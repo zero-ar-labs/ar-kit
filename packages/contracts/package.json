@@ -1,0 +1,41 @@
+{
+  "name": "@zero-ar/contracts",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "One source for public payloads, closed vocabularies, ids, and state machines.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "zod": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
+    "directory": "packages/contracts"
+  },
+  "bugs": {
+    "url": "https://github.com/zero-ar-labs/ar-kit/issues"
+  },
+  "homepage": "https://github.com/zero-ar-labs/ar-kit/tree/main/packages/contracts#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js"
+}

@@ -1,0 +1,54 @@
+{
+  "name": "@zero-ar/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The Zero-AR command. Speaks only to the public API.",
+  "license": "Apache-2.0",
+  "bin": {
+    "zeroar": "./dist/zeroar.js"
+  },
+  "dependencies": {
+    "@zero-ar/contracts": "0.1.0",
+    "@zero-ar/client": "0.1.0",
+    "@zero-ar/sdk": "0.1.0"
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
+    "directory": "apps/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/zero-ar-labs/ar-kit/issues"
+  },
+  "homepage": "https://github.com/zero-ar-labs/ar-kit/tree/main/apps/cli#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/main.d.ts",
+      "default": "./dist/main.js"
+    },
+    "./external-product-template": {
+      "types": "./dist/external-product-template.d.ts",
+      "default": "./dist/external-product-template.js"
+    },
+    "./zeroar": {
+      "types": "./dist/zeroar.d.ts",
+      "default": "./dist/zeroar.js"
+    }
+  },
+  "types": "./dist/main.d.ts",
+  "main": "./dist/main.js"
+}

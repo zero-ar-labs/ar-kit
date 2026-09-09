@@ -1,0 +1,41 @@
+{
+  "name": "@zero-ar/testkit",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Deterministic providers, logical clocks, seeded populations, and self-cleaning scratch directories.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@zero-ar/contracts": "0.1.0"
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
+    "directory": "packages/testkit"
+  },
+  "bugs": {
+    "url": "https://github.com/zero-ar-labs/ar-kit/issues"
+  },
+  "homepage": "https://github.com/zero-ar-labs/ar-kit/tree/main/packages/testkit#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js"
+}

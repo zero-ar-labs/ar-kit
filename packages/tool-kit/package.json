@@ -1,0 +1,41 @@
+{
+  "name": "@zero-ar/tool-kit",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "One typed tool definition and the development host that serves it.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@zero-ar/contracts": "0.1.0"
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
+    "directory": "packages/tool-kit"
+  },
+  "bugs": {
+    "url": "https://github.com/zero-ar-labs/ar-kit/issues"
+  },
+  "homepage": "https://github.com/zero-ar-labs/ar-kit/tree/main/packages/tool-kit#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js"
+}
