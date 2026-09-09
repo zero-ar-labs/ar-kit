@@ -28,7 +28,7 @@ try {
   const openApi = JSON.parse(readFileSync(require.resolve('@zero-ar/client/openapi'), 'utf8'));
   assert.equal(openApi.openapi, '3.1.0');
   const command = join(consumer, 'node_modules/@zero-ar/cli/dist/zeroar.js');
-  const help = execFileSync(process.execPath, [command, '--help'], { cwd: consumer, encoding: 'utf8', timeout: 30000 });
+  const help = execFileSync(command, ['--help'], { cwd: consumer, encoding: 'utf8', timeout: 30000 });
   assert.equal((help.match(/^usage$/gm) ?? []).length, 1);
   console.log('public-packages: 9 tarballs imported, OpenAPI read, and command help rendered once.');
 } finally {

@@ -3,11 +3,11 @@
   "product": "Zero-AR Developer Kit",
   "source": {
     "repository": "https://github.com/zero-ar-labs/zero-ar",
-    "commit": "38a5b2d0c216ecf58ac5ac597a70f2e5fec63b12",
-    "package_set_ref": "sha256:320e3a280608532df981ddae3d6964a21c66d8a0633d5185ebed81045c38d4ef",
-    "package_exercise_ref": "sha256:ec7ed8e1f9a733d9c8a399ebbcf683f9f40b5ef5822b4e7eda8b7dbd364af861",
+    "commit": "af375a67c9db7bf0541fb9ff2831ce020bb4236a",
+    "package_set_ref": "sha256:9bd855760e06f6e0db366eb7a6526c92ce881865daf1ba43274069f68dc23f31",
+    "package_exercise_ref": "sha256:37556f2eff8c314cbbc01ce0f86c67e558368b4f8938990d930cca070ea070ca",
     "generator_path": "scripts/export-public-developer-kit.ts",
-    "generator_sha256": "4fd7d4d79749fc16c3ce408b8678fef19fccdeff0016fc89e32f20d55de8790b"
+    "generator_sha256": "b71f0da8b4b55430f740c915adab1b4e30bf7e269705b93012ef1314d36d60a3"
   },
   "destination": {
     "repository": "https://github.com/zero-ar-labs/ar-kit",
@@ -50,7 +50,7 @@
       "workspace_path": "apps/cli",
       "manifest_ref": "sha256:eaad45dcd89db8a69c71e9caeb81c020eb8c3a3d84e0279c9a9605360d4c72ef",
       "tarball_path": "release/tarballs/zero-ar-cli-0.1.0.tgz",
-      "tarball_sha256": "6d68dfdbc8cd16adbdd8afaa8e0db1fdd19329b1043ac9053df75d1b5ece6c1e"
+      "tarball_sha256": "f50bcf793b5a5cb0a591a5dd6e2c5374c43d54a71d4a5d5ac4c7d54f0aa6552f"
     },
     {
       "name": "@zero-ar/conformance",
@@ -156,13 +156,13 @@
     },
     {
       "path": "apps/cli/dist/zeroar.d.ts",
-      "bytes": 194,
-      "sha256": "f80528a132f834bcab1b183459ff8edb39ec0f22d126c9506b1733a833d5b705"
+      "bytes": 214,
+      "sha256": "d598396b80d2d33d84af9e224ae88bd7cea6d1a4c2cad04a481c3b7d36bf9f07"
     },
     {
       "path": "apps/cli/dist/zeroar.js",
-      "bytes": 243,
-      "sha256": "7e071e2d6b03778563eea3618d90626f7cf74231a737005e16e829f203731e0f"
+      "bytes": 263,
+      "sha256": "7acc13a4df33367db1635fed2241e5f3017f90d24d5cdd9567fe697dd476e38c"
     },
     {
       "path": "apps/cli/LICENSE",
@@ -183,6 +183,11 @@
       "path": "apps/cli/README.md",
       "bytes": 232,
       "sha256": "18cc0d8c951c508861c4c60829002e34fa94a6ea436cc8e59d4d34825e283ceb"
+    },
+    {
+      "path": "assets/zero-ar-architecture.svg",
+      "bytes": 36621,
+      "sha256": "beed04edf0775de2001c73dd2d700e041b00326a1a3c2d6fd3b20cde44925925"
     },
     {
       "path": "LICENSE",
@@ -997,32 +1002,32 @@
     {
       "path": "PROVENANCE.md",
       "bytes": 698,
-      "sha256": "0886988cdbb97a2c2448217883a74cf5f39210d48872808951f70ee8086d0427"
+      "sha256": "57a9bbcad91e376433a1354aa626fe008441cb11eb27dfca0d99b4891ed1d327"
     },
     {
       "path": "README.md",
-      "bytes": 1277,
-      "sha256": "dcc4df0c1aab35d13e42d228721afbfae634d90e04be2a8fe7534a4317c43146"
+      "bytes": 5811,
+      "sha256": "1ca9d3341c398171124293f429065519898d407ecdbadc563f952c8d9c917f97"
     },
     {
       "path": "release/package-release-exercise-report.json",
       "bytes": 3413,
-      "sha256": "c866591cd4abd330c39e383e1a9bf5013254ac5a19b6f98897225ca613d4bf6b"
+      "sha256": "92e60ae24b2892e3df98d94bc3bbf526f7eda6866445c346e03167ecbaab4f20"
     },
     {
       "path": "release/package-release-identity-report.json",
       "bytes": 304501,
-      "sha256": "847294dde19c8c87341858a49d182e4e239bc74cc085e87d030430bc54060c11"
+      "sha256": "d27b4b6e8db1e98bd67ce11246fa6aab5ce0d274d5713a2b5113f3a54b4d3a9d"
     },
     {
       "path": "release/package-release-manifest.json",
       "bytes": 10528,
-      "sha256": "a702e165a104bada5cf544b9563b904bfca1eb071f702b8e331da6f3b4b409f5"
+      "sha256": "c2225abfc95d9e0c92ffb971b3a8630ad5f3e23792d2764809284239a71f4cf5"
     },
     {
       "path": "release/tarballs/zero-ar-cli-0.1.0.tgz",
-      "bytes": 36404,
-      "sha256": "6d68dfdbc8cd16adbdd8afaa8e0db1fdd19329b1043ac9053df75d1b5ece6c1e"
+      "bytes": 36415,
+      "sha256": "f50bcf793b5a5cb0a591a5dd6e2c5374c43d54a71d4a5d5ac4c7d54f0aa6552f"
     },
     {
       "path": "release/tarballs/zero-ar-client-0.1.0.tgz",
@@ -1066,8 +1071,8 @@
     },
     {
       "path": "scripts/exercise-public-packages.mjs",
-      "bytes": 2069,
-      "sha256": "204e88c51f55236f5bcbb510f5f01560a76a88d448497c31925ce50d64b9e4fd"
+      "bytes": 2051,
+      "sha256": "54dfea4ba7296f857f17cea3eace609f3533422281e13562acf6a7b1c4d0dc91"
     },
     {
       "path": "scripts/verify-public-export.mjs",
@@ -1077,8 +1082,8 @@
     {
       "path": "SOURCE_COMMIT",
       "bytes": 41,
-      "sha256": "b80a2e65abe545916def901dfe56d05a6b53f234ce26db1982639ec554d2a153"
+      "sha256": "9a9b2b3522f5a233dee015bdf04e71de9acf4e6374a3a41c7c8ecb92db037320"
     }
   ],
-  "export_ref": "sha256:299979653f7500ad54a61aec7e96e6873067c0ffe19516ab1fe8041146302218"
+  "export_ref": "sha256:2220a8ed290782d2e62d90bee5cef4c9064c64b7db2465b4b7fd328caa68df25"
 }

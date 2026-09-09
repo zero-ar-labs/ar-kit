@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * The command entrypoint.
  *
