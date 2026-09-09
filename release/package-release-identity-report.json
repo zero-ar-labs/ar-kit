@@ -1,7 +1,7 @@
 {
   "schema": "zero-ar-package-release-identity-report/v1",
-  "release_manifest_ref": "sha256:320e3a280608532df981ddae3d6964a21c66d8a0633d5185ebed81045c38d4ef",
-  "source_commit": "38a5b2d0c216ecf58ac5ac597a70f2e5fec63b12",
+  "release_manifest_ref": "sha256:9bd855760e06f6e0db366eb7a6526c92ce881865daf1ba43274069f68dc23f31",
+  "source_commit": "af375a67c9db7bf0541fb9ff2831ce020bb4236a",
   "package_count": 9,
   "occurrence_count": 917,
   "occurrences": [
@@ -9176,5 +9176,5 @@
       "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
     }
   ],
-  "report_ref": "sha256:3745e2c40807187eb398e27d704005c582b18d65f44a4fd639dc88c0fbbb30d7"
+  "report_ref": "sha256:2ecc1ab183c9019f20eb506cb9789c0bb62cc668fbbdc33290acb5e7057b81a5"
 }

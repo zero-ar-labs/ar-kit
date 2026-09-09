@@ -1,7 +1,7 @@
 {
   "schema": "zero-ar-public-package-exercise/v1",
   "source_report_schema": "zero-ar-package-release-exercise/v1",
-  "release_manifest_ref": "sha256:320e3a280608532df981ddae3d6964a21c66d8a0633d5185ebed81045c38d4ef",
+  "release_manifest_ref": "sha256:9bd855760e06f6e0db366eb7a6526c92ce881865daf1ba43274069f68dc23f31",
   "packages": [
     {
       "name": "@zero-ar/contracts",
@@ -34,7 +34,7 @@
     {
       "name": "@zero-ar/cli",
       "tarball_path": "release/tarballs/zero-ar-cli-0.1.0.tgz",
-      "sha256": "6d68dfdbc8cd16adbdd8afaa8e0db1fdd19329b1043ac9053df75d1b5ece6c1e",
+      "sha256": "f50bcf793b5a5cb0a591a5dd6e2c5374c43d54a71d4a5d5ac4c7d54f0aa6552f",
       "entry_count": 16,
       "export_subpaths": [
         ".",
@@ -110,5 +110,5 @@
     "declarations_ok": true
   },
   "refusals": [],
-  "report_ref": "sha256:ec7ed8e1f9a733d9c8a399ebbcf683f9f40b5ef5822b4e7eda8b7dbd364af861"
+  "report_ref": "sha256:37556f2eff8c314cbbc01ce0f86c67e558368b4f8938990d930cca070ea070ca"
 }
