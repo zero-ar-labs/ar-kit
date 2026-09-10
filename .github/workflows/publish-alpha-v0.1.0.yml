@@ -1,0 +1,98 @@
+# The one-release npm publisher.
+#
+# What this is: it publishes the source-bound v0.1.0 package set once.
+# How it fits: the public repository supplies GitHub provenance while the
+# immutable export commit supplies every package byte and its verified
+# clean-consumer report.
+name: publish npm alpha v0.1.0
+on:
+  push:
+    branches: [codex/publish-alpha-v0.1.0]
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: publish-npm-alpha-v0.1.0
+  cancel-in-progress: false
+env:
+  ZERO_AR_SOURCE_COMMIT: 30ea6e0b1b9ec8f9147a06c7e456a1ec516cc41d
+  ZERO_AR_PUBLIC_KIT_COMMIT: 1a93ee8295b4a6bcadac46a475bb8c0c89061e99
+jobs:
+  publish:
+    if: github.repository == 'zero-ar-labs/ar-kit'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 1a93ee8295b4a6bcadac46a475bb8c0c89061e99
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - name: Use the provenance-capable npm client
+        run: npm install --global npm@11.6.2
+      - name: Verify the immutable public package set
+        run: |
+          test "$(git rev-parse HEAD)" = "$ZERO_AR_PUBLIC_KIT_COMMIT"
+          test "$(cat SOURCE_COMMIT)" = "$ZERO_AR_SOURCE_COMMIT"
+          npm run check
+      - name: Checkout the release observer
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .release-operator
+          sparse-checkout: scripts/verify-npm-alpha-release.mjs
+          sparse-checkout-cone-mode: false
+      - name: Classify the v0.1.0 package set
+        id: release-state
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          existing_count=0
+          for package in \
+            @zero-ar/contracts \
+            @zero-ar/client \
+            @zero-ar/conformance \
+            @zero-ar/testkit \
+            @zero-ar/tool-kit \
+            @zero-ar/validator-kit \
+            @zero-ar/sdk \
+            @zero-ar/cli \
+            @zero-ar/mcp
+          do
+            tags="$(npm dist-tag ls "$package" 2>/dev/null || true)"
+            if printf '%s\n' "$tags" | grep -qx 'alpha: 0.1.0'; then
+              existing_count=$((existing_count + 1))
+              if ! printf '%s\n' "$tags" | grep -qx 'latest: 0.1.0'; then
+                echo "$package exposes an unrelated version as latest. Stop before changing the release set." >&2
+                exit 1
+              fi
+            elif test -n "$tags"; then
+              echo "$package exists without the required alpha tag. Stop before changing the release set." >&2
+              exit 1
+            fi
+          done
+          if test "$existing_count" = 0; then
+            echo 'publish_required=true' >> "$GITHUB_OUTPUT"
+          elif test "$existing_count" = 9; then
+            echo 'publish_required=false' >> "$GITHUB_OUTPUT"
+          else
+            echo "Only $existing_count of 9 packages exist. Stop because the release set is partial." >&2
+            exit 1
+          fi
+      - name: Publish the source-bound alpha packages with provenance
+        if: steps.release-state.outputs.publish_required == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish ./release/tarballs/zero-ar-contracts-0.1.0.tgz --access public --tag alpha --provenance
+          npm publish ./release/tarballs/zero-ar-client-0.1.0.tgz --access public --tag alpha --provenance
+          npm publish ./release/tarballs/zero-ar-conformance-0.1.0.tgz --access public --tag alpha --provenance
+          npm publish ./release/tarballs/zero-ar-testkit-0.1.0.tgz --access public --tag alpha --provenance
+          npm publish ./release/tarballs/zero-ar-tool-kit-0.1.0.tgz --access public --tag alpha --provenance
+          npm publish ./release/tarballs/zero-ar-validator-kit-0.1.0.tgz --access public --tag alpha --provenance
+          npm publish ./release/tarballs/zero-ar-sdk-0.1.0.tgz --access public --tag alpha --provenance
+          npm publish ./release/tarballs/zero-ar-cli-0.1.0.tgz --access public --tag alpha --provenance
+          npm publish ./release/tarballs/zero-ar-mcp-0.1.0.tgz --access public --tag alpha --provenance
+      - name: Wait for scanning and verify the public alpha
+        run: node .release-operator/scripts/verify-npm-alpha-release.mjs
