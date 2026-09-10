@@ -9,7 +9,7 @@
     "node": ">=23.6"
   },
   "scripts": {
-    "check": "node scripts/verify-public-export.mjs && node scripts/exercise-public-packages.mjs",
+    "check": "node scripts/verify-public-export.mjs && node scripts/verify-npm-publication-workflow.mjs && node scripts/exercise-public-packages.mjs",
     "verify": "node scripts/verify-public-export.mjs",
     "exercise": "node scripts/exercise-public-packages.mjs"
   }
