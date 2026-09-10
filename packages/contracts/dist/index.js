@@ -20,6 +20,7 @@ export * from "./model.js";
 export * from "./publication.js";
 export * from "./providers.js";
 export * from "./tool-sources.js";
+export * from "./sources.js";
 export * from "./memory.js";
 export * from "./integration.js";
 export * from "./environment.js";

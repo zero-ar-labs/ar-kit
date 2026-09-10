@@ -14,7 +14,7 @@
  * quality plane remains the seam that admits a finding; this package only
  * helps an author write one and test it out of process.
  */
-import { VALIDATOR_CLASSES, canonicalJson, contentHash, refuse } from '@zero-ar/contracts';
+import { VALIDATOR_CLASSES, contentHash, refuse } from '@zero-ar/contracts';
 export { CorpusStore, GROUNDING_LIMIT, groundClaims, groundedClaims } from "./grounding.js";
 export { airlockExtract, assertLevel, classifiedDerivation, conformAirlockValue, declareAirlockType, joinClassification } from "./classification.js";
 const NAME = /^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/;
@@ -24,7 +24,7 @@ export const VALIDATOR_FINDINGS = ['pass', 'reject', 'indeterminate'];
 /** The manifest of exactly what was placed before a validator. */
 export function examinedManifest(input) {
     return {
-        input_hash: contentHash(JSON.parse(canonicalJson({ run_id: input.run_id, rule: input.rule, items: input.items }))),
+        input_hash: contentHash(input),
         items: input.items.length,
         declared_total: input.declared_total,
         partial: input.items.length < input.declared_total,

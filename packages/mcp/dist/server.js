@@ -12,7 +12,7 @@
  */
 import { CLIENT_CAPABILITIES_META_KEY, PROTOCOL_VERSION_META_KEY, SERVER_INFO_META_KEY, SUBSCRIPTION_ID_META_KEY, Server, classifyInboundRequest, createMcpHandler, isJsonContentType, } from '@modelcontextprotocol/server';
 import { fromJsonSchema } from '@modelcontextprotocol/client';
-import { DiagnosticError, McpPublishedWorkEntrypointSchema, assuranceEnvelopeFromRunResult, canonicalJson, contentHash, nativeRunIdFromMcpTask, projectMcpTask, } from '@zero-ar/contracts';
+import { DiagnosticError, McpPublishedWorkEntrypointSchema, SourceBindingInputSchema, assuranceEnvelopeFromRunResult, canonicalJson, contentHash, nativeRunIdFromMcpTask, projectMcpTask, } from '@zero-ar/contracts';
 import { MCP_OFFICIAL_SDK_VERSION, MCP_PROTOCOL_VERSION, MCP_TASKS_EXTENSION, ZERO_AR_MCP_VERSION, ZERO_AR_REQUEST_META_KEY, } from "./constants.js";
 import { assertBoundedJsonSchema } from "./schema-policy.js";
 const DEFAULT_LIMITS = {
@@ -421,6 +421,9 @@ export function createZeroARMcpServer(options) {
             if (objective.length > 100_000)
                 throw new McpProtocolError(-32602, 'The projected objective passes the native 100000-character limit.');
             const items = Array.isArray(args['items']) && args['items'].every((item) => typeof item === 'string') ? args['items'] : undefined;
+            const sources = args['sources'] === undefined
+                ? undefined
+                : SourceBindingInputSchema.array().max(64).parse(args['sources']);
             const created = await context.native.createDeferredRun({
                 objective,
                 agent_ref: entrypoint.agent_ref,
@@ -440,7 +443,7 @@ export function createZeroARMcpServer(options) {
                     verification_reserve_fraction: entrypoint.default_budgets.verification_reserve_fraction,
                     max_turns: entrypoint.default_budgets.max_turns,
                 },
-                ...(items ? { inputs: { items } } : {}),
+                ...(items || sources ? { inputs: { ...(items ? { items } : {}), ...(sources ? { sources } : {}) } } : {}),
                 idempotency_key: idempotencyKey,
                 correlation_id: `mcp:${options.binding_ref}`,
             });

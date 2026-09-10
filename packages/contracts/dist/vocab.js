@@ -13,7 +13,7 @@
 /** Model-visible entry roles. Entries form a tree; records never reach a model. */
 export const ENTRY_ROLES = ['system', 'user', 'assistant', 'tool_result', 'steer', 'marker'];
 /** Prefixes for sortable opaque identifiers. A prefix identifies a kind and grants no authority. */
-export const ID_PREFIXES = ['run', 'rec', 'ent', 'lea', 'brn', 'ctl', 'gap', 'eff', 'ead', 'agt', 'chk', 'wak', 'pub', 'env', 'job', 'obs'];
+export const ID_PREFIXES = ['run', 'rec', 'ent', 'lea', 'brn', 'ctl', 'gap', 'eff', 'ead', 'agt', 'chk', 'wak', 'pub', 'env', 'job', 'obs', 'src'];
 /** Runtime record types. The canonical history is a hash-chained sequence of these. */
 export const RECORD_TYPES = [
     'run.created',
@@ -240,6 +240,8 @@ export const PROFILE_CAPABILITIES = [
     'authored-orchestration',
     'mcp-work-entrypoints',
     'mcp-imported-tools',
+    'source-local-read-only',
+    'document-pdf-extraction',
 ];
 /** Capability manifest states. Every capability appears once in one state. */
 export const PROFILE_CAPABILITY_STATES = ['supported', 'conditional', 'excluded'];
@@ -335,6 +337,8 @@ export const ROUTE_SCOPES = [
     'run:reexecute',
     'run:resume',
     'run:start',
+    'source:read',
+    'source:write',
     'tool-source:read',
     'tool-source:test',
     'tool-source:write',

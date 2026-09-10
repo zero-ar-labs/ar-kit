@@ -26,6 +26,7 @@ import { ExternalObservationAcceptedSchema, ExternalObservationAppliedSchema, Ex
 import { GatewayAdapterManifestSchema, GatewayDeliveryCursorSchema, ArtifactReadRequestSchema, DeclareFallbackSetRequestSchema, ModelFallbackSetSchema, ResolvedModelPlanSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SkillDescriptorSchema, SkillLoadResultSchema, SkillOpenRequestSchema, SkillReadRequestSchema, SkillSearchRequestSchema, SkillSearchResultSchema, TenantModelPoolSchema, } from "./integration.js";
 import { AdmitModelAdapterRequestSchema, AdmittedModelAdapterSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, CredentialBindingSchema, EnableProviderModelRequestSchema, ModelSelectionSchema, ProtectedCredentialIngestRequestSchema, ProviderCompatibilitySchema, ProviderCatalogueSchema, ProviderInstanceListSchema, ProviderInstanceSchema, ProviderModelEntrySchema, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SyncProviderCatalogueRequestSchema, } from "./providers.js";
 import { EnableToolSourceToolsRequestSchema, RegisterToolSourceRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceCatalogueSchema, ToolSourceEnablementSchema, ToolSourceListSchema, ToolSourceSchema, ToolSourceStateRequestSchema, ToolSourceTestResultSchema, ToolSourceToolEntrySchema, } from "./tool-sources.js";
+import { DocumentExtractionPageSchema, DocumentExtractionResultSchema, RegisterSourceRequestSchema, ResolvedSourceBindingSchema, SourceBindingInputSchema, SourceInstanceSchema, SourceExtractorIdentitySchema, SourceListSchema, SourceLocatorSchema, SourceBoundsSchema, SourceOperationRequestSchema, SourceOperationResultSchema, SourcePreflightSchema, SourceSnapshotMemberSchema, SourceSnapshotPageRequestSchema, SourceSnapshotPageSchema, SourceSnapshotSchema, } from "./sources.js";
 import { MemoryAssertionInputSchema, MemoryAssertionSchema, MemorySubjectErasureRequestSchema, MemorySubjectErasureOutcomeSchema, MemoryHistoryRequestSchema, MemoryHistoryResponseSchema, MemoryReadRequestSchema, MemoryReadResponseSchema, MemorySupersedeRequestSchema, MemorySupersedeOutcomeSchema, MemoryWriteOutcomeSchema, RunMemoryReadOutcomeSchema, } from "./memory.js";
 import { AssuranceEnvelopeSchema, InteropBindingManifestBodySchema, InteropBindingManifestSchema, InteropCapabilitySchema, InteropConnectionSchema, InteropJsonSchema, InteropProtocolRegistryEntrySchema, InteropProtocolRegistrySchema, McpImportedToolPlanSchema, McpImportedResourcePlanSchema, McpPeerResourceSchema, McpPeerSnapshotBodySchema, McpPeerSnapshotSchema, McpPeerToolSchema, McpPendingInputSchema, McpPublishedWorkEntrypointSchema, McpTaskAliasSchema, McpTaskProjectionSchema, } from "./interop.js";
 import { BRANCH_REASONS, CLAIM_REPRESENTATIONS, CONTROLLER_MODES, OPERATION_CLASSES, PACK_CLAIM_KINDS, TOOL_EXECUTION_OUTCOMES, TOOL_METERING, WORKSPACE_SLOTS, CONTROL_VERBS, DURABLE_EVENTS, ENTRY_ROLES, EVIDENCE_GRADES, EXTERNAL_EVIDENCE_CLASSIFICATIONS, EXTERNAL_EVIDENCE_CAMPAIGN_MODES, EXTERNAL_EVIDENCE_DECISION_KINDS, EXTERNAL_EVIDENCE_DEGRADATIONS, EXTERNAL_EVIDENCE_DEMONSTRATION_SIDES, EXTERNAL_EVIDENCE_ENVIRONMENT_KINDS, EXTERNAL_EVIDENCE_INVARIANTS, EXTERNAL_EVIDENCE_INVARIANT_STATUSES, EXTERNAL_EVIDENCE_PROPERTY_FAMILIES, EXTERNAL_EVIDENCE_REFERENCE_VECTORS, EXTERNAL_EVIDENCE_STANDINGS, EXTERNAL_EVIDENCE_STRENGTHS, FAILURE_CLASSES, ITEM_STATES, LEASE_DENOMINATIONS, LEASE_POOLS, LEASE_STATES, MEMORY_CLASSIFICATIONS, MEMORY_EVENT_KINDS, MCP_REMOTE_TASK_CAUSES, MCP_REMOTE_TASK_STATES, MODEL_CATALOGUE_SOURCES, MODEL_CREDENTIAL_MODES, MODEL_PROTOCOL_ADAPTERS, MODEL_PROVIDERS, MODEL_PROVIDER_PROFILES, MODEL_USAGE_MEASUREMENTS, PROFILES, PRODUCT_EVENT_FAMILIES, RECORD_TYPES, SKILL_RETENTIONS, REVIEW_ITEM_KINDS, REVIEW_ITEM_STATES, RUN_REVIEW_STATES, RUN_STATUSES, RUN_TERMINALS, RUN_RESUME_BLOCK_CATEGORIES, RUN_LIFECYCLE_COMMANDS, SUSPEND_REASONS, COMPLETION_STATES, STOP_REASONS, POSTGRES_DEPLOYMENT_MODES, POSTGRES_LATENCY_OPERATIONS, POSTGRES_LATENCY_REPORT_STATUSES, POSTGRES_LATENCY_TOPOLOGIES, STORE_KINDS, VALIDATOR_CLASSES, VERDICTS, DIAGNOSTIC_SEVERITIES, TRUST_TIERS, ASSURANCE_COMPLETION_CLASSES, } from "./vocab.js";
@@ -110,6 +111,8 @@ export const IntakeRequestSchema = z.strictObject({
         items: z.array(z.string().min(1).max(200)).max(100_000).optional(),
         /** Committed artifacts this run depends on, verified before admission. */
         artifacts: z.array(InputArtifactBindingSchema).max(1_000).optional(),
+        /** Immutable source snapshots named by stable aliases for bounded model operations. */
+        sources: z.array(SourceBindingInputSchema).max(64).optional(),
     })
         .optional(),
     idempotency_key: z.string().min(1).max(256),
@@ -167,6 +170,8 @@ export const ResolvedRunManifestSchema = z.strictObject({
     model_plan: ResolvedModelPlanSchema.nullable().optional(),
     /** Committed input artifacts verified before admission and folded into identity. */
     input_artifacts: z.array(ResolvedInputArtifactSchema).default([]),
+    /** Immutable source bindings resolved before admission and folded into identity. */
+    source_bindings: z.array(ResolvedSourceBindingSchema).optional(),
     tools: z.array(z.strictObject({
         name: z.string(),
         version: z.string(),
@@ -503,6 +508,10 @@ export const RECORD_PAYLOADS = {
         metering: z.enum(TOOL_METERING),
         refused: z.boolean(),
         clause: z.string().nullable(),
+        /** Present for native source operations; the resolved run manifest owns the expanded identity. */
+        source_alias: z.string().regex(/^[a-z][a-z0-9-]{0,62}$/).optional(),
+        binding_ref: z.string().regex(/^source-binding:\/\/sha256:[0-9a-f]{64}$/).optional(),
+        snapshot_ref: z.string().regex(/^source-snapshot:\/\/sha256:[0-9a-f]{64}$/).optional(),
     }),
     'tool.remote.pending': RemoteToolTaskHandleSchema,
     'tool.finished': z.strictObject({
@@ -1357,6 +1366,23 @@ export const SCHEMA_REGISTRY = {
     BudgetsSchema: { schema: BudgetsSchema, placement: 'intake', owner: 'runtime-resources' },
     InputArtifactBindingSchema: { schema: InputArtifactBindingSchema, placement: 'intake', owner: 'runtime-core' },
     ResolvedInputArtifactSchema: { schema: ResolvedInputArtifactSchema, placement: 'runtime-identity', owner: 'runtime-core' },
+    SourceLocatorSchema: { schema: SourceLocatorSchema, placement: 'operator-management', owner: 'source-access' },
+    SourceBoundsSchema: { schema: SourceBoundsSchema, placement: 'operator-management', owner: 'source-access' },
+    RegisterSourceRequestSchema: { schema: RegisterSourceRequestSchema, placement: 'operator-management', owner: 'source-access' },
+    SourceInstanceSchema: { schema: SourceInstanceSchema, placement: 'operator-management', owner: 'source-access' },
+    SourceExtractorIdentitySchema: { schema: SourceExtractorIdentitySchema, placement: 'runtime-identity', owner: 'source-access' },
+    SourceListSchema: { schema: SourceListSchema, placement: 'operator-management', owner: 'source-access' },
+    SourceSnapshotMemberSchema: { schema: SourceSnapshotMemberSchema, placement: 'runtime-identity', owner: 'source-access' },
+    SourceSnapshotSchema: { schema: SourceSnapshotSchema, placement: 'runtime-identity', owner: 'source-access' },
+    SourceSnapshotPageRequestSchema: { schema: SourceSnapshotPageRequestSchema, placement: 'operator-management', owner: 'source-access' },
+    SourceSnapshotPageSchema: { schema: SourceSnapshotPageSchema, placement: 'operator-management', owner: 'source-access' },
+    SourceBindingInputSchema: { schema: SourceBindingInputSchema, placement: 'intake', owner: 'source-access' },
+    ResolvedSourceBindingSchema: { schema: ResolvedSourceBindingSchema, placement: 'runtime-identity', owner: 'source-access' },
+    SourcePreflightSchema: { schema: SourcePreflightSchema, placement: 'operator-management', owner: 'source-access' },
+    SourceOperationRequestSchema: { schema: SourceOperationRequestSchema, placement: 'run-management', owner: 'source-access' },
+    SourceOperationResultSchema: { schema: SourceOperationResultSchema, placement: 'observation', owner: 'source-access' },
+    DocumentExtractionPageSchema: { schema: DocumentExtractionPageSchema, placement: 'observation', owner: 'source-access' },
+    DocumentExtractionResultSchema: { schema: DocumentExtractionResultSchema, placement: 'observation', owner: 'source-access' },
     RuntimeArtifactIntendedUseSchema: { schema: RuntimeArtifactIntendedUseSchema, placement: 'intake', owner: 'runtime-core' },
     RuntimeArtifactProvenanceInputSchema: { schema: RuntimeArtifactProvenanceInputSchema, placement: 'intake', owner: 'runtime-core' },
     RuntimeArtifactSessionRequestSchema: { schema: RuntimeArtifactSessionRequestSchema, placement: 'intake', owner: 'runtime-core' },

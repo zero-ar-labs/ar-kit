@@ -6,7 +6,7 @@
     "package_scope": "@zero-ar"
   },
   "source": {
-    "commit": "af375a67c9db7bf0541fb9ff2831ce020bb4236a",
+    "commit": "8d8ed716faff649b01357f17f44672426856552e",
     "repository": {
       "provider": "github",
       "organization": "zero-ar-labs",
@@ -39,8 +39,8 @@
     "plan_ref": "sha256:bf3b0e663d63236b48b2e7defe51017086d2f2faa30749fc6639ce5b99b7344c"
   },
   "external_evidence": {
-    "report_ref": "sha256:886984b244574fbadd34a767d0d0f3206a4bc82699ae280ce58e25a395e8356d",
-    "campaign_comparison_ref": "sha256:0eaad320ee53dd3bd4d097f68729b840157db55ebcefc4b2d1a2d61bb2f785e2",
+    "report_ref": "sha256:59cf942c7485a43bfe033b57802f3014fbff821e0a94cfea883633a012b5113c",
+    "campaign_comparison_ref": "sha256:bdd03c0081f73fa51405e407265029f4cdc51ff2efb9fab9f5200e89a159020e",
     "publication_ref": null,
     "local_campaign_manifest_ref": null,
     "ci_campaign_manifest_ref": null,
@@ -54,8 +54,8 @@
     "export_subpath": "./openapi",
     "path": "openapi/zero-ar-v1.openapi.json",
     "contract_version": "v1",
-    "sha256": "a744897cb0054c1edf6753d12fc744c4adaefb5832484b0fc95266235fddc912",
-    "source_revision": "af375a67c9db7bf0541fb9ff2831ce020bb4236a"
+    "sha256": "d1d1152584ff9735e4061d3b281c9e9c1ef0b605a23e629740f176c6137118a2",
+    "source_revision": "8d8ed716faff649b01357f17f44672426856552e"
   },
   "packages": [
     {
@@ -348,5 +348,5 @@
       }
     }
   ],
-  "package_set_ref": "sha256:9bd855760e06f6e0db366eb7a6526c92ce881865daf1ba43274069f68dc23f31"
+  "package_set_ref": "sha256:50a0c071a5ca2dd0b18ae6ab7cbffb833569fd200e95fe86ad09b762f2acc276"
 }

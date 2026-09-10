@@ -6,7 +6,9 @@ Zero-AR is a log-native runtime for long-horizon agent work. It keeps an objecti
 
 > **The unit is work, not the conversation.**
 
-A model can propose that work is complete. Zero-AR records the proposal and applies the declared validators before the result can be reported as verified. Zero-AR does not decide what correct means. Your task contract and domain validators do.
+Zero-AR makes the definition of done explicit before work begins. The task contract maps each acceptance rule to a named validator. Missing coverage, rejection, failure, timeout or uncertainty cannot become verified.
+
+Zero-AR does not decide what correct means. A weak validator can still check the wrong thing or always return pass. Labelled domain cases and observed false-pass and false-rejection rates are separate evidence.
 
 Zero-AR is not a model, model host, sandbox, chat interface, workflow graph or general domain oracle. This kit does not grant effect authority or decide whether an outside action may occur.
 
@@ -76,7 +78,39 @@ The typed client and the [OpenAPI 3.1 document](./packages/client/openapi/zero-a
 
 ![Zero-AR architecture showing the W0 Kernel, Quality Plane, optional Effect Plane and public adapter boundaries.](./assets/zero-ar-architecture.svg)
 
-The W0 Kernel owns the canonical work log, execution position, budgets, leases and reconstruction. The Quality Plane judges evidence against the task contract. The optional Effect Plane mediates consequential actions, authority, receipts and reconciliation. Models, tools and compute remain replaceable connected services.
+The W0 Kernel owns the canonical work log, execution position, budgets, leases and reconstruction. The Quality Plane judges evidence against the task contract. The Public Alpha Effect Plane attachment records consequential-action proposals and refuses dispatch. Production authority, dispatch, receipts and reconciliation remain outside the Public Alpha claim. Models, tools and compute remain replaceable connected services.
+
+## Completion and action boundaries
+
+### 1. Who defines done?
+
+Your task contract names every acceptance rule and the validator that covers it.
+
+### 2. What does Zero-AR enforce?
+
+The runtime refuses missing coverage, an unregistered or mismatched validator and heuristic-only sufficiency. Verified completion requires sufficient pass findings for every required rule.
+
+### 3. What input does a validator receive?
+
+A validator receives one rule, ordered ledger rows, their outputs and states, and the declared population total. The runtime computes a canonical hash over that complete admitted input and quarantines a host finding bound to another hash or item count.
+
+### 4. Where does a validator run today?
+
+The current development and first-beta host is a separate child process with no runtime append port, a registry-local working directory and a minimal environment. It is not the production sidecar boundary.
+
+### 5. What happens when validation cannot conclude?
+
+Absence, crash, timeout, cancellation, dependency failure or an input-manifest mismatch becomes infrastructure-indeterminate, never pass.
+
+### 6. Can a weak validator establish a useful result?
+
+Not by runtime mechanics alone. A validator can be deterministic and consistently wrong. Use positive, negative, indeterminate and adversarial labelled cases, then measure domain false-pass and false-rejection rates.
+
+### 7. When is the Effect Plane required?
+
+Read-only work may omit it. Consequential outside mutation requires an attached admitted plane. Public Alpha records a proposal and refuses dispatch; this kit exports no effect dispatcher or production target adapter.
+
+Production validator admission still needs content-addressed executable identity, enforced repeatability, explicit full, sampled or oracle coverage, complete case admission, authenticated local IPC, read-only inputs, network denial and CPU, memory and PID limits.
 
 ## What this repository excludes
 
@@ -93,7 +127,7 @@ npm run verify
 npm run exercise
 ```
 
-`verify` checks the byte inventory and its binding to source commit `af375a67c9db7bf0541fb9ff2831ce020bb4236a`. `exercise` installs all nine tarballs in an isolated consumer, imports their public entrypoints, reads the OpenAPI contract and runs the packaged command. Neither command publishes anything. See [PROVENANCE.md](./PROVENANCE.md) for the complete boundary.
+`verify` checks the byte inventory and its binding to source commit `8d8ed716faff649b01357f17f44672426856552e`. `exercise` installs all nine tarballs in an isolated consumer, imports their public entrypoints, reads the OpenAPI contract and runs the packaged command. Neither command publishes anything. See [PROVENANCE.md](./PROVENANCE.md) for the complete boundary.
 
 ## License
 

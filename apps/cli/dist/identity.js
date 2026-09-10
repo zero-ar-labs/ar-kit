@@ -8,8 +8,8 @@
  */
 import { CONTRACT_VERSION, SUCCESSOR_PRODUCT_IDENTITY } from '@zero-ar/contracts';
 export const CLI_USAGE_ROWS = [
-    { command: 'run', syntax: 'run "<objective>" [--items a,b,c] [--contract name] [--tokens N] [--max-turns N]', summary: 'start a run' },
-    { command: 'attach', syntax: 'attach <run>', summary: 'follow durable events from the start' },
+    { command: 'run', syntax: 'run "<objective>" [--items-from manifest.ndjson] [--source alias=ref] [--contract name] [--detach]', summary: 'start a run' },
+    { command: 'attach', syntax: 'attach <run> [--after seq]', summary: 'follow durable events from a cursor' },
     { command: 'inspect', syntax: 'inspect <run>', summary: 'snapshot, budgets, usage, and state' },
     { command: 'records', syntax: 'records <run>', summary: 'the canonical record stream' },
     { command: 'result', syntax: 'result <run> [--json]', summary: 'artifact, verdict, and handover' },
@@ -30,6 +30,7 @@ export const CLI_USAGE_ROWS = [
     { command: 'environment', syntax: 'environment <operation>', summary: 'administer profiles and environment jobs' },
     { command: 'provider', syntax: 'provider <operation> --url u', summary: 'administer provider adapters, credentials, instances, catalogues, and model policy' },
     { command: 'tool-source', syntax: 'tool-source <operation>', summary: 'administer Composio and Merge sources' },
+    { command: 'source', syntax: 'source add|list|inspect|snapshot|preflight', summary: 'administer read-only content sources' },
     { command: 'init', syntax: 'init [dir] [--kind agent|external-product] [--fixture name]', summary: 'scaffold an agent or external product' },
     { command: 'version', syntax: 'version', summary: 'print product identity, runtime build, and contract version' },
     { command: 'help', syntax: 'help', summary: 'print this command guide' },
@@ -57,6 +58,7 @@ export const CLI_REMOTE_CAPABLE_COMMANDS = [
     'environment',
     'provider',
     'tool-source',
+    'source',
 ];
 export function isRemoteCapableCommand(command) {
     return CLI_REMOTE_CAPABLE_COMMANDS.includes(command);

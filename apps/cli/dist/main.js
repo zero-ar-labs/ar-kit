@@ -14,7 +14,7 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { CONTRACT_VERSION, DiagnosticError, AdmitModelAdapterRequestSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, DeclareFallbackSetRequestSchema, EnableProviderModelRequestSchema, EnableToolSourceToolsRequestSchema, ProtectedCredentialIngestRequestSchema, RegisterEnvironmentRequestSchema, RegisterToolSourceRequestSchema, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SyncProviderCatalogueRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceStateRequestSchema, canonicalJson, makeId, productEnvironmentNames, productEnvironmentValue, productProjectTemplate, profileCapabilitySummaryFor, resolveCommandTarget, renderDiagnostic, shortId, SUCCESSOR_PRODUCT_IDENTITY, productLocalDataDirectory, } from '@zero-ar/contracts';
+import { CONTRACT_VERSION, DiagnosticError, AdmitModelAdapterRequestSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, DeclareFallbackSetRequestSchema, EnableProviderModelRequestSchema, EnableToolSourceToolsRequestSchema, ProtectedCredentialIngestRequestSchema, RegisterEnvironmentRequestSchema, RegisterSourceRequestSchema, RegisterToolSourceRequestSchema, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SyncProviderCatalogueRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceStateRequestSchema, canonicalJson, makeId, productEnvironmentNames, productEnvironmentValue, productProjectTemplate, profileCapabilitySummaryFor, resolveCommandTarget, renderDiagnostic, shortId, SUCCESSOR_PRODUCT_IDENTITY, productLocalDataDirectory, } from '@zero-ar/contracts';
 import { connectRuntimeTarget, ZeroARClient } from '@zero-ar/client';
 import { compileProject, renderPlan, verifyBundle } from '@zero-ar/sdk';
 import { CLI_USAGE_ROWS, cliIdentityReport, createCliContext, isRemoteCapableCommand, } from "./identity.js";
@@ -57,7 +57,7 @@ export async function runCli(options = {}) {
             case 'run':
                 return await run(client, commandArguments, context);
             case 'attach':
-                return await attach(client, need(commandArguments[0], 'run id'));
+                return await attach(client, need(commandArguments[0], 'run id'), cursorValue(commandArguments, '--after'));
             case 'inspect':
                 return await inspect(client, need(commandArguments[0], 'run id'));
             case 'records':
@@ -139,6 +139,8 @@ export async function runCli(options = {}) {
                 return await provider(client, commandArguments);
             case 'tool-source':
                 return await toolSource(client, commandArguments);
+            case 'source':
+                return await source(client, commandArguments);
             case 'rebuild': {
                 const outcome = await client.rebuildProjection(need(commandArguments[0], 'run id'));
                 console.log(outcome.equal
@@ -308,6 +310,28 @@ async function toolSource(client, args) {
     console.log(JSON.stringify(result, null, 2));
     return 0;
 }
+/** Local and hosted source lifecycle through generated native client methods only. */
+async function source(client, args) {
+    const operation = need(args[0], 'a source operation');
+    const handlers = {
+        add: () => client.registerSource(RegisterSourceRequestSchema.parse({
+            name: need(argValue(args, '--name'), 'a source name after --name'),
+            profile: argValue(args, '--profile') ?? 'local-read-only',
+            locator: { kind: 'local-directory', path: resolve(need(args[1], 'a source directory')) },
+        })),
+        list: () => client.listSources(),
+        inspect: () => client.inspectSource(need(args[1], 'a source reference')),
+        snapshot: () => client.snapshotSource(need(args[1], 'a source reference')),
+        preflight: () => client.preflightSource(need(args[1], 'a source reference')),
+    };
+    const handler = handlers[operation];
+    if (!handler) {
+        console.error('error: source needs add, list, inspect, snapshot, or preflight.');
+        return 1;
+    }
+    console.log(JSON.stringify(await handler(), null, 2));
+    return 0;
+}
 /**
  * Provider administration is a remote control-plane surface. Request files
  * use the generated public schemas, and protected credential bytes are read
@@ -352,7 +376,21 @@ async function run(client, args, context) {
         console.error(`error: run needs an objective. Example: ${context.command} run "Summarise the brief"`);
         return 1;
     }
-    const items = (argValue(args, '--items') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+    const inlineItems = (argValue(args, '--items') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+    const manifestPath = argValue(args, '--items-from');
+    const items = [...inlineItems, ...(manifestPath ? itemsFromManifest(manifestPath) : [])];
+    const sources = argValues(args, '--source').map((binding) => {
+        const separator = binding.indexOf('=');
+        if (separator <= 0 || separator === binding.length - 1) {
+            throw new DiagnosticError({
+                severity: 'error',
+                code: 'cli.source.binding-invalid',
+                message: `source binding ${binding} must use alias=source-binding-ref syntax. Use the binding_ref printed by ${context.command} source snapshot.`,
+                clause: 'SRC-025',
+            });
+        }
+        return { alias: binding.slice(0, separator), binding_ref: binding.slice(separator + 1), required_for_completion: true };
+    });
     let contractRef;
     const contractName = argValue(args, '--contract') ?? (items.length > 0 ? 'transform.items' : undefined);
     if (contractName) {
@@ -364,7 +402,8 @@ async function run(client, args, context) {
         }
         contractRef = found.ref;
     }
-    const created = await client.createRun({
+    const detached = args.includes('--detach');
+    const request = {
         objective,
         principals: {
             executing: 'application:zeroar-cli',
@@ -372,17 +411,35 @@ async function run(client, args, context) {
             accountable: envValue('OWNER') ?? process.env['USER'] ?? 'local-operator',
         },
         budgets: {
-            consumption: { model_tokens: Number(argValue(args, '--tokens') ?? 50_000), compute_ms: 600_000 },
+            consumption: {
+                model_tokens: Number(argValue(args, '--tokens') ?? 50_000),
+                compute_ms: Number(argValue(args, '--compute-ms') ?? 600_000),
+                ...(sources.length > 0 ? {
+                    tool_calls: Number(argValue(args, '--tool-calls') ?? 64),
+                    bytes: Number(argValue(args, '--bytes') ?? 64 * 1_048_576),
+                } : {}),
+            },
             attention: Number(argValue(args, '--attention') ?? 0),
             verification_reserve_fraction: 0.2,
             max_turns: Number(argValue(args, '--max-turns') ?? (items.length > 0 ? Math.ceil(items.length / 2) + 12 : 12)),
         },
         ...(contractRef ? { task_contract_ref: contractRef } : {}),
-        ...(items.length > 0 ? { inputs: { items } } : {}),
+        ...(items.length > 0 || sources.length > 0 ? { inputs: {
+                ...(items.length > 0 ? { items } : {}),
+                ...(sources.length > 0 ? { sources } : {}),
+            } } : {}),
         idempotency_key: makeId('ctl'),
-    });
+    };
+    const created = detached
+        ? await client.createDeferredRun(request)
+        : await client.createRun(request);
     const snapshot = created.snapshot;
     console.log(t.label(`run ${shortId(created.run_id)}`) + ' ' + t.dim(created.run_id));
+    if (detached) {
+        console.log('');
+        console.log(`attach later: ${context.command} attach ${created.run_id} --after 0`);
+        return 0;
+    }
     const resolved = await client.records(created.run_id, 0);
     const createdRecord = resolved.records.find((r) => r.type === 'run.created');
     const narration = createdRecord?.payload['resolved']?.narration ?? [];
@@ -392,11 +449,11 @@ async function run(client, args, context) {
     void snapshot;
     return attach(client, created.run_id);
 }
-async function attach(client, run_id) {
+async function attach(client, run_id, after = 0) {
     const abort = new AbortController();
     const progress = client.streamProgress(run_id, (text) => process.stdout.write(t.dim(neutralize(text))), abort.signal).catch(() => undefined);
     let sawDelta = false;
-    await client.streamRecords(run_id, 0, (event) => {
+    await client.streamRecords(run_id, after, (event) => {
         if (!sawDelta)
             sawDelta = true;
         renderEvent(event);
@@ -405,6 +462,19 @@ async function attach(client, run_id) {
     await progress;
     console.log('');
     return showResult(client, run_id);
+}
+function cursorValue(args, flag) {
+    const raw = argValue(args, flag);
+    if (raw === undefined)
+        return 0;
+    if (!/^[0-9]+$/.test(raw) || !Number.isSafeInteger(Number(raw))) {
+        throw new DiagnosticError({
+            severity: 'error',
+            code: 'cli.cursor.invalid',
+            message: `${flag} needs a non-negative integer sequence. Use the last durable sequence you processed, or zero for the beginning.`,
+        });
+    }
+    return Number(raw);
 }
 function renderEvent(raw) {
     // Everything in a payload arrived from a run, so it neutralizes before
@@ -860,6 +930,47 @@ function canWrite(dir) {
 function argValue(args, flag) {
     const index = args.indexOf(flag);
     return index >= 0 ? args[index + 1] : undefined;
+}
+function argValues(args, flag) {
+    const values = [];
+    for (let index = 0; index < args.length; index += 1) {
+        if (args[index] === flag && args[index + 1])
+            values.push(args[index + 1]);
+    }
+    return values;
+}
+function itemsFromManifest(path) {
+    const text = readFileSync(path, 'utf8');
+    const trimmed = text.trim();
+    if (!trimmed)
+        return [];
+    const values = trimmed.startsWith('[')
+        ? JSON.parse(trimmed)
+        : trimmed.split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+    if (!Array.isArray(values) || values.length > 100_000) {
+        throw new DiagnosticError({
+            severity: 'error',
+            code: 'cli.items.manifest-invalid',
+            message: 'the item manifest must be a JSON array or NDJSON with no more than 100000 entries.',
+            clause: 'SRC-025',
+        });
+    }
+    return values.map((value, index) => {
+        const item = typeof value === 'string'
+            ? value
+            : value && typeof value === 'object'
+                ? String(value['item_id'] ?? value['id'] ?? '')
+                : '';
+        if (!item || item.length > 200) {
+            throw new DiagnosticError({
+                severity: 'error',
+                code: 'cli.items.manifest-invalid',
+                message: `item manifest entry ${index + 1} needs a string, item_id, or id no longer than 200 characters.`,
+                clause: 'SRC-025',
+            });
+        }
+        return item;
+    });
 }
 function isValueOf(args, value) {
     const index = args.indexOf(value);
