@@ -1,7 +1,7 @@
 {
   "schema": "zero-ar-public-package-exercise/v1",
   "source_report_schema": "zero-ar-package-release-exercise/v1",
-  "release_manifest_ref": "sha256:50a0c071a5ca2dd0b18ae6ab7cbffb833569fd200e95fe86ad09b762f2acc276",
+  "release_manifest_ref": "sha256:c318c4e80931217fc82c424d89b1574400bd2c505060c876b431af8a8f8f8f1f",
   "packages": [
     {
       "name": "@zero-ar/contracts",
@@ -110,5 +110,5 @@
     "declarations_ok": true
   },
   "refusals": [],
-  "report_ref": "sha256:2e5269786370b065b974b770236766b2e39708f2cf69e72a7d12ef30e0355d2f"
+  "report_ref": "sha256:187b55f2961447d77b22b12d868c533a2712bec2c292bfb0c2bdc0a7982cfa09"
 }

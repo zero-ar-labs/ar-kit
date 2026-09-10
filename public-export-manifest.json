@@ -3,9 +3,9 @@
   "product": "Zero-AR Developer Kit",
   "source": {
     "repository": "https://github.com/zero-ar-labs/zero-ar",
-    "commit": "8d8ed716faff649b01357f17f44672426856552e",
-    "package_set_ref": "sha256:50a0c071a5ca2dd0b18ae6ab7cbffb833569fd200e95fe86ad09b762f2acc276",
-    "package_exercise_ref": "sha256:2e5269786370b065b974b770236766b2e39708f2cf69e72a7d12ef30e0355d2f",
+    "commit": "30ea6e0b1b9ec8f9147a06c7e456a1ec516cc41d",
+    "package_set_ref": "sha256:c318c4e80931217fc82c424d89b1574400bd2c505060c876b431af8a8f8f8f1f",
+    "package_exercise_ref": "sha256:187b55f2961447d77b22b12d868c533a2712bec2c292bfb0c2bdc0a7982cfa09",
     "generator_path": "scripts/export-public-developer-kit.ts",
     "generator_sha256": "5800346c8107a31d22540d33802fd95a5671b4a49a16d0a9765590cb3c06bdc8"
   },
@@ -1012,27 +1012,27 @@
     {
       "path": "PROVENANCE.md",
       "bytes": 698,
-      "sha256": "f35d5da8bad73e6e80fc97ab7011fdd9360222e0bb939deb6e99513edef80a33"
+      "sha256": "8e9285baf5a2d30afb48ef2803b1cf5d155ebeb90d8f2b2cb3a4c9ca4ee74e6f"
     },
     {
       "path": "README.md",
       "bytes": 8011,
-      "sha256": "beab8d99515d35305d9904976cb0220875347c209dd7b6502e6bc70218800885"
+      "sha256": "6084b3eb613a295b8d7e3ea711c1178c9ba610c91009df9c6690b8731f8d3c76"
     },
     {
       "path": "release/package-release-exercise-report.json",
       "bytes": 3413,
-      "sha256": "6ed5c5faeb33a9c7441ef36c0a7d1e877d85bf88c7975eac656712c7631959dc"
+      "sha256": "6d9a725c5444fe82ccaf99b56d990e44f4c765097559e75a44db56272fb29d12"
     },
     {
       "path": "release/package-release-identity-report.json",
       "bytes": 316289,
-      "sha256": "8b483979b3ebfc21b8e1208218aaa56a0bdd3f619b59c2f21643f71f2289c052"
+      "sha256": "780240cf5e2d21f0763acf61fe576c2d43abb43b282f962477fef321aeb3785e"
     },
     {
       "path": "release/package-release-manifest.json",
       "bytes": 10528,
-      "sha256": "57c4dd3d1f5aeb7cf2bb4ba3f5f59a2051e59291a44b081e62c2abf2f3b52efb"
+      "sha256": "3374ad9e13e6f19587d91a01dfe53adeef1c95bb009a1b31c28f7ca9a1aa09e8"
     },
     {
       "path": "release/tarballs/zero-ar-cli-0.1.0.tgz",
@@ -1092,8 +1092,8 @@
     {
       "path": "SOURCE_COMMIT",
       "bytes": 41,
-      "sha256": "3ae8459969d5dbf1c6d37c3466512dd67157b04c15e3fb491f72b53113975f84"
+      "sha256": "cb97c15d28c28c91c2ec5a414085c5ddf98c81abe8e60db53265430e89e06d25"
     }
   ],
-  "export_ref": "sha256:74a9ae05f3eea9741401637c99f16fc3efb9dca9ce1739b0e3fb41724ed531fa"
+  "export_ref": "sha256:a1f7a5e3e44f0b9385dbcccda28968c46e243142d957d272d4b38858e802fb50"
 }
