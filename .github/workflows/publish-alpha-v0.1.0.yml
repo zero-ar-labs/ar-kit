@@ -36,6 +36,13 @@ jobs:
           test "$(git rev-parse HEAD)" = "$ZERO_AR_PUBLIC_KIT_COMMIT"
           test "$(cat SOURCE_COMMIT)" = "$ZERO_AR_SOURCE_COMMIT"
           npm run check
+      - name: Checkout the release observer
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .release-operator
+          sparse-checkout: scripts/verify-npm-alpha-release.mjs
+          sparse-checkout-cone-mode: false
       - name: Classify the v0.1.0 package set
         id: release-state
         env:
@@ -97,7 +104,7 @@ jobs:
           npm publish ./release/tarballs/zero-ar-cli-0.1.0.tgz --access public --tag alpha --provenance
           npm publish ./release/tarballs/zero-ar-mcp-0.1.0.tgz --access public --tag alpha --provenance
       - name: Wait for scanning and verify the immutable public alpha
-        run: node scripts/verify-npm-alpha-release.mjs --allow-latest
+        run: node .release-operator/scripts/verify-npm-alpha-release.mjs --allow-latest
       - name: Remove the implicit latest tags from a first publication
         if: steps.release-state.outputs.latest_cleanup_required == 'true'
         env:
@@ -123,4 +130,4 @@ jobs:
             fi
           done
       - name: Confirm the final public-alpha surface
-        run: node scripts/verify-npm-alpha-release.mjs
+        run: node .release-operator/scripts/verify-npm-alpha-release.mjs
