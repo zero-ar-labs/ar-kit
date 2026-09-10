@@ -10,7 +10,7 @@
  * run id after a restart gives the same observable behaviour, because the
  * handle holds nothing the server does not (DXI-001 through DXI-004).
  */
-import type { ControlAccepted, ControlRequest, IntakeRequest, ProductPackageGraphInput, RecordEnvelope, RunResult, RunSnapshot } from '@zero-ar/contracts';
+import type { ControlAccepted, ControlRequest, IntakeRequest, ProductPackageGraphInput, RecordEnvelope, RunResult, RunSnapshot, RegisterSourceRequest, SourceBindingInput, SourceInstance, SourceList, SourcePreflight, SourceSnapshot, SourceSnapshotPage, SourceSnapshotPageRequest } from '@zero-ar/contracts';
 import { ZeroARClient } from '@zero-ar/client';
 export interface ZeroAROptions {
     /** The hosted or Local Lite endpoint. Required unless a profile supplies one. */
@@ -25,10 +25,20 @@ export interface ZeroAROptions {
 /** What a run needs to start. The objective alone is legal where a default agent is authorized. */
 export interface RunInput {
     objective: string;
+    /** Start in the server and return immediately so another process can attach by id. */
+    detached?: boolean;
     agent?: string;
     principals?: IntakeRequest['principals'];
     budgets?: IntakeRequest['budgets'];
     items?: string[];
+    /** Immutable tenant source bindings, resolved by the runtime before any model call. */
+    sources?: SourceBindingInput[];
+    /** Native input parity. Flat items/sources remain compatibility conveniences. */
+    inputs?: {
+        items?: string[];
+        artifacts?: NonNullable<IntakeRequest['inputs']>['artifacts'];
+        sources?: SourceBindingInput[];
+    };
     task_contract_ref?: string;
     posture_ref?: string;
     idempotency_key?: string;
@@ -89,6 +99,12 @@ export declare class ZeroAR {
     run(input: string | RunInput): Promise<RunHandle>;
     /** The same handle for a run this process did not create (DXI-004). */
     attach(run_id: string): RunHandle;
+    registerSource(request: RegisterSourceRequest): Promise<SourceInstance>;
+    sources(): Promise<SourceList>;
+    inspectSource(source_ref: string): Promise<SourceInstance>;
+    snapshotSource(source_ref: string): Promise<SourceSnapshot>;
+    sourceSnapshotMembers(source_ref: string, query?: SourceSnapshotPageRequest): Promise<SourceSnapshotPage>;
+    preflightSource(source_ref: string): Promise<SourcePreflight>;
 }
 /**
  * Configure one Zero-AR handle. This constructs a public client and

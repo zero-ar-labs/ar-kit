@@ -57,6 +57,8 @@ export declare const ProfileCapabilityEntrySchema: z.ZodObject<{
         "authored-orchestration": "authored-orchestration";
         "mcp-work-entrypoints": "mcp-work-entrypoints";
         "mcp-imported-tools": "mcp-imported-tools";
+        "source-local-read-only": "source-local-read-only";
+        "document-pdf-extraction": "document-pdf-extraction";
     }>;
     state: z.ZodEnum<{
         supported: "supported";
@@ -203,6 +205,8 @@ export declare const ProfileCapabilityManifestSchema: z.ZodObject<{
             "authored-orchestration": "authored-orchestration";
             "mcp-work-entrypoints": "mcp-work-entrypoints";
             "mcp-imported-tools": "mcp-imported-tools";
+            "source-local-read-only": "source-local-read-only";
+            "document-pdf-extraction": "document-pdf-extraction";
         }>;
         state: z.ZodEnum<{
             supported: "supported";
@@ -273,6 +277,8 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
         "authored-orchestration": "authored-orchestration";
         "mcp-work-entrypoints": "mcp-work-entrypoints";
         "mcp-imported-tools": "mcp-imported-tools";
+        "source-local-read-only": "source-local-read-only";
+        "document-pdf-extraction": "document-pdf-extraction";
     }>>;
     conditional: z.ZodArray<z.ZodObject<{
         capability: z.ZodEnum<{
@@ -314,6 +320,8 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
             "authored-orchestration": "authored-orchestration";
             "mcp-work-entrypoints": "mcp-work-entrypoints";
             "mcp-imported-tools": "mcp-imported-tools";
+            "source-local-read-only": "source-local-read-only";
+            "document-pdf-extraction": "document-pdf-extraction";
         }>;
         refusal_point: z.ZodEnum<{
             "profile-compilation": "profile-compilation";
@@ -366,6 +374,8 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
             "authored-orchestration": "authored-orchestration";
             "mcp-work-entrypoints": "mcp-work-entrypoints";
             "mcp-imported-tools": "mcp-imported-tools";
+            "source-local-read-only": "source-local-read-only";
+            "document-pdf-extraction": "document-pdf-extraction";
         }>;
         refusal_point: z.ZodEnum<{
             "profile-compilation": "profile-compilation";

@@ -10,7 +10,7 @@
  * run id after a restart gives the same observable behaviour, because the
  * handle holds nothing the server does not (DXI-001 through DXI-004).
  */
-import { assertProductPackageGraph, makeId, productEnvironmentValue, refuse } from '@zero-ar/contracts';
+import { SourceBindingInputSchema, assertProductPackageGraph, makeId, productEnvironmentValue, refuse } from '@zero-ar/contracts';
 import { ZeroARClient } from '@zero-ar/client';
 const DEFAULT_BUDGETS = {
     consumption: { model_tokens: 100_000 },
@@ -117,6 +117,13 @@ export class ZeroAR {
     /** Create and start one run, then hand back its durable handle. */
     async run(input) {
         const spec = typeof input === 'string' ? { objective: input } : input;
+        if (spec.items && spec.inputs?.items)
+            refuse({ code: 'sdk.input.ambiguous', message: 'Supply items through either RunInput.items or RunInput.inputs.items, not both.', clause: 'SRC-024' });
+        if (spec.sources && spec.inputs?.sources)
+            refuse({ code: 'sdk.input.ambiguous', message: 'Supply sources through either RunInput.sources or RunInput.inputs.sources, not both.', clause: 'SRC-024' });
+        const items = spec.inputs?.items ?? spec.items;
+        const artifacts = spec.inputs?.artifacts;
+        const sources = spec.inputs?.sources ?? spec.sources;
         const request = {
             objective: spec.objective,
             principals: spec.principals ?? DEFAULT_PRINCIPALS,
@@ -125,12 +132,18 @@ export class ZeroAR {
             ...(spec.agent ? { agent_ref: spec.agent } : {}),
             ...(spec.task_contract_ref ? { task_contract_ref: spec.task_contract_ref } : {}),
             ...(spec.posture_ref ? { posture_ref: spec.posture_ref } : {}),
-            ...(spec.items ? { inputs: { items: spec.items } } : {}),
+            ...(items || artifacts || sources ? { inputs: {
+                    ...(items ? { items } : {}),
+                    ...(artifacts ? { artifacts } : {}),
+                    ...(sources ? { sources: sources.map((source) => SourceBindingInputSchema.parse(source)) } : {}),
+                } } : {}),
         };
-        const created = await this.client.createRun(request);
+        const created = spec.detached
+            ? await this.client.createDeferredRun(request)
+            : await this.client.createRun(request);
         // Creation is idempotent: a key that resolved to an existing run
         // hands back that run rather than starting it a second time.
-        if (created.created && created.snapshot.status === 'created') {
+        if (!spec.detached && created.created && created.snapshot.status === 'created') {
             await this.client.start(created.run_id, {
                 idempotency_key: `${request.idempotency_key}:start`,
                 reason: 'start work accepted by the embedding facade',
@@ -141,6 +154,24 @@ export class ZeroAR {
     /** The same handle for a run this process did not create (DXI-004). */
     attach(run_id) {
         return new RunHandle(this.client, run_id);
+    }
+    registerSource(request) {
+        return this.client.registerSource(request);
+    }
+    sources() {
+        return this.client.listSources();
+    }
+    inspectSource(source_ref) {
+        return this.client.inspectSource(source_ref);
+    }
+    snapshotSource(source_ref) {
+        return this.client.snapshotSource(source_ref);
+    }
+    sourceSnapshotMembers(source_ref, query = {}) {
+        return this.client.listSourceSnapshotMembers(source_ref, query);
+    }
+    preflightSource(source_ref) {
+        return this.client.preflightSource(source_ref);
     }
 }
 /**

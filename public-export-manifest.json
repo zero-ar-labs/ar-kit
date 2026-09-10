@@ -3,11 +3,11 @@
   "product": "Zero-AR Developer Kit",
   "source": {
     "repository": "https://github.com/zero-ar-labs/zero-ar",
-    "commit": "af375a67c9db7bf0541fb9ff2831ce020bb4236a",
-    "package_set_ref": "sha256:9bd855760e06f6e0db366eb7a6526c92ce881865daf1ba43274069f68dc23f31",
-    "package_exercise_ref": "sha256:37556f2eff8c314cbbc01ce0f86c67e558368b4f8938990d930cca070ea070ca",
+    "commit": "8d8ed716faff649b01357f17f44672426856552e",
+    "package_set_ref": "sha256:50a0c071a5ca2dd0b18ae6ab7cbffb833569fd200e95fe86ad09b762f2acc276",
+    "package_exercise_ref": "sha256:2e5269786370b065b974b770236766b2e39708f2cf69e72a7d12ef30e0355d2f",
     "generator_path": "scripts/export-public-developer-kit.ts",
-    "generator_sha256": "b71f0da8b4b55430f740c915adab1b4e30bf7e269705b93012ef1314d36d60a3"
+    "generator_sha256": "5800346c8107a31d22540d33802fd95a5671b4a49a16d0a9765590cb3c06bdc8"
   },
   "destination": {
     "repository": "https://github.com/zero-ar-labs/ar-kit",
@@ -26,7 +26,7 @@
       "workspace_path": "packages/contracts",
       "manifest_ref": "sha256:441c1b268dbb8e7ef2f7b71f1e6d3fab91f554e1317cdb860b11e8ce14f4b95b",
       "tarball_path": "release/tarballs/zero-ar-contracts-0.1.0.tgz",
-      "tarball_sha256": "adc50a8860108ecb7374ee296476632b26079f6801c9874ddb4139a62e0d5475"
+      "tarball_sha256": "1382ad2db3a6759f57c491b07c56551dce07ac5fb3e5c9ec817b22461d76d20f"
     },
     {
       "name": "@zero-ar/client",
@@ -34,7 +34,7 @@
       "workspace_path": "packages/client",
       "manifest_ref": "sha256:1dd4a50cbbf6fd8f7b0996098b9e8b6e32a5f9cbc4dd32ae5141532db5b23e6d",
       "tarball_path": "release/tarballs/zero-ar-client-0.1.0.tgz",
-      "tarball_sha256": "297358256add7eb02a064822564399e3cdad135752984d6c2d5a7e94f47ffc9e"
+      "tarball_sha256": "3f55db3178b34d36e32aecceaf264d796c65c2a20272436a6ca72b206712277c"
     },
     {
       "name": "@zero-ar/sdk",
@@ -42,7 +42,7 @@
       "workspace_path": "packages/sdk",
       "manifest_ref": "sha256:0c587a9b9c01a16e3ebbe8b0e3ec0cefb67b2e9efa223414c8cffbd5f1de1b46",
       "tarball_path": "release/tarballs/zero-ar-sdk-0.1.0.tgz",
-      "tarball_sha256": "d39ba601f260e2dfbe18bd6f7fb3da5d4b81f838d2fc3b8a58c70c494ab1518d"
+      "tarball_sha256": "7c29813b08c339000585b0acf08a55bbc6f98391ff33f025935ce4d0641947aa"
     },
     {
       "name": "@zero-ar/cli",
@@ -50,7 +50,7 @@
       "workspace_path": "apps/cli",
       "manifest_ref": "sha256:eaad45dcd89db8a69c71e9caeb81c020eb8c3a3d84e0279c9a9605360d4c72ef",
       "tarball_path": "release/tarballs/zero-ar-cli-0.1.0.tgz",
-      "tarball_sha256": "f50bcf793b5a5cb0a591a5dd6e2c5374c43d54a71d4a5d5ac4c7d54f0aa6552f"
+      "tarball_sha256": "108241964e5a7f2ee790762a338fb08b414d48319117e9d8773771f094a620dc"
     },
     {
       "name": "@zero-ar/conformance",
@@ -74,7 +74,7 @@
       "workspace_path": "packages/mcp",
       "manifest_ref": "sha256:464f4c49d6c804cdd187501c5ce97ac397c414cb1c5798511b714b4212159ff3",
       "tarball_path": "release/tarballs/zero-ar-mcp-0.1.0.tgz",
-      "tarball_sha256": "74adf5b16f450fd05126286fb8d8e187e0615dd49e2f07470ec034160ea1e9e9"
+      "tarball_sha256": "e2c73b56937a2c527ab9c67eac4ef45c5a3e2d0d4daaa3ef058d90cd38f40fba"
     },
     {
       "name": "@zero-ar/testkit",
@@ -90,7 +90,7 @@
       "workspace_path": "packages/validator-kit",
       "manifest_ref": "sha256:d80c6d513dddf76d56084fbf11a326aff7082e677fdc52792e32c6a61a952b8e",
       "tarball_path": "release/tarballs/zero-ar-validator-kit-0.1.0.tgz",
-      "tarball_sha256": "4f2924fa2714f3d98b8ccc40b7fc920d6550dec4cde35293c11d339449a6482f"
+      "tarball_sha256": "362b32f3643f8b6949117ba6d2d4b841f5c9ac607c9c2019234ca01a43d908a1"
     }
   ],
   "files": [
@@ -116,13 +116,13 @@
     },
     {
       "path": "apps/cli/dist/identity.d.ts",
-      "bytes": 1380,
-      "sha256": "7c059639ddc29166c297f9b1630d33eb90353259bf110e541d76b6be056230f1"
+      "bytes": 1390,
+      "sha256": "4e31d965ade2c4cb1882ea03ff7a41428d03c56527bf0246fae9b49a5c213eb3"
     },
     {
       "path": "apps/cli/dist/identity.js",
-      "bytes": 4572,
-      "sha256": "c46377efbd5425b39ad7c95969724fd99cdc276c10bc4e46213b14281bf4e26a"
+      "bytes": 4747,
+      "sha256": "ae26785343dbd898fb2c6e80352a5053d6f96c8f58269308207cb3a534d33b98"
     },
     {
       "path": "apps/cli/dist/main.d.ts",
@@ -131,8 +131,8 @@
     },
     {
       "path": "apps/cli/dist/main.js",
-      "bytes": 46714,
-      "sha256": "9fa8aff023fec5627c7e1a4192a4a779acf762d502c215c072fc104eda998f6e"
+      "bytes": 51566,
+      "sha256": "b81c73ebbde5053f2f80c54a8c8552252029ec20044c14ea2afb02ba425d7053"
     },
     {
       "path": "apps/cli/dist/release-artifacts.d.ts",
@@ -206,13 +206,13 @@
     },
     {
       "path": "packages/client/dist/generated.d.ts",
-      "bytes": 10575,
-      "sha256": "5df263a57ca6b9b9b98000c33b5835b6ac4a0aac6bafd67d87ad7ce9e0d4baeb"
+      "bytes": 11131,
+      "sha256": "7991ff2f0c6f07baf58a4963395aa2aa75909696cde6b34fd42b0f4fe3dc3608"
     },
     {
       "path": "packages/client/dist/generated.js",
-      "bytes": 12775,
-      "sha256": "9fdaaa3f63ff69bee51ff887ca07faa1e089e84ff703b978a5ebfdda809bd4be"
+      "bytes": 13600,
+      "sha256": "eb4aa98116ec742073cbbe863d69e3b33eba95773457ea0740fb125dd6b20fa6"
     },
     {
       "path": "packages/client/dist/index.d.ts",
@@ -236,8 +236,8 @@
     },
     {
       "path": "packages/client/openapi/zero-ar-v1.openapi.json",
-      "bytes": 1325287,
-      "sha256": "a744897cb0054c1edf6753d12fc744c4adaefb5832484b0fc95266235fddc912"
+      "bytes": 1408553,
+      "sha256": "d1d1152584ff9735e4061d3b281c9e9c1ef0b605a23e629740f176c6137118a2"
     },
     {
       "path": "packages/client/package.json",
@@ -301,13 +301,13 @@
     },
     {
       "path": "packages/contracts/dist/capability-profile.d.ts",
-      "bytes": 20365,
-      "sha256": "6fe2edbc4aa01692c7e95db2a9d4c8c357ba03e1453c71812ce8172f089d1686"
+      "bytes": 20999,
+      "sha256": "821ffb46654eea7e446f469124fa7acdaaca43bc5205dbcfc1a76e23dd0e3490"
     },
     {
       "path": "packages/contracts/dist/capability-profile.js",
-      "bytes": 34281,
-      "sha256": "d35ca928fe072a78bc2aa9c95de888642f66d6b38676b0950338512538982191"
+      "bytes": 35400,
+      "sha256": "875dd1472201ddf9e943c664e536b10e7f92ad6798e38d3a4f347512d112d73e"
     },
     {
       "path": "packages/contracts/dist/claims.d.ts",
@@ -431,13 +431,13 @@
     },
     {
       "path": "packages/contracts/dist/index.d.ts",
-      "bytes": 1790,
-      "sha256": "8ce8c573782ffa7875b350e0ec0a9cb9476181d87e088e12e19bb9660f72cc0a"
+      "bytes": 1820,
+      "sha256": "a036bd20d2adefcac35680f7ed5e2f20771ab2483cecda0d90bc2fe4510d2c97"
     },
     {
       "path": "packages/contracts/dist/index.js",
-      "bytes": 1782,
-      "sha256": "9ba4100f56fac978ba9ac16780c5998d2e67679328c2a3cb37dfecb171aa0873"
+      "bytes": 1812,
+      "sha256": "031a410cc099507625653d079fc6333329c1a5afa5c24069cef6f141ff390f76"
     },
     {
       "path": "packages/contracts/dist/integration.d.ts",
@@ -601,13 +601,13 @@
     },
     {
       "path": "packages/contracts/dist/routes.d.ts",
-      "bytes": 45145,
-      "sha256": "26e63d6fd6a115b56ff41266a5cd516c54d58b44513a6ab45b5c0fb5e63facba"
+      "bytes": 47737,
+      "sha256": "ad2390b26f0055e3a687e61db864de64bb27f0aefde14893976b3a3c01c362ef"
     },
     {
       "path": "packages/contracts/dist/routes.js",
-      "bytes": 26326,
-      "sha256": "54af8ccf54d609a75feafc2f381db9bc3b178ed4712f08b1af46a34b976c80bf"
+      "bytes": 27825,
+      "sha256": "75999766fc0b64ebecf4a920274f8ae17ffe0f326038a561902636be5214dd0a"
     },
     {
       "path": "packages/contracts/dist/runtime-artifacts.d.ts",
@@ -621,13 +621,23 @@
     },
     {
       "path": "packages/contracts/dist/schemas.d.ts",
-      "bytes": 546093,
-      "sha256": "d01bff4027eeba3ba41a70270ae17a6fac217690d618716dcc65218a21ec4500"
+      "bytes": 574634,
+      "sha256": "6fea2e7f0f651915bc2ee692163034067d42585c516a8a211a3b53e71f0e7c7f"
     },
     {
       "path": "packages/contracts/dist/schemas.js",
-      "bytes": 97611,
-      "sha256": "0c548e14f72c372eac88f4ce6fde2e48a8b9c764496dfdfe4abf6a193f367e95"
+      "bytes": 100894,
+      "sha256": "ec77fe38160149a5fad290e459ded4e059e0edd578d6bc8180923a09f85168df"
+    },
+    {
+      "path": "packages/contracts/dist/sources.d.ts",
+      "bytes": 18010,
+      "sha256": "e9bcb65f6781fa6a38933c0dcc7a6255c6919b357674f37bd54b24ae1addb3a5"
+    },
+    {
+      "path": "packages/contracts/dist/sources.js",
+      "bytes": 10813,
+      "sha256": "991ee3aa40a5353e9a83e82364197ee9396197e6ac575c0389d1f2a155c1f464"
     },
     {
       "path": "packages/contracts/dist/state-machines.d.ts",
@@ -661,13 +671,13 @@
     },
     {
       "path": "packages/contracts/dist/vocab.d.ts",
-      "bytes": 46647,
-      "sha256": "a8df75e9b933a14677191e924095182ba27be5bdb130a6ba5ff530356b5ef444"
+      "bytes": 46738,
+      "sha256": "85202f694feeff3bf088feb0ee2231142977d14e6a1fced8c751f5b77a286630"
     },
     {
       "path": "packages/contracts/dist/vocab.js",
-      "bytes": 34235,
-      "sha256": "74d34a70bb4fc865a46def3915778f101814303d41d2a4754ec974880a054125"
+      "bytes": 34342,
+      "sha256": "fff11683b461b69b38a87880ac09fc047711738b4652a4fe7c20feae685d8a62"
     },
     {
       "path": "packages/contracts/LICENSE",
@@ -756,8 +766,8 @@
     },
     {
       "path": "packages/mcp/dist/server.js",
-      "bytes": 36076,
-      "sha256": "106b4eeac50a5d70996872ed4a0b04a111be308992c4b421f28eb1d2ae4fa529"
+      "bytes": 36337,
+      "sha256": "18e45d774e0545d1e85099f71c4e191a980b0fcad7113309b4eef4a29eee02bd"
     },
     {
       "path": "packages/mcp/LICENSE",
@@ -791,13 +801,13 @@
     },
     {
       "path": "packages/sdk/dist/embed.d.ts",
-      "bytes": 4209,
-      "sha256": "34d9cef9cf5f02a703f085758384e76547bbce486cadbb15b9766ca85081d1dc"
+      "bytes": 5268,
+      "sha256": "272f94c3dba48efba4869e1903e371451188d8e8a42eb1cb1e26136d926bf7a8"
     },
     {
       "path": "packages/sdk/dist/embed.js",
-      "bytes": 7743,
-      "sha256": "2c7b1f12ed0ac87891d36cfec2fb5b069b2e0b68268a8b6189c911d886e0ee71"
+      "bytes": 9276,
+      "sha256": "5bfcf8184b8e4ecaa85e03b07e8d62ecca72a9f19e1d4bc73ad8e0bed93699fc"
     },
     {
       "path": "packages/sdk/dist/index.d.ts",
@@ -976,8 +986,8 @@
     },
     {
       "path": "packages/validator-kit/dist/index.js",
-      "bytes": 5298,
-      "sha256": "c5b5d6d92e1560fdd77eb7e67018ac9d94c7a04a599541733bd4cd5ba6fc74d4"
+      "bytes": 5199,
+      "sha256": "aececf5c08ccb34f5d47f26491613f15839d589416ef699ebbe3f36a7dee12df"
     },
     {
       "path": "packages/validator-kit/LICENSE",
@@ -996,43 +1006,43 @@
     },
     {
       "path": "packages/validator-kit/README.md",
-      "bytes": 256,
-      "sha256": "6a524f130a2ce17a964521bef3174a136c600b166aaec7b0ba7a656a92488b7a"
+      "bytes": 4496,
+      "sha256": "c3bfe1e8b5af2aa5f0d52d38b570399fa4d27f18cbc40640e4953ec56983a0a0"
     },
     {
       "path": "PROVENANCE.md",
       "bytes": 698,
-      "sha256": "57a9bbcad91e376433a1354aa626fe008441cb11eb27dfca0d99b4891ed1d327"
+      "sha256": "f35d5da8bad73e6e80fc97ab7011fdd9360222e0bb939deb6e99513edef80a33"
     },
     {
       "path": "README.md",
-      "bytes": 5811,
-      "sha256": "1ca9d3341c398171124293f429065519898d407ecdbadc563f952c8d9c917f97"
+      "bytes": 8011,
+      "sha256": "beab8d99515d35305d9904976cb0220875347c209dd7b6502e6bc70218800885"
     },
     {
       "path": "release/package-release-exercise-report.json",
       "bytes": 3413,
-      "sha256": "92e60ae24b2892e3df98d94bc3bbf526f7eda6866445c346e03167ecbaab4f20"
+      "sha256": "6ed5c5faeb33a9c7441ef36c0a7d1e877d85bf88c7975eac656712c7631959dc"
     },
     {
       "path": "release/package-release-identity-report.json",
-      "bytes": 304501,
-      "sha256": "d27b4b6e8db1e98bd67ce11246fa6aab5ce0d274d5713a2b5113f3a54b4d3a9d"
+      "bytes": 316289,
+      "sha256": "8b483979b3ebfc21b8e1208218aaa56a0bdd3f619b59c2f21643f71f2289c052"
     },
     {
       "path": "release/package-release-manifest.json",
       "bytes": 10528,
-      "sha256": "c2225abfc95d9e0c92ffb971b3a8630ad5f3e23792d2764809284239a71f4cf5"
+      "sha256": "57c4dd3d1f5aeb7cf2bb4ba3f5f59a2051e59291a44b081e62c2abf2f3b52efb"
     },
     {
       "path": "release/tarballs/zero-ar-cli-0.1.0.tgz",
-      "bytes": 36415,
-      "sha256": "f50bcf793b5a5cb0a591a5dd6e2c5374c43d54a71d4a5d5ac4c7d54f0aa6552f"
+      "bytes": 37642,
+      "sha256": "108241964e5a7f2ee790762a338fb08b414d48319117e9d8773771f094a620dc"
     },
     {
       "path": "release/tarballs/zero-ar-client-0.1.0.tgz",
-      "bytes": 78082,
-      "sha256": "297358256add7eb02a064822564399e3cdad135752984d6c2d5a7e94f47ffc9e"
+      "bytes": 82725,
+      "sha256": "3f55db3178b34d36e32aecceaf264d796c65c2a20272436a6ca72b206712277c"
     },
     {
       "path": "release/tarballs/zero-ar-conformance-0.1.0.tgz",
@@ -1041,18 +1051,18 @@
     },
     {
       "path": "release/tarballs/zero-ar-contracts-0.1.0.tgz",
-      "bytes": 191970,
-      "sha256": "adc50a8860108ecb7374ee296476632b26079f6801c9874ddb4139a62e0d5475"
+      "bytes": 200161,
+      "sha256": "1382ad2db3a6759f57c491b07c56551dce07ac5fb3e5c9ec817b22461d76d20f"
     },
     {
       "path": "release/tarballs/zero-ar-mcp-0.1.0.tgz",
-      "bytes": 28468,
-      "sha256": "74adf5b16f450fd05126286fb8d8e187e0615dd49e2f07470ec034160ea1e9e9"
+      "bytes": 28537,
+      "sha256": "e2c73b56937a2c527ab9c67eac4ef45c5a3e2d0d4daaa3ef058d90cd38f40fba"
     },
     {
       "path": "release/tarballs/zero-ar-sdk-0.1.0.tgz",
-      "bytes": 33518,
-      "sha256": "d39ba601f260e2dfbe18bd6f7fb3da5d4b81f838d2fc3b8a58c70c494ab1518d"
+      "bytes": 34123,
+      "sha256": "7c29813b08c339000585b0acf08a55bbc6f98391ff33f025935ce4d0641947aa"
     },
     {
       "path": "release/tarballs/zero-ar-testkit-0.1.0.tgz",
@@ -1066,8 +1076,8 @@
     },
     {
       "path": "release/tarballs/zero-ar-validator-kit-0.1.0.tgz",
-      "bytes": 12078,
-      "sha256": "4f2924fa2714f3d98b8ccc40b7fc920d6550dec4cde35293c11d339449a6482f"
+      "bytes": 13385,
+      "sha256": "362b32f3643f8b6949117ba6d2d4b841f5c9ac607c9c2019234ca01a43d908a1"
     },
     {
       "path": "scripts/exercise-public-packages.mjs",
@@ -1082,8 +1092,8 @@
     {
       "path": "SOURCE_COMMIT",
       "bytes": 41,
-      "sha256": "9a9b2b3522f5a233dee015bdf04e71de9acf4e6374a3a41c7c8ecb92db037320"
+      "sha256": "3ae8459969d5dbf1c6d37c3466512dd67157b04c15e3fb491f72b53113975f84"
     }
   ],
-  "export_ref": "sha256:2220a8ed290782d2e62d90bee5cef4c9064c64b7db2465b4b7fd328caa68df25"
+  "export_ref": "sha256:74a9ae05f3eea9741401637c99f16fc3efb9dca9ce1739b0e3fb41724ed531fa"
 }

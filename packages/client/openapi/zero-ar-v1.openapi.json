@@ -8079,6 +8079,705 @@
         }
       }
     },
+    "/v1/sources": {
+      "post": {
+        "operationId": "registerSource",
+        "tags": [
+          "administration"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "The command or its declared content is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request carries no admitted credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The authenticated principal lacks the required scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The addressed public resource does not exist for this principal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The command conflicts with current canonical state or prior idempotent content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request passed the declared transfer bound.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The server encountered an internal defect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "The operation completed. Creation and idempotent replay may use different successful status codes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceInstanceSchema"
+                }
+              }
+            }
+          }
+        },
+        "x-zero-ar-route-kind": "json",
+        "x-zero-ar-authorization": {
+          "scopes": [
+            "source:write"
+          ]
+        },
+        "x-zero-ar-required-scopes": [
+          "source:write"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterSourceRequestSchema"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listSources",
+        "tags": [
+          "administration"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "The command or its declared content is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request carries no admitted credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The authenticated principal lacks the required scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The addressed public resource does not exist for this principal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The command conflicts with current canonical state or prior idempotent content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request passed the declared transfer bound.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The server encountered an internal defect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "The operation completed. Creation and idempotent replay may use different successful status codes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceListSchema"
+                }
+              }
+            }
+          }
+        },
+        "x-zero-ar-route-kind": "json",
+        "x-zero-ar-authorization": {
+          "scopes": [
+            "source:read"
+          ]
+        },
+        "x-zero-ar-required-scopes": [
+          "source:read"
+        ]
+      }
+    },
+    "/v1/sources/{source_ref}": {
+      "get": {
+        "operationId": "inspectSource",
+        "tags": [
+          "administration"
+        ],
+        "parameters": [
+          {
+            "name": "source_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "The command or its declared content is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request carries no admitted credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The authenticated principal lacks the required scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The addressed public resource does not exist for this principal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The command conflicts with current canonical state or prior idempotent content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request passed the declared transfer bound.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The server encountered an internal defect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "The operation completed. Creation and idempotent replay may use different successful status codes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceInstanceSchema"
+                }
+              }
+            }
+          }
+        },
+        "x-zero-ar-route-kind": "json",
+        "x-zero-ar-authorization": {
+          "scopes": [
+            "source:read"
+          ]
+        },
+        "x-zero-ar-required-scopes": [
+          "source:read"
+        ]
+      }
+    },
+    "/v1/sources/{source_ref}/snapshots": {
+      "post": {
+        "operationId": "snapshotSource",
+        "tags": [
+          "administration"
+        ],
+        "parameters": [
+          {
+            "name": "source_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "The command or its declared content is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request carries no admitted credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The authenticated principal lacks the required scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The addressed public resource does not exist for this principal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The command conflicts with current canonical state or prior idempotent content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request passed the declared transfer bound.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The server encountered an internal defect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "The operation completed. Creation and idempotent replay may use different successful status codes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceSnapshotSchema"
+                }
+              }
+            }
+          }
+        },
+        "x-zero-ar-route-kind": "json",
+        "x-zero-ar-authorization": {
+          "scopes": [
+            "source:write"
+          ]
+        },
+        "x-zero-ar-required-scopes": [
+          "source:write"
+        ]
+      }
+    },
+    "/v1/sources/{source_ref}/snapshot-members": {
+      "get": {
+        "operationId": "listSourceSnapshotMembers",
+        "tags": [
+          "administration"
+        ],
+        "parameters": [
+          {
+            "name": "source_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "The command or its declared content is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request carries no admitted credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The authenticated principal lacks the required scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The addressed public resource does not exist for this principal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The command conflicts with current canonical state or prior idempotent content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request passed the declared transfer bound.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The server encountered an internal defect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "The operation completed. Creation and idempotent replay may use different successful status codes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceSnapshotPageSchema"
+                }
+              }
+            }
+          }
+        },
+        "x-zero-ar-route-kind": "json",
+        "x-zero-ar-authorization": {
+          "scopes": [
+            "source:read"
+          ]
+        },
+        "x-zero-ar-required-scopes": [
+          "source:read"
+        ]
+      }
+    },
+    "/v1/sources/{source_ref}/preflight": {
+      "post": {
+        "operationId": "preflightSource",
+        "tags": [
+          "administration"
+        ],
+        "parameters": [
+          {
+            "name": "source_ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "The command or its declared content is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request carries no admitted credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The authenticated principal lacks the required scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The addressed public resource does not exist for this principal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The command conflicts with current canonical state or prior idempotent content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request passed the declared transfer bound.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The server encountered an internal defect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "The operation completed. Creation and idempotent replay may use different successful status codes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourcePreflightSchema"
+                }
+              }
+            }
+          }
+        },
+        "x-zero-ar-route-kind": "json",
+        "x-zero-ar-authorization": {
+          "scopes": [
+            "source:read"
+          ]
+        },
+        "x-zero-ar-required-scopes": [
+          "source:read"
+        ]
+      }
+    },
     "/v1/environments": {
       "post": {
         "operationId": "registerEnvironment",
@@ -11118,6 +11817,1886 @@
         ],
         "additionalProperties": false
       },
+      "SourceLocatorSchema": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "local-directory"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              }
+            },
+            "required": [
+              "kind",
+              "path"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "SourceBoundsSchema": {
+        "type": "object",
+        "properties": {
+          "max_items": {
+            "default": 20000,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 100000
+          },
+          "max_total_bytes": {
+            "default": 1073741824,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 10737418240
+          },
+          "max_item_bytes": {
+            "default": 67108864,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 1073741824
+          },
+          "max_depth": {
+            "default": 32,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 128
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisterSourceRequestSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "profile": {
+            "type": "string",
+            "enum": [
+              "local-read-only"
+            ]
+          },
+          "locator": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "local-directory"
+                  },
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  }
+                },
+                "required": [
+                  "kind",
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "classification": {
+            "default": "internal",
+            "type": "string",
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ]
+          },
+          "evidence_grade": {
+            "default": "original",
+            "type": "string",
+            "enum": [
+              "original",
+              "derived",
+              "model-generated"
+            ]
+          },
+          "bounds": {
+            "default": {
+              "max_items": 20000,
+              "max_total_bytes": 1073741824,
+              "max_item_bytes": 67108864,
+              "max_depth": 32
+            },
+            "type": "object",
+            "properties": {
+              "max_items": {
+                "default": 20000,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 100000
+              },
+              "max_total_bytes": {
+                "default": 1073741824,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 10737418240
+              },
+              "max_item_bytes": {
+                "default": 67108864,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 1073741824
+              },
+              "max_depth": {
+                "default": 32,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 128
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "name",
+          "profile",
+          "locator"
+        ],
+        "additionalProperties": false
+      },
+      "SourceInstanceSchema": {
+        "type": "object",
+        "properties": {
+          "source_ref": {
+            "type": "string",
+            "pattern": "^src_[0-9a-f]{32}$"
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "profile": {
+            "type": "string",
+            "enum": [
+              "local-read-only"
+            ]
+          },
+          "locator": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "local-directory"
+                  },
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  }
+                },
+                "required": [
+                  "kind",
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "admitted_root_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "access": {
+            "type": "string",
+            "const": "read-only"
+          },
+          "operations": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "list",
+                "stat",
+                "read",
+                "search",
+                "document.extract"
+              ]
+            }
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ]
+          },
+          "evidence_grade": {
+            "type": "string",
+            "enum": [
+              "original",
+              "derived",
+              "model-generated"
+            ]
+          },
+          "bounds": {
+            "type": "object",
+            "properties": {
+              "max_items": {
+                "default": 20000,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 100000
+              },
+              "max_total_bytes": {
+                "default": 1073741824,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 10737418240
+              },
+              "max_item_bytes": {
+                "default": 67108864,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 1073741824
+              },
+              "max_depth": {
+                "default": 32,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 128
+              }
+            },
+            "additionalProperties": false
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "disabled",
+              "removed"
+            ]
+          },
+          "current_snapshot_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^source-snapshot:\\/\\/sha256:[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "registered_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "source_ref",
+          "name",
+          "profile",
+          "locator",
+          "admitted_root_ref",
+          "access",
+          "operations",
+          "destinations",
+          "classification",
+          "evidence_grade",
+          "bounds",
+          "state",
+          "current_snapshot_ref",
+          "registered_at"
+        ],
+        "additionalProperties": false
+      },
+      "SourceExtractorIdentitySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "const": "zero-ar.pdf-extractor"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "poppler_version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tesseract_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "type": "string",
+            "const": "eng"
+          },
+          "dpi": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sandbox_mode": {
+            "type": "string",
+            "enum": [
+              "linux-bwrap-no-network",
+              "resource-limited-process"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "poppler_version",
+          "tesseract_version",
+          "language",
+          "dpi",
+          "sandbox_mode"
+        ],
+        "additionalProperties": false
+      },
+      "SourceListSchema": {
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source_ref": {
+                  "type": "string",
+                  "pattern": "^src_[0-9a-f]{32}$"
+                },
+                "name": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{0,62}$"
+                },
+                "profile": {
+                  "type": "string",
+                  "enum": [
+                    "local-read-only"
+                  ]
+                },
+                "locator": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "local-directory"
+                        },
+                        "path": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4096
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "path"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "admitted_root_ref": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "access": {
+                  "type": "string",
+                  "const": "read-only"
+                },
+                "operations": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "list",
+                      "stat",
+                      "read",
+                      "search",
+                      "document.extract"
+                    ]
+                  }
+                },
+                "destinations": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "classification": {
+                  "type": "string",
+                  "enum": [
+                    "public",
+                    "internal",
+                    "confidential",
+                    "restricted"
+                  ]
+                },
+                "evidence_grade": {
+                  "type": "string",
+                  "enum": [
+                    "original",
+                    "derived",
+                    "model-generated"
+                  ]
+                },
+                "bounds": {
+                  "type": "object",
+                  "properties": {
+                    "max_items": {
+                      "default": 20000,
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100000
+                    },
+                    "max_total_bytes": {
+                      "default": 1073741824,
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 10737418240
+                    },
+                    "max_item_bytes": {
+                      "default": 67108864,
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 1073741824
+                    },
+                    "max_depth": {
+                      "default": 32,
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 128
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "ready",
+                    "disabled",
+                    "removed"
+                  ]
+                },
+                "current_snapshot_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^source-snapshot:\\/\\/sha256:[0-9a-f]{64}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "registered_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                }
+              },
+              "required": [
+                "source_ref",
+                "name",
+                "profile",
+                "locator",
+                "admitted_root_ref",
+                "access",
+                "operations",
+                "destinations",
+                "classification",
+                "evidence_grade",
+                "bounds",
+                "state",
+                "current_snapshot_ref",
+                "registered_at"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "sources"
+        ],
+        "additionalProperties": false
+      },
+      "SourceSnapshotMemberSchema": {
+        "type": "object",
+        "properties": {
+          "member_ref": {
+            "type": "string",
+            "pattern": "^source-member:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "snapshot_ref": {
+            "type": "string",
+            "pattern": "^source-snapshot:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "locator": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "artifact_ref": {
+            "type": "string",
+            "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+          },
+          "manifest_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "content_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "media_type": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[^\\s/]+\\/[^\\s]+$"
+          }
+        },
+        "required": [
+          "member_ref",
+          "snapshot_ref",
+          "locator",
+          "artifact_ref",
+          "manifest_ref",
+          "content_hash",
+          "bytes",
+          "media_type"
+        ],
+        "additionalProperties": false
+      },
+      "SourceSnapshotSchema": {
+        "type": "object",
+        "properties": {
+          "snapshot_ref": {
+            "type": "string",
+            "pattern": "^source-snapshot:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "collection_ref": {
+            "type": "string",
+            "pattern": "^source-collection:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "binding_ref": {
+            "type": "string",
+            "pattern": "^source-binding:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "source_ref": {
+            "type": "string",
+            "pattern": "^src_[0-9a-f]{32}$"
+          },
+          "source_name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "profile": {
+            "type": "string",
+            "enum": [
+              "local-read-only"
+            ]
+          },
+          "item_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "total_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "manifest_artifact_ref": {
+            "type": "string",
+            "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+          },
+          "manifest_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "snapshot_ref",
+          "collection_ref",
+          "binding_ref",
+          "source_ref",
+          "source_name",
+          "profile",
+          "item_count",
+          "total_bytes",
+          "manifest_artifact_ref",
+          "manifest_ref",
+          "created_at"
+        ],
+        "additionalProperties": false
+      },
+      "SourceSnapshotPageRequestSchema": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 100
+          }
+        },
+        "additionalProperties": false
+      },
+      "SourceSnapshotPageSchema": {
+        "type": "object",
+        "properties": {
+          "snapshot": {
+            "type": "object",
+            "properties": {
+              "snapshot_ref": {
+                "type": "string",
+                "pattern": "^source-snapshot:\\/\\/sha256:[0-9a-f]{64}$"
+              },
+              "collection_ref": {
+                "type": "string",
+                "pattern": "^source-collection:\\/\\/sha256:[0-9a-f]{64}$"
+              },
+              "binding_ref": {
+                "type": "string",
+                "pattern": "^source-binding:\\/\\/sha256:[0-9a-f]{64}$"
+              },
+              "source_ref": {
+                "type": "string",
+                "pattern": "^src_[0-9a-f]{32}$"
+              },
+              "source_name": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "profile": {
+                "type": "string",
+                "enum": [
+                  "local-read-only"
+                ]
+              },
+              "item_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "total_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "manifest_artifact_ref": {
+                "type": "string",
+                "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+              },
+              "manifest_ref": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "snapshot_ref",
+              "collection_ref",
+              "binding_ref",
+              "source_ref",
+              "source_name",
+              "profile",
+              "item_count",
+              "total_bytes",
+              "manifest_artifact_ref",
+              "manifest_ref",
+              "created_at"
+            ],
+            "additionalProperties": false
+          },
+          "members": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "member_ref": {
+                  "type": "string",
+                  "pattern": "^source-member:\\/\\/sha256:[0-9a-f]{64}$"
+                },
+                "snapshot_ref": {
+                  "type": "string",
+                  "pattern": "^source-snapshot:\\/\\/sha256:[0-9a-f]{64}$"
+                },
+                "locator": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "artifact_ref": {
+                  "type": "string",
+                  "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+                },
+                "manifest_ref": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "content_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "bytes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "media_type": {
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^[^\\s/]+\\/[^\\s]+$"
+                }
+              },
+              "required": [
+                "member_ref",
+                "snapshot_ref",
+                "locator",
+                "artifact_ref",
+                "manifest_ref",
+                "content_hash",
+                "bytes",
+                "media_type"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "snapshot",
+          "members",
+          "next_cursor"
+        ],
+        "additionalProperties": false
+      },
+      "SourceBindingInputSchema": {
+        "type": "object",
+        "properties": {
+          "alias": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "binding_ref": {
+            "type": "string",
+            "pattern": "^source-binding:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "required_for_completion": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "alias",
+          "binding_ref"
+        ],
+        "additionalProperties": false
+      },
+      "ResolvedSourceBindingSchema": {
+        "type": "object",
+        "properties": {
+          "alias": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "binding_ref": {
+            "type": "string",
+            "pattern": "^source-binding:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "source_ref": {
+            "type": "string",
+            "pattern": "^src_[0-9a-f]{32}$"
+          },
+          "source_name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "snapshot_ref": {
+            "type": "string",
+            "pattern": "^source-snapshot:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "collection_ref": {
+            "type": "string",
+            "pattern": "^source-collection:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "profile": {
+            "type": "string",
+            "enum": [
+              "local-read-only"
+            ]
+          },
+          "profile_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "admitted_root_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "classification_floor": {
+            "type": "string",
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ]
+          },
+          "classification_ceiling": {
+            "type": "string",
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ]
+          },
+          "destination_policy_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "operation_contract_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "operations": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "list",
+                "stat",
+                "read",
+                "search",
+                "document.extract"
+              ]
+            }
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ]
+          },
+          "evidence_grade": {
+            "type": "string",
+            "enum": [
+              "original",
+              "derived",
+              "model-generated"
+            ]
+          },
+          "item_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "total_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "manifest_artifact_ref": {
+            "type": "string",
+            "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+          },
+          "manifest_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "extractor": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "const": "zero-ar.pdf-extractor"
+              },
+              "version": {
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+$"
+              },
+              "poppler_version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "tesseract_version": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "language": {
+                "type": "string",
+                "const": "eng"
+              },
+              "dpi": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "sandbox_mode": {
+                "type": "string",
+                "enum": [
+                  "linux-bwrap-no-network",
+                  "resource-limited-process"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "version",
+              "poppler_version",
+              "tesseract_version",
+              "language",
+              "dpi",
+              "sandbox_mode"
+            ],
+            "additionalProperties": false
+          },
+          "required_for_completion": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "alias",
+          "binding_ref",
+          "source_ref",
+          "source_name",
+          "snapshot_ref",
+          "collection_ref",
+          "profile",
+          "profile_ref",
+          "admitted_root_ref",
+          "classification_floor",
+          "classification_ceiling",
+          "destination_policy_ref",
+          "operation_contract_ref",
+          "operations",
+          "destinations",
+          "classification",
+          "evidence_grade",
+          "item_count",
+          "total_bytes",
+          "manifest_artifact_ref",
+          "manifest_ref",
+          "extractor",
+          "required_for_completion"
+        ],
+        "additionalProperties": false
+      },
+      "SourcePreflightSchema": {
+        "type": "object",
+        "properties": {
+          "source_ref": {
+            "type": "string",
+            "pattern": "^src_[0-9a-f]{32}$"
+          },
+          "source_name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "profile": {
+            "type": "string",
+            "enum": [
+              "local-read-only"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "disabled",
+              "removed"
+            ]
+          },
+          "resolved_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "readable": {
+            "type": "boolean"
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "list",
+                "stat",
+                "read",
+                "search",
+                "document.extract"
+              ]
+            }
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ]
+          },
+          "classification_floor": {
+            "type": "string",
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ]
+          },
+          "classification_ceiling": {
+            "type": "string",
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ]
+          },
+          "admitted_root_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "destination_policy_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "bounds": {
+            "type": "object",
+            "properties": {
+              "max_items": {
+                "default": 20000,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 100000
+              },
+              "max_total_bytes": {
+                "default": 1073741824,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 10737418240
+              },
+              "max_item_bytes": {
+                "default": 67108864,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 1073741824
+              },
+              "max_depth": {
+                "default": 32,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 128
+              }
+            },
+            "additionalProperties": false
+          },
+          "extractor": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "zero-ar.pdf-extractor"
+                  },
+                  "version": {
+                    "type": "string",
+                    "pattern": "^\\d+\\.\\d+\\.\\d+$"
+                  },
+                  "poppler_version": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "tesseract_version": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "language": {
+                    "type": "string",
+                    "const": "eng"
+                  },
+                  "dpi": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "sandbox_mode": {
+                    "type": "string",
+                    "enum": [
+                      "linux-bwrap-no-network",
+                      "resource-limited-process"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "version",
+                  "poppler_version",
+                  "tesseract_version",
+                  "language",
+                  "dpi",
+                  "sandbox_mode"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "budget_requirements": {
+            "type": "object",
+            "properties": {
+              "tool_calls_per_operation": {
+                "type": "number",
+                "const": 1
+              },
+              "max_read_bytes": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "max_extract_input_bytes": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "max_extract_compute_ms": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "tool_calls_per_operation",
+              "max_read_bytes",
+              "max_extract_input_bytes",
+              "max_extract_compute_ms"
+            ],
+            "additionalProperties": false
+          },
+          "extraction_limits": {
+            "type": "object",
+            "properties": {
+              "max_pdf_bytes": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "max_pages": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "max_text_bytes": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "max_command_output_bytes": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "command_timeout_ms": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "max_pdf_bytes",
+              "max_pages",
+              "max_text_bytes",
+              "max_command_output_bytes",
+              "command_timeout_ms"
+            ],
+            "additionalProperties": false
+          },
+          "validator_coverage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "completion_reachability": {
+            "type": "string",
+            "const": "run-contract-dependent"
+          },
+          "snapshot_ready": {
+            "type": "boolean"
+          },
+          "current_snapshot_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^source-snapshot:\\/\\/sha256:[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "item_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "total_bytes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "refusals": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          }
+        },
+        "required": [
+          "source_ref",
+          "source_name",
+          "profile",
+          "state",
+          "resolved_path",
+          "readable",
+          "operations",
+          "destinations",
+          "classification",
+          "classification_floor",
+          "classification_ceiling",
+          "admitted_root_ref",
+          "destination_policy_ref",
+          "bounds",
+          "extractor",
+          "budget_requirements",
+          "extraction_limits",
+          "validator_coverage",
+          "completion_reachability",
+          "snapshot_ready",
+          "current_snapshot_ref",
+          "item_count",
+          "total_bytes",
+          "refusals"
+        ],
+        "additionalProperties": false
+      },
+      "SourceOperationRequestSchema": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "source_alias": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "operation": {
+                "type": "string",
+                "const": "list"
+              },
+              "cursor": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              "limit": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "source_alias",
+              "operation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_alias": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "operation": {
+                "type": "string",
+                "const": "stat"
+              },
+              "locator": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              }
+            },
+            "required": [
+              "source_alias",
+              "operation",
+              "locator"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_alias": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "operation": {
+                "type": "string",
+                "const": "read"
+              },
+              "locator": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "offset": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1073741824
+              },
+              "length": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 1048576
+              }
+            },
+            "required": [
+              "source_alias",
+              "operation",
+              "locator",
+              "offset",
+              "length"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_alias": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "operation": {
+                "type": "string",
+                "const": "search"
+              },
+              "query": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "max_matches": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 1000
+              },
+              "max_scan_bytes": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 16777216
+              }
+            },
+            "required": [
+              "source_alias",
+              "operation",
+              "query"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_alias": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "operation": {
+                "type": "string",
+                "const": "document.extract"
+              },
+              "locator": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "max_pages": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              }
+            },
+            "required": [
+              "source_alias",
+              "operation",
+              "locator"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "SourceOperationResultSchema": {
+        "type": "object",
+        "properties": {
+          "source_alias": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "list",
+              "stat",
+              "read",
+              "search",
+              "document.extract"
+            ]
+          },
+          "snapshot_ref": {
+            "type": "string",
+            "pattern": "^source-snapshot:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "payload": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "bytes_read": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "compute_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "provenance_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "source_alias",
+          "operation",
+          "snapshot_ref",
+          "payload",
+          "bytes_read",
+          "compute_ms",
+          "provenance_ref"
+        ],
+        "additionalProperties": false
+      },
+      "DocumentExtractionPageSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coordinate_space": {
+            "type": "string",
+            "const": "pdf-points"
+          },
+          "text_artifact_ref": {
+            "type": "string",
+            "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+          },
+          "text_content_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "text_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "poppler-text",
+              "tesseract-ocr"
+            ]
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "page",
+          "width",
+          "height",
+          "coordinate_space",
+          "text_artifact_ref",
+          "text_content_hash",
+          "text_bytes",
+          "method",
+          "confidence"
+        ],
+        "additionalProperties": false
+      },
+      "DocumentExtractionResultSchema": {
+        "type": "object",
+        "properties": {
+          "source_alias": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "member_ref": {
+            "type": "string",
+            "pattern": "^source-member:\\/\\/sha256:[0-9a-f]{64}$"
+          },
+          "original_artifact_ref": {
+            "type": "string",
+            "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+          },
+          "original_content_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "media_type": {
+            "type": "string",
+            "const": "application/pdf"
+          },
+          "extractor": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "const": "zero-ar.pdf-extractor"
+              },
+              "version": {
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+$"
+              },
+              "poppler_version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "tesseract_version": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "language": {
+                "type": "string",
+                "const": "eng"
+              },
+              "dpi": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "sandbox_mode": {
+                "type": "string",
+                "enum": [
+                  "linux-bwrap-no-network",
+                  "resource-limited-process"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "version",
+              "poppler_version",
+              "tesseract_version",
+              "language",
+              "dpi",
+              "sandbox_mode"
+            ],
+            "additionalProperties": false
+          },
+          "pages": {
+            "minItems": 1,
+            "maxItems": 10000,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "page": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "width": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "height": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "coordinate_space": {
+                  "type": "string",
+                  "const": "pdf-points"
+                },
+                "text_artifact_ref": {
+                  "type": "string",
+                  "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+                },
+                "text_content_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "text_bytes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "poppler-text",
+                    "tesseract-ocr"
+                  ]
+                },
+                "confidence": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "page",
+                "width",
+                "height",
+                "coordinate_space",
+                "text_artifact_ref",
+                "text_content_hash",
+                "text_bytes",
+                "method",
+                "confidence"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "page_count": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "total_text_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "manifest_artifact_ref": {
+            "type": "string",
+            "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+          },
+          "manifest_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "provenance_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "source_alias",
+          "member_ref",
+          "original_artifact_ref",
+          "original_content_hash",
+          "media_type",
+          "extractor",
+          "pages",
+          "page_count",
+          "total_text_bytes",
+          "truncated",
+          "manifest_artifact_ref",
+          "manifest_ref",
+          "provenance_ref"
+        ],
+        "additionalProperties": false
+      },
       "RuntimeArtifactIntendedUseSchema": {
         "oneOf": [
           {
@@ -13579,6 +16158,32 @@
                   ],
                   "additionalProperties": false
                 }
+              },
+              "sources": {
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "alias": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9-]{0,62}$"
+                    },
+                    "binding_ref": {
+                      "type": "string",
+                      "pattern": "^source-binding:\\/\\/sha256:[0-9a-f]{64}$"
+                    },
+                    "required_for_completion": {
+                      "default": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "alias",
+                    "binding_ref"
+                  ],
+                  "additionalProperties": false
+                }
               }
             },
             "additionalProperties": false
@@ -13699,7 +16304,9 @@
                     "cross-run-memory",
                     "authored-orchestration",
                     "mcp-work-entrypoints",
-                    "mcp-imported-tools"
+                    "mcp-imported-tools",
+                    "source-local-read-only",
+                    "document-pdf-extraction"
                   ]
                 }
               },
@@ -13748,7 +16355,9 @@
                         "cross-run-memory",
                         "authored-orchestration",
                         "mcp-work-entrypoints",
-                        "mcp-imported-tools"
+                        "mcp-imported-tools",
+                        "source-local-read-only",
+                        "document-pdf-extraction"
                       ]
                     },
                     "refusal_point": {
@@ -13823,7 +16432,9 @@
                         "cross-run-memory",
                         "authored-orchestration",
                         "mcp-work-entrypoints",
-                        "mcp-imported-tools"
+                        "mcp-imported-tools",
+                        "source-local-read-only",
+                        "document-pdf-extraction"
                       ]
                     },
                     "refusal_point": {
@@ -14963,6 +17574,218 @@
               "additionalProperties": false
             }
           },
+          "source_bindings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "alias": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{0,62}$"
+                },
+                "binding_ref": {
+                  "type": "string",
+                  "pattern": "^source-binding:\\/\\/sha256:[0-9a-f]{64}$"
+                },
+                "source_ref": {
+                  "type": "string",
+                  "pattern": "^src_[0-9a-f]{32}$"
+                },
+                "source_name": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{0,62}$"
+                },
+                "snapshot_ref": {
+                  "type": "string",
+                  "pattern": "^source-snapshot:\\/\\/sha256:[0-9a-f]{64}$"
+                },
+                "collection_ref": {
+                  "type": "string",
+                  "pattern": "^source-collection:\\/\\/sha256:[0-9a-f]{64}$"
+                },
+                "profile": {
+                  "type": "string",
+                  "enum": [
+                    "local-read-only"
+                  ]
+                },
+                "profile_ref": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "admitted_root_ref": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "classification_floor": {
+                  "type": "string",
+                  "enum": [
+                    "public",
+                    "internal",
+                    "confidential",
+                    "restricted"
+                  ]
+                },
+                "classification_ceiling": {
+                  "type": "string",
+                  "enum": [
+                    "public",
+                    "internal",
+                    "confidential",
+                    "restricted"
+                  ]
+                },
+                "destination_policy_ref": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "operation_contract_ref": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "operations": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "list",
+                      "stat",
+                      "read",
+                      "search",
+                      "document.extract"
+                    ]
+                  }
+                },
+                "destinations": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "classification": {
+                  "type": "string",
+                  "enum": [
+                    "public",
+                    "internal",
+                    "confidential",
+                    "restricted"
+                  ]
+                },
+                "evidence_grade": {
+                  "type": "string",
+                  "enum": [
+                    "original",
+                    "derived",
+                    "model-generated"
+                  ]
+                },
+                "item_count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "total_bytes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "manifest_artifact_ref": {
+                  "type": "string",
+                  "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+                },
+                "manifest_ref": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "extractor": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "const": "zero-ar.pdf-extractor"
+                    },
+                    "version": {
+                      "type": "string",
+                      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+                    },
+                    "poppler_version": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "tesseract_version": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "language": {
+                      "type": "string",
+                      "const": "eng"
+                    },
+                    "dpi": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "sandbox_mode": {
+                      "type": "string",
+                      "enum": [
+                        "linux-bwrap-no-network",
+                        "resource-limited-process"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "version",
+                    "poppler_version",
+                    "tesseract_version",
+                    "language",
+                    "dpi",
+                    "sandbox_mode"
+                  ],
+                  "additionalProperties": false
+                },
+                "required_for_completion": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "alias",
+                "binding_ref",
+                "source_ref",
+                "source_name",
+                "snapshot_ref",
+                "collection_ref",
+                "profile",
+                "profile_ref",
+                "admitted_root_ref",
+                "classification_floor",
+                "classification_ceiling",
+                "destination_policy_ref",
+                "operation_contract_ref",
+                "operations",
+                "destinations",
+                "classification",
+                "evidence_grade",
+                "item_count",
+                "total_bytes",
+                "manifest_artifact_ref",
+                "manifest_ref",
+                "extractor",
+                "required_for_completion"
+              ],
+              "additionalProperties": false
+            }
+          },
           "tools": {
             "type": "array",
             "items": {
@@ -15234,7 +18057,9 @@
               "cross-run-memory",
               "authored-orchestration",
               "mcp-work-entrypoints",
-              "mcp-imported-tools"
+              "mcp-imported-tools",
+              "source-local-read-only",
+              "document-pdf-extraction"
             ]
           },
           "state": {
@@ -15526,7 +18351,9 @@
                     "cross-run-memory",
                     "authored-orchestration",
                     "mcp-work-entrypoints",
-                    "mcp-imported-tools"
+                    "mcp-imported-tools",
+                    "source-local-read-only",
+                    "document-pdf-extraction"
                   ]
                 },
                 "state": {
@@ -15679,7 +18506,9 @@
                 "cross-run-memory",
                 "authored-orchestration",
                 "mcp-work-entrypoints",
-                "mcp-imported-tools"
+                "mcp-imported-tools",
+                "source-local-read-only",
+                "document-pdf-extraction"
               ]
             }
           },
@@ -15728,7 +18557,9 @@
                     "cross-run-memory",
                     "authored-orchestration",
                     "mcp-work-entrypoints",
-                    "mcp-imported-tools"
+                    "mcp-imported-tools",
+                    "source-local-read-only",
+                    "document-pdf-extraction"
                   ]
                 },
                 "refusal_point": {
@@ -15803,7 +18634,9 @@
                     "cross-run-memory",
                     "authored-orchestration",
                     "mcp-work-entrypoints",
-                    "mcp-imported-tools"
+                    "mcp-imported-tools",
+                    "source-local-read-only",
+                    "document-pdf-extraction"
                   ]
                 },
                 "refusal_point": {
@@ -34907,7 +37740,9 @@
                     "cross-run-memory",
                     "authored-orchestration",
                     "mcp-work-entrypoints",
-                    "mcp-imported-tools"
+                    "mcp-imported-tools",
+                    "source-local-read-only",
+                    "document-pdf-extraction"
                   ]
                 }
               },
@@ -34956,7 +37791,9 @@
                         "cross-run-memory",
                         "authored-orchestration",
                         "mcp-work-entrypoints",
-                        "mcp-imported-tools"
+                        "mcp-imported-tools",
+                        "source-local-read-only",
+                        "document-pdf-extraction"
                       ]
                     },
                     "refusal_point": {
@@ -35031,7 +37868,9 @@
                         "cross-run-memory",
                         "authored-orchestration",
                         "mcp-work-entrypoints",
-                        "mcp-imported-tools"
+                        "mcp-imported-tools",
+                        "source-local-read-only",
+                        "document-pdf-extraction"
                       ]
                     },
                     "refusal_point": {

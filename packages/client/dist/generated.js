@@ -200,6 +200,24 @@ export class GeneratedRoutes {
     removeToolSource(source_ref, body) {
         return this.transport.json('POST', `/v1/tool-sources/${encodeURIComponent(source_ref)}/removal`, body);
     }
+    registerSource(body) {
+        return this.transport.json('POST', `/v1/sources`, body);
+    }
+    listSources() {
+        return this.transport.json('GET', `/v1/sources`);
+    }
+    inspectSource(source_ref) {
+        return this.transport.json('GET', `/v1/sources/${encodeURIComponent(source_ref)}`);
+    }
+    snapshotSource(source_ref) {
+        return this.transport.json('POST', `/v1/sources/${encodeURIComponent(source_ref)}/snapshots`);
+    }
+    listSourceSnapshotMembers(source_ref, query = {}) {
+        return this.transport.json('GET', withQuery(`/v1/sources/${encodeURIComponent(source_ref)}/snapshot-members`, { cursor: query.cursor, limit: query.limit }));
+    }
+    preflightSource(source_ref) {
+        return this.transport.json('POST', `/v1/sources/${encodeURIComponent(source_ref)}/preflight`);
+    }
     registerEnvironment(body) {
         return this.transport.json('POST', `/v1/environments`, body);
     }

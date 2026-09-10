@@ -906,6 +906,80 @@ export declare const API_ROUTES: {
             readonly scopes: readonly ["tool-source:write"];
         };
     };
+    readonly registerSource: {
+        readonly method: "POST";
+        readonly path: "/v1/sources";
+        readonly kind: "json";
+        readonly request: "RegisterSourceRequestSchema";
+        readonly response: "SourceInstanceSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["source:write"];
+        };
+    };
+    readonly listSources: {
+        readonly method: "GET";
+        readonly path: "/v1/sources";
+        readonly kind: "json";
+        readonly response: "SourceListSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["source:read"];
+        };
+    };
+    readonly inspectSource: {
+        readonly method: "GET";
+        readonly path: "/v1/sources/:source_ref";
+        readonly kind: "json";
+        readonly response: "SourceInstanceSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["source:read"];
+        };
+    };
+    readonly snapshotSource: {
+        readonly method: "POST";
+        readonly path: "/v1/sources/:source_ref/snapshots";
+        readonly kind: "json";
+        readonly response: "SourceSnapshotSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["source:write"];
+        };
+    };
+    readonly listSourceSnapshotMembers: {
+        readonly method: "GET";
+        readonly path: "/v1/sources/:source_ref/snapshot-members";
+        readonly kind: "json";
+        readonly query_request: "SourceSnapshotPageRequestSchema";
+        readonly query: readonly [{
+            readonly name: "cursor";
+            readonly type: "string";
+            readonly minLength: 1;
+            readonly maxLength: 512;
+        }, {
+            readonly name: "limit";
+            readonly type: "integer";
+            readonly minimum: 1;
+            readonly maximum: 100;
+            readonly default: 50;
+        }];
+        readonly response: "SourceSnapshotPageSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["source:read"];
+        };
+    };
+    readonly preflightSource: {
+        readonly method: "POST";
+        readonly path: "/v1/sources/:source_ref/preflight";
+        readonly kind: "json";
+        readonly response: "SourcePreflightSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["source:read"];
+        };
+    };
     readonly registerEnvironment: {
         readonly method: "POST";
         readonly path: "/v1/environments";

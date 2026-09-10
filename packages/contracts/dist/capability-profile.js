@@ -295,11 +295,13 @@ function conditional(capability, summary, vectors, requirements = ['ENV-040', 'E
 const localLiteSupported = [
     supported('artifacts', 'Local artifact storage exists for development and conformance work.', ['XCV-002']),
     supported('canonical-log', 'Runs append to the canonical log and rebuild projections from it.', ['KCV-001']),
+    supported('document-pdf-extraction', 'PDF text extraction uses the bounded process tool host with Poppler and Tesseract fallback.', ['SRC-CV-008'], ['SRC-011', 'SRC-012', 'SRC-013', 'SRC-017', 'SRC-029', 'SRC-030']),
     supported('environment-process', 'Local process execution is available under the development profile.', ['ENV-CV-003']),
     supported('honest-completion', 'Completion stays tied to validator verdicts and explicit unverified outcomes.', ['QCV-003']),
     supported('local-lite', 'The local development profile runs with SQLite and deterministic providers.', ['XCV-002']),
     supported('quality-plane', 'The validator seam and quality ledger run in the local composition.', ['QCV-004']),
     supported('suspension', 'Suspended runs persist their handles and resume from durable state.', ['KCV-008']),
+    supported('source-local-read-only', 'Local directories register as read-only source instances and commit immutable artifact-backed snapshots.', ['SRC-CV-001', 'SRC-CV-002', 'SRC-CV-003', 'SRC-CV-005', 'SRC-CV-014'], ['SRC-001', 'SRC-002', 'SRC-003', 'SRC-004', 'SRC-005', 'SRC-006', 'SRC-007', 'SRC-009', 'SRC-021', 'SRC-022', 'SRC-023']),
     supported('transformation-volume-reference-pack', 'The transformation fixture is available at conformance scale.', ['UAT-CV-015']),
 ];
 const hostedSupported = [
@@ -308,6 +310,7 @@ const hostedSupported = [
     supported('authored-orchestration', 'The SDK can run authored research orchestration through public client APIs only.', ['XCV-017'], ['ORC-001']),
     supported('artifacts', 'Publication and environment artifacts use bounded streaming paths.', ['UAT-CV-012']),
     supported('canonical-log', 'The log remains the source for rebuild, audit and rollback checks.', ['UAT-CV-014', 'UAT-CV-019']),
+    supported('document-pdf-extraction', 'PDF extraction runs in the pinned process tool host with retained originals and derived artifacts.', ['SRC-CV-008'], ['SRC-011', 'SRC-012', 'SRC-013', 'SRC-017', 'SRC-029', 'SRC-030']),
     supported('environment-oci', 'The Docker/Linux container adapter is inside the UAT profile.', ['UAT-CV-011']),
     supported('environment-process', 'The process adapter is inside the UAT profile for cancellation and teardown proof.', ['UAT-CV-010']),
     supported('honest-completion', 'Result surfaces report only established evidence and explicit operational blockers.', ['UAT-CV-013']),
@@ -321,6 +324,7 @@ const hostedSupported = [
     supported('quality-plane', 'The hosted run path validates contracts and keeps unverified outcomes explicit.', ['UAT-CV-013', 'UAT-CV-015']),
     supported('restricted-effect-plane-attachment', 'Consequential aggregator work can stage proposals but cannot dispatch mutation effects.', ['UAT-CV-009']),
     supported('suspension', 'Long suspensions resume with budget, position and credential epochs rechecked.', ['UAT-CV-018']),
+    supported('source-local-read-only', 'Admitted read-only directories resolve into immutable artifact-backed source bindings.', ['SRC-CV-001', 'SRC-CV-002', 'SRC-CV-003', 'SRC-CV-005', 'SRC-CV-014'], ['SRC-001', 'SRC-002', 'SRC-003', 'SRC-004', 'SRC-005', 'SRC-006', 'SRC-007', 'SRC-009', 'SRC-021', 'SRC-022', 'SRC-023']),
     supported('transformation-volume-reference-pack', 'The volume pack is the UAT domain reference.', ['UAT-CV-015']),
 ];
 const hostedMcpCapability = {

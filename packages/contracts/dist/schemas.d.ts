@@ -154,6 +154,11 @@ export declare const IntakeRequestSchema: z.ZodObject<{
             }>;
             required_for_completion: z.ZodDefault<z.ZodBoolean>;
         }, z.core.$strict>>>;
+        sources: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            alias: z.ZodString;
+            binding_ref: z.ZodString;
+            required_for_completion: z.ZodDefault<z.ZodBoolean>;
+        }, z.core.$strict>>>;
     }, z.core.$strict>>;
     idempotency_key: z.ZodString;
     correlation_id: z.ZodOptional<z.ZodString>;
@@ -221,6 +226,8 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
             "authored-orchestration": "authored-orchestration";
             "mcp-work-entrypoints": "mcp-work-entrypoints";
             "mcp-imported-tools": "mcp-imported-tools";
+            "source-local-read-only": "source-local-read-only";
+            "document-pdf-extraction": "document-pdf-extraction";
         }>>;
         conditional: z.ZodArray<z.ZodObject<{
             capability: z.ZodEnum<{
@@ -262,6 +269,8 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "authored-orchestration": "authored-orchestration";
                 "mcp-work-entrypoints": "mcp-work-entrypoints";
                 "mcp-imported-tools": "mcp-imported-tools";
+                "source-local-read-only": "source-local-read-only";
+                "document-pdf-extraction": "document-pdf-extraction";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -314,6 +323,8 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "authored-orchestration": "authored-orchestration";
                 "mcp-work-entrypoints": "mcp-work-entrypoints";
                 "mcp-imported-tools": "mcp-imported-tools";
+                "source-local-read-only": "source-local-read-only";
+                "document-pdf-extraction": "document-pdf-extraction";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -645,6 +656,69 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
             derived: "derived";
             "model-generated": "model-generated";
         }>;
+        required_for_completion: z.ZodBoolean;
+    }, z.core.$strict>>>;
+    source_bindings: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        alias: z.ZodString;
+        binding_ref: z.ZodString;
+        source_ref: z.ZodString;
+        source_name: z.ZodString;
+        snapshot_ref: z.ZodString;
+        collection_ref: z.ZodString;
+        profile: z.ZodEnum<{
+            "local-read-only": "local-read-only";
+        }>;
+        profile_ref: z.ZodString;
+        admitted_root_ref: z.ZodString;
+        classification_floor: z.ZodEnum<{
+            public: "public";
+            internal: "internal";
+            confidential: "confidential";
+            restricted: "restricted";
+        }>;
+        classification_ceiling: z.ZodEnum<{
+            public: "public";
+            internal: "internal";
+            confidential: "confidential";
+            restricted: "restricted";
+        }>;
+        destination_policy_ref: z.ZodString;
+        operation_contract_ref: z.ZodString;
+        operations: z.ZodArray<z.ZodEnum<{
+            search: "search";
+            list: "list";
+            stat: "stat";
+            read: "read";
+            "document.extract": "document.extract";
+        }>>;
+        destinations: z.ZodArray<z.ZodString>;
+        classification: z.ZodEnum<{
+            public: "public";
+            internal: "internal";
+            confidential: "confidential";
+            restricted: "restricted";
+        }>;
+        evidence_grade: z.ZodEnum<{
+            original: "original";
+            derived: "derived";
+            "model-generated": "model-generated";
+        }>;
+        item_count: z.ZodNumber;
+        total_bytes: z.ZodNumber;
+        manifest_artifact_ref: z.ZodString;
+        manifest_ref: z.ZodString;
+        extractor: z.ZodObject<{
+            name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+            version: z.ZodString;
+            poppler_version: z.ZodString;
+            tesseract_version: z.ZodNullable<z.ZodString>;
+            language: z.ZodLiteral<"eng">;
+            dpi: z.ZodNumber;
+            sandbox_mode: z.ZodEnum<{
+                "linux-bwrap-no-network": "linux-bwrap-no-network";
+                "resource-limited-process": "resource-limited-process";
+            }>;
+        }, z.core.$strict>;
         required_for_completion: z.ZodBoolean;
     }, z.core.$strict>>>;
     tools: z.ZodArray<z.ZodObject<{
@@ -1886,6 +1960,8 @@ export declare const HealthResponseSchema: z.ZodObject<{
             "authored-orchestration": "authored-orchestration";
             "mcp-work-entrypoints": "mcp-work-entrypoints";
             "mcp-imported-tools": "mcp-imported-tools";
+            "source-local-read-only": "source-local-read-only";
+            "document-pdf-extraction": "document-pdf-extraction";
         }>>;
         conditional: z.ZodArray<z.ZodObject<{
             capability: z.ZodEnum<{
@@ -1927,6 +2003,8 @@ export declare const HealthResponseSchema: z.ZodObject<{
                 "authored-orchestration": "authored-orchestration";
                 "mcp-work-entrypoints": "mcp-work-entrypoints";
                 "mcp-imported-tools": "mcp-imported-tools";
+                "source-local-read-only": "source-local-read-only";
+                "document-pdf-extraction": "document-pdf-extraction";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -1979,6 +2057,8 @@ export declare const HealthResponseSchema: z.ZodObject<{
                 "authored-orchestration": "authored-orchestration";
                 "mcp-work-entrypoints": "mcp-work-entrypoints";
                 "mcp-imported-tools": "mcp-imported-tools";
+                "source-local-read-only": "source-local-read-only";
+                "document-pdf-extraction": "document-pdf-extraction";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -2719,6 +2799,515 @@ export declare const SCHEMA_REGISTRY: {
         readonly placement: "runtime-identity";
         readonly owner: "runtime-core";
     };
+    readonly SourceLocatorSchema: {
+        readonly schema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+            kind: z.ZodLiteral<"local-directory">;
+            path: z.ZodString;
+        }, z.core.$strict>], "kind">;
+        readonly placement: "operator-management";
+        readonly owner: "source-access";
+    };
+    readonly SourceBoundsSchema: {
+        readonly schema: z.ZodObject<{
+            max_items: z.ZodDefault<z.ZodNumber>;
+            max_total_bytes: z.ZodDefault<z.ZodNumber>;
+            max_item_bytes: z.ZodDefault<z.ZodNumber>;
+            max_depth: z.ZodDefault<z.ZodNumber>;
+        }, z.core.$strict>;
+        readonly placement: "operator-management";
+        readonly owner: "source-access";
+    };
+    readonly RegisterSourceRequestSchema: {
+        readonly schema: z.ZodObject<{
+            name: z.ZodString;
+            profile: z.ZodEnum<{
+                "local-read-only": "local-read-only";
+            }>;
+            locator: z.ZodDiscriminatedUnion<[z.ZodObject<{
+                kind: z.ZodLiteral<"local-directory">;
+                path: z.ZodString;
+            }, z.core.$strict>], "kind">;
+            classification: z.ZodDefault<z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>>;
+            evidence_grade: z.ZodDefault<z.ZodEnum<{
+                original: "original";
+                derived: "derived";
+                "model-generated": "model-generated";
+            }>>;
+            bounds: z.ZodDefault<z.ZodObject<{
+                max_items: z.ZodDefault<z.ZodNumber>;
+                max_total_bytes: z.ZodDefault<z.ZodNumber>;
+                max_item_bytes: z.ZodDefault<z.ZodNumber>;
+                max_depth: z.ZodDefault<z.ZodNumber>;
+            }, z.core.$strict>>;
+        }, z.core.$strict>;
+        readonly placement: "operator-management";
+        readonly owner: "source-access";
+    };
+    readonly SourceInstanceSchema: {
+        readonly schema: z.ZodObject<{
+            source_ref: z.ZodString;
+            name: z.ZodString;
+            profile: z.ZodEnum<{
+                "local-read-only": "local-read-only";
+            }>;
+            locator: z.ZodDiscriminatedUnion<[z.ZodObject<{
+                kind: z.ZodLiteral<"local-directory">;
+                path: z.ZodString;
+            }, z.core.$strict>], "kind">;
+            admitted_root_ref: z.ZodString;
+            access: z.ZodLiteral<"read-only">;
+            operations: z.ZodArray<z.ZodEnum<{
+                search: "search";
+                list: "list";
+                stat: "stat";
+                read: "read";
+                "document.extract": "document.extract";
+            }>>;
+            destinations: z.ZodArray<z.ZodString>;
+            classification: z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>;
+            evidence_grade: z.ZodEnum<{
+                original: "original";
+                derived: "derived";
+                "model-generated": "model-generated";
+            }>;
+            bounds: z.ZodObject<{
+                max_items: z.ZodDefault<z.ZodNumber>;
+                max_total_bytes: z.ZodDefault<z.ZodNumber>;
+                max_item_bytes: z.ZodDefault<z.ZodNumber>;
+                max_depth: z.ZodDefault<z.ZodNumber>;
+            }, z.core.$strict>;
+            state: z.ZodEnum<{
+                ready: "ready";
+                disabled: "disabled";
+                removed: "removed";
+            }>;
+            current_snapshot_ref: z.ZodNullable<z.ZodString>;
+            registered_at: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "operator-management";
+        readonly owner: "source-access";
+    };
+    readonly SourceExtractorIdentitySchema: {
+        readonly schema: z.ZodObject<{
+            name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+            version: z.ZodString;
+            poppler_version: z.ZodString;
+            tesseract_version: z.ZodNullable<z.ZodString>;
+            language: z.ZodLiteral<"eng">;
+            dpi: z.ZodNumber;
+            sandbox_mode: z.ZodEnum<{
+                "linux-bwrap-no-network": "linux-bwrap-no-network";
+                "resource-limited-process": "resource-limited-process";
+            }>;
+        }, z.core.$strict>;
+        readonly placement: "runtime-identity";
+        readonly owner: "source-access";
+    };
+    readonly SourceListSchema: {
+        readonly schema: z.ZodObject<{
+            sources: z.ZodArray<z.ZodObject<{
+                source_ref: z.ZodString;
+                name: z.ZodString;
+                profile: z.ZodEnum<{
+                    "local-read-only": "local-read-only";
+                }>;
+                locator: z.ZodDiscriminatedUnion<[z.ZodObject<{
+                    kind: z.ZodLiteral<"local-directory">;
+                    path: z.ZodString;
+                }, z.core.$strict>], "kind">;
+                admitted_root_ref: z.ZodString;
+                access: z.ZodLiteral<"read-only">;
+                operations: z.ZodArray<z.ZodEnum<{
+                    search: "search";
+                    list: "list";
+                    stat: "stat";
+                    read: "read";
+                    "document.extract": "document.extract";
+                }>>;
+                destinations: z.ZodArray<z.ZodString>;
+                classification: z.ZodEnum<{
+                    public: "public";
+                    internal: "internal";
+                    confidential: "confidential";
+                    restricted: "restricted";
+                }>;
+                evidence_grade: z.ZodEnum<{
+                    original: "original";
+                    derived: "derived";
+                    "model-generated": "model-generated";
+                }>;
+                bounds: z.ZodObject<{
+                    max_items: z.ZodDefault<z.ZodNumber>;
+                    max_total_bytes: z.ZodDefault<z.ZodNumber>;
+                    max_item_bytes: z.ZodDefault<z.ZodNumber>;
+                    max_depth: z.ZodDefault<z.ZodNumber>;
+                }, z.core.$strict>;
+                state: z.ZodEnum<{
+                    ready: "ready";
+                    disabled: "disabled";
+                    removed: "removed";
+                }>;
+                current_snapshot_ref: z.ZodNullable<z.ZodString>;
+                registered_at: z.ZodString;
+            }, z.core.$strict>>;
+        }, z.core.$strict>;
+        readonly placement: "operator-management";
+        readonly owner: "source-access";
+    };
+    readonly SourceSnapshotMemberSchema: {
+        readonly schema: z.ZodObject<{
+            member_ref: z.ZodString;
+            snapshot_ref: z.ZodString;
+            locator: z.ZodString;
+            artifact_ref: z.ZodString;
+            manifest_ref: z.ZodString;
+            content_hash: z.ZodString;
+            bytes: z.ZodNumber;
+            media_type: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "runtime-identity";
+        readonly owner: "source-access";
+    };
+    readonly SourceSnapshotSchema: {
+        readonly schema: z.ZodObject<{
+            snapshot_ref: z.ZodString;
+            collection_ref: z.ZodString;
+            binding_ref: z.ZodString;
+            source_ref: z.ZodString;
+            source_name: z.ZodString;
+            profile: z.ZodEnum<{
+                "local-read-only": "local-read-only";
+            }>;
+            item_count: z.ZodNumber;
+            total_bytes: z.ZodNumber;
+            manifest_artifact_ref: z.ZodString;
+            manifest_ref: z.ZodString;
+            created_at: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "runtime-identity";
+        readonly owner: "source-access";
+    };
+    readonly SourceSnapshotPageRequestSchema: {
+        readonly schema: z.ZodObject<{
+            cursor: z.ZodOptional<z.ZodString>;
+            limit: z.ZodOptional<z.ZodNumber>;
+        }, z.core.$strict>;
+        readonly placement: "operator-management";
+        readonly owner: "source-access";
+    };
+    readonly SourceSnapshotPageSchema: {
+        readonly schema: z.ZodObject<{
+            snapshot: z.ZodObject<{
+                snapshot_ref: z.ZodString;
+                collection_ref: z.ZodString;
+                binding_ref: z.ZodString;
+                source_ref: z.ZodString;
+                source_name: z.ZodString;
+                profile: z.ZodEnum<{
+                    "local-read-only": "local-read-only";
+                }>;
+                item_count: z.ZodNumber;
+                total_bytes: z.ZodNumber;
+                manifest_artifact_ref: z.ZodString;
+                manifest_ref: z.ZodString;
+                created_at: z.ZodString;
+            }, z.core.$strict>;
+            members: z.ZodArray<z.ZodObject<{
+                member_ref: z.ZodString;
+                snapshot_ref: z.ZodString;
+                locator: z.ZodString;
+                artifact_ref: z.ZodString;
+                manifest_ref: z.ZodString;
+                content_hash: z.ZodString;
+                bytes: z.ZodNumber;
+                media_type: z.ZodString;
+            }, z.core.$strict>>;
+            next_cursor: z.ZodNullable<z.ZodString>;
+        }, z.core.$strict>;
+        readonly placement: "operator-management";
+        readonly owner: "source-access";
+    };
+    readonly SourceBindingInputSchema: {
+        readonly schema: z.ZodObject<{
+            alias: z.ZodString;
+            binding_ref: z.ZodString;
+            required_for_completion: z.ZodDefault<z.ZodBoolean>;
+        }, z.core.$strict>;
+        readonly placement: "intake";
+        readonly owner: "source-access";
+    };
+    readonly ResolvedSourceBindingSchema: {
+        readonly schema: z.ZodObject<{
+            alias: z.ZodString;
+            binding_ref: z.ZodString;
+            source_ref: z.ZodString;
+            source_name: z.ZodString;
+            snapshot_ref: z.ZodString;
+            collection_ref: z.ZodString;
+            profile: z.ZodEnum<{
+                "local-read-only": "local-read-only";
+            }>;
+            profile_ref: z.ZodString;
+            admitted_root_ref: z.ZodString;
+            classification_floor: z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>;
+            classification_ceiling: z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>;
+            destination_policy_ref: z.ZodString;
+            operation_contract_ref: z.ZodString;
+            operations: z.ZodArray<z.ZodEnum<{
+                search: "search";
+                list: "list";
+                stat: "stat";
+                read: "read";
+                "document.extract": "document.extract";
+            }>>;
+            destinations: z.ZodArray<z.ZodString>;
+            classification: z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>;
+            evidence_grade: z.ZodEnum<{
+                original: "original";
+                derived: "derived";
+                "model-generated": "model-generated";
+            }>;
+            item_count: z.ZodNumber;
+            total_bytes: z.ZodNumber;
+            manifest_artifact_ref: z.ZodString;
+            manifest_ref: z.ZodString;
+            extractor: z.ZodObject<{
+                name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+                version: z.ZodString;
+                poppler_version: z.ZodString;
+                tesseract_version: z.ZodNullable<z.ZodString>;
+                language: z.ZodLiteral<"eng">;
+                dpi: z.ZodNumber;
+                sandbox_mode: z.ZodEnum<{
+                    "linux-bwrap-no-network": "linux-bwrap-no-network";
+                    "resource-limited-process": "resource-limited-process";
+                }>;
+            }, z.core.$strict>;
+            required_for_completion: z.ZodBoolean;
+        }, z.core.$strict>;
+        readonly placement: "runtime-identity";
+        readonly owner: "source-access";
+    };
+    readonly SourcePreflightSchema: {
+        readonly schema: z.ZodObject<{
+            source_ref: z.ZodString;
+            source_name: z.ZodString;
+            profile: z.ZodEnum<{
+                "local-read-only": "local-read-only";
+            }>;
+            state: z.ZodEnum<{
+                ready: "ready";
+                disabled: "disabled";
+                removed: "removed";
+            }>;
+            resolved_path: z.ZodString;
+            readable: z.ZodBoolean;
+            operations: z.ZodArray<z.ZodEnum<{
+                search: "search";
+                list: "list";
+                stat: "stat";
+                read: "read";
+                "document.extract": "document.extract";
+            }>>;
+            destinations: z.ZodArray<z.ZodString>;
+            classification: z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>;
+            classification_floor: z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>;
+            classification_ceiling: z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>;
+            admitted_root_ref: z.ZodString;
+            destination_policy_ref: z.ZodString;
+            bounds: z.ZodObject<{
+                max_items: z.ZodDefault<z.ZodNumber>;
+                max_total_bytes: z.ZodDefault<z.ZodNumber>;
+                max_item_bytes: z.ZodDefault<z.ZodNumber>;
+                max_depth: z.ZodDefault<z.ZodNumber>;
+            }, z.core.$strict>;
+            extractor: z.ZodNullable<z.ZodObject<{
+                name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+                version: z.ZodString;
+                poppler_version: z.ZodString;
+                tesseract_version: z.ZodNullable<z.ZodString>;
+                language: z.ZodLiteral<"eng">;
+                dpi: z.ZodNumber;
+                sandbox_mode: z.ZodEnum<{
+                    "linux-bwrap-no-network": "linux-bwrap-no-network";
+                    "resource-limited-process": "resource-limited-process";
+                }>;
+            }, z.core.$strict>>;
+            budget_requirements: z.ZodObject<{
+                tool_calls_per_operation: z.ZodLiteral<1>;
+                max_read_bytes: z.ZodNumber;
+                max_extract_input_bytes: z.ZodNumber;
+                max_extract_compute_ms: z.ZodNumber;
+            }, z.core.$strict>;
+            extraction_limits: z.ZodObject<{
+                max_pdf_bytes: z.ZodNumber;
+                max_pages: z.ZodNumber;
+                max_text_bytes: z.ZodNumber;
+                max_command_output_bytes: z.ZodNumber;
+                command_timeout_ms: z.ZodNumber;
+            }, z.core.$strict>;
+            validator_coverage: z.ZodArray<z.ZodString>;
+            completion_reachability: z.ZodLiteral<"run-contract-dependent">;
+            snapshot_ready: z.ZodBoolean;
+            current_snapshot_ref: z.ZodNullable<z.ZodString>;
+            item_count: z.ZodNullable<z.ZodNumber>;
+            total_bytes: z.ZodNullable<z.ZodNumber>;
+            refusals: z.ZodArray<z.ZodString>;
+        }, z.core.$strict>;
+        readonly placement: "operator-management";
+        readonly owner: "source-access";
+    };
+    readonly SourceOperationRequestSchema: {
+        readonly schema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+            source_alias: z.ZodString;
+            operation: z.ZodLiteral<"list">;
+            cursor: z.ZodOptional<z.ZodString>;
+            limit: z.ZodOptional<z.ZodNumber>;
+        }, z.core.$strict>, z.ZodObject<{
+            source_alias: z.ZodString;
+            operation: z.ZodLiteral<"stat">;
+            locator: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            source_alias: z.ZodString;
+            operation: z.ZodLiteral<"read">;
+            locator: z.ZodString;
+            offset: z.ZodNumber;
+            length: z.ZodNumber;
+        }, z.core.$strict>, z.ZodObject<{
+            source_alias: z.ZodString;
+            operation: z.ZodLiteral<"search">;
+            query: z.ZodString;
+            max_matches: z.ZodOptional<z.ZodNumber>;
+            max_scan_bytes: z.ZodOptional<z.ZodNumber>;
+        }, z.core.$strict>, z.ZodObject<{
+            source_alias: z.ZodString;
+            operation: z.ZodLiteral<"document.extract">;
+            locator: z.ZodString;
+            max_pages: z.ZodOptional<z.ZodNumber>;
+        }, z.core.$strict>], "operation">;
+        readonly placement: "run-management";
+        readonly owner: "source-access";
+    };
+    readonly SourceOperationResultSchema: {
+        readonly schema: z.ZodObject<{
+            source_alias: z.ZodString;
+            operation: z.ZodEnum<{
+                search: "search";
+                list: "list";
+                stat: "stat";
+                read: "read";
+                "document.extract": "document.extract";
+            }>;
+            snapshot_ref: z.ZodString;
+            payload: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+            bytes_read: z.ZodNumber;
+            compute_ms: z.ZodNumber;
+            provenance_ref: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "observation";
+        readonly owner: "source-access";
+    };
+    readonly DocumentExtractionPageSchema: {
+        readonly schema: z.ZodObject<{
+            page: z.ZodNumber;
+            width: z.ZodNullable<z.ZodNumber>;
+            height: z.ZodNullable<z.ZodNumber>;
+            coordinate_space: z.ZodLiteral<"pdf-points">;
+            text_artifact_ref: z.ZodString;
+            text_content_hash: z.ZodString;
+            text_bytes: z.ZodNumber;
+            method: z.ZodEnum<{
+                "poppler-text": "poppler-text";
+                "tesseract-ocr": "tesseract-ocr";
+            }>;
+            confidence: z.ZodNullable<z.ZodNumber>;
+        }, z.core.$strict>;
+        readonly placement: "observation";
+        readonly owner: "source-access";
+    };
+    readonly DocumentExtractionResultSchema: {
+        readonly schema: z.ZodObject<{
+            source_alias: z.ZodString;
+            member_ref: z.ZodString;
+            original_artifact_ref: z.ZodString;
+            original_content_hash: z.ZodString;
+            media_type: z.ZodLiteral<"application/pdf">;
+            extractor: z.ZodObject<{
+                name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+                version: z.ZodString;
+                poppler_version: z.ZodString;
+                tesseract_version: z.ZodNullable<z.ZodString>;
+                language: z.ZodLiteral<"eng">;
+                dpi: z.ZodNumber;
+                sandbox_mode: z.ZodEnum<{
+                    "linux-bwrap-no-network": "linux-bwrap-no-network";
+                    "resource-limited-process": "resource-limited-process";
+                }>;
+            }, z.core.$strict>;
+            pages: z.ZodArray<z.ZodObject<{
+                page: z.ZodNumber;
+                width: z.ZodNullable<z.ZodNumber>;
+                height: z.ZodNullable<z.ZodNumber>;
+                coordinate_space: z.ZodLiteral<"pdf-points">;
+                text_artifact_ref: z.ZodString;
+                text_content_hash: z.ZodString;
+                text_bytes: z.ZodNumber;
+                method: z.ZodEnum<{
+                    "poppler-text": "poppler-text";
+                    "tesseract-ocr": "tesseract-ocr";
+                }>;
+                confidence: z.ZodNullable<z.ZodNumber>;
+            }, z.core.$strict>>;
+            page_count: z.ZodNumber;
+            total_text_bytes: z.ZodNumber;
+            truncated: z.ZodBoolean;
+            manifest_artifact_ref: z.ZodString;
+            manifest_ref: z.ZodString;
+            provenance_ref: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "observation";
+        readonly owner: "source-access";
+    };
     readonly RuntimeArtifactIntendedUseSchema: {
         readonly schema: z.ZodDiscriminatedUnion<[z.ZodObject<{
             kind: z.ZodLiteral<"run">;
@@ -3353,6 +3942,11 @@ export declare const SCHEMA_REGISTRY: {
                     }>;
                     required_for_completion: z.ZodDefault<z.ZodBoolean>;
                 }, z.core.$strict>>>;
+                sources: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    alias: z.ZodString;
+                    binding_ref: z.ZodString;
+                    required_for_completion: z.ZodDefault<z.ZodBoolean>;
+                }, z.core.$strict>>>;
             }, z.core.$strict>>;
             idempotency_key: z.ZodString;
             correlation_id: z.ZodOptional<z.ZodString>;
@@ -3418,6 +4012,8 @@ export declare const SCHEMA_REGISTRY: {
                     "authored-orchestration": "authored-orchestration";
                     "mcp-work-entrypoints": "mcp-work-entrypoints";
                     "mcp-imported-tools": "mcp-imported-tools";
+                    "source-local-read-only": "source-local-read-only";
+                    "document-pdf-extraction": "document-pdf-extraction";
                 }>>;
                 conditional: z.ZodArray<z.ZodObject<{
                     capability: z.ZodEnum<{
@@ -3459,6 +4055,8 @@ export declare const SCHEMA_REGISTRY: {
                         "authored-orchestration": "authored-orchestration";
                         "mcp-work-entrypoints": "mcp-work-entrypoints";
                         "mcp-imported-tools": "mcp-imported-tools";
+                        "source-local-read-only": "source-local-read-only";
+                        "document-pdf-extraction": "document-pdf-extraction";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -3511,6 +4109,8 @@ export declare const SCHEMA_REGISTRY: {
                         "authored-orchestration": "authored-orchestration";
                         "mcp-work-entrypoints": "mcp-work-entrypoints";
                         "mcp-imported-tools": "mcp-imported-tools";
+                        "source-local-read-only": "source-local-read-only";
+                        "document-pdf-extraction": "document-pdf-extraction";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -3844,6 +4444,69 @@ export declare const SCHEMA_REGISTRY: {
                 }>;
                 required_for_completion: z.ZodBoolean;
             }, z.core.$strict>>>;
+            source_bindings: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                alias: z.ZodString;
+                binding_ref: z.ZodString;
+                source_ref: z.ZodString;
+                source_name: z.ZodString;
+                snapshot_ref: z.ZodString;
+                collection_ref: z.ZodString;
+                profile: z.ZodEnum<{
+                    "local-read-only": "local-read-only";
+                }>;
+                profile_ref: z.ZodString;
+                admitted_root_ref: z.ZodString;
+                classification_floor: z.ZodEnum<{
+                    public: "public";
+                    internal: "internal";
+                    confidential: "confidential";
+                    restricted: "restricted";
+                }>;
+                classification_ceiling: z.ZodEnum<{
+                    public: "public";
+                    internal: "internal";
+                    confidential: "confidential";
+                    restricted: "restricted";
+                }>;
+                destination_policy_ref: z.ZodString;
+                operation_contract_ref: z.ZodString;
+                operations: z.ZodArray<z.ZodEnum<{
+                    search: "search";
+                    list: "list";
+                    stat: "stat";
+                    read: "read";
+                    "document.extract": "document.extract";
+                }>>;
+                destinations: z.ZodArray<z.ZodString>;
+                classification: z.ZodEnum<{
+                    public: "public";
+                    internal: "internal";
+                    confidential: "confidential";
+                    restricted: "restricted";
+                }>;
+                evidence_grade: z.ZodEnum<{
+                    original: "original";
+                    derived: "derived";
+                    "model-generated": "model-generated";
+                }>;
+                item_count: z.ZodNumber;
+                total_bytes: z.ZodNumber;
+                manifest_artifact_ref: z.ZodString;
+                manifest_ref: z.ZodString;
+                extractor: z.ZodObject<{
+                    name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+                    version: z.ZodString;
+                    poppler_version: z.ZodString;
+                    tesseract_version: z.ZodNullable<z.ZodString>;
+                    language: z.ZodLiteral<"eng">;
+                    dpi: z.ZodNumber;
+                    sandbox_mode: z.ZodEnum<{
+                        "linux-bwrap-no-network": "linux-bwrap-no-network";
+                        "resource-limited-process": "resource-limited-process";
+                    }>;
+                }, z.core.$strict>;
+                required_for_completion: z.ZodBoolean;
+            }, z.core.$strict>>>;
             tools: z.ZodArray<z.ZodObject<{
                 name: z.ZodString;
                 version: z.ZodString;
@@ -3932,6 +4595,8 @@ export declare const SCHEMA_REGISTRY: {
                 "authored-orchestration": "authored-orchestration";
                 "mcp-work-entrypoints": "mcp-work-entrypoints";
                 "mcp-imported-tools": "mcp-imported-tools";
+                "source-local-read-only": "source-local-read-only";
+                "document-pdf-extraction": "document-pdf-extraction";
             }>;
             state: z.ZodEnum<{
                 supported: "supported";
@@ -4081,6 +4746,8 @@ export declare const SCHEMA_REGISTRY: {
                     "authored-orchestration": "authored-orchestration";
                     "mcp-work-entrypoints": "mcp-work-entrypoints";
                     "mcp-imported-tools": "mcp-imported-tools";
+                    "source-local-read-only": "source-local-read-only";
+                    "document-pdf-extraction": "document-pdf-extraction";
                 }>;
                 state: z.ZodEnum<{
                     supported: "supported";
@@ -4154,6 +4821,8 @@ export declare const SCHEMA_REGISTRY: {
                 "authored-orchestration": "authored-orchestration";
                 "mcp-work-entrypoints": "mcp-work-entrypoints";
                 "mcp-imported-tools": "mcp-imported-tools";
+                "source-local-read-only": "source-local-read-only";
+                "document-pdf-extraction": "document-pdf-extraction";
             }>>;
             conditional: z.ZodArray<z.ZodObject<{
                 capability: z.ZodEnum<{
@@ -4195,6 +4864,8 @@ export declare const SCHEMA_REGISTRY: {
                     "authored-orchestration": "authored-orchestration";
                     "mcp-work-entrypoints": "mcp-work-entrypoints";
                     "mcp-imported-tools": "mcp-imported-tools";
+                    "source-local-read-only": "source-local-read-only";
+                    "document-pdf-extraction": "document-pdf-extraction";
                 }>;
                 refusal_point: z.ZodEnum<{
                     "profile-compilation": "profile-compilation";
@@ -4247,6 +4918,8 @@ export declare const SCHEMA_REGISTRY: {
                     "authored-orchestration": "authored-orchestration";
                     "mcp-work-entrypoints": "mcp-work-entrypoints";
                     "mcp-imported-tools": "mcp-imported-tools";
+                    "source-local-read-only": "source-local-read-only";
+                    "document-pdf-extraction": "document-pdf-extraction";
                 }>;
                 refusal_point: z.ZodEnum<{
                     "profile-compilation": "profile-compilation";
@@ -9604,6 +10277,8 @@ export declare const SCHEMA_REGISTRY: {
                     "authored-orchestration": "authored-orchestration";
                     "mcp-work-entrypoints": "mcp-work-entrypoints";
                     "mcp-imported-tools": "mcp-imported-tools";
+                    "source-local-read-only": "source-local-read-only";
+                    "document-pdf-extraction": "document-pdf-extraction";
                 }>>;
                 conditional: z.ZodArray<z.ZodObject<{
                     capability: z.ZodEnum<{
@@ -9645,6 +10320,8 @@ export declare const SCHEMA_REGISTRY: {
                         "authored-orchestration": "authored-orchestration";
                         "mcp-work-entrypoints": "mcp-work-entrypoints";
                         "mcp-imported-tools": "mcp-imported-tools";
+                        "source-local-read-only": "source-local-read-only";
+                        "document-pdf-extraction": "document-pdf-extraction";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -9697,6 +10374,8 @@ export declare const SCHEMA_REGISTRY: {
                         "authored-orchestration": "authored-orchestration";
                         "mcp-work-entrypoints": "mcp-work-entrypoints";
                         "mcp-imported-tools": "mcp-imported-tools";
+                        "source-local-read-only": "source-local-read-only";
+                        "document-pdf-extraction": "document-pdf-extraction";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
