@@ -34,14 +34,10 @@ assert.match(workflow, /id: release-state/);
 assert.match(workflow, /npm dist-tag ls/);
 assert.match(workflow, /Only \$existing_count of 9 packages exist/);
 assert.match(workflow, /if: steps\.release-state\.outputs\.publish_required == 'true'/);
-assert.match(workflow, /latest_cleanup_required=true/);
-assert.match(workflow, /if: steps\.release-state\.outputs\.latest_cleanup_required == 'true'/);
-assert.equal((workflow.match(/npm dist-tag rm "\$package" latest/g) ?? []).length, 1);
-assert.equal((workflow.match(/node \.release-operator\/scripts\/verify-npm-alpha-release\.mjs/g) ?? []).length, 2);
-assert.match(workflow, /node \.release-operator\/scripts\/verify-npm-alpha-release\.mjs --allow-latest/);
+assert.doesNotMatch(workflow, /npm dist-tag (?:add|rm)/);
+assert.equal((workflow.match(/node \.release-operator\/scripts\/verify-npm-alpha-release\.mjs/g) ?? []).length, 1);
 assert.match(registryVerifier, /20 \* 60 \* 1_000/);
-assert.match(registryVerifier, /process\.argv\.includes\('--allow-latest'\)/);
-assert.match(registryVerifier, /entry\['dist-tags'\]\?\.latest, undefined/);
+assert.match(registryVerifier, /entry\['dist-tags'\]\?\.latest, '0\.1\.0'/);
 assert.match(registryVerifier, /entry\['dist\.integrity'\], expectedIntegrity/);
 assert.match(registryVerifier, /entry\['dist\.attestations'\]\?\.provenance\?\.predicateType/);
 
@@ -53,4 +49,4 @@ for (const name of packages) {
   previous = index;
 }
 
-console.log('npm-publication-workflow: nine v0.1.0 tarballs remain source-bound, restart-aware, alpha-only and provenance-required.');
+console.log('npm-publication-workflow: nine v0.1.0 tarballs remain source-bound, restart-aware, alpha-tagged and provenance-required.');

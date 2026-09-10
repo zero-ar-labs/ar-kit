@@ -101,8 +101,8 @@
     },
     {
       "path": ".github/workflows/publish-alpha-v0.1.0.yml",
-      "bytes": 5915,
-      "sha256": "52f51817d43d8a096bc51638d368dda4f8611b9c1b8a91daa5dc6ff2797d2c7f"
+      "bytes": 4365,
+      "sha256": "810a63b3d4069e8a60f18e623182beab1a29e77572ec6966770a22bf51d78ea8"
     },
     {
       "path": ".gitignore",
@@ -1091,13 +1091,13 @@
     },
     {
       "path": "scripts/verify-npm-alpha-release.mjs",
-      "bytes": 3580,
-      "sha256": "0a3c031722a19fff10dbf4275fd1d0af487c6e5ce23a9859db7c98a1f6380ac7"
+      "bytes": 3365,
+      "sha256": "b5d2ab5d19b9960399f0796349334efc2f27957f6a4219cad20451fb827cb50c"
     },
     {
       "path": "scripts/verify-npm-publication-workflow.mjs",
-      "bytes": 3325,
-      "sha256": "24ddf0555a84381f405b569b5b1b84021e5e210506057e74f93d3ac4b78d1eca"
+      "bytes": 2961,
+      "sha256": "15a93dcb3fbdcab749655b06c5dc748961c41c50d532e739350303bb1c53280b"
     },
     {
       "path": "scripts/verify-public-export.mjs",
@@ -1110,5 +1110,5 @@
       "sha256": "cb97c15d28c28c91c2ec5a414085c5ddf98c81abe8e60db53265430e89e06d25"
     }
   ],
-  "export_ref": "sha256:caf24995d2355bc7fafd93f40985c84715ad2260087d4854d20d95fcbd013863"
+  "export_ref": "sha256:23af62d98c1528e86099ed71f4af97f2c814f33f0d8abb7de16d4ec3f16895db"
 }

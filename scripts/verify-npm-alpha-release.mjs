@@ -3,7 +3,7 @@
  *
  * What this is: a bounded observer for npm's publish-time scan window.
  * How it fits: it proves that each immutable tarball became installable with
- * the alpha tag, without a latest tag, and with matching integrity and
+ * the alpha tag, npm's first-publication alias, and matching integrity and
  * provenance metadata.
  */
 
@@ -24,7 +24,6 @@ const packages = [
   ['cli', '@zero-ar/cli'],
   ['mcp', '@zero-ar/mcp'],
 ];
-const allowLatest = process.argv.includes('--allow-latest');
 const scanTimeoutMs = parsePositiveInteger(process.env.ZERO_AR_NPM_SCAN_TIMEOUT_MS, 20 * 60 * 1_000);
 const observationIntervalMs = parsePositiveInteger(process.env.ZERO_AR_NPM_SCAN_INTERVAL_MS, 15_000);
 const deadline = Date.now() + scanTimeoutMs;
@@ -46,16 +45,12 @@ for (let index = 0; index < packages.length; index += 1) {
   const expectedIntegrity = `sha512-${createHash('sha512').update(tarball).digest('base64')}`;
   assert.equal(entry.version, '0.1.0', `${name} exposes an unexpected version.`);
   assert.equal(entry['dist-tags']?.alpha, '0.1.0', `${name} does not expose alpha at 0.1.0.`);
-  if (allowLatest) {
-    assert.ok([undefined, '0.1.0'].includes(entry['dist-tags']?.latest), `${name} exposes an unrelated version as latest.`);
-  } else {
-    assert.equal(entry['dist-tags']?.latest, undefined, `${name} exposes the public alpha as latest.`);
-  }
+  assert.equal(entry['dist-tags']?.latest, '0.1.0', `${name} exposes an unrelated version as latest.`);
   assert.equal(entry['dist.integrity'], expectedIntegrity, `${name} does not match the source-bound tarball.`);
   assert.ok(entry['dist.attestations']?.provenance?.predicateType, `${name} has no provenance attestation.`);
 }
 
-console.log('npm-alpha: 9 public packages match the source-bound tarballs, alpha tags and provenance requirements.');
+console.log('npm-alpha: 9 public packages match the source-bound tarballs, registry tags and provenance requirements.');
 
 function registryMetadata(name) {
   const result = spawnSync('npm', ['view', `${name}@0.1.0`, 'version', 'dist-tags', 'dist.integrity', 'dist.attestations', '--json', '--prefer-online'], {
