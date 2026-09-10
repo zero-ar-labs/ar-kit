@@ -36,25 +36,54 @@ jobs:
           test "$(git rev-parse HEAD)" = "$ZERO_AR_PUBLIC_KIT_COMMIT"
           test "$(cat SOURCE_COMMIT)" = "$ZERO_AR_SOURCE_COMMIT"
           npm run check
-      - name: Refuse an existing v0.1.0 package
+      - name: Classify the v0.1.0 package set
+        id: release-state
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          existing_count=0
+          latest_cleanup_count=0
           for package in \
-            @zero-ar/contracts@0.1.0 \
-            @zero-ar/client@0.1.0 \
-            @zero-ar/conformance@0.1.0 \
-            @zero-ar/testkit@0.1.0 \
-            @zero-ar/tool-kit@0.1.0 \
-            @zero-ar/validator-kit@0.1.0 \
-            @zero-ar/sdk@0.1.0 \
-            @zero-ar/cli@0.1.0 \
-            @zero-ar/mcp@0.1.0
+            @zero-ar/contracts \
+            @zero-ar/client \
+            @zero-ar/conformance \
+            @zero-ar/testkit \
+            @zero-ar/tool-kit \
+            @zero-ar/validator-kit \
+            @zero-ar/sdk \
+            @zero-ar/cli \
+            @zero-ar/mcp
           do
-            if npm view "$package" version >/dev/null 2>&1; then
-              echo "$package already exists. Stop before changing the release set." >&2
+            tags="$(npm dist-tag ls "$package" 2>/dev/null || true)"
+            if printf '%s\n' "$tags" | grep -qx 'alpha: 0.1.0'; then
+              existing_count=$((existing_count + 1))
+              if printf '%s\n' "$tags" | grep -qx 'latest: 0.1.0'; then
+                latest_cleanup_count=$((latest_cleanup_count + 1))
+              elif printf '%s\n' "$tags" | grep -q '^latest:'; then
+                echo "$package exposes an unrelated version as latest. Stop before changing the release set." >&2
+                exit 1
+              fi
+            elif test -n "$tags"; then
+              echo "$package exists without the required alpha tag. Stop before changing the release set." >&2
               exit 1
             fi
           done
+          if test "$existing_count" = 0; then
+            echo 'publish_required=true' >> "$GITHUB_OUTPUT"
+            echo 'latest_cleanup_required=true' >> "$GITHUB_OUTPUT"
+          elif test "$existing_count" = 9; then
+            echo 'publish_required=false' >> "$GITHUB_OUTPUT"
+            if test "$latest_cleanup_count" = 0; then
+              echo 'latest_cleanup_required=false' >> "$GITHUB_OUTPUT"
+            else
+              echo 'latest_cleanup_required=true' >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "Only $existing_count of 9 packages exist. Stop because the release set is partial." >&2
+            exit 1
+          fi
       - name: Publish the source-bound alpha packages with provenance
+        if: steps.release-state.outputs.publish_required == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -67,14 +96,31 @@ jobs:
           npm publish ./release/tarballs/zero-ar-sdk-0.1.0.tgz --access public --tag alpha --provenance
           npm publish ./release/tarballs/zero-ar-cli-0.1.0.tgz --access public --tag alpha --provenance
           npm publish ./release/tarballs/zero-ar-mcp-0.1.0.tgz --access public --tag alpha --provenance
-      - name: Confirm every alpha tag
+      - name: Wait for scanning and verify the immutable public alpha
+        run: node scripts/verify-npm-alpha-release.mjs --allow-latest
+      - name: Remove the implicit latest tags from a first publication
+        if: steps.release-state.outputs.latest_cleanup_required == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          test "$(npm view @zero-ar/contracts dist-tags.alpha)" = 0.1.0
-          test "$(npm view @zero-ar/client dist-tags.alpha)" = 0.1.0
-          test "$(npm view @zero-ar/conformance dist-tags.alpha)" = 0.1.0
-          test "$(npm view @zero-ar/testkit dist-tags.alpha)" = 0.1.0
-          test "$(npm view @zero-ar/tool-kit dist-tags.alpha)" = 0.1.0
-          test "$(npm view @zero-ar/validator-kit dist-tags.alpha)" = 0.1.0
-          test "$(npm view @zero-ar/sdk dist-tags.alpha)" = 0.1.0
-          test "$(npm view @zero-ar/cli dist-tags.alpha)" = 0.1.0
-          test "$(npm view @zero-ar/mcp dist-tags.alpha)" = 0.1.0
+          for package in \
+            @zero-ar/contracts \
+            @zero-ar/client \
+            @zero-ar/conformance \
+            @zero-ar/testkit \
+            @zero-ar/tool-kit \
+            @zero-ar/validator-kit \
+            @zero-ar/sdk \
+            @zero-ar/cli \
+            @zero-ar/mcp
+          do
+            tags="$(npm dist-tag ls "$package")"
+            if printf '%s\n' "$tags" | grep -qx 'latest: 0.1.0'; then
+              npm dist-tag rm "$package" latest
+            elif printf '%s\n' "$tags" | grep -q '^latest:'; then
+              echo "$package exposes an unrelated version as latest. Stop before changing the release set." >&2
+              exit 1
+            fi
+          done
+      - name: Confirm the final public-alpha surface
+        run: node scripts/verify-npm-alpha-release.mjs
