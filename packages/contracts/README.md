@@ -1,6 +1,11 @@
-# @zero-ar/contracts
+# `@zero-ar/contracts`
 
-Zero-AR is a log-native runtime for long-horizon agent work.
+The canonical public schemas, identifiers, vocabulary, routes, state machines
+and diagnostic envelopes for Zero-AR.
 
-This package is part of the Zero-AR public npm surface.
-Source for this package is staged from https://github.com/zero-ar-labs/ar-kit/tree/main/packages/contracts.
+Most applications receive this package through `@zero-ar/sdk` or
+`@zero-ar/client`. Install it directly when building a custom binding, adapter
+or protocol consumer that needs the exact public payloads.
+
+This package contains no runtime, model loop, storage implementation or
+credential handling. See the [package guide](../../docs/npm-packages.md).

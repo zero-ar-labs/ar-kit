@@ -2,6 +2,9 @@
 
 This package helps you declare a validator and exercise it against labelled cases. It does not decide whether a run is complete and cannot write runtime state.
 
+See the [package guide](../../docs/npm-packages.md) for where it fits in the
+public package set.
+
 ## The boundary in plain language
 
 Zero-AR makes the definition of done explicit before work begins. The task contract maps each acceptance rule to a named validator. Missing coverage, rejection, failure, timeout or uncertainty cannot become verified.
