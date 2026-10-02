@@ -8,13 +8,14 @@
  */
 import { z } from 'zod';
 import { contentHash } from "./ids.js";
-import { ENVIRONMENT_BACKENDS, ENVIRONMENT_ISOLATIONS, ENVIRONMENT_LIFECYCLE_OPERATIONS, ENVIRONMENT_MOUNT_MODES, ENVIRONMENT_NETWORK_MODES, ENVIRONMENT_PROFILE_STATES, ENVIRONMENT_STATUSES, ENVIRONMENT_SUSPENSION_DISPOSITIONS, ENVIRONMENT_TENANT_SHARING, OPERATION_CLASSES, } from "./vocab.js";
+import { ENVIRONMENT_BACKENDS, ENVIRONMENT_ISOLATIONS, ENVIRONMENT_LIFECYCLE_OPERATIONS, ENVIRONMENT_MOUNT_MODES, ENVIRONMENT_NETWORK_MODES, ENVIRONMENT_PROFILE_STATES, ENVIRONMENT_REUSE_POLICIES, ENVIRONMENT_STATUSES, ENVIRONMENT_SUSPENSION_DISPOSITIONS, ENVIRONMENT_TENANT_SHARING, OPERATION_CLASSES, } from "./vocab.js";
 const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const runId = z.string().regex(/^run_[0-9a-f]{32}$/, 'expected a run id');
 const leaseId = z.string().regex(/^lea_[0-9a-f]{32}$/, 'expected a lease id');
 const controlId = z.string().regex(/^ctl_[0-9a-f]{32}$/, 'expected a control id');
 const environmentId = z.string().regex(/^env_[0-9a-f]{32}$/, 'expected an environment id');
 const jobId = z.string().regex(/^job_[0-9a-f]{32}$/, 'expected an environment job id');
+const workspaceId = z.string().regex(/^wsp_[0-9a-f]{32}$/, 'expected a workspace id');
 const count = z.number().int().nonnegative();
 const name = z.string().min(1).max(200);
 export const EnvironmentBackendSchema = z.enum(ENVIRONMENT_BACKENDS);
@@ -23,6 +24,7 @@ export const EnvironmentLifecycleOperationSchema = z.enum(ENVIRONMENT_LIFECYCLE_
 export const EnvironmentMountModeSchema = z.enum(ENVIRONMENT_MOUNT_MODES);
 export const EnvironmentNetworkModeSchema = z.enum(ENVIRONMENT_NETWORK_MODES);
 export const EnvironmentProfileStateSchema = z.enum(ENVIRONMENT_PROFILE_STATES);
+export const EnvironmentReusePolicySchema = z.enum(ENVIRONMENT_REUSE_POLICIES);
 export const EnvironmentStatusSchema = z.enum(ENVIRONMENT_STATUSES);
 export const EnvironmentSuspensionDispositionSchema = z.enum(ENVIRONMENT_SUSPENSION_DISPOSITIONS);
 export const EnvironmentTenantSharingSchema = z.enum(ENVIRONMENT_TENANT_SHARING);
@@ -163,10 +165,17 @@ export const EnvironmentHandleSchema = z.strictObject({
     environment_id: environmentId,
     provider_handle: z.string().min(1),
     binding: EnvironmentHandleBindingSchema,
+    /** Non-authorizing durable-workspace locator and observed generation. */
+    workspace_handle: workspaceId.nullable().optional(),
+    workspace_generation: z.number().int().positive().nullable().optional(),
     identity_ref: hash,
     status: EnvironmentStatusSchema,
     credential_epoch: z.number().int().positive().nullable(),
     expires_at: z.string().datetime().nullable(),
+}).superRefine((handle, context) => {
+    if ((handle.workspace_handle == null) !== (handle.workspace_generation == null)) {
+        context.addIssue({ code: 'custom', path: ['workspace_handle'], message: 'workspace handle and generation must be present or absent together.' });
+    }
 });
 export const EnvironmentJobHandleSchema = z.strictObject({
     job_id: jobId,
@@ -228,6 +237,8 @@ export const ObserveEnvironmentJobResultSchema = z
     stdout_bytes: count,
     stderr_bytes: count,
     inline_output_json: z.string().max(4_096).nullable(),
+    /** Cost the adapter reports for a terminal job, by declared cost dimension. Absent when it reports none. */
+    known_cost: z.record(z.string(), count).optional(),
 })
     .superRefine((result, context) => matchingStatus(result, result.job, 'job', context));
 export const ReconcileEnvironmentJobRequestSchema = z.strictObject({
@@ -245,6 +256,8 @@ export const ReconcileEnvironmentJobResultSchema = z
     stdout_bytes: count,
     stderr_bytes: count,
     inline_output_json: z.string().max(4_096).nullable(),
+    /** Cost the adapter reports for a terminal job, by declared cost dimension. Absent when it reports none. */
+    known_cost: z.record(z.string(), count).optional(),
 })
     .superRefine((result, context) => matchingStatus(result, result.job, 'job', context));
 export const CancelEnvironmentJobRequestSchema = z.strictObject({
@@ -331,6 +344,35 @@ export const SuspendedEnvironmentHandleSchema = z.strictObject({
     jobs: z.array(EnvironmentJobHandleSchema),
     disposition: EnvironmentSuspensionDispositionSchema,
     recorded_at: z.string().datetime(),
+    /** Internal runtime provenance; never sent to the environment adapter. */
+    closure_epoch: z.number().int().positive().optional(),
+    closure_ref: hash.optional(),
+}).superRefine((value, context) => {
+    if ((value.closure_epoch === undefined) !== (value.closure_ref === undefined)) {
+        context.addIssue({ code: 'custom', message: 'closure_epoch and closure_ref must be present together' });
+    }
+});
+/**
+ * One recorded reuse. A later call in the same run, tenant, and profile runs
+ * its job in an environment an earlier call prepared. The environment handle
+ * keeps its preparing binding; this record carries the binding of the call it
+ * now serves and names the submission that call makes (ENV-006 and appendix
+ * section 9: reuse is explicit, bounded by expiry, and recorded).
+ */
+export const EnvironmentReuseRecordSchema = z.strictObject({
+    environment_id: environmentId,
+    /** The serving call: its run, tenant, profile, adapter, operation, lease, and tool-call identity. */
+    binding: EnvironmentHandleBindingSchema,
+    submission_request_id: controlId,
+    /** Jobs the environment had already run when this call began. */
+    prior_jobs: count,
+    policy: EnvironmentReusePolicySchema,
+    /** The environment expiry the reuse decision checked, or null when the provider sets none. */
+    expires_at: z.string().datetime().nullable(),
+}).superRefine((value, context) => {
+    if (value.policy !== 'run') {
+        context.addIssue({ code: 'custom', path: ['policy'], message: 'only the run reuse policy serves a later call from a prepared environment.' });
+    }
 });
 /** Current facts that resume must revalidate before it contacts a provider. */
 export const EnvironmentResumeContextSchema = z.strictObject({
@@ -357,6 +399,14 @@ export const EnvironmentExecutionRequestSchema = z.strictObject({
     tenant: z.string().min(1),
     executing_principal: z.string().min(1),
     accountable_owner: z.string().min(1),
+    closure_epoch: z.number().int().min(1).optional(),
+    closure_ref: hash.optional(),
+    /** The environment profile the run pinned for this tool at admission. Absent in runs recorded before resolution. */
+    profile_ref: hash.optional(),
+}).superRefine((value, context) => {
+    if ((value.closure_epoch === undefined) !== (value.closure_ref === undefined)) {
+        context.addIssue({ code: 'custom', path: ['closure_epoch'], message: 'closure_epoch and closure_ref must be present or absent together' });
+    }
 });
 export const EnvironmentExecutionResultSchema = z.strictObject({
     ok: z.boolean(),

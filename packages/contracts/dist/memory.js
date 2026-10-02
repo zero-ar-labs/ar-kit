@@ -8,9 +8,52 @@
  */
 import { z } from 'zod';
 import { CitationSchema } from "./claims.js";
-import { MEMORY_CLASSIFICATIONS } from "./vocab.js";
+import { MEMORY_AVAILABILITY_MODES, MEMORY_CLASSIFICATIONS, MEMORY_READ_MODES, MEMORY_WRITE_MODES, } from "./vocab.js";
 const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const timestamp = z.string().datetime({ offset: true });
+const name = z.string().regex(/^[a-z][a-z0-9-]{0,62}$/, 'expected a lowercase name');
+/** The publication-owned policy that makes one narrow memory subject available to a run. */
+export const MemoryBindingSchema = z.strictObject({
+    name,
+    subject: z.strictObject({
+        from_intake: name,
+        namespace: name,
+    }),
+    predicates: z.array(name).min(1).max(200).superRefine((values, context) => {
+        if (new Set(values).size !== values.length)
+            context.addIssue({ code: 'custom', message: 'memory binding predicates must be unique' });
+    }),
+    read: z.enum(MEMORY_READ_MODES),
+    write: z.enum(MEMORY_WRITE_MODES),
+    availability: z.enum(MEMORY_AVAILABILITY_MODES),
+    classification_ceiling: z.enum(MEMORY_CLASSIFICATIONS).default('internal'),
+    maximum_assertions_per_read: z.number().int().min(1).max(200).default(50),
+});
+/** One published binding resolved against authenticated intake and pinned into run identity. */
+export const ResolvedMemoryBindingSchema = MemoryBindingSchema.extend({
+    binding_ref: hash,
+    tenant: z.string().min(1).max(128),
+    subject: MemoryBindingSchema.shape.subject.extend({
+        /** The runtime, never the model, derives this exact namespaced subject. */
+        resolved: z.string().min(1).max(512),
+    }),
+});
+/** The bounded model request. Tenant and subject are absent by construction (MSH-003). */
+export const ModelMemoryReadRequestSchema = z.strictObject({
+    binding: name,
+    predicate: name,
+    valid_at: timestamp,
+    minimum_watermark: z.number().int().nonnegative().optional(),
+});
+/** A run-owned proposal. Its cited spans must resolve through the current run before admission. */
+export const ModelMemoryProposalSchema = z.strictObject({
+    binding: name,
+    predicate: name,
+    object: z.string().min(1).max(10_000),
+    valid_from: timestamp,
+    valid_to: timestamp.nullable().optional(),
+    supports: z.array(CitationSchema).min(1).max(1_000),
+});
 export const MemoryAssertionInputSchema = z.strictObject({
     subject: z.string().min(1).max(256),
     predicate: z.string().min(1).max(256),
@@ -85,4 +128,68 @@ export const RunMemoryReadOutcomeSchema = z.strictObject({
     status: z.enum(['available', 'stale', 'unavailable']),
     reason: z.string().nullable(),
     read: MemoryReadResponseSchema.nullable(),
+});
+/** Exact model-visible memory bytes before subject-key sealing and artifact storage. */
+export const MemoryReadEnvelopeSchema = z.strictObject({
+    schema: z.literal('zero-ar-memory-read-envelope/1'),
+    run_id: z.string().regex(/^run_[0-9a-f]{32}$/),
+    binding_ref: hash,
+    query_ref: hash,
+    subject_ref: hash,
+    classification: z.enum(MEMORY_CLASSIFICATIONS),
+    read: MemoryReadResponseSchema,
+    created_at: timestamp,
+});
+/** Subject-key-sealed bytes stored by the artifact backend for one exact read envelope. */
+export const ProtectedMemoryReadEnvelopeSchema = z.strictObject({
+    schema: z.literal('zero-ar-protected-memory-read-envelope/1'),
+    subject_ref: hash,
+    content_hash: hash,
+    classification: z.enum(MEMORY_CLASSIFICATIONS),
+    nonce: z.string().min(1),
+    ciphertext: z.string().min(1),
+    tag: z.string().min(1),
+});
+/** One durable key row as stored under a deployment wrapping key. */
+export const MemoryWrappedKeySchema = z.strictObject({
+    wrapped_key: z.string().min(1).max(1_024),
+    nonce: z.string().min(1).max(256),
+    tag: z.string().min(1).max(256),
+});
+/** The encrypted custody rows explicitly permitted to travel with one subject stream. */
+export const MemorySubjectKeyMaterialSchema = z.strictObject({
+    schema: z.literal('zero-ar-memory-subject-key-material/1'),
+    binding_ref: hash,
+    index_key: MemoryWrappedKeySchema,
+    subject_key: z.strictObject({
+        subject_ref: hash,
+        state: z.enum(['active', 'erased']),
+        wrapped_key: z.string().min(1).max(1_024).nullable(),
+        nonce: z.string().min(1).max(256).nullable(),
+        tag: z.string().min(1).max(256).nullable(),
+    }),
+});
+/** One content-addressed subject transfer. The subject itself travels only in the authorized request. */
+export const MemorySubjectTransferBundleSchema = z.strictObject({
+    schema: z.literal('zero-ar-memory-subject-transfer/1'),
+    subject_ref: hash,
+    stream_id: z.string().regex(/^run_[0-9a-f]{32}$/),
+    watermark: MemoryWatermarkSchema,
+    record_count: z.number().int().positive(),
+    canonical_log_bundle: z.string().min(1).max(12 * 1024 * 1024),
+    key_material: MemorySubjectKeyMaterialSchema,
+    content_ref: hash,
+});
+export const MemorySubjectTransferRequestSchema = z.strictObject({ subject: z.string().min(1).max(256) });
+export const MemorySubjectImportRequestSchema = z.strictObject({
+    subject: z.string().min(1).max(256),
+    bundle: MemorySubjectTransferBundleSchema,
+});
+export const MemorySubjectImportOutcomeSchema = z.strictObject({
+    subject_ref: hash,
+    stream_id: z.string().regex(/^run_[0-9a-f]{32}$/),
+    content_ref: hash,
+    watermark: MemoryWatermarkSchema,
+    records: z.number().int().positive(),
+    erased: z.boolean(),
 });

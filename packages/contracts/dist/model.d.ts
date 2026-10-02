@@ -13,7 +13,7 @@
  * emits it directly, and the kernel treats both identically. The loop
  * belongs to the runtime; an adapter only streams (C-ARCH-LOOP-OWNED-002).
  */
-import type { ModelUsageMeasurement } from './vocab.js';
+import type { ModelUsageMeasurement, ToolViewSelectionReason } from './vocab.js';
 export interface NeutralMessage {
     role: 'system' | 'user' | 'assistant';
     content: string;
@@ -25,6 +25,48 @@ export interface ModelToolSchema {
     description: string;
     /** The one JSON Schema object published for model description and runtime use. */
     input_schema: Record<string, unknown>;
+}
+/** Runtime-local catalogue operations. They inspect visibility, never capability. */
+export declare const TOOL_CATALOGUE_OPERATIONS: readonly ["tool.search", "tool.describe", "tool.activate"];
+export type ToolCatalogueOperation = (typeof TOOL_CATALOGUE_OPERATIONS)[number];
+export type ToolDisclosureClass = 'small' | 'medium' | 'large' | 'unknown';
+/** Compact, provider-neutral metadata for one contract already pinned to a run. */
+export interface ToolCatalogueDescriptor {
+    name: string;
+    purpose: string;
+    use_when: string;
+    do_not_use_when: string;
+    operation_class: 'observation' | 'run-internal' | 'effect-proposal';
+    expected_cost: ToolDisclosureClass;
+    expected_latency: ToolDisclosureClass;
+    expected_result_size: ToolDisclosureClass;
+    contract_ref: string;
+    visible: boolean;
+}
+/** Canonical record of exactly what one model call could see. */
+export interface ModelToolViewRecord {
+    schema: 'zero-ar-tool-view/1';
+    ref: string;
+    closure_size: number;
+    budget: {
+        schema_tokens: number;
+        schema_bytes: number;
+    };
+    used: {
+        schema_tokens: number;
+        schema_bytes: number;
+    };
+    visible: {
+        name: string;
+        contract_ref: string;
+        reason: ToolViewSelectionReason;
+    }[];
+    hidden: number;
+    refusals: {
+        code: string;
+        message: string;
+        alternatives: string[];
+    }[];
 }
 export interface ModelRequest {
     model_ref: string;

@@ -93,6 +93,7 @@ export function defineTool(definition) {
         isolation: definition.isolation,
         cost: definition.cost ? { denomination: definition.cost.denomination, enforced_max: definition.cost.maximum } : null,
         timeout_ms: definition.timeout_ms ?? null,
+        ...(definition.disclosure ? { disclosure: definition.disclosure } : {}),
     };
     return Object.freeze({
         ...definition,
@@ -184,8 +185,8 @@ export class ToolHost {
                     }
                     const answer = 'op' in request
                         ? request.op === 'handshake'
-                            ? { ...this.handshake(), invoke_id: request.invoke_id }
-                            : { ...this.health(), invoke_id: request.invoke_id }
+                            ? { ...this.handshake(), invoke_id: request.invoke_id, ok: true, output: this.handshake() }
+                            : { ...this.health(), invoke_id: request.invoke_id, ok: true, output: this.health() }
                         : await this.invoke(request);
                     output.write(`${JSON.stringify(answer)}\n`);
                 })();

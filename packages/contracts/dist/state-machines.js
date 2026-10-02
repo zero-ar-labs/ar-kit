@@ -9,7 +9,8 @@
  * How it fits: the central honesty claim is structural here. The only
  * transition a model may cause is proposing completion. Complete is reachable
  * through a verification verdict alone, so no model output can reach it
- * (QLT-031, QLT-032, C-ARCH-VERIFIED-COMPLETION-005).
+ * (QLT-031, QLT-032, C-ARCH-VERIFIED-COMPLETION-005). The browser destination
+ * proposal table below is capability state, not a fifth trusted machine.
  */
 export const RUN_MACHINE = [
     { from: 'created', to: 'running', on: 'run.started', actor: 'runtime' },
@@ -64,17 +65,56 @@ export const MACHINES = {
     effect: EFFECT_MACHINE,
 };
 /**
+ * One browser destination proposal (BRC-012, BRC-013). A participant opens
+ * it through the operator route, and one authenticated disposition settles
+ * it. The model has no move here, and a refusal grants nothing. It stays
+ * outside MACHINES because it moves no run, completion, lease or effect
+ * state; the relay refuses the origin until an approval is recorded.
+ */
+export const BROWSER_DESTINATION_PROPOSAL_TRANSITIONS = [
+    { from: 'proposed', to: 'approved', on: 'browser.destination.decided', actor: 'caller' },
+    { from: 'proposed', to: 'refused', on: 'browser.destination.decided', actor: 'caller' },
+];
+/** The matched transition, or null when the machine does not permit the move. */
+export function findTransition(machine, from, to, on, actor) {
+    const table = MACHINES[machine];
+    return table.find((t) => t.from === from && t.to === to && t.on === on && t.actor === actor) ?? null;
+}
+/**
  * The single deciding function for state movement. Returns the matched
  * transition or throws naming the machine, the states, and the legal moves.
  */
 export function assertTransition(machine, from, to, on, actor) {
-    const table = MACHINES[machine];
-    const hit = table.find((t) => t.from === from && t.to === to && t.on === on && t.actor === actor);
+    const hit = findTransition(machine, from, to, on, actor);
     if (hit)
         return hit;
+    const table = MACHINES[machine];
     const legal = table.filter((t) => t.from === from).map((t) => t.to);
     throw new Error(`illegal ${machine} transition ${from} to ${to} on event ${on} by actor ${actor}. ` +
         `From ${from} the machine permits: ${legal.length > 0 ? legal.join(', ') : 'nothing, the state is terminal'}.`);
+}
+/**
+ * The effect machine move one effect record asks for, read from the state
+ * the effect stands in. The run head fold and the effect dispatcher both
+ * read effect records through this function, so they agree on which record
+ * is which event; each then checks the move against EFFECT_MACHINE.
+ */
+export function effectRecordTransition(type, payload, from) {
+    if (type === 'effect.dispatched')
+        return { from, to: 'dispatched', on: 'effect.dispatched', actor: 'runtime' };
+    if (type === 'effect.unreconcilable')
+        return { from, to: 'unreconcilable', on: 'reconciliation.unanswerable', actor: 'runtime' };
+    const to = payload['state'];
+    const on = to === 'withdrawn'
+        ? 'effect.withdrawn'
+        : to === 'outcome_unknown'
+            ? 'receipt.missing'
+            : to === 'prepared'
+                ? 'reconciliation.absent'
+                : from === 'outcome_unknown'
+                    ? 'reconciliation.confirmed'
+                    : 'receipt.recorded';
+    return { from, to, on, actor: to === 'withdrawn' ? 'caller' : 'runtime' };
 }
 /** States with no outgoing transition. The honest ends of each machine. */
 export function terminalStates(machine) {

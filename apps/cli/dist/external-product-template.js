@@ -6,9 +6,10 @@
  * channel, language and projection files different. Dependency overrides let
  * conformance install one exact set of packed release artifacts.
  */
+import { SUPPORTED_NODE_RUNTIME } from '@zero-ar/contracts';
 export const EXTERNAL_PRODUCT_SCAFFOLD_VERSION = '1.0.0';
 export const EXTERNAL_PRODUCT_API_VERSION = 'v1';
-export const EXTERNAL_PRODUCT_PACKAGE_VERSION = '0.1.0';
+export const EXTERNAL_PRODUCT_PACKAGE_VERSION = '0.2.0';
 const FIXTURES = {
     'facilities-operations': {
         package_name: 'zero-ar-facilities-operations',
@@ -79,7 +80,7 @@ function packageJson(copy, dependencies) {
         private: true,
         type: 'module',
         description: `${copy.display_name} reference product over the public Zero-AR API.`,
-        engines: { node: '>=23.6' },
+        engines: { node: SUPPORTED_NODE_RUNTIME.engine },
         scripts: {
             test: 'node --disable-warning=ExperimentalWarning --test tests/contract/*.test.ts tests/journeys/*.test.ts',
         },
@@ -277,7 +278,7 @@ function compatibility() {
 import type { HealthResponse } from '@zero-ar/contracts';
 
 export const SUPPORTED_ZERO_AR_API = 'v1';
-export const SUPPORTED_ZERO_AR_PACKAGES = '0.1.0';
+export const SUPPORTED_ZERO_AR_PACKAGES = '0.2.0';
 
 export function assertCompatibleRuntime(health: HealthResponse): void {
   if (health.product !== 'zero-ar') {

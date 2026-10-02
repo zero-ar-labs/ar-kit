@@ -8,6 +8,8 @@
  * Commands in this surface include run control, replay, export, import,
  * local checks, hosted diagnostics, publication dry runs, environment
  * administration, provider administration, and tool-source administration.
+ * The command table in ./commands answers reserved commands and the
+ * operations a module adds before the built-in dispatch runs.
  */
 export declare function runCli(options?: {
     argv?: string[];

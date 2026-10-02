@@ -1,9 +1,6 @@
-# `@zero-ar/conformance`
+# @zero-ar/conformance
 
-The public conformance battery for third-party execution-environment adapters.
-It reports whether an implementation follows the declared protocol and
-lifecycle.
+Zero-AR is a log-native runtime for long-horizon agent work.
 
-Passing conformance does not establish task correctness or a security
-certification. Most application developers do not install this package. See
-the [package guide](../../docs/npm-packages.md).
+This package is part of the Zero-AR public npm surface.
+Source for this package is staged from https://github.com/zero-ar-labs/ar-kit/tree/main/packages/conformance.

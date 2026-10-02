@@ -8,10 +8,11 @@
  */
 import { z } from 'zod';
 export declare const EnvironmentBackendSchema: z.ZodEnum<{
+    process: "process";
     ssh: "ssh";
     firecracker: "firecracker";
     apptainer: "apptainer";
-    process: "process";
+    "openai-agents": "openai-agents";
     oci: "oci";
     "cloudflare-sandbox": "cloudflare-sandbox";
     modal: "modal";
@@ -28,11 +29,11 @@ export declare const EnvironmentIsolationSchema: z.ZodEnum<{
 }>;
 export declare const EnvironmentLifecycleOperationSchema: z.ZodEnum<{
     cancel: "cancel";
+    submit: "submit";
     observe: "observe";
     teardown: "teardown";
     descriptor: "descriptor";
     prepare: "prepare";
-    submit: "submit";
     reconcile: "reconcile";
     collect: "collect";
     abandon: "abandon";
@@ -47,14 +48,18 @@ export declare const EnvironmentNetworkModeSchema: z.ZodEnum<{
     unrestricted: "unrestricted";
 }>;
 export declare const EnvironmentProfileStateSchema: z.ZodEnum<{
-    enabled: "enabled";
     disabled: "disabled";
+    enabled: "enabled";
     registered: "registered";
     draining: "draining";
 }>;
+export declare const EnvironmentReusePolicySchema: z.ZodEnum<{
+    run: "run";
+    none: "none";
+}>;
 export declare const EnvironmentStatusSchema: z.ZodEnum<{
-    running: "running";
     cancelled: "cancelled";
+    running: "running";
     failed: "failed";
     "outcome-unknown": "outcome-unknown";
     ready: "ready";
@@ -145,10 +150,11 @@ export declare const EnvironmentAdapterDescriptorSchema: z.ZodObject<{
     version: z.ZodString;
     adapter_digest: z.ZodString;
     backend: z.ZodEnum<{
+        process: "process";
         ssh: "ssh";
         firecracker: "firecracker";
         apptainer: "apptainer";
-        process: "process";
+        "openai-agents": "openai-agents";
         oci: "oci";
         "cloudflare-sandbox": "cloudflare-sandbox";
         modal: "modal";
@@ -157,11 +163,11 @@ export declare const EnvironmentAdapterDescriptorSchema: z.ZodObject<{
     }>;
     operations: z.ZodArray<z.ZodEnum<{
         cancel: "cancel";
+        submit: "submit";
         observe: "observe";
         teardown: "teardown";
         descriptor: "descriptor";
         prepare: "prepare";
-        submit: "submit";
         reconcile: "reconcile";
         collect: "collect";
         abandon: "abandon";
@@ -209,10 +215,11 @@ export declare const EnvironmentProfileSchema: z.ZodObject<{
         version: z.ZodString;
         adapter_digest: z.ZodString;
         backend: z.ZodEnum<{
+            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
-            process: "process";
+            "openai-agents": "openai-agents";
             oci: "oci";
             "cloudflare-sandbox": "cloudflare-sandbox";
             modal: "modal";
@@ -221,11 +228,11 @@ export declare const EnvironmentProfileSchema: z.ZodObject<{
         }>;
         operations: z.ZodArray<z.ZodEnum<{
             cancel: "cancel";
+            submit: "submit";
             observe: "observe";
             teardown: "teardown";
             descriptor: "descriptor";
             prepare: "prepare";
-            submit: "submit";
             reconcile: "reconcile";
             collect: "collect";
             abandon: "abandon";
@@ -336,10 +343,11 @@ export declare const EnvironmentProfileRegistrationSchema: z.ZodObject<{
             version: z.ZodString;
             adapter_digest: z.ZodString;
             backend: z.ZodEnum<{
+                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
-                process: "process";
+                "openai-agents": "openai-agents";
                 oci: "oci";
                 "cloudflare-sandbox": "cloudflare-sandbox";
                 modal: "modal";
@@ -348,11 +356,11 @@ export declare const EnvironmentProfileRegistrationSchema: z.ZodObject<{
             }>;
             operations: z.ZodArray<z.ZodEnum<{
                 cancel: "cancel";
+                submit: "submit";
                 observe: "observe";
                 teardown: "teardown";
                 descriptor: "descriptor";
                 prepare: "prepare";
-                submit: "submit";
                 reconcile: "reconcile";
                 collect: "collect";
                 abandon: "abandon";
@@ -444,8 +452,8 @@ export declare const EnvironmentProfileRegistrationSchema: z.ZodObject<{
         reviewed_by: z.ZodString;
     }, z.core.$strict>;
     state: z.ZodEnum<{
-        enabled: "enabled";
         disabled: "disabled";
+        enabled: "enabled";
         registered: "registered";
         draining: "draining";
     }>;
@@ -490,10 +498,12 @@ export declare const EnvironmentHandleSchema: z.ZodObject<{
         executing_principal: z.ZodString;
         accountable_owner: z.ZodString;
     }, z.core.$strict>;
+    workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     identity_ref: z.ZodString;
     status: z.ZodEnum<{
-        running: "running";
         cancelled: "cancelled";
+        running: "running";
         failed: "failed";
         "outcome-unknown": "outcome-unknown";
         ready: "ready";
@@ -532,10 +542,12 @@ export declare const EnvironmentJobHandleSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -555,8 +567,8 @@ export declare const EnvironmentJobHandleSchema: z.ZodObject<{
     request_hash: z.ZodString;
     idempotency_key: z.ZodString;
     status: z.ZodEnum<{
-        running: "running";
         cancelled: "cancelled";
+        running: "running";
         failed: "failed";
         "outcome-unknown": "outcome-unknown";
         ready: "ready";
@@ -582,10 +594,11 @@ export declare const PrepareEnvironmentRequestSchema: z.ZodObject<{
             version: z.ZodString;
             adapter_digest: z.ZodString;
             backend: z.ZodEnum<{
+                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
-                process: "process";
+                "openai-agents": "openai-agents";
                 oci: "oci";
                 "cloudflare-sandbox": "cloudflare-sandbox";
                 modal: "modal";
@@ -594,11 +607,11 @@ export declare const PrepareEnvironmentRequestSchema: z.ZodObject<{
             }>;
             operations: z.ZodArray<z.ZodEnum<{
                 cancel: "cancel";
+                submit: "submit";
                 observe: "observe";
                 teardown: "teardown";
                 descriptor: "descriptor";
                 prepare: "prepare";
-                submit: "submit";
                 reconcile: "reconcile";
                 collect: "collect";
                 abandon: "abandon";
@@ -729,10 +742,12 @@ export declare const PrepareEnvironmentResultSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -750,8 +765,8 @@ export declare const PrepareEnvironmentResultSchema: z.ZodObject<{
     }, z.core.$strict>>;
     request_id: z.ZodString;
     status: z.ZodEnum<{
-        running: "running";
         cancelled: "cancelled";
+        running: "running";
         failed: "failed";
         "outcome-unknown": "outcome-unknown";
         ready: "ready";
@@ -789,10 +804,12 @@ export declare const SubmitEnvironmentJobRequestSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -861,10 +878,12 @@ export declare const SubmitEnvironmentJobResultSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -884,8 +903,8 @@ export declare const SubmitEnvironmentJobResultSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -901,8 +920,8 @@ export declare const SubmitEnvironmentJobResultSchema: z.ZodObject<{
     }, z.core.$strict>>;
     request_id: z.ZodString;
     status: z.ZodEnum<{
-        running: "running";
         cancelled: "cancelled";
+        running: "running";
         failed: "failed";
         "outcome-unknown": "outcome-unknown";
         ready: "ready";
@@ -940,10 +959,12 @@ export declare const ObserveEnvironmentJobRequestSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -981,10 +1002,12 @@ export declare const ObserveEnvironmentJobRequestSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -1004,8 +1027,8 @@ export declare const ObserveEnvironmentJobRequestSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1062,10 +1085,12 @@ export declare const ObserveEnvironmentJobResultSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -1085,8 +1110,8 @@ export declare const ObserveEnvironmentJobResultSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1104,10 +1129,11 @@ export declare const ObserveEnvironmentJobResultSchema: z.ZodObject<{
     stdout_bytes: z.ZodNumber;
     stderr_bytes: z.ZodNumber;
     inline_output_json: z.ZodNullable<z.ZodString>;
+    known_cost: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodNumber>>;
     request_id: z.ZodString;
     status: z.ZodEnum<{
-        running: "running";
         cancelled: "cancelled";
+        running: "running";
         failed: "failed";
         "outcome-unknown": "outcome-unknown";
         ready: "ready";
@@ -1145,10 +1171,12 @@ export declare const ReconcileEnvironmentJobRequestSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1186,10 +1214,12 @@ export declare const ReconcileEnvironmentJobRequestSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -1209,8 +1239,8 @@ export declare const ReconcileEnvironmentJobRequestSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1269,10 +1299,12 @@ export declare const ReconcileEnvironmentJobResultSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -1292,8 +1324,8 @@ export declare const ReconcileEnvironmentJobResultSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1311,10 +1343,11 @@ export declare const ReconcileEnvironmentJobResultSchema: z.ZodObject<{
     stdout_bytes: z.ZodNumber;
     stderr_bytes: z.ZodNumber;
     inline_output_json: z.ZodNullable<z.ZodString>;
+    known_cost: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodNumber>>;
     request_id: z.ZodString;
     status: z.ZodEnum<{
-        running: "running";
         cancelled: "cancelled";
+        running: "running";
         failed: "failed";
         "outcome-unknown": "outcome-unknown";
         ready: "ready";
@@ -1353,10 +1386,12 @@ export declare const CancelEnvironmentJobRequestSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1394,10 +1429,12 @@ export declare const CancelEnvironmentJobRequestSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -1417,8 +1454,8 @@ export declare const CancelEnvironmentJobRequestSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1475,10 +1512,12 @@ export declare const CancelEnvironmentJobResultSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -1498,8 +1537,8 @@ export declare const CancelEnvironmentJobResultSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1516,8 +1555,8 @@ export declare const CancelEnvironmentJobResultSchema: z.ZodObject<{
     cannot_continue: z.ZodBoolean;
     request_id: z.ZodString;
     status: z.ZodEnum<{
-        running: "running";
         cancelled: "cancelled";
+        running: "running";
         failed: "failed";
         "outcome-unknown": "outcome-unknown";
         ready: "ready";
@@ -1561,10 +1600,12 @@ export declare const CollectEnvironmentArtifactRequestSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1602,10 +1643,12 @@ export declare const CollectEnvironmentArtifactRequestSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -1625,8 +1668,8 @@ export declare const CollectEnvironmentArtifactRequestSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1686,8 +1729,8 @@ export declare const CollectEnvironmentArtifactResultSchema: z.ZodObject<{
     }, z.core.$strict>>;
     request_id: z.ZodString;
     status: z.ZodEnum<{
-        running: "running";
         cancelled: "cancelled";
+        running: "running";
         failed: "failed";
         "outcome-unknown": "outcome-unknown";
         ready: "ready";
@@ -1725,10 +1768,12 @@ export declare const TeardownEnvironmentRequestSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1785,10 +1830,12 @@ export declare const TeardownEnvironmentResultSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1807,8 +1854,8 @@ export declare const TeardownEnvironmentResultSchema: z.ZodObject<{
     retained_resources: z.ZodArray<z.ZodString>;
     request_id: z.ZodString;
     status: z.ZodEnum<{
-        running: "running";
         cancelled: "cancelled";
+        running: "running";
         failed: "failed";
         "outcome-unknown": "outcome-unknown";
         ready: "ready";
@@ -1846,10 +1893,12 @@ export declare const AbandonEnvironmentRequestSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1887,10 +1936,12 @@ export declare const AbandonEnvironmentRequestSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -1910,8 +1961,8 @@ export declare const AbandonEnvironmentRequestSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -1971,10 +2022,12 @@ export declare const AbandonEnvironmentResultSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -2012,10 +2065,12 @@ export declare const AbandonEnvironmentResultSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -2035,8 +2090,8 @@ export declare const AbandonEnvironmentResultSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -2053,8 +2108,8 @@ export declare const AbandonEnvironmentResultSchema: z.ZodObject<{
     blocks_verified_completion: z.ZodBoolean;
     request_id: z.ZodString;
     status: z.ZodEnum<{
-        running: "running";
         cancelled: "cancelled";
+        running: "running";
         failed: "failed";
         "outcome-unknown": "outcome-unknown";
         ready: "ready";
@@ -2093,10 +2148,12 @@ export declare const SuspendedEnvironmentHandleSchema: z.ZodObject<{
             executing_principal: z.ZodString;
             accountable_owner: z.ZodString;
         }, z.core.$strict>;
+        workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         identity_ref: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -2134,10 +2191,12 @@ export declare const SuspendedEnvironmentHandleSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -2157,8 +2216,8 @@ export declare const SuspendedEnvironmentHandleSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -2180,15 +2239,51 @@ export declare const SuspendedEnvironmentHandleSchema: z.ZodObject<{
         "operator-review-required": "operator-review-required";
     }>;
     recorded_at: z.ZodString;
+    closure_epoch: z.ZodOptional<z.ZodNumber>;
+    closure_ref: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type SuspendedEnvironmentHandle = z.infer<typeof SuspendedEnvironmentHandleSchema>;
+/**
+ * One recorded reuse. A later call in the same run, tenant, and profile runs
+ * its job in an environment an earlier call prepared. The environment handle
+ * keeps its preparing binding; this record carries the binding of the call it
+ * now serves and names the submission that call makes (ENV-006 and appendix
+ * section 9: reuse is explicit, bounded by expiry, and recorded).
+ */
+export declare const EnvironmentReuseRecordSchema: z.ZodObject<{
+    environment_id: z.ZodString;
+    binding: z.ZodObject<{
+        tenant: z.ZodString;
+        run_id: z.ZodString;
+        profile_ref: z.ZodString;
+        adapter_digest: z.ZodString;
+        operation_class: z.ZodEnum<{
+            observation: "observation";
+            "run-internal": "run-internal";
+            "effect-proposal": "effect-proposal";
+        }> & z.ZodType<"observation" | "run-internal", "observation" | "run-internal" | "effect-proposal", z.core.$ZodTypeInternals<"observation" | "run-internal", "observation" | "run-internal" | "effect-proposal">>;
+        operation: z.ZodString;
+        tool_call_id: z.ZodString;
+        lease_id: z.ZodString;
+        executing_principal: z.ZodString;
+        accountable_owner: z.ZodString;
+    }, z.core.$strict>;
+    submission_request_id: z.ZodString;
+    prior_jobs: z.ZodNumber;
+    policy: z.ZodEnum<{
+        run: "run";
+        none: "none";
+    }>;
+    expires_at: z.ZodNullable<z.ZodString>;
+}, z.core.$strict>;
+export type EnvironmentReuseRecord = z.infer<typeof EnvironmentReuseRecordSchema>;
 /** Current facts that resume must revalidate before it contacts a provider. */
 export declare const EnvironmentResumeContextSchema: z.ZodObject<{
     tenant: z.ZodString;
     accepted_adapter_digest: z.ZodString;
     profile_state: z.ZodEnum<{
-        enabled: "enabled";
         disabled: "disabled";
+        enabled: "enabled";
         registered: "registered";
         draining: "draining";
     }>;
@@ -2213,6 +2308,9 @@ export declare const EnvironmentExecutionRequestSchema: z.ZodObject<{
     tenant: z.ZodString;
     executing_principal: z.ZodString;
     accountable_owner: z.ZodString;
+    closure_epoch: z.ZodOptional<z.ZodNumber>;
+    closure_ref: z.ZodOptional<z.ZodString>;
+    profile_ref: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type EnvironmentExecutionRequest = z.infer<typeof EnvironmentExecutionRequestSchema>;
 export declare const EnvironmentExecutionResultSchema: z.ZodObject<{
@@ -2230,6 +2328,16 @@ export interface EnvironmentExecutionPort {
     };
     readonly profiles: Readonly<Record<string, string>>;
     execute(request: EnvironmentExecutionRequest, signal?: AbortSignal): Promise<EnvironmentExecutionResult>;
+    /**
+     * Resolve each run-internal tool to one registered profile ref before the
+     * run manifest is built, so the run pins its profiles at admission. A port
+     * without it keeps the static profile map.
+     */
+    resolveForRun?(input: {
+        tenant: string;
+        run_id: string;
+        tools: readonly string[];
+    }): Promise<Readonly<Record<string, string>>>;
     suspendRun(run_id: string): Promise<SuspendedEnvironmentHandle[]>;
     resumeRun(run_id: string): Promise<{
         reconciled_jobs: number;
@@ -2238,9 +2346,24 @@ export interface EnvironmentExecutionPort {
         jobs: number;
         uncertainties: string[];
     }>;
+    /**
+     * Tear down what the run still holds. Retained names every environment
+     * still open afterwards: one whose teardown answer is unknown, or one on an
+     * adapter this port cannot reach. A port that reports none may omit it.
+     */
     teardownRun(run_id: string): Promise<{
         removed: string[];
+        retained?: string[];
     }>;
+    /**
+     * Rebuild in-process capacity holds from the canonical environment records
+     * after a restart. A port without in-process state may omit it.
+     */
+    restore?(): Promise<{
+        environments: number;
+    }>;
+    /** Runs the canonical records still show holding an open environment, including one this port cannot reach. */
+    openRuns?(): Promise<string[]>;
 }
 /** The full adapter protocol. Short execute compiles into these methods. */
 export interface EnvironmentAdapter {

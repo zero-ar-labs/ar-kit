@@ -10,8 +10,9 @@
  * run id after a restart gives the same observable behaviour, because the
  * handle holds nothing the server does not (DXI-001 through DXI-004).
  */
-import { SourceBindingInputSchema, assertProductPackageGraph, makeId, productEnvironmentValue, refuse } from '@zero-ar/contracts';
+import { DiagnosticError, SourceBindingInputSchema, assertProductPackageGraph, makeId, productEnvironmentValue, refuse } from '@zero-ar/contracts';
 import { ZeroARClient } from '@zero-ar/client';
+import { publishCapabilitySource } from "./capability-admission.js";
 const DEFAULT_BUDGETS = {
     consumption: { model_tokens: 100_000 },
     attention: 0,
@@ -43,27 +44,53 @@ export class RunHandle {
     snapshot() {
         return this.client.snapshot(this.id);
     }
+    /** The canonical, content-addressed plan reconstructed from run.created. */
+    verificationPlan() {
+        return this.client.verificationPlan(this.id);
+    }
     /**
-     * Durable records in order, resuming from a cursor. The stream ends when
-     * nothing further can arrive on its own: a terminal, or a suspension
+     * Durable records in order, resuming from a record cursor. The stream ends
+     * when nothing further can arrive on its own: a terminal, or a suspension
      * waiting on an act nobody has taken yet. A caller stops earlier with a
-     * signal.
+     * signal. The snapshot is read before each page, so a page read after a
+     * settled snapshot holds every record up to the settle point. Between
+     * pages the handle waits on the durable event stream, which reconnects
+     * from its cursor, never on a timer.
      */
     async *events(options = {}) {
         let after = options.after ?? 0;
-        for (;;) {
-            if (options.signal?.aborted)
-                return;
-            const page = await this.client.records(this.id, after);
-            for (const record of page.records) {
-                yield record;
-                after = record.seq;
+        let wake = null;
+        let latestEvent = 0;
+        try {
+            for (;;) {
+                if (options.signal?.aborted)
+                    return;
+                const snapshot = await answered(() => this.client.snapshot(this.id), options.signal);
+                const page = await answered(() => this.client.records(this.id, after), options.signal);
+                for (const record of page.records) {
+                    yield record;
+                    after = record.seq;
+                }
+                if (snapshot.terminal || snapshot.status === 'suspended')
+                    return;
+                if (page.records.length > 0)
+                    continue;
+                // Nothing new since a running snapshot: wait for the next durable
+                // event past the cursor. Replayed events at or below it are skipped.
+                wake ??= this.client.followRecords(this.id, { after: 0, ...(options.signal ? { signal: options.signal } : {}) });
+                while (latestEvent <= after) {
+                    const next = await wake.next();
+                    if (next.done) {
+                        // The follow settled or the signal aborted; the next snapshot says which.
+                        wake = null;
+                        break;
+                    }
+                    latestEvent = Math.max(latestEvent, next.value.record_seq);
+                }
             }
-            const snapshot = await this.client.snapshot(this.id);
-            if (snapshot.terminal || snapshot.status === 'suspended')
-                return;
-            if (page.records.length === 0)
-                await new Promise((resolve) => setTimeout(resolve, 25));
+        }
+        finally {
+            await wake?.return(undefined);
         }
     }
     steer(text, control_id = makeId('ctl')) {
@@ -82,6 +109,43 @@ export class RunHandle {
     control(request) {
         return this.client.control(this.id, request);
     }
+    /** Request one immutable publication already available to the runtime. */
+    requestCapability(request) {
+        return this.client.requestCapabilityAdmission(this.id, request);
+    }
+    /** Compile and publish a local Agent Skill, then request its exact hashes. */
+    async requestCapabilityFromPath(sourcePath, input) {
+        const candidate = await publishCapabilitySource(this.client, sourcePath);
+        return this.requestCapability({
+            kind: 'add',
+            candidate_locator: candidate.publication_ref,
+            expected_content_hash: candidate.root_ref,
+            declared_package_kind: 'procedure',
+            requested_capabilities: [...new Set([candidate.procedure.name, ...(candidate.procedure.allowed_tools ?? [])])].sort(),
+            reason: input.reason,
+            requested_activation_mode: 'next-safe-boundary',
+            ...(input.expected_active_epoch === undefined ? {} : { expected_active_epoch: input.expected_active_epoch }),
+            idempotency_key: input.idempotency_key ?? makeId('ctl'),
+        });
+    }
+    capabilityAdmissions(query = {}) {
+        return this.client.listCapabilityAdmissions(this.id, query);
+    }
+    inspectCapability(request_id) {
+        return this.client.inspectCapabilityAdmission(this.id, request_id);
+    }
+    decideCapability(request_id, decision) {
+        return this.client.decideCapabilityAdmission(this.id, request_id, decision);
+    }
+    approveCapability(request_id, input) {
+        return this.decideCapability(request_id, { ...input, decision: 'approve' });
+    }
+    refuseCapability(request_id, input) {
+        return this.decideCapability(request_id, { ...input, decision: 'refuse' });
+    }
+    cancelCapability(request_id, input) {
+        return this.client.cancelCapabilityAdmission(this.id, request_id, input);
+    }
     /**
      * The typed result. With wait, the handle follows durable records until
      * the run reaches a terminal; the verdict, gaps, effects, and blocking
@@ -97,15 +161,37 @@ export class RunHandle {
         }
         return this.client.result(this.id);
     }
-    /** What this run resolved before any external work: agent, model plan, tools, contract. */
-    async explain() {
-        const snapshot = await this.snapshot();
-        return {
-            agent: snapshot.agent_name,
-            model: snapshot.model_ref,
-            verified_completion_reachable: snapshot.verified_completion_reachable,
-            contract: snapshot.contract?.name ?? null,
-        };
+    /** Explain from the same complete canonical object returned by the public API and CLI. */
+    explain() {
+        return this.verificationPlan();
+    }
+}
+/**
+ * Retry a read the runtime did not answer, as while it restarts, for up to
+ * sixty seconds. A refusal the runtime answered with a diagnostic throws at
+ * once, and so does an abort.
+ */
+async function answered(read, signal) {
+    const started = Date.now();
+    let delay = 250;
+    for (;;) {
+        try {
+            return await read();
+        }
+        catch (error) {
+            if (error instanceof DiagnosticError || signal?.aborted || Date.now() - started >= 60_000)
+                throw error;
+            await new Promise((resolve) => {
+                const done = () => {
+                    clearTimeout(timer);
+                    signal?.removeEventListener('abort', done);
+                    resolve();
+                };
+                const timer = setTimeout(done, delay);
+                signal?.addEventListener('abort', done, { once: true });
+            });
+            delay = Math.min(delay * 2, 5_000);
+        }
     }
 }
 /** The configured handle an application holds. It wraps the public client and nothing else. */
@@ -114,7 +200,11 @@ export class ZeroAR {
     constructor(client) {
         this.client = client;
     }
-    /** Create and start one run, then hand back its durable handle. */
+    /**
+     * Create and start one run, then hand back its durable handle at
+     * acceptance. The run works on in the runtime; follow it with events()
+     * or wait for it with result({ wait: true }).
+     */
     async run(input) {
         const spec = typeof input === 'string' ? { objective: input } : input;
         if (spec.items && spec.inputs?.items)
@@ -141,9 +231,11 @@ export class ZeroAR {
         const created = spec.detached
             ? await this.client.createDeferredRun(request)
             : await this.client.createRun(request);
-        // Creation is idempotent: a key that resolved to an existing run
-        // hands back that run rather than starting it a second time.
-        if (!spec.detached && created.created && created.snapshot.status === 'created') {
+        // Creation is idempotent: a key that resolved to an existing run hands
+        // back that run rather than starting it a second time. A runtime that
+        // admits without starting leaves the run created, and the start key is
+        // derived from the create key so a retry converges on one start.
+        if (!spec.detached && created.snapshot.status === 'created') {
             await this.client.start(created.run_id, {
                 idempotency_key: `${request.idempotency_key}:start`,
                 reason: 'start work accepted by the embedding facade',

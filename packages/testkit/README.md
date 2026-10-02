@@ -1,9 +1,6 @@
-# `@zero-ar/testkit`
+# @zero-ar/testkit
 
-Deterministic fixtures for Zero-AR integration tests. It provides a scripted
-adapter, logical time, seeded synthetic populations and self-cleaning scratch
-directories so failure and recovery paths can run without provider spend or
-network calls.
+Zero-AR is a log-native runtime for long-horizon agent work.
 
-This is development support, not a production runtime. See the
-[package guide](../../docs/npm-packages.md).
+This package is part of the Zero-AR public npm surface.
+Source for this package is staged from https://github.com/zero-ar-labs/ar-kit/tree/main/packages/testkit.

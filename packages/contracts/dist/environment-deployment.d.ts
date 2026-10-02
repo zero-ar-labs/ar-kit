@@ -9,7 +9,7 @@
  * while the native API and generated client expose the same facts to operators.
  */
 import { z } from 'zod';
-import type { EnvironmentAdapter, EnvironmentProfile } from './environment.js';
+import type { EnvironmentAdapter, EnvironmentHandleBinding, EnvironmentProfile } from './environment.js';
 import { CONDITIONAL_ENVIRONMENT_BACKENDS } from './vocab.js';
 export declare const EnvironmentPrerequisiteObservationSchema: z.ZodObject<{
     name: z.ZodString;
@@ -46,10 +46,11 @@ export declare const EnvironmentAcceptanceReportBodySchema: z.ZodObject<{
     vector_id: z.ZodString;
     source_commit: z.ZodString;
     backend: z.ZodEnum<{
+        process: "process";
         ssh: "ssh";
         firecracker: "firecracker";
         apptainer: "apptainer";
-        process: "process";
+        "openai-agents": "openai-agents";
         oci: "oci";
         "cloudflare-sandbox": "cloudflare-sandbox";
         modal: "modal";
@@ -62,10 +63,11 @@ export declare const EnvironmentAcceptanceReportBodySchema: z.ZodObject<{
         version: z.ZodString;
         adapter_digest: z.ZodString;
         backend: z.ZodEnum<{
+            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
-            process: "process";
+            "openai-agents": "openai-agents";
             oci: "oci";
             "cloudflare-sandbox": "cloudflare-sandbox";
             modal: "modal";
@@ -74,11 +76,11 @@ export declare const EnvironmentAcceptanceReportBodySchema: z.ZodObject<{
         }>;
         operations: z.ZodArray<z.ZodEnum<{
             cancel: "cancel";
+            submit: "submit";
             observe: "observe";
             teardown: "teardown";
             descriptor: "descriptor";
             prepare: "prepare";
-            submit: "submit";
             reconcile: "reconcile";
             collect: "collect";
             abandon: "abandon";
@@ -148,10 +150,11 @@ export declare const EnvironmentAcceptanceReportSchema: z.ZodObject<{
     vector_id: z.ZodString;
     source_commit: z.ZodString;
     backend: z.ZodEnum<{
+        process: "process";
         ssh: "ssh";
         firecracker: "firecracker";
         apptainer: "apptainer";
-        process: "process";
+        "openai-agents": "openai-agents";
         oci: "oci";
         "cloudflare-sandbox": "cloudflare-sandbox";
         modal: "modal";
@@ -164,10 +167,11 @@ export declare const EnvironmentAcceptanceReportSchema: z.ZodObject<{
         version: z.ZodString;
         adapter_digest: z.ZodString;
         backend: z.ZodEnum<{
+            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
-            process: "process";
+            "openai-agents": "openai-agents";
             oci: "oci";
             "cloudflare-sandbox": "cloudflare-sandbox";
             modal: "modal";
@@ -176,11 +180,11 @@ export declare const EnvironmentAcceptanceReportSchema: z.ZodObject<{
         }>;
         operations: z.ZodArray<z.ZodEnum<{
             cancel: "cancel";
+            submit: "submit";
             observe: "observe";
             teardown: "teardown";
             descriptor: "descriptor";
             prepare: "prepare";
-            submit: "submit";
             reconcile: "reconcile";
             collect: "collect";
             abandon: "abandon";
@@ -248,10 +252,11 @@ export declare const EnvironmentAcceptanceReportSchema: z.ZodObject<{
 export type EnvironmentAcceptanceReport = z.infer<typeof EnvironmentAcceptanceReportSchema>;
 export declare const EnvironmentDeploymentCapabilitySchema: z.ZodObject<{
     backend: z.ZodEnum<{
+        process: "process";
         ssh: "ssh";
         firecracker: "firecracker";
         apptainer: "apptainer";
-        process: "process";
+        "openai-agents": "openai-agents";
         oci: "oci";
         "cloudflare-sandbox": "cloudflare-sandbox";
         modal: "modal";
@@ -290,10 +295,11 @@ export type EnvironmentDeploymentCapability = z.infer<typeof EnvironmentDeployme
 export declare const EnvironmentDeploymentCapabilityListSchema: z.ZodObject<{
     capabilities: z.ZodArray<z.ZodObject<{
         backend: z.ZodEnum<{
+            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
-            process: "process";
+            "openai-agents": "openai-agents";
             oci: "oci";
             "cloudflare-sandbox": "cloudflare-sandbox";
             modal: "modal";
@@ -335,13 +341,49 @@ export interface ConditionalEnvironmentDeployment {
     adapter: EnvironmentAdapter;
     profile: EnvironmentProfile;
     configuration_ref: string;
+    usage_for?(output: Record<string, unknown> | null): number | undefined;
     probe(): Promise<EnvironmentHostObservation>;
+}
+/** The streaming artifact port a composition hands an adapter so collected outputs land in the tenant store. */
+export interface EnvironmentArtifactSinkPort {
+    put(input: {
+        chunks: AsyncIterable<Uint8Array>;
+        destination_ref: string;
+        max_bytes: number;
+    }): Promise<{
+        artifact_ref: string;
+        content_hash: string;
+        bytes: number;
+    }>;
+}
+/** Runtime ports needed by an optional deployment without embedding bytes in configuration. */
+export interface ConditionalEnvironmentRuntimeContext {
+    tenant: string;
+    credentials: {
+        inspect(binding_ref: string, binding: EnvironmentHandleBinding): Promise<{
+            epoch: number;
+            status: 'active' | 'revoked';
+        }>;
+        resolve(binding_ref: string, binding: EnvironmentHandleBinding): Promise<{
+            epoch: number;
+            secret: string;
+        }>;
+    };
+    fetch_impl: typeof fetch;
+    read_artifact?(input: {
+        session_id: string;
+        source_path: string;
+        max_bytes: number;
+    }): AsyncIterable<Uint8Array>;
+    /** Where collected outputs are committed. Absent means the adapter keeps its hash-only default. */
+    artifact_sink?: EnvironmentArtifactSinkPort;
 }
 /** The common export every conditional adapter package supplies. */
 export interface ConditionalEnvironmentDeploymentModule {
     openEnvironmentDeployment(input: {
         configuration: unknown;
         resolve_environment(name: string): string;
+        runtime?: ConditionalEnvironmentRuntimeContext;
     }): Promise<ConditionalEnvironmentDeployment> | ConditionalEnvironmentDeployment;
 }
 export declare function compileEnvironmentAcceptanceReport(input: EnvironmentAcceptanceReportBody): EnvironmentAcceptanceReport;

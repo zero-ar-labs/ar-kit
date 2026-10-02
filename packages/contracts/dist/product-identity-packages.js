@@ -14,6 +14,7 @@ export const PRODUCT_PACKAGE_GRAPH_PROTOCOL = 'product-package-graph/v1';
 export const PRODUCT_PACKAGE_MATRIX = [
     packageRow('packages/aggregator', 'aggregator', 'private-workspace'),
     packageRow('packages/artifacts', 'artifacts', 'private-workspace'),
+    packageRow('packages/browser', 'browser', 'conditional-hosted'),
     packageRow('apps/authority-host', 'authority-host', 'private-workspace'),
     packageRow('packages/client', 'client', 'public-npm'),
     packageRow('apps/cli', 'cli', 'public-npm'),
@@ -36,6 +37,7 @@ export const PRODUCT_PACKAGE_MATRIX = [
     packageRow('packages/environment-process', 'environment-process', 'private-workspace'),
     packageRow('packages/environment-ssh', 'environment-ssh', 'conditional-hosted'),
     packageRow('packages/environment-vercel-sandbox', 'environment-vercel-sandbox', 'future-optional'),
+    packageRow('packages/environment-openai-agents', 'environment-openai-agents', 'conditional-hosted'),
     packageRow('packages/gateways', 'gateways', 'private-workspace'),
     packageRow('apps/zero-ar-hosted', 'hosted', 'signed-distribution'),
     packageRow('packages/kernel', 'kernel', 'private-workspace'),

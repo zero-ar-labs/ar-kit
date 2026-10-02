@@ -20,10 +20,11 @@ export declare const RegisterEnvironmentRequestSchema: z.ZodObject<{
             version: z.ZodString;
             adapter_digest: z.ZodString;
             backend: z.ZodEnum<{
+                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
-                process: "process";
+                "openai-agents": "openai-agents";
                 oci: "oci";
                 "cloudflare-sandbox": "cloudflare-sandbox";
                 modal: "modal";
@@ -32,11 +33,11 @@ export declare const RegisterEnvironmentRequestSchema: z.ZodObject<{
             }>;
             operations: z.ZodArray<z.ZodEnum<{
                 cancel: "cancel";
+                submit: "submit";
                 observe: "observe";
                 teardown: "teardown";
                 descriptor: "descriptor";
                 prepare: "prepare";
-                submit: "submit";
                 reconcile: "reconcile";
                 collect: "collect";
                 abandon: "abandon";
@@ -136,8 +137,8 @@ export declare const EnvironmentProfileRefRequestSchema: z.ZodObject<{
 export type EnvironmentProfileRefRequest = z.infer<typeof EnvironmentProfileRefRequestSchema>;
 export declare const EnvironmentProfileStateRequestSchema: z.ZodObject<{
     state: z.ZodEnum<{
-        enabled: "enabled";
         disabled: "disabled";
+        enabled: "enabled";
         registered: "registered";
         draining: "draining";
     }>;
@@ -161,10 +162,11 @@ export declare const EnvironmentProfileListSchema: z.ZodObject<{
                 version: z.ZodString;
                 adapter_digest: z.ZodString;
                 backend: z.ZodEnum<{
+                    process: "process";
                     ssh: "ssh";
                     firecracker: "firecracker";
                     apptainer: "apptainer";
-                    process: "process";
+                    "openai-agents": "openai-agents";
                     oci: "oci";
                     "cloudflare-sandbox": "cloudflare-sandbox";
                     modal: "modal";
@@ -173,11 +175,11 @@ export declare const EnvironmentProfileListSchema: z.ZodObject<{
                 }>;
                 operations: z.ZodArray<z.ZodEnum<{
                     cancel: "cancel";
+                    submit: "submit";
                     observe: "observe";
                     teardown: "teardown";
                     descriptor: "descriptor";
                     prepare: "prepare";
-                    submit: "submit";
                     reconcile: "reconcile";
                     collect: "collect";
                     abandon: "abandon";
@@ -269,8 +271,8 @@ export declare const EnvironmentProfileListSchema: z.ZodObject<{
             reviewed_by: z.ZodString;
         }, z.core.$strict>;
         state: z.ZodEnum<{
-            enabled: "enabled";
             disabled: "disabled";
+            enabled: "enabled";
             registered: "registered";
             draining: "draining";
         }>;
@@ -292,10 +294,11 @@ export declare const EnvironmentDoctorResultSchema: z.ZodObject<{
         version: z.ZodString;
         adapter_digest: z.ZodString;
         backend: z.ZodEnum<{
+            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
-            process: "process";
+            "openai-agents": "openai-agents";
             oci: "oci";
             "cloudflare-sandbox": "cloudflare-sandbox";
             modal: "modal";
@@ -304,11 +307,11 @@ export declare const EnvironmentDoctorResultSchema: z.ZodObject<{
         }>;
         operations: z.ZodArray<z.ZodEnum<{
             cancel: "cancel";
+            submit: "submit";
             observe: "observe";
             teardown: "teardown";
             descriptor: "descriptor";
             prepare: "prepare";
-            submit: "submit";
             reconcile: "reconcile";
             collect: "collect";
             abandon: "abandon";
@@ -389,10 +392,12 @@ export declare const EnvironmentJobListSchema: z.ZodObject<{
                 executing_principal: z.ZodString;
                 accountable_owner: z.ZodString;
             }, z.core.$strict>;
+            workspace_handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            workspace_generation: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             identity_ref: z.ZodString;
             status: z.ZodEnum<{
-                running: "running";
                 cancelled: "cancelled";
+                running: "running";
                 failed: "failed";
                 "outcome-unknown": "outcome-unknown";
                 ready: "ready";
@@ -412,8 +417,8 @@ export declare const EnvironmentJobListSchema: z.ZodObject<{
         request_hash: z.ZodString;
         idempotency_key: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -463,8 +468,8 @@ export declare const EnvironmentSweepResultSchema: z.ZodObject<{
     unresolved: z.ZodArray<z.ZodObject<{
         job_id: z.ZodString;
         status: z.ZodEnum<{
-            running: "running";
             cancelled: "cancelled";
+            running: "running";
             failed: "failed";
             "outcome-unknown": "outcome-unknown";
             ready: "ready";
@@ -491,6 +496,7 @@ export declare const EnvironmentSweepResultSchema: z.ZodObject<{
 export type EnvironmentSweepResult = z.infer<typeof EnvironmentSweepResultSchema>;
 export declare const EnvironmentMeasurementSummarySchema: z.ZodObject<{
     phase: z.ZodEnum<{
+        cancellation: "cancellation";
         observation: "observation";
         "server-cold-start": "server-cold-start";
         "adapter-coordinator-overhead": "adapter-coordinator-overhead";
@@ -498,7 +504,6 @@ export declare const EnvironmentMeasurementSummarySchema: z.ZodObject<{
         "environment-warm-start": "environment-warm-start";
         "submit-to-running": "submit-to-running";
         reconciliation: "reconciliation";
-        cancellation: "cancellation";
         teardown: "teardown";
         "artifact-upload-throughput": "artifact-upload-throughput";
         "artifact-download-throughput": "artifact-download-throughput";
@@ -529,6 +534,7 @@ export declare const EnvironmentMetricsSchema: z.ZodObject<{
     }, z.core.$strict>>;
     measurements_by_adapter: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodObject<{
         phase: z.ZodEnum<{
+            cancellation: "cancellation";
             observation: "observation";
             "server-cold-start": "server-cold-start";
             "adapter-coordinator-overhead": "adapter-coordinator-overhead";
@@ -536,7 +542,6 @@ export declare const EnvironmentMetricsSchema: z.ZodObject<{
             "environment-warm-start": "environment-warm-start";
             "submit-to-running": "submit-to-running";
             reconciliation: "reconciliation";
-            cancellation: "cancellation";
             teardown: "teardown";
             "artifact-upload-throughput": "artifact-upload-throughput";
             "artifact-download-throughput": "artifact-download-throughput";
@@ -565,10 +570,11 @@ export declare const EnvironmentResolutionRequestSchema: z.ZodObject<{
         "effect-proposal": "effect-proposal";
     }> & z.ZodType<"observation" | "run-internal", "observation" | "run-internal" | "effect-proposal", z.core.$ZodTypeInternals<"observation" | "run-internal", "observation" | "run-internal" | "effect-proposal">>;
     acceptable_backends: z.ZodArray<z.ZodEnum<{
+        process: "process";
         ssh: "ssh";
         firecracker: "firecracker";
         apptainer: "apptainer";
-        process: "process";
+        "openai-agents": "openai-agents";
         oci: "oci";
         "cloudflare-sandbox": "cloudflare-sandbox";
         modal: "modal";
@@ -610,10 +616,11 @@ export declare const EnvironmentResolutionResultSchema: z.ZodObject<{
             version: z.ZodString;
             adapter_digest: z.ZodString;
             backend: z.ZodEnum<{
+                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
-                process: "process";
+                "openai-agents": "openai-agents";
                 oci: "oci";
                 "cloudflare-sandbox": "cloudflare-sandbox";
                 modal: "modal";
@@ -622,11 +629,11 @@ export declare const EnvironmentResolutionResultSchema: z.ZodObject<{
             }>;
             operations: z.ZodArray<z.ZodEnum<{
                 cancel: "cancel";
+                submit: "submit";
                 observe: "observe";
                 teardown: "teardown";
                 descriptor: "descriptor";
                 prepare: "prepare";
-                submit: "submit";
                 reconcile: "reconcile";
                 collect: "collect";
                 abandon: "abandon";

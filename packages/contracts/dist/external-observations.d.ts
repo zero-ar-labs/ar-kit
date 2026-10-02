@@ -39,13 +39,13 @@ export declare const ExternalObservationRequestSchema: z.ZodObject<{
     source: z.ZodObject<{
         channel: z.ZodEnum<{
             system: "system";
+            other: "other";
             web: "web";
             mobile: "mobile";
             voice: "voice";
             sms: "sms";
             email: "email";
             chat: "chat";
-            other: "other";
         }>;
         event_id: z.ZodString;
     }, z.core.$strict>;
@@ -91,13 +91,13 @@ export declare const ExternalObservationRecordedSchema: z.ZodObject<{
     source: z.ZodObject<{
         channel: z.ZodEnum<{
             system: "system";
+            other: "other";
             web: "web";
             mobile: "mobile";
             voice: "voice";
             sms: "sms";
             email: "email";
             chat: "chat";
-            other: "other";
         }>;
         event_id: z.ZodString;
     }, z.core.$strict>;

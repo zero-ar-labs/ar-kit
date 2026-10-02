@@ -13,7 +13,7 @@
  * generated contracts (PUB-014, PUB-024).
  */
 import { z } from 'zod';
-import { PRODUCT_IDENTITY_MIGRATION_IMPACTS, PRODUCT_SOURCE_API_VERSIONS, PUBLICATION_EDGE_KINDS, PUBLICATION_KINDS, SKILL_ACTIVATION_POLICIES, } from "./vocab.js";
+import { PRODUCT_IDENTITY_MIGRATION_IMPACTS, PRODUCT_SOURCE_API_VERSIONS, PUBLICATION_BLOB_ENCODINGS, PUBLICATION_EDGE_KINDS, PUBLICATION_KINDS, SKILL_ACTIVATION_POLICIES, } from "./vocab.js";
 import { contentHash } from "./ids.js";
 import { spanHash } from "./claims.js";
 import { refuse } from "./diagnostics.js";
@@ -197,11 +197,46 @@ export const IdentityMigrationEventOutcomeSchema = z.strictObject({
 /** Cell intake drain: new admissions refuse while drained; running work continues (operator procedure). */
 export const DrainRequestSchema = z.strictObject({ drained: z.boolean(), reason: z.string().min(1).max(500) });
 export const DrainOutcomeSchema = z.strictObject({ drained: z.boolean(), recorded: z.literal(true) });
-/** One reconciliation sweep over a run's open effects, through the dispatcher's ladder. */
+/**
+ * One reconciliation sweep over a run's open effects, through the dispatcher's
+ * ladder. A diagnostic says why an effect did not settle on this pass: its
+ * owner could not be reached, its target is no longer registered, its
+ * dispatch is still in flight, or a newer record superseded the answer.
+ */
 export const ReconciliationOutcomeSchema = z.strictObject({
-    reconciled: z.array(z.strictObject({ effect_id: z.string(), state: z.string() })),
+    reconciled: z.array(z.strictObject({
+        effect_id: z.string(),
+        state: z.string(),
+        diagnostic: z.strictObject({ code: z.string().min(1), message: z.string().min(1) }).optional(),
+    })),
 });
 /** The durable operator audit trail, newest last, read through the public surface alone. */
 export const OperatorAuditPageSchema = z.strictObject({
     entries: z.array(z.strictObject({ seq: z.number().int(), action: z.string(), detail: z.string(), actor: z.string(), at: z.string() })),
+});
+/** One alias's moves, oldest first. Earlier runs keep the ref they pinned (PUB-018). */
+export const AliasHistorySchema = z.strictObject({
+    alias: name,
+    entries: z.array(z.strictObject({ content_ref: ref, moved_at: z.string().min(1), actor: z.string().min(1).max(256) })),
+});
+/** A registry name projection rebuilt from the immutable publication records alone (PUB-029). */
+export const RegistryRebuildOutcomeSchema = z.strictObject({
+    publications: z.number().int().min(0),
+    names: z.number().int().min(0),
+    equal: z.boolean(),
+});
+/**
+ * One line of a framed publication export: the bundle, each blob, then a
+ * checksum over every prior line. Aliases, grants and credentials are never
+ * framed, so an import establishes content and nothing about authority.
+ */
+export const PublicationExportFrameSchema = z.discriminatedUnion('kind', [
+    z.strictObject({ kind: z.literal('bundle'), bundle: PublicationBundleManifestSchema }),
+    z.strictObject({ kind: z.literal('blob'), content_ref: ref, encoding: z.enum(PUBLICATION_BLOB_ENCODINGS), bytes: z.string() }),
+    z.strictObject({ kind: z.literal('checksum'), sha256: z.string().regex(/^[0-9a-f]{64}$/, 'expected 64 hex characters') }),
+]);
+/** A publication import committed under this tenant: a new receipt for the same closure refs. */
+export const PublicationImportOutcomeSchema = z.strictObject({
+    receipt: PublicationReceiptSchema,
+    blobs: z.number().int().min(0),
 });

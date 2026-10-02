@@ -13,11 +13,22 @@
  * die here, paths stay relative, and a procedure compiles inert
  * (PUB-010, PUB-011).
  */
-import type { PublicationBundleManifest } from '@zero-ar/contracts';
+import type { IntakeRequest, PublicationBundleManifest, Posture, ValidatorAvailabilitySnapshot, VerificationCheckpointInput, VerificationPlan } from '@zero-ar/contracts';
 export interface CompiledBundle {
     bundle: PublicationBundleManifest;
     /** Every byte the closure needs, keyed by content ref: declarations as canonical JSON, assets verbatim. */
     blobs: Map<string, string>;
+}
+export interface PublicationVerificationPreviewInput {
+    budgets: IntakeRequest['budgets'];
+    availability: ValidatorAvailabilitySnapshot;
+    profile_manifest: import('@zero-ar/contracts').ProfileCapabilitySummary;
+    items_declared: number;
+    checkpoint?: VerificationCheckpointInput;
+    posture?: {
+        ref: string;
+        configuration: Posture;
+    } | null;
 }
 /**
  * Compile one project rooted at an agent source into its complete,
@@ -26,6 +37,8 @@ export interface CompiledBundle {
  * into the output.
  */
 export declare function compileProject(sourcePath: string): Promise<CompiledBundle>;
+/** Compile an agent, standard skill or standalone public extension through one entry point. */
+export declare function compileAuthoringSource(sourcePath: string): Promise<CompiledBundle>;
 /** Compile one reusable standard Agent Skill with no wrapper manifest. */
 export declare function compileSkill(directoryPath: string, selectedVersion?: string): Promise<CompiledBundle>;
 export interface ExportedAgentSkill {
@@ -35,6 +48,17 @@ export interface ExportedAgentSkill {
     package_ref: string;
     files: Map<string, string>;
 }
+export interface SkillLock {
+    schema: 'zero-ar-skill-lock/v1';
+    procedure_ref: string;
+    activation: 'progressive' | 'always';
+    files: {
+        path: string;
+        content_ref: string;
+    }[];
+}
+/** Derive the source lock for one compiled Agent Skill. */
+export declare function skillLock(compiled: CompiledBundle): SkillLock;
 /** Recover a standard Agent Skill directory from a publication archive without rewriting source bytes. */
 export declare function exportAgentSkill(archive: {
     bundle: PublicationBundleManifest;
@@ -43,3 +67,9 @@ export declare function exportAgentSkill(archive: {
 export { verifyBundle } from '@zero-ar/contracts';
 /** The readable dry-run plan: what would publish, and what that would not establish. */
 export declare function renderPlan(compiled: CompiledBundle): string;
+/**
+ * Publication preflight over exact caller-supplied deployment and budget
+ * snapshots. It reads only the already-compiled closure and calls the same
+ * pure compiler used at runtime.
+ */
+export declare function previewPublicationVerificationPlan(compiled: CompiledBundle, input: PublicationVerificationPreviewInput): VerificationPlan;

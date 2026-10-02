@@ -39,7 +39,7 @@ export const EnvironmentAcceptanceLifecycleSchema = z.strictObject({
 });
 const acceptanceReportBodySchema = z.strictObject({
     format: z.literal('zero-ar-environment-acceptance/1'),
-    vector_id: z.string().regex(/^ENV-CV-\d{3}$/, 'expected an ENV-CV vector id'),
+    vector_id: z.string().regex(/^(?:ENV|DXI)-CV-\d{3}$/, 'expected an ENV-CV or DXI-CV vector id'),
     source_commit: sourceRevision,
     backend: EnvironmentBackendSchema,
     adapter: EnvironmentAdapterDescriptorSchema,

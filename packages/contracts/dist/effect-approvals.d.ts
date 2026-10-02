@@ -67,9 +67,9 @@ export declare const EffectApprovalRecordedSchema: z.ZodObject<{
         refuse: "refuse";
     }>;
     disposition: z.ZodEnum<{
+        expired: "expired";
         approved: "approved";
         refused: "refused";
-        expired: "expired";
     }>;
     reason: z.ZodString;
     recorded_at: z.ZodString;
@@ -78,19 +78,11 @@ export type EffectApprovalRecorded = z.infer<typeof EffectApprovalRecordedSchema
 /** Internal command sent from the Effect Plane to the deployment-owned authority service. */
 export declare const EffectAuthorityDecisionCommandSchema: z.ZodObject<{
     reason: z.ZodString;
-    idempotency_key: z.ZodString;
-    request_fingerprint: z.ZodString;
-    application_principal: z.ZodString;
-    run_id: z.ZodString;
-    target: z.ZodString;
+    scope: z.ZodLiteral<"effect:approve">;
     operation: z.ZodString;
-    param_hash: z.ZodString;
-    magnitude: z.ZodNullable<z.ZodNumber>;
-    expires_at: z.ZodString;
-    decision: z.ZodEnum<{
-        approve: "approve";
-        refuse: "refuse";
-    }>;
+    run_id: z.ZodString;
+    tenant: z.ZodString;
+    idempotency_key: z.ZodString;
     approver: z.ZodObject<{
         subject: z.ZodString;
         issuer: z.ZodString;
@@ -98,10 +90,18 @@ export declare const EffectAuthorityDecisionCommandSchema: z.ZodObject<{
         claims_ref: z.ZodString;
         credential_id: z.ZodNullable<z.ZodString>;
     }, z.core.$strict>;
-    tenant: z.ZodString;
+    decision: z.ZodEnum<{
+        approve: "approve";
+        refuse: "refuse";
+    }>;
+    target: z.ZodString;
     effect_id: z.ZodString;
+    param_hash: z.ZodString;
+    magnitude: z.ZodNullable<z.ZodNumber>;
+    expires_at: z.ZodString;
     grant_ref: z.ZodString;
-    scope: z.ZodLiteral<"effect:approve">;
+    request_fingerprint: z.ZodString;
+    application_principal: z.ZodString;
     scope_epoch: z.ZodNumber;
 }, z.core.$strict>;
 export type EffectAuthorityDecisionCommand = z.infer<typeof EffectAuthorityDecisionCommandSchema>;
@@ -141,9 +141,9 @@ export declare const EffectApprovalAcceptedSchema: z.ZodObject<{
         refuse: "refuse";
     }>;
     disposition: z.ZodEnum<{
+        expired: "expired";
         approved: "approved";
         refused: "refused";
-        expired: "expired";
     }>;
     application_principal: z.ZodString;
     approver: z.ZodObject<{

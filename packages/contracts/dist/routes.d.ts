@@ -47,6 +47,12 @@ export interface ApiRouteHeaderParameter {
     description: string;
     maxLength?: number;
 }
+/** One typed refusal a route answers before or instead of its success shape. */
+export interface ApiRouteDiagnostic {
+    status: 400 | 404 | 409;
+    code: string;
+    when: string;
+}
 export interface ApiRoute {
     method: 'GET' | 'POST';
     path: string;
@@ -60,6 +66,8 @@ export interface ApiRoute {
     query_request?: string;
     /** Extra typed request headers beyond the application Authorization credential. */
     headers?: readonly ApiRouteHeaderParameter[];
+    /** Route-specific refusals, named by diagnostic code, beyond the shared diagnostic responses. */
+    diagnostics?: readonly ApiRouteDiagnostic[];
     /** JSON is the default. Binary, framed, and stream routes state their media explicitly. */
     request_media_type?: ApiMediaType;
     response_media_type?: ApiMediaType;
@@ -182,6 +190,93 @@ export declare const API_ROUTES: {
         readonly kind: "json";
         readonly response: "RunSnapshotSchema";
         readonly area: "run";
+        readonly authorization: {
+            readonly scopes: readonly ["run:read"];
+        };
+    };
+    readonly requestCapabilityAdmission: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/capability-admissions";
+        readonly kind: "json";
+        readonly request: "CapabilityAdmissionRequestSchema";
+        readonly response: "CapabilityAdmissionAcceptedSchema";
+        readonly area: "run";
+        readonly authorization: {
+            readonly scopes: readonly ["capability:request"];
+        };
+        readonly product_mutation: {
+            readonly idempotency_source: "request-idempotency-key";
+            readonly changed_content_code: "capability.admission.idempotency-conflict";
+        };
+    };
+    readonly listCapabilityAdmissions: {
+        readonly method: "GET";
+        readonly path: "/v1/runs/:run_id/capability-admissions";
+        readonly kind: "json";
+        readonly query_request: "CapabilityAdmissionListRequestSchema";
+        readonly query: readonly [{
+            readonly name: "cursor";
+            readonly type: "string";
+            readonly pattern: "^cap_[0-9a-f]{32}$";
+        }, {
+            readonly name: "limit";
+            readonly type: "integer";
+            readonly minimum: 1;
+            readonly maximum: 100;
+            readonly default: 20;
+        }];
+        readonly response: "CapabilityAdmissionListSchema";
+        readonly area: "run";
+        readonly authorization: {
+            readonly scopes: readonly ["capability:read"];
+        };
+    };
+    readonly inspectCapabilityAdmission: {
+        readonly method: "GET";
+        readonly path: "/v1/runs/:run_id/capability-admissions/:request_id";
+        readonly kind: "json";
+        readonly response: "CapabilityAdmissionViewSchema";
+        readonly area: "run";
+        readonly authorization: {
+            readonly scopes: readonly ["capability:read"];
+        };
+    };
+    readonly decideCapabilityAdmission: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/capability-admissions/:request_id/decisions";
+        readonly kind: "json";
+        readonly request: "CapabilityAdmissionDecisionRequestSchema";
+        readonly response: "CapabilityAdmissionAcceptedSchema";
+        readonly area: "review-and-authority";
+        readonly authorization: {
+            readonly scopes: readonly ["capability:decide"];
+        };
+        readonly product_mutation: {
+            readonly idempotency_source: "request-idempotency-key";
+            readonly changed_content_code: "capability.admission.idempotency-conflict";
+        };
+    };
+    readonly cancelCapabilityAdmission: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/capability-admissions/:request_id/cancellations";
+        readonly kind: "json";
+        readonly request: "CapabilityAdmissionCancellationRequestSchema";
+        readonly response: "CapabilityAdmissionAcceptedSchema";
+        readonly area: "run";
+        readonly authorization: {
+            readonly scopes: readonly ["capability:cancel"];
+        };
+        readonly product_mutation: {
+            readonly idempotency_source: "request-idempotency-key";
+            readonly changed_content_code: "capability.admission.idempotency-conflict";
+        };
+    };
+    readonly verificationPlan: {
+        readonly method: "GET";
+        readonly path: "/v1/runs/:run_id/verification-plan";
+        readonly kind: "json";
+        readonly response: "VerificationPlanSchema";
+        readonly area: "results-and-audit";
         readonly authorization: {
             readonly scopes: readonly ["run:read"];
         };
@@ -339,7 +434,7 @@ export declare const API_ROUTES: {
         readonly method: "POST";
         readonly path: "/v1/runs/:run_id/resume-deferred";
         readonly kind: "json";
-        readonly request: "RunLifecycleCommandRequestSchema";
+        readonly request: "RunResumeDeferredRequestSchema";
         readonly response: "StartAcceptedSchema";
         readonly area: "run";
         readonly authorization: {
@@ -452,6 +547,22 @@ export declare const API_ROUTES: {
             readonly minimum: 0;
             readonly default: 0;
         }];
+        readonly headers: readonly [{
+            readonly name: "Last-Event-ID";
+            readonly argument: "last_event_id";
+            readonly required: false;
+            readonly maxLength: 20;
+            readonly description: "The outbox sequence of the last event a reconnecting event-stream client processed. The stream resumes after it. The after query parameter wins when both are sent.";
+        }];
+        readonly diagnostics: readonly [{
+            readonly status: 404;
+            readonly code: "run.unknown";
+            readonly when: "the run does not exist for this principal; the stream never opens";
+        }, {
+            readonly status: 400;
+            readonly code: "stream.cursor.invalid";
+            readonly when: "the after parameter or Last-Event-ID is not a non-negative integer sequence";
+        }];
         readonly response: "ObservationEventSchema";
         readonly response_media_type: "text/event-stream";
         readonly area: "results-and-audit";
@@ -463,6 +574,11 @@ export declare const API_ROUTES: {
         readonly method: "GET";
         readonly path: "/v1/runs/:run_id/progress/stream";
         readonly kind: "sse";
+        readonly diagnostics: readonly [{
+            readonly status: 404;
+            readonly code: "run.unknown";
+            readonly when: "the run does not exist for this principal; the stream never opens";
+        }];
         readonly response: "ProgressEventSchema";
         readonly response_media_type: "text/event-stream";
         readonly area: "run";
@@ -1226,6 +1342,28 @@ export declare const API_ROUTES: {
             readonly scopes: readonly ["memory:erase"];
         };
     };
+    readonly exportMemorySubject: {
+        readonly method: "POST";
+        readonly path: "/v1/memory/exports";
+        readonly kind: "json";
+        readonly request: "MemorySubjectTransferRequestSchema";
+        readonly response: "MemorySubjectTransferBundleSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:audit"];
+        };
+    };
+    readonly importMemorySubject: {
+        readonly method: "POST";
+        readonly path: "/v1/memory/imports";
+        readonly kind: "json";
+        readonly request: "MemorySubjectImportRequestSchema";
+        readonly response: "MemorySubjectImportOutcomeSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:restore"];
+        };
+    };
     readonly readRunMemory: {
         readonly method: "POST";
         readonly path: "/v1/runs/:run_id/memory-reads";
@@ -1235,6 +1373,303 @@ export declare const API_ROUTES: {
         readonly area: "run";
         readonly authorization: {
             readonly scopes: readonly ["memory:read"];
+        };
+    };
+    readonly contextReplay: {
+        readonly method: "GET";
+        readonly path: "/v1/runs/:run_id/contexts/:turn";
+        readonly kind: "json";
+        readonly response: "ContextReplaySchema";
+        readonly area: "results-and-audit";
+        readonly authorization: {
+            readonly scopes: readonly ["run:read"];
+        };
+    };
+    readonly wakeSchedulerReport: {
+        readonly method: "GET";
+        readonly path: "/v1/scheduler/wakes";
+        readonly kind: "json";
+        readonly response: "WakeSchedulerReportSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:audit"];
+        };
+    };
+    readonly controllers: {
+        readonly method: "GET";
+        readonly path: "/v1/runs/:run_id/controllers";
+        readonly kind: "json";
+        readonly response: "ControllersViewSchema";
+        readonly area: "results-and-audit";
+        readonly authorization: {
+            readonly scopes: readonly ["run:read"];
+        };
+    };
+    readonly calibrateAttention: {
+        readonly method: "POST";
+        readonly path: "/v1/attention/calibrations";
+        readonly kind: "json";
+        readonly request: "AttentionCalibrationRequestSchema";
+        readonly response: "AttentionCalibrationReportSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:attention"];
+        };
+    };
+    readonly publishAttentionCapacitySnapshot: {
+        readonly method: "POST";
+        readonly path: "/v1/attention/capacity-snapshots";
+        readonly kind: "json";
+        readonly request: "AttentionCapacitySnapshotPublishRequestSchema";
+        readonly response: "AttentionCapacitySnapshotSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:attention"];
+        };
+    };
+    readonly currentAttentionCapacitySnapshot: {
+        readonly method: "GET";
+        readonly path: "/v1/attention/capacity-snapshots/current";
+        readonly kind: "json";
+        readonly response: "AttentionCapacitySnapshotSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:attention"];
+        };
+    };
+    readonly attentionDashboard: {
+        readonly method: "GET";
+        readonly path: "/v1/attention/dashboard";
+        readonly kind: "json";
+        readonly response: "AttentionDashboardSchema";
+        readonly area: "review-and-authority";
+        readonly authorization: {
+            readonly scopes: readonly ["review:read"];
+        };
+    };
+    readonly proposeBrowserDestination: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/browser-destination-proposals";
+        readonly kind: "json";
+        readonly request: "BrowserDestinationProposalRequestSchema";
+        readonly response: "BrowserDestinationProposalSchema";
+        readonly area: "run";
+        readonly authorization: {
+            readonly scopes: readonly ["run:control"];
+        };
+    };
+    readonly decideBrowserDestination: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/browser-destination-proposals/:proposal_ref/decisions";
+        readonly kind: "json";
+        readonly request: "BrowserDestinationDecisionRequestSchema";
+        readonly response: "BrowserDestinationDecisionSchema";
+        readonly headers: readonly [{
+            readonly name: "X-Zero-AR-Participant-Token";
+            readonly argument: "participant_token";
+            readonly required: true;
+            readonly maxLength: 16384;
+            readonly description: "A JWT from the tenant's admitted participant identity provider. The verified subject becomes the destination approver.";
+        }];
+        readonly area: "review-and-authority";
+        readonly authorization: {
+            readonly scopes: readonly ["effect:approve"];
+        };
+    };
+    readonly sweepArtifacts: {
+        readonly method: "POST";
+        readonly path: "/v1/artifact-sweeps";
+        readonly kind: "json";
+        readonly request: "ArtifactSweepRequestSchema";
+        readonly response: "ArtifactSweepResultSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:reconcile"];
+        };
+    };
+    readonly exportPublication: {
+        readonly method: "GET";
+        readonly path: "/v1/publications/:publication_ref/export";
+        readonly kind: "bundle";
+        readonly response_media_type: "application/x-ndjson";
+        readonly area: "build-and-publish";
+        readonly authorization: {
+            readonly scopes: readonly ["publication:read"];
+        };
+    };
+    readonly importPublication: {
+        readonly method: "POST";
+        readonly path: "/v1/publication-imports";
+        readonly kind: "bundle";
+        readonly request_media_type: "application/x-ndjson";
+        readonly response: "PublicationImportOutcomeSchema";
+        readonly area: "build-and-publish";
+        readonly authorization: {
+            readonly scopes: readonly ["publication:create"];
+        };
+    };
+    readonly rebuildRegistry: {
+        readonly method: "POST";
+        readonly path: "/v1/registry/rebuilds";
+        readonly kind: "json";
+        readonly response: "RegistryRebuildOutcomeSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:rebuild"];
+        };
+    };
+    readonly registryAliasHistory: {
+        readonly method: "GET";
+        readonly path: "/v1/registry/aliases/:alias/history";
+        readonly kind: "json";
+        readonly response: "AliasHistorySchema";
+        readonly area: "build-and-publish";
+        readonly authorization: {
+            readonly scopes: readonly ["publication:read"];
+        };
+    };
+    readonly importLegacyModelPool: {
+        readonly method: "POST";
+        readonly path: "/v1/model-pool/legacy-imports";
+        readonly kind: "json";
+        readonly request: "LegacyModelPoolImportRequestSchema";
+        readonly response: "TenantModelPoolSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["provider:write"];
+        };
+    };
+    readonly toolSourceDrift: {
+        readonly method: "GET";
+        readonly path: "/v1/tool-sources/:source_ref/drift";
+        readonly kind: "json";
+        readonly response: "ToolSourceDriftReportSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["tool-source:read"];
+        };
+    };
+    readonly toolSourceIngress: {
+        readonly method: "POST";
+        readonly path: "/v1/tool-source-ingress/:tenant/:source_ref";
+        readonly kind: "json";
+        readonly request: "ToolSourceIngressDeliverySchema";
+        readonly response: "ToolSourceIngressReceiptSchema";
+        readonly headers: readonly [{
+            readonly name: "webhook-id";
+            readonly argument: "webhook_id";
+            readonly required: false;
+            readonly maxLength: 512;
+            readonly description: "The Standard Webhooks delivery id a Composio trigger delivery carries.";
+        }, {
+            readonly name: "webhook-timestamp";
+            readonly argument: "webhook_timestamp";
+            readonly required: false;
+            readonly maxLength: 64;
+            readonly description: "The Standard Webhooks delivery time the signature covers.";
+        }, {
+            readonly name: "webhook-signature";
+            readonly argument: "webhook_signature";
+            readonly required: false;
+            readonly maxLength: 4096;
+            readonly description: "The Standard Webhooks signature over the raw delivery bytes.";
+        }, {
+            readonly name: "X-Merge-Webhook-Signature";
+            readonly argument: "merge_webhook_signature";
+            readonly required: false;
+            readonly maxLength: 4096;
+            readonly description: "The Merge signature over the raw delivery bytes.";
+        }];
+        readonly area: "administration";
+        readonly authorization: {
+            readonly public: true;
+            readonly reason: "The provider signature over the raw delivery bytes authenticates a trigger delivery, and the tenant comes from deployment configuration. An unverified delivery starts nothing.";
+        };
+    };
+    readonly reissueEffectGrant: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/effect-grants/reissuances";
+        readonly kind: "json";
+        readonly request: "EffectGrantReissueRequestSchema";
+        readonly response: "EffectGrantReissueOutcomeSchema";
+        readonly headers: readonly [{
+            readonly name: "X-Zero-AR-Participant-Token";
+            readonly argument: "participant_token";
+            readonly required: true;
+            readonly maxLength: 16384;
+            readonly description: "A JWT from the tenant's admitted participant identity provider. The verified subject becomes the re-issue approver.";
+        }];
+        readonly area: "review-and-authority";
+        readonly authorization: {
+            readonly scopes: readonly ["effect:grant"];
+        };
+    };
+    readonly revokeEffectGrant: {
+        readonly method: "POST";
+        readonly path: "/v1/effect-grants/:grant_ref/revocations";
+        readonly kind: "json";
+        readonly request: "EffectGrantRevocationRequestSchema";
+        readonly response: "EffectGrantRevocationOutcomeSchema";
+        readonly area: "review-and-authority";
+        readonly authorization: {
+            readonly scopes: readonly ["effect:grant"];
+        };
+    };
+    readonly advanceEffectAuthorityEpoch: {
+        readonly method: "POST";
+        readonly path: "/v1/effect-authority/epoch-advances";
+        readonly kind: "json";
+        readonly request: "EffectAuthorityEpochAdvanceRequestSchema";
+        readonly response: "EffectAuthorityEpochAdvanceOutcomeSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["platform:authority-epoch"];
+        };
+    };
+    readonly listEffectTargets: {
+        readonly method: "GET";
+        readonly path: "/v1/effect-targets";
+        readonly kind: "json";
+        readonly diagnostics: readonly [{
+            readonly status: 400;
+            readonly code: "effect.authority.unwired";
+            readonly when: "a runtime that attaches no effect authority port, which is every hosted tenant in this build";
+        }];
+        readonly response: "EffectTargetListSchema";
+        readonly area: "review-and-authority";
+        readonly authorization: {
+            readonly scopes: readonly ["effect:read"];
+        };
+    };
+    readonly registerWorkspaceInstance: {
+        readonly method: "POST";
+        readonly path: "/v1/workspace-instances";
+        readonly kind: "json";
+        readonly request: "RegisterWorkspaceInstanceRequestSchema";
+        readonly response: "WorkspaceInstanceSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["environment:write"];
+        };
+    };
+    readonly listWorkspaceInstances: {
+        readonly method: "GET";
+        readonly path: "/v1/workspace-instances";
+        readonly kind: "json";
+        readonly response: "WorkspaceInstanceListSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["environment:read"];
+        };
+    };
+    readonly inspectWorkspaceInstance: {
+        readonly method: "GET";
+        readonly path: "/v1/workspace-instances/:instance_ref";
+        readonly kind: "json";
+        readonly response: "WorkspaceInstanceSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["environment:read"];
         };
     };
 };

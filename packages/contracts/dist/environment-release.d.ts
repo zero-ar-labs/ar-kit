@@ -24,10 +24,11 @@ export declare const EnvironmentAdapterReleaseBodySchema: z.ZodObject<{
         version: z.ZodString;
         adapter_digest: z.ZodString;
         backend: z.ZodEnum<{
+            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
-            process: "process";
+            "openai-agents": "openai-agents";
             oci: "oci";
             "cloudflare-sandbox": "cloudflare-sandbox";
             modal: "modal";
@@ -36,11 +37,11 @@ export declare const EnvironmentAdapterReleaseBodySchema: z.ZodObject<{
         }>;
         operations: z.ZodArray<z.ZodEnum<{
             cancel: "cancel";
+            submit: "submit";
             observe: "observe";
             teardown: "teardown";
             descriptor: "descriptor";
             prepare: "prepare";
-            submit: "submit";
             reconcile: "reconcile";
             collect: "collect";
             abandon: "abandon";
@@ -101,10 +102,11 @@ export declare const EnvironmentAdapterReleaseManifestSchema: z.ZodObject<{
         version: z.ZodString;
         adapter_digest: z.ZodString;
         backend: z.ZodEnum<{
+            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
-            process: "process";
+            "openai-agents": "openai-agents";
             oci: "oci";
             "cloudflare-sandbox": "cloudflare-sandbox";
             modal: "modal";
@@ -113,11 +115,11 @@ export declare const EnvironmentAdapterReleaseManifestSchema: z.ZodObject<{
         }>;
         operations: z.ZodArray<z.ZodEnum<{
             cancel: "cancel";
+            submit: "submit";
             observe: "observe";
             teardown: "teardown";
             descriptor: "descriptor";
             prepare: "prepare";
-            submit: "submit";
             reconcile: "reconcile";
             collect: "collect";
             abandon: "abandon";

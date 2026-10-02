@@ -1,18 +1,18 @@
 {
   "name": "@zero-ar/mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "MCP work entrypoints and reviewed capability import over the native Zero-AR API.",
   "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/client": "2.0.0",
     "@modelcontextprotocol/server": "2.0.0",
-    "@zero-ar/client": "0.1.0",
-    "@zero-ar/contracts": "0.1.0",
-    "@zero-ar/tool-kit": "0.1.0"
+    "@zero-ar/client": "0.2.0",
+    "@zero-ar/contracts": "0.2.0",
+    "@zero-ar/tool-kit": "0.2.0"
   },
   "engines": {
-    "node": ">=23.6"
+    "node": ">=24.11.0 <25"
   },
   "files": [
     "dist",

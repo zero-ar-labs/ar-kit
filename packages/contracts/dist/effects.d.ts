@@ -75,5 +75,13 @@ export declare const StaticGrantSchema: z.ZodObject<{
 export type StaticGrant = z.infer<typeof StaticGrantSchema>;
 /** The bytes a receipt attestation or owner signature covers. One serialization for signing and verifying. */
 export declare function receiptBinding(receipt: Pick<Receipt, 'effect_id' | 'target' | 'operation' | 'param_hash' | 'idempotency_key' | 'outcome' | 'owner_response'>): string;
+/**
+ * The key-free half of the receipt gate: the receipt's effect, target,
+ * operation, parameter hash and idempotency key must all equal the prepared
+ * descriptor's. Answers the first field that differs, or null when the
+ * receipt binds (EFX-006). Import checks this without any key; the
+ * dispatcher checks it beside the attestation.
+ */
+export declare function receiptBindingMismatch(receipt: Pick<Receipt, 'effect_id' | 'target' | 'operation' | 'param_hash' | 'idempotency_key'>, descriptor: Pick<EffectDescriptor, 'effect_id' | 'target' | 'operation' | 'param_hash' | 'idempotency_key'>): 'effect_id' | 'target' | 'operation' | 'param_hash' | 'idempotency_key' | null;
 /** The bytes a grant attestation covers: every field except the attestation itself. */
 export declare function grantBinding(grant: Omit<StaticGrant, 'attestation'>): string;

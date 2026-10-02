@@ -91,10 +91,10 @@ export declare const ToolSourceSchema: z.ZodIntersection<z.ZodDiscriminatedUnion
 }, z.core.$strict>], "provider">, z.ZodObject<{
     source_ref: z.ZodString;
     state: z.ZodEnum<{
+        disabled: "disabled";
         configured: "configured";
         revoked: "revoked";
         ready: "ready";
-        disabled: "disabled";
         removed: "removed";
     }>;
     credential_epoch: z.ZodNumber;
@@ -130,10 +130,10 @@ export declare const ToolSourceListSchema: z.ZodObject<{
     }, z.core.$strict>], "provider">, z.ZodObject<{
         source_ref: z.ZodString;
         state: z.ZodEnum<{
+            disabled: "disabled";
             configured: "configured";
             revoked: "revoked";
             ready: "ready";
-            disabled: "disabled";
             removed: "removed";
         }>;
         credential_epoch: z.ZodNumber;
@@ -163,9 +163,9 @@ export declare const ToolSourceToolEntrySchema: z.ZodObject<{
     operation_class: z.ZodNullable<z.ZodType<"observation" | "effect-proposal", unknown, z.core.$ZodTypeInternals<"observation" | "effect-proposal", unknown>>>;
     reviewer: z.ZodNullable<z.ZodString>;
     state: z.ZodEnum<{
+        disabled: "disabled";
         discovered: "discovered";
         enabled: "enabled";
-        disabled: "disabled";
     }>;
 }, z.core.$strict>;
 export type ToolSourceToolEntry = z.infer<typeof ToolSourceToolEntrySchema>;
@@ -195,9 +195,9 @@ export declare const ToolSourceCatalogueSchema: z.ZodObject<{
         operation_class: z.ZodNullable<z.ZodType<"observation" | "effect-proposal", unknown, z.core.$ZodTypeInternals<"observation" | "effect-proposal", unknown>>>;
         reviewer: z.ZodNullable<z.ZodString>;
         state: z.ZodEnum<{
+            disabled: "disabled";
             discovered: "discovered";
             enabled: "enabled";
-            disabled: "disabled";
         }>;
     }, z.core.$strict>>;
 }, z.core.$strict>;
@@ -238,10 +238,10 @@ export declare const ToolSourceEnablementSchema: z.ZodObject<{
     }, z.core.$strict>], "provider">, z.ZodObject<{
         source_ref: z.ZodString;
         state: z.ZodEnum<{
+            disabled: "disabled";
             configured: "configured";
             revoked: "revoked";
             ready: "ready";
-            disabled: "disabled";
             removed: "removed";
         }>;
         credential_epoch: z.ZodNumber;
@@ -261,9 +261,9 @@ export declare const ToolSourceEnablementSchema: z.ZodObject<{
         operation_class: z.ZodNullable<z.ZodType<"observation" | "effect-proposal", unknown, z.core.$ZodTypeInternals<"observation" | "effect-proposal", unknown>>>;
         reviewer: z.ZodNullable<z.ZodString>;
         state: z.ZodEnum<{
+            disabled: "disabled";
             discovered: "discovered";
             enabled: "enabled";
-            disabled: "disabled";
         }>;
     }, z.core.$strict>>;
 }, z.core.$strict>;
@@ -287,3 +287,75 @@ export declare const ToolSourceTestResultSchema: z.ZodObject<{
 }, z.core.$strict>;
 export type ToolSourceTestResult = z.infer<typeof ToolSourceTestResultSchema>;
 export declare function toolSourceProvider(request: RegisterToolSourceRequest): AggregatorProviderName;
+/**
+ * The one content address for a discovered provider catalogue. The registry
+ * and the aggregator host both hash through this function, so a snapshot one
+ * pins reads as the same snapshot in the other (TAG-023). Tools sort by name
+ * in UTF-16 code-unit order, which does not depend on the host locale.
+ */
+export declare function catalogueSnapshotRef(input: {
+    provider: AggregatorProviderName;
+    instance: string;
+    tools: readonly {
+        name: string;
+    }[];
+}): string;
+/** One recorded difference between a source's pinned catalogue and what the provider now serves (TAG-025). */
+export declare const ToolSourceDriftRecordSchema: z.ZodObject<{
+    source_ref: z.ZodString;
+    pinned_snapshot_ref: z.ZodString;
+    observed_snapshot_ref: z.ZodString;
+    added: z.ZodArray<z.ZodString>;
+    removed: z.ZodArray<z.ZodString>;
+    changed: z.ZodArray<z.ZodObject<{
+        name: z.ZodString;
+        fields: z.ZodArray<z.ZodEnum<{
+            description: "description";
+            input_schema: "input_schema";
+            provider_version: "provider_version";
+            annotations: "annotations";
+        }>>;
+    }, z.core.$strict>>;
+    recorded_at: z.ZodString;
+}, z.core.$strict>;
+export type ToolSourceDriftRecord = z.infer<typeof ToolSourceDriftRecordSchema>;
+/** The durable drift history of one source. Drifted means its enabled bindings refuse until re-enabled. */
+export declare const ToolSourceDriftReportSchema: z.ZodObject<{
+    source_ref: z.ZodString;
+    drifted: z.ZodBoolean;
+    records: z.ZodArray<z.ZodObject<{
+        source_ref: z.ZodString;
+        pinned_snapshot_ref: z.ZodString;
+        observed_snapshot_ref: z.ZodString;
+        added: z.ZodArray<z.ZodString>;
+        removed: z.ZodArray<z.ZodString>;
+        changed: z.ZodArray<z.ZodObject<{
+            name: z.ZodString;
+            fields: z.ZodArray<z.ZodEnum<{
+                description: "description";
+                input_schema: "input_schema";
+                provider_version: "provider_version";
+                annotations: "annotations";
+            }>>;
+        }, z.core.$strict>>;
+        recorded_at: z.ZodString;
+    }, z.core.$strict>>;
+}, z.core.$strict>;
+export type ToolSourceDriftReport = z.infer<typeof ToolSourceDriftReportSchema>;
+/**
+ * One provider trigger delivery exactly as the provider sent it. The
+ * provider signature over the raw bytes authenticates it; the tenant comes
+ * from deployment configuration, never from these fields (TAG-CV-013).
+ */
+export declare const ToolSourceIngressDeliverySchema: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+export type ToolSourceIngressDelivery = z.infer<typeof ToolSourceIngressDeliverySchema>;
+/** What ingress did with one delivery. An unverified delivery is kept as untrusted evidence and wakes nothing. */
+export declare const ToolSourceIngressReceiptSchema: z.ZodObject<{
+    source_ref: z.ZodString;
+    delivery_id: z.ZodString;
+    verified: z.ZodBoolean;
+    duplicate: z.ZodBoolean;
+    evidence_ref: z.ZodNullable<z.ZodString>;
+    run_id: z.ZodNullable<z.ZodString>;
+}, z.core.$strict>;
+export type ToolSourceIngressReceipt = z.infer<typeof ToolSourceIngressReceiptSchema>;

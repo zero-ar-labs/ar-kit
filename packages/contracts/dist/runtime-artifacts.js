@@ -12,7 +12,7 @@
  * and hash.
  */
 import { z } from 'zod';
-import { ARTIFACT_BACKENDS, EVIDENCE_GRADES, MEMORY_CLASSIFICATIONS, } from "./vocab.js";
+import { ARTIFACT_BACKENDS, ARTIFACT_TRANSFER_OMISSIONS, EVIDENCE_GRADES, MEMORY_CLASSIFICATIONS, RUN_BUNDLE_ARTIFACT_FRAME_KINDS, } from "./vocab.js";
 const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const runId = z.string().regex(/^run_[0-9a-f]{32}$/, 'expected a run id');
 const sessionId = z.string().regex(/^artw_[0-9a-f]{32}$/, 'expected an artifact session id');
@@ -86,4 +86,43 @@ export const RuntimeArtifactCommittedSessionSchema = z.strictObject({
 export const RuntimeArtifactSessionStatusSchema = z.discriminatedUnion('status', [
     RuntimeArtifactReadySessionSchema,
     RuntimeArtifactCommittedSessionSchema,
+]);
+/**
+ * An operator's sweep of uncommitted uploads for the authenticated tenant.
+ * The runtime raises a cutoff below the deployment's retention floor to that
+ * floor, so a sweep never removes an upload younger than the floor (PUB-030).
+ */
+export const ArtifactSweepRequestSchema = z.strictObject({
+    older_than_seconds: z.number().int().positive().max(31_536_000),
+    reason: z.string().min(1).max(500),
+});
+/** What one tenant sweep removed, and the cutoff it applied after the retention floor. */
+export const ArtifactSweepResultSchema = z.strictObject({
+    cutoff: z.string().datetime(),
+    retention_floor_seconds: z.number().int().nonnegative(),
+    removed_staged_writes: z.number().int().nonnegative(),
+    removed_uncommitted_objects: z.number().int().nonnegative(),
+});
+/** Why a run export or import named an artifact without carrying its bytes (UAT-ART-013). */
+export const ArtifactTransferOmissionSchema = z.strictObject({
+    artifact_ref: artifactHandle,
+    reason: z.enum(ARTIFACT_TRANSFER_OMISSIONS),
+});
+const [ARTIFACT_BUNDLE_FRAME, ARTIFACT_OMISSIONS_FRAME] = RUN_BUNDLE_ARTIFACT_FRAME_KINDS;
+/**
+ * One artifact frame of a run export (UAT-ART-013): an artifact bundle for
+ * one committed scope, a run id or intake:<ref>, with the handles it
+ * carries, or the handles the export named without bytes.
+ */
+export const RunBundleArtifactFrameSchema = z.discriminatedUnion('kind', [
+    z.strictObject({
+        kind: z.literal(ARTIFACT_BUNDLE_FRAME),
+        scope: z.string().min(1).max(256),
+        artifact_refs: z.array(artifactHandle).min(1),
+        text: z.string().min(1),
+    }),
+    z.strictObject({
+        kind: z.literal(ARTIFACT_OMISSIONS_FRAME),
+        omissions: z.array(ArtifactTransferOmissionSchema).min(1),
+    }),
 ]);
