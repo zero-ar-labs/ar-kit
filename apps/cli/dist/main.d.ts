@@ -17,3 +17,13 @@ export declare function runCli(options?: {
 export declare function runCliAndExit(options?: {
     argv?: string[];
 }): void;
+/** Render one actionable refusal while keeping stacks behind explicit debug output. */
+export declare function renderCliFailure(error: unknown, options?: {
+    command?: string;
+    debug?: boolean;
+}): string;
+/** Remove presentation-only flags before command parsing and runtime selection. */
+export declare function globalCliArguments(args: readonly string[]): {
+    arguments: string[];
+    no_color: boolean;
+};

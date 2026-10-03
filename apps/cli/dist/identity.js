@@ -1,10 +1,10 @@
 /**
  * The command's identity and its usage table.
  *
- * What this is: the one table that drives help, completions, manpages and
- * release artifacts, and the identity report that help, doctor and version
- * print: product, command, runtime build, contract version. Every surface
- * reads these so the command never describes itself by hand.
+ * What this is: the usage and example data that drive help, completions,
+ * manpages and release artifacts, and the identity report that help, doctor
+ * and version print: product, command, runtime build, contract version.
+ * Every surface reads these so the command never describes itself by hand.
  */
 import { CONTRACT_VERSION, SUCCESSOR_PRODUCT_IDENTITY, SUPPORTED_NODE_RUNTIME } from '@zero-ar/contracts';
 export const CLI_USAGE_ROWS = [
@@ -59,6 +59,25 @@ export const CLI_USAGE_ROWS = [
     { command: 'help', syntax: 'help', summary: 'print this command guide' },
 ];
 export const CLI_COMMANDS = [...new Set(CLI_USAGE_ROWS.map((row) => row.command))].sort();
+/** Copyable first steps for the commands used in the primary product journey. */
+export const CLI_COMMAND_EXAMPLES = {
+    init: ['init documentary-agent --form yaml'],
+    validate: ['validate documentary-agent'],
+    publish: ['publish documentary-agent --dry-run'],
+    run: ['run "Summarise the objective"'],
+    inspect: ['inspect <run-id>'],
+    result: ['result <run-id>', 'result <run-id> --json'],
+    doctor: ['doctor', 'doctor --json'],
+};
+/** The full guide groups the command table by the job a person is doing. */
+export const CLI_HELP_SECTIONS = [
+    { title: 'get started', commands: ['init', 'scaffold', 'validate', 'run', 'attach', 'inspect', 'result'] },
+    { title: 'guide and control runs', commands: ['records', 'context', 'verification-plan', 'steer', 'redirect', 'answer', 'resume', 'fork', 'replay', 'cancel'] },
+    { title: 'publish and integrate', commands: ['publish', 'publication', 'source', 'capability', 'browser', 'gateway'] },
+    { title: 'operate', commands: ['doctor', 'profile', 'rebuild', 'export', 'import', 'registry', 'artifact', 'memory', 'attention'] },
+    { title: 'administer hosted runtime', commands: ['environment', 'provider', 'tool-source', 'effect'] },
+    { title: 'reference', commands: ['version', 'help'] },
+];
 /** Commands whose work can run against bundled or hosted Zero-AR. */
 export const CLI_REMOTE_CAPABLE_COMMANDS = [
     'run',

@@ -1,16 +1,16 @@
 {
   "name": "@zero-ar/cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
-  "description": "The Zero-AR command. Speaks only to the public API.",
+  "description": "Start, inspect, control and transfer Zero-AR work from the terminal.",
   "license": "Apache-2.0",
   "bin": {
     "zeroar": "./dist/zeroar.js"
   },
   "dependencies": {
-    "@zero-ar/contracts": "0.2.0",
-    "@zero-ar/client": "0.2.0",
-    "@zero-ar/sdk": "0.2.0"
+    "@zero-ar/contracts": "0.2.1",
+    "@zero-ar/client": "0.2.1",
+    "@zero-ar/sdk": "0.2.1"
   },
   "engines": {
     "node": ">=24.11.0 <25"

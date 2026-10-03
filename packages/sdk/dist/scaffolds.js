@@ -14,7 +14,7 @@ import { AUTHORING_SCAFFOLD_KINDS, AUTHORING_SOURCE_FORMS, ProcedureManifestSche
 const NAME = /^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/;
 const DIRECTORY_NAME = /^[a-z][a-z0-9-]*$/;
 const VERSION = /^\d+\.\d+\.\d+$/;
-const PUBLIC_VERSION = '0.2.0';
+const PUBLIC_VERSION = '0.2.1';
 const TOOL_KIT = '@zero-ar/tool-kit';
 const VALIDATOR_KIT = '@zero-ar/validator-kit';
 function checked(kind, name, version = '1.0.0') {

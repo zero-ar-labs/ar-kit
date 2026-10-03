@@ -22,7 +22,7 @@ Zero-AR is not a model, model host, sandbox, chat interface, workflow graph or g
 
 Zero-AR expands to **Zero-layer Autonomous Runtime**. "Zero-layer" places the runtime beneath whichever model, agent framework, tool host or human expert does the work. "Autonomous Runtime" describes continuity toward an explicit objective, not unlimited authority. The product is unrelated to augmented reality or Apple ARKit. `ar-kit` is the name of this public Zero-AR developer kit.
 
-**Developer release:** nine public packages are published to npm at version 0.2.0. This repository also carries the exact tested tarballs, emitted JavaScript, TypeScript declarations and the [OpenAPI 3.1 contract](./packages/client/openapi/zero-ar-v1.openapi.json). The runtime server and bundled Local Lite distribution are separate artifacts.
+**Developer release:** nine public packages are published to npm at version 0.2.1. This repository also carries the exact tested tarballs, emitted JavaScript, TypeScript declarations and the [OpenAPI 3.1 contract](./packages/client/openapi/zero-ar-v1.openapi.json). The runtime server and bundled Local Lite distribution are separate artifacts.
 
 ## Connect to a running endpoint
 
@@ -56,8 +56,8 @@ A process can discard this handle and recreate it later with `zeroar.attach(runI
 Node.js 24.11.0 through the Node 24.x LTS line is required. Install the SDK or command from npm:
 
 ```bash
-npm install @zero-ar/sdk@0.2.0
-npm install --global @zero-ar/cli@0.2.0
+npm install @zero-ar/sdk@0.2.1
+npm install --global @zero-ar/cli@0.2.1
 
 export ZERO_AR_URL=https://your-zero-ar.example
 export ZERO_AR_API_KEY=your-tenant-key
@@ -135,7 +135,7 @@ npm run verify
 npm run exercise
 ```
 
-`verify` checks the byte inventory and its binding to source commit `a73de3cc2c98157ab4db23eefe088114db26ca64`. `exercise` installs all nine tarballs in an isolated consumer, imports their public entrypoints, reads the OpenAPI contract and runs the packaged command. Neither command publishes anything. See [PROVENANCE.md](./PROVENANCE.md) for the complete boundary.
+`verify` checks the byte inventory and its binding to source commit `f1e0077e6a9840b52dd6b89a9d42755935e2b821`. `exercise` installs all nine tarballs in an isolated consumer, imports their public entrypoints, reads the OpenAPI contract and runs the packaged command. Neither command publishes anything. See [PROVENANCE.md](./PROVENANCE.md) for the complete boundary.
 
 ## License
 

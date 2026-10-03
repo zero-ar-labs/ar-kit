@@ -19,19 +19,30 @@ import { pathToFileURL } from 'node:url';
 import { CONTRACT_VERSION, AUTHORING_SCAFFOLD_KINDS, CapabilityAdmissionRequestSchema, DiagnosticError, compileBrowserBinding, AdmitModelAdapterRequestSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, DeclareFallbackSetRequestSchema, EnableProviderModelRequestSchema, EnableToolSourceToolsRequestSchema, ProtectedCredentialIngestRequestSchema, RegisterEnvironmentRequestSchema, RegisterSourceRequestSchema, RegisterToolSourceRequestSchema, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SyncProviderCatalogueRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceStateRequestSchema, canonicalJson, makeId, productEnvironmentNames, productEnvironmentValue, profileCapabilitySummaryFor, resolveCommandTarget, renderDiagnostic, shortId, SUCCESSOR_PRODUCT_IDENTITY, SUPPORTED_NODE_RUNTIME, isSupportedNodeRuntime, productLocalDataDirectory, } from '@zero-ar/contracts';
 import { connectRuntimeTarget, ZeroARClient } from '@zero-ar/client';
 import { authoringScaffold, compileAuthoringSource, declareBrowserTools, loadProject, lockBytes, publishCapabilitySource, previewPublicationVerificationPlan, renderPlan, renderVerificationPlan, scaffoldProject, verifyBundle, } from '@zero-ar/sdk';
-import { CLI_USAGE_ROWS, cliIdentityReport, createCliContext, isRemoteCapableCommand, } from "./identity.js";
+import { CLI_COMMANDS, CLI_COMMAND_EXAMPLES, CLI_HELP_SECTIONS, CLI_USAGE_ROWS, cliIdentityReport, createCliContext, isRemoteCapableCommand, } from "./identity.js";
 import { CLI_COMMAND_MODULES } from "./commands/index.js";
 import { exportedArtifactsNote } from "./commands/artifact.js";
 import { externalProductTemplate } from "./external-product-template.js";
-import { Terminal, neutralize, neutralizeDeep, stateFor } from "./terminal.js";
-const t = new Terminal();
+import { Terminal, detectAscii, detectTier, neutralize, neutralizeDeep, stateFor } from "./terminal.js";
+let t = new Terminal();
 export async function runCli(options = {}) {
     const context = createCliContext();
-    const [command, ...rest] = options.argv ?? process.argv.slice(2);
-    if (!command || command === 'help' || command === '--help') {
+    const parsed = globalCliArguments(options.argv ?? process.argv.slice(2));
+    t = new Terminal(detectTier(process.env, process.stdout.isTTY ?? false, parsed.no_color), detectAscii(process.env));
+    const [command, ...rest] = parsed.arguments;
+    if (!command) {
+        console.log(conciseHelpText(context));
+        return 0;
+    }
+    if (command === 'help' || command === '--help' || command === '-h') {
+        const requested = command === 'help' ? rest[0] : undefined;
+        if (requested)
+            return printCommandHelp(requested, context);
         console.log(helpText(context));
         return 0;
     }
+    if (rest.includes('--help') || rest.includes('-h'))
+        return printCommandHelp(command, context);
     if (command === 'version' || command === '--version') {
         console.log(versionText(context));
         return 0;
@@ -57,8 +68,7 @@ export async function runCli(options = {}) {
     if (answeredLocally !== undefined && answeredLocally !== null)
         return answeredLocally;
     if (!isRemoteCapableCommand(command)) {
-        console.error(`error: ${command} is not a command. Run ${context.command} help for the list.`);
-        return 1;
+        return unknownCommand(command, context);
     }
     const resolved = resolveCommandTarget({ arguments: rest, environment: process.env });
     const connection = await connectRuntimeTarget({
@@ -220,23 +230,61 @@ export async function runCli(options = {}) {
 }
 export function runCliAndExit(options = {}) {
     runCli(options).then((code) => process.exit(code), (error) => {
-        if (error instanceof DiagnosticError)
-            console.error(renderDiagnostic(error.diagnostic));
-        else
-            console.error('defect:', error);
+        console.error(renderCliFailure(error));
         process.exit(1);
     });
 }
+/** Render one actionable refusal while keeping stacks behind explicit debug output. */
+export function renderCliFailure(error, options = {}) {
+    if (error instanceof DiagnosticError)
+        return renderDiagnostic(error.diagnostic);
+    const command = options.command ?? createCliContext().command;
+    const debugName = productEnvironmentNames('DEBUG').name;
+    const debug = options.debug ?? productEnvironmentValue('DEBUG', process.env) === '1';
+    const reason = cleanFailureText(error instanceof Error ? error.message : String(error), false);
+    const lines = [
+        'error cli.command.failed: the command stopped before it finished.',
+        `reason: ${reason || 'the command returned an error without a reason'}`,
+        `next: run ${command} doctor to check the installation and selected runtime target`,
+    ];
+    if (debug && error instanceof Error && error.stack) {
+        lines.push('debug details:', cleanFailureText(error.stack, true));
+    }
+    else {
+        lines.push(`debug: rerun with ${debugName}=1 to include stack details in a problem report`);
+    }
+    return lines.join('\n');
+}
+function cleanFailureText(value, preserveLines) {
+    const redacted = neutralize(value)
+        .replace(/\bBearer\s+[^\s,;]+/gi, 'Bearer [redacted]')
+        .replace(/\bsk-[A-Za-z0-9_-]{8,}\b/g, '[redacted]')
+        .replace(/([?&][^=&#\s]+)=([^&#\s]*)/g, '$1=[redacted]')
+        .slice(0, 8_000);
+    return preserveLines ? redacted : redacted.replace(/\s+/g, ' ').trim();
+}
 function helpText(context) {
-    const commandWidth = Math.max(...CLI_USAGE_ROWS.map((row) => `${context.command} ${row.syntax}`.length));
-    const rows = CLI_USAGE_ROWS
-        .map((row) => `  ${`${context.command} ${row.syntax}`.padEnd(commandWidth)}  ${row.summary}`)
-        .join('\n');
     const identity = cliIdentityReport(context);
+    const sections = CLI_HELP_SECTIONS.map((section) => {
+        const rows = CLI_USAGE_ROWS.filter((row) => section.commands.includes(row.command));
+        return `${section.title}\n${usageRows(rows, context)}`;
+    }).join('\n\n');
     return `${t.label(context.command)} a log-native runtime for long-horizon agent work
 
 usage
-${rows}
+  ${context.command} <command> [options]
+
+examples
+  ${context.command} init my-agent
+  ${context.command} run "Summarise the objective"
+
+${sections}
+
+global options
+  -h, --help       show the full guide or help for one command
+  --version        show product, runtime, and contract versions
+  --no-color       never write terminal colour sequences
+  --url <url>      use a hosted runtime for remote-capable commands
 
 identity
   product ${identity.product}
@@ -249,7 +297,76 @@ no database server, and no network.
 target
   Remote-capable commands use --url, then ZERO_AR_URL, then bundled Local Lite when this distribution carries it.
   Hosted authentication is read only from ZERO_AR_API_KEY. A selected hosted
-  target refuses in place and never falls back to bundled execution.`;
+  target refuses in place and never falls back to bundled execution.
+
+docs
+  https://github.com/zero-ar-labs/zero-ar#readme
+  Report a problem: https://github.com/zero-ar-labs/zero-ar/issues`;
+}
+function conciseHelpText(context) {
+    return `${t.label(context.command)} a log-native runtime for long-horizon agent work
+
+usage
+  ${context.command} <command> [options]
+
+examples
+  ${context.command} init my-agent
+  ${context.command} run "Summarise the objective"
+
+common commands
+  run       start a run
+  inspect   view a run's state, budgets, and usage
+  result    read the artifact, verdict, and handover
+  doctor    check this installation or a hosted database
+
+Run ${context.command} help for every command.
+Run ${context.command} help <command> for command details.`;
+}
+function printCommandHelp(command, context) {
+    if (!CLI_COMMANDS.includes(command))
+        return unknownCommand(command, context);
+    const rows = CLI_USAGE_ROWS.filter((row) => row.command === command);
+    const examples = CLI_COMMAND_EXAMPLES[command] ?? [];
+    console.log(`${t.label(`${context.command} ${command}`)} ${rows[0]?.summary ?? 'command reference'}
+
+${examples.length > 0 ? `examples\n${examples.map((example) => `  ${context.command} ${example}`).join('\n')}\n\n` : ''}usage
+${usageRows(rows, context)}
+
+Run ${context.command} help for every command.
+Docs: https://github.com/zero-ar-labs/zero-ar#readme`);
+    return 0;
+}
+function usageRows(rows, context) {
+    const commands = rows.map((row) => `${context.command} ${row.syntax}`);
+    const width = Math.max(...commands.map((command) => command.length));
+    return rows.map((row, index) => `  ${commands[index].padEnd(width)}  ${row.summary}`).join('\n');
+}
+function unknownCommand(command, context) {
+    const suggestion = closestCommand(command);
+    console.error(`error: ${command} is not a command.`);
+    if (suggestion)
+        console.error(`Did you mean ${context.command} ${suggestion}?`);
+    console.error(`Run ${context.command} help for every command.`);
+    return 1;
+}
+function closestCommand(input) {
+    const ranked = CLI_COMMANDS.map((command) => ({ command, distance: editDistance(input, command) }))
+        .sort((left, right) => left.distance - right.distance || left.command.localeCompare(right.command));
+    const best = ranked[0];
+    if (!best)
+        return undefined;
+    return best.distance <= Math.max(2, Math.floor(best.command.length / 3)) ? best.command : undefined;
+}
+function editDistance(left, right) {
+    const previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+    for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+        const current = [leftIndex];
+        for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+            current[rightIndex] = Math.min(current[rightIndex - 1] + 1, previous[rightIndex] + 1, previous[rightIndex - 1] + (left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1));
+        }
+        previous.splice(0, previous.length, ...current);
+    }
+    return previous[right.length];
 }
 function versionText(context) {
     const identity = cliIdentityReport(context);
@@ -259,6 +376,13 @@ function versionText(context) {
         `execution substrate: ${identity.execution_substrate}`,
         `contract: ${identity.contract_version}`,
     ].join('\n');
+}
+/** Remove presentation-only flags before command parsing and runtime selection. */
+export function globalCliArguments(args) {
+    return {
+        arguments: args.filter((argument) => argument !== '--no-color'),
+        no_color: args.includes('--no-color'),
+    };
 }
 // ---- commands ----
 /**
@@ -807,7 +931,7 @@ function renderEvent(raw) {
         case 'item.invalidated':
             return; // the checkpoint line already carries the count
         case 'completion.proposed':
-            console.log(`${at}  completion proposed; the claim now meets verification`);
+            console.log(`${at}  completion proposed; checking the claim against the verification plan`);
             return;
         case 'verification.concluded': {
             const verdict = String(event.payload['verdict']);
@@ -855,6 +979,10 @@ async function showResult(client, run_id, asJson = false) {
     console.log(t.label('handover'));
     for (const line of result.handover)
         console.log(`  ${neutralize(line)}`);
+    console.log('');
+    console.log(t.label('next'));
+    console.log(`  inspect: ${createCliContext().command} inspect ${run_id}`);
+    console.log(`  records: ${createCliContext().command} records ${run_id}`);
     return result.terminal === 'complete' || result.terminal === 'unverified_artifact' ? 0 : result.status === 'suspended' ? 2 : 0;
 }
 async function inspect(client, run_id) {

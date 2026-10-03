@@ -13,7 +13,7 @@
  * appear. Brass carries identity and interaction, never a state.
  */
 export type Tier = '256' | '16' | 'none';
-export declare function detectTier(env?: NodeJS.ProcessEnv, isTty?: boolean): Tier;
+export declare function detectTier(env?: NodeJS.ProcessEnv, isTty?: boolean, noColor?: boolean): Tier;
 export declare function detectAscii(env?: NodeJS.ProcessEnv): boolean;
 /** The six states: filled, crossed, open, dotted, barred, slashed. */
 declare const GLYPHS: {
