@@ -1,11 +1,11 @@
 {
   "name": "@zero-ar/testkit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
-  "description": "Deterministic providers, logical clocks, seeded populations, and self-cleaning scratch directories.",
+  "description": "Build deterministic Zero-AR integration tests without external providers.",
   "license": "Apache-2.0",
   "dependencies": {
-    "@zero-ar/contracts": "0.2.0"
+    "@zero-ar/contracts": "0.2.1"
   },
   "engines": {
     "node": ">=24.11.0 <25"

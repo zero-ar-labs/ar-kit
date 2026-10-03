@@ -12,8 +12,8 @@
  * background is ever set, and underline, blink, reverse, and italic do not
  * appear. Brass carries identity and interaction, never a state.
  */
-export function detectTier(env = process.env, isTty = process.stdout.isTTY ?? false) {
-    if (!isTty || env['NO_COLOR'] !== undefined || env['TERM'] === 'dumb')
+export function detectTier(env = process.env, isTty = process.stdout.isTTY ?? false, noColor = false) {
+    if (!isTty || noColor || (env['NO_COLOR'] !== undefined && env['NO_COLOR'] !== '') || env['TERM'] === 'dumb')
         return 'none';
     const term = env['TERM'] ?? '';
     if (term.includes('256color') || env['COLORTERM'])

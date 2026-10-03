@@ -1,11 +1,11 @@
 {
   "name": "@zero-ar/conformance",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
-  "description": "Versioned adapter and profile conformance harnesses for third-party implementations.",
+  "description": "Check environment adapters against the Zero-AR lifecycle contract.",
   "license": "Apache-2.0",
   "dependencies": {
-    "@zero-ar/contracts": "0.2.0"
+    "@zero-ar/contracts": "0.2.1"
   },
   "engines": {
     "node": ">=24.11.0 <25"

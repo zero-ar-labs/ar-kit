@@ -8,7 +8,7 @@
  */
 export declare const EXTERNAL_PRODUCT_SCAFFOLD_VERSION: "1.0.0";
 export declare const EXTERNAL_PRODUCT_API_VERSION: "v1";
-export declare const EXTERNAL_PRODUCT_PACKAGE_VERSION: "0.2.0";
+export declare const EXTERNAL_PRODUCT_PACKAGE_VERSION: "0.2.1";
 export type ExternalProductFixture = 'facilities-operations' | 'large-corpus-review';
 export interface ExternalProductTemplateOptions {
     fixture: ExternalProductFixture;

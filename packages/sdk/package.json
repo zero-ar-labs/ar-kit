@@ -1,13 +1,13 @@
 {
   "name": "@zero-ar/sdk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
-  "description": "Authoring builders producing immutable content-addressed manifests.",
+  "description": "Author agents and attach durable Zero-AR runs to applications.",
   "license": "Apache-2.0",
   "dependencies": {
-    "@zero-ar/contracts": "0.2.0",
-    "@zero-ar/client": "0.2.0",
-    "@zero-ar/validator-kit": "0.2.0",
+    "@zero-ar/contracts": "0.2.1",
+    "@zero-ar/client": "0.2.1",
+    "@zero-ar/validator-kit": "0.2.1",
     "esbuild": "^0.28.2",
     "yaml": "^2.8.1"
   },
