@@ -135,7 +135,7 @@ npm run verify
 npm run exercise
 ```
 
-`verify` checks the byte inventory and its binding to source commit `03b2ba6fc353a80be897c188919895c6c90e2f11`. `exercise` installs all nine tarballs in an isolated consumer, imports their public entrypoints, reads the OpenAPI contract and runs the packaged command. Neither command publishes anything. See [PROVENANCE.md](./PROVENANCE.md) for the complete boundary.
+`verify` checks the byte inventory and its binding to source commit `a73de3cc2c98157ab4db23eefe088114db26ca64`. `exercise` installs all nine tarballs in an isolated consumer, imports their public entrypoints, reads the OpenAPI contract and runs the packaged command. Neither command publishes anything. See [PROVENANCE.md](./PROVENANCE.md) for the complete boundary.
 
 ## License
 
