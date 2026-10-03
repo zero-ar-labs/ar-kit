@@ -101,6 +101,7 @@ export declare const CredentialBindingSchema: z.ZodObject<{
         "merge-agent-handler": "merge-agent-handler";
         "merge-unified": "merge-unified";
         "s3-compatible-artifact-store": "s3-compatible-artifact-store";
+        "memory-wrapping-key": "memory-wrapping-key";
     }>;
     status: z.ZodEnum<{
         active: "active";
@@ -123,6 +124,7 @@ export declare const CreateExternalCredentialBindingRequestSchema: z.ZodObject<{
         "merge-agent-handler": "merge-agent-handler";
         "merge-unified": "merge-unified";
         "s3-compatible-artifact-store": "s3-compatible-artifact-store";
+        "memory-wrapping-key": "memory-wrapping-key";
     }>;
     external_ref: z.ZodString;
 }, z.core.$strict>;
@@ -142,6 +144,7 @@ export declare const ProtectedCredentialIngestRequestSchema: z.ZodObject<{
         "merge-agent-handler": "merge-agent-handler";
         "merge-unified": "merge-unified";
         "s3-compatible-artifact-store": "s3-compatible-artifact-store";
+        "memory-wrapping-key": "memory-wrapping-key";
     }>;
     secret: z.ZodString;
 }, z.core.$strict>;
@@ -162,23 +165,23 @@ export type RevokeCredentialRequest = z.infer<typeof RevokeCredentialRequestSche
 /** Exact compatible behavior one tenant admits for a configured endpoint. */
 export declare const ProviderCompatibilitySchema: z.ZodObject<{
     streaming: z.ZodEnum<{
-        supported: "supported";
         unknown: "unknown";
+        supported: "supported";
         unsupported: "unsupported";
     }>;
     tools: z.ZodEnum<{
-        supported: "supported";
         unknown: "unknown";
+        supported: "supported";
         unsupported: "unsupported";
     }>;
     cancellation: z.ZodEnum<{
-        supported: "supported";
         unknown: "unknown";
+        supported: "supported";
         unsupported: "unsupported";
     }>;
     context_limits: z.ZodEnum<{
-        supported: "supported";
         unknown: "unknown";
+        supported: "supported";
         unsupported: "unsupported";
     }>;
     usage: z.ZodEnum<{
@@ -229,23 +232,23 @@ export declare const CreateProviderInstanceRequestSchema: z.ZodObject<{
     }>;
     compatibility: z.ZodObject<{
         streaming: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         tools: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         cancellation: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         context_limits: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         usage: z.ZodEnum<{
@@ -306,23 +309,23 @@ export declare const ProviderInstanceSchema: z.ZodObject<{
     }>;
     compatibility: z.ZodObject<{
         streaming: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         tools: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         cancellation: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         context_limits: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         usage: z.ZodEnum<{
@@ -389,23 +392,23 @@ export declare const ProviderInstanceListSchema: z.ZodObject<{
         }>;
         compatibility: z.ZodObject<{
             streaming: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             tools: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             cancellation: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             context_limits: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             usage: z.ZodEnum<{
@@ -470,9 +473,9 @@ export declare const ProviderModelEntrySchema: z.ZodObject<{
     adapter_ref: z.ZodString;
     model_ref: z.ZodString;
     state: z.ZodEnum<{
+        disabled: "disabled";
         discovered: "discovered";
         enabled: "enabled";
-        disabled: "disabled";
     }>;
 }, z.core.$strict>;
 export type ProviderModelEntry = z.infer<typeof ProviderModelEntrySchema>;
@@ -490,9 +493,9 @@ export declare const ProviderCatalogueSchema: z.ZodObject<{
         adapter_ref: z.ZodString;
         model_ref: z.ZodString;
         state: z.ZodEnum<{
+            disabled: "disabled";
             discovered: "discovered";
             enabled: "enabled";
-            disabled: "disabled";
         }>;
     }, z.core.$strict>>;
 }, z.core.$strict>;
@@ -543,23 +546,23 @@ export declare const ModelSelectionSchema: z.ZodObject<{
     }>;
     compatibility: z.ZodObject<{
         streaming: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         tools: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         cancellation: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         context_limits: z.ZodEnum<{
-            supported: "supported";
             unknown: "unknown";
+            supported: "supported";
             unsupported: "unsupported";
         }>;
         usage: z.ZodEnum<{
@@ -582,4 +585,15 @@ export declare const ModelSelectionSchema: z.ZodObject<{
     credential_epoch: z.ZodNullable<z.ZodNumber>;
 }, z.core.$strict>;
 export type ModelSelection = z.infer<typeof ModelSelectionSchema>;
+/**
+ * An operator's explicit, audited move of a tenant's deprecated single
+ * provider fields into the model pool (DXI-017). The provider model id comes
+ * from the tenant's deployment configuration, never from this body, and an
+ * instance whose adapter differs from the configured one refuses.
+ */
+export declare const LegacyModelPoolImportRequestSchema: z.ZodObject<{
+    provider_instance_ref: z.ZodString;
+    alias: z.ZodOptional<z.ZodString>;
+}, z.core.$strict>;
+export type LegacyModelPoolImportRequest = z.infer<typeof LegacyModelPoolImportRequestSchema>;
 export {};

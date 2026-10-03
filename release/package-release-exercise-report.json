@@ -1,21 +1,21 @@
 {
   "schema": "zero-ar-public-package-exercise/v1",
   "source_report_schema": "zero-ar-package-release-exercise/v1",
-  "release_manifest_ref": "sha256:c318c4e80931217fc82c424d89b1574400bd2c505060c876b431af8a8f8f8f1f",
+  "release_manifest_ref": "sha256:3a6fc0e61d1c5930c7f030d102236285fcf5350bdf7d3976a7b9efc40144e25f",
   "packages": [
     {
       "name": "@zero-ar/contracts",
-      "tarball_path": "release/tarballs/zero-ar-contracts-0.1.0.tgz",
-      "sha256": "1382ad2db3a6759f57c491b07c56551dce07ac5fb3e5c9ec817b22461d76d20f",
-      "entry_count": 82,
+      "tarball_path": "release/tarballs/zero-ar-contracts-0.2.0.tgz",
+      "sha256": "b7913d92a3d4817f1b2240e275081125d32da9bf313cf52d903bc9c48cda79c0",
+      "entry_count": 104,
       "export_subpaths": [
         "."
       ]
     },
     {
       "name": "@zero-ar/client",
-      "tarball_path": "release/tarballs/zero-ar-client-0.1.0.tgz",
-      "sha256": "3f55db3178b34d36e32aecceaf264d796c65c2a20272436a6ca72b206712277c",
+      "tarball_path": "release/tarballs/zero-ar-client-0.2.0.tgz",
+      "sha256": "0da051c29069eba634df7fcebe26843b70d04e981e1bc248307300d72308a439",
       "entry_count": 9,
       "export_subpaths": [
         ".",
@@ -23,19 +23,28 @@
       ]
     },
     {
-      "name": "@zero-ar/sdk",
-      "tarball_path": "release/tarballs/zero-ar-sdk-0.1.0.tgz",
-      "sha256": "7c29813b08c339000585b0acf08a55bbc6f98391ff33f025935ce4d0641947aa",
+      "name": "@zero-ar/validator-kit",
+      "tarball_path": "release/tarballs/zero-ar-validator-kit-0.2.0.tgz",
+      "sha256": "cda0d0e7e52392dd20a5ebac801304b41f329a2db1bcee1ff6a23549a0e1682d",
       "entry_count": 18,
       "export_subpaths": [
         "."
       ]
     },
     {
+      "name": "@zero-ar/sdk",
+      "tarball_path": "release/tarballs/zero-ar-sdk-0.2.0.tgz",
+      "sha256": "3dffbd578e5f7b272370ac1e86e4096bdac45b6b88b46ebbb254e4b4662bdb2f",
+      "entry_count": 26,
+      "export_subpaths": [
+        "."
+      ]
+    },
+    {
       "name": "@zero-ar/cli",
-      "tarball_path": "release/tarballs/zero-ar-cli-0.1.0.tgz",
-      "sha256": "108241964e5a7f2ee790762a338fb08b414d48319117e9d8773771f094a620dc",
-      "entry_count": 16,
+      "tarball_path": "release/tarballs/zero-ar-cli-0.2.0.tgz",
+      "sha256": "2b30e5e25aa96dc708f3c0b994cc82a28410dd7521825848c99b9b433bb088f8",
+      "entry_count": 40,
       "export_subpaths": [
         ".",
         "./external-product-template",
@@ -44,8 +53,8 @@
     },
     {
       "name": "@zero-ar/conformance",
-      "tarball_path": "release/tarballs/zero-ar-conformance-0.1.0.tgz",
-      "sha256": "e9982836c641074626cb7743a9f3b809419ed494220fec6a125f09b13d3321ee",
+      "tarball_path": "release/tarballs/zero-ar-conformance-0.2.0.tgz",
+      "sha256": "bedb28ed9becaf7cc969b32cfb307ecc86ad09df6b19f8bbfc72a9a2b4f6e59e",
       "entry_count": 8,
       "export_subpaths": [
         "."
@@ -53,8 +62,8 @@
     },
     {
       "name": "@zero-ar/tool-kit",
-      "tarball_path": "release/tarballs/zero-ar-tool-kit-0.1.0.tgz",
-      "sha256": "d6062e03c20fff44855c92ad2729eaddea3563cf2a7ea8237f71bad43d00c440",
+      "tarball_path": "release/tarballs/zero-ar-tool-kit-0.2.0.tgz",
+      "sha256": "7b5c4b7aef423917372c67ee8fac82dcffe1d935e6bf90707e8b4593c56d26bb",
       "entry_count": 6,
       "export_subpaths": [
         "."
@@ -62,8 +71,8 @@
     },
     {
       "name": "@zero-ar/mcp",
-      "tarball_path": "release/tarballs/zero-ar-mcp-0.1.0.tgz",
-      "sha256": "e2c73b56937a2c527ab9c67eac4ef45c5a3e2d0d4daaa3ef058d90cd38f40fba",
+      "tarball_path": "release/tarballs/zero-ar-mcp-0.2.0.tgz",
+      "sha256": "2e01f3d3bafb85bd9d731c7ff07e05022c57a00d4482807a3985b62a75703152",
       "entry_count": 18,
       "export_subpaths": [
         "."
@@ -71,17 +80,8 @@
     },
     {
       "name": "@zero-ar/testkit",
-      "tarball_path": "release/tarballs/zero-ar-testkit-0.1.0.tgz",
-      "sha256": "c1940f680f072f96fb685762854c3898d12db4899625812f43eeff3e52ece3b7",
-      "entry_count": 10,
-      "export_subpaths": [
-        "."
-      ]
-    },
-    {
-      "name": "@zero-ar/validator-kit",
-      "tarball_path": "release/tarballs/zero-ar-validator-kit-0.1.0.tgz",
-      "sha256": "362b32f3643f8b6949117ba6d2d4b841f5c9ac607c9c2019234ca01a43d908a1",
+      "tarball_path": "release/tarballs/zero-ar-testkit-0.2.0.tgz",
+      "sha256": "5d15a859246d5478cf5f0daab673e86b7bcec12105a19afb1abed94dd2b02aaa",
       "entry_count": 10,
       "export_subpaths": [
         "."
@@ -96,19 +96,19 @@
       "@zero-ar/contracts",
       "@zero-ar/client",
       "@zero-ar/client/openapi",
+      "@zero-ar/validator-kit",
       "@zero-ar/sdk",
       "@zero-ar/cli",
       "@zero-ar/cli/external-product-template",
       "@zero-ar/conformance",
       "@zero-ar/tool-kit",
       "@zero-ar/mcp",
-      "@zero-ar/testkit",
-      "@zero-ar/validator-kit"
+      "@zero-ar/testkit"
     ],
     "openapi_contract_ok": true,
     "command_help_ok": true,
     "declarations_ok": true
   },
   "refusals": [],
-  "report_ref": "sha256:187b55f2961447d77b22b12d868c533a2712bec2c292bfb0c2bdc0a7982cfa09"
+  "report_ref": "sha256:dc433f930cc64d5dba468024aec178912ddb62a38a26b2736786fa01f99a82c4"
 }

@@ -44,6 +44,8 @@ export interface ProjectLoaderOptions {
         path: string;
         content: string;
     }[];
+    /** Regenerate a reviewed lock after source edits instead of checking the held lock. */
+    ignore_lock?: boolean;
 }
 /** Everything the loader found, with the lock that makes a build repeatable. */
 export interface LoadedProject {
@@ -74,5 +76,3 @@ export declare function loadProject(options: ProjectLoaderOptions): Promise<Load
 export declare function renderDiagnostics(project: LoadedProject): string;
 /** The canonical bytes of a lock, for comparing two machines' builds. */
 export declare function lockBytes(project: LoadedProject): string;
-/** The directory a path belongs to, for diagnostics that name a location. */
-export declare function projectRootOf(path: string): string;

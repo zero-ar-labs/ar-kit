@@ -16,12 +16,12 @@ import { z } from 'zod';
 /** One compiled declaration in the closure, named for discovery, pinned by ref. */
 export declare const PublicationDeclarationEntrySchema: z.ZodObject<{
     kind: z.ZodEnum<{
-        agent: "agent";
-        tool: "tool";
         procedure: "procedure";
+        tool: "tool";
+        "task-contract": "task-contract";
+        agent: "agent";
         validator: "validator";
         posture: "posture";
-        "task-contract": "task-contract";
         semantic: "semantic";
         "domain-pack": "domain-pack";
         "binding-profile": "binding-profile";
@@ -58,12 +58,12 @@ export type PublicationDependencyEdge = z.infer<typeof PublicationDependencyEdge
 export declare const PublicationBundleManifestSchema: z.ZodObject<{
     format_version: z.ZodLiteral<"1.0.0">;
     root_kind: z.ZodEnum<{
-        agent: "agent";
-        tool: "tool";
         procedure: "procedure";
+        tool: "tool";
+        "task-contract": "task-contract";
+        agent: "agent";
         validator: "validator";
         posture: "posture";
-        "task-contract": "task-contract";
         semantic: "semantic";
         "domain-pack": "domain-pack";
         "binding-profile": "binding-profile";
@@ -71,12 +71,12 @@ export declare const PublicationBundleManifestSchema: z.ZodObject<{
     root_ref: z.ZodString;
     declarations: z.ZodArray<z.ZodObject<{
         kind: z.ZodEnum<{
-            agent: "agent";
-            tool: "tool";
             procedure: "procedure";
+            tool: "tool";
+            "task-contract": "task-contract";
+            agent: "agent";
             validator: "validator";
             posture: "posture";
-            "task-contract": "task-contract";
             semantic: "semantic";
             "domain-pack": "domain-pack";
             "binding-profile": "binding-profile";
@@ -164,12 +164,12 @@ export declare const PublicationReceiptSchema: z.ZodObject<{
     publication_ref: z.ZodString;
     bundle_ref: z.ZodString;
     root_kind: z.ZodEnum<{
-        agent: "agent";
-        tool: "tool";
         procedure: "procedure";
+        tool: "tool";
+        "task-contract": "task-contract";
+        agent: "agent";
         validator: "validator";
         posture: "posture";
-        "task-contract": "task-contract";
         semantic: "semantic";
         "domain-pack": "domain-pack";
         "binding-profile": "binding-profile";
@@ -213,12 +213,12 @@ export declare const PublicationSessionRequestSchema: z.ZodObject<{
     bundle: z.ZodObject<{
         format_version: z.ZodLiteral<"1.0.0">;
         root_kind: z.ZodEnum<{
-            agent: "agent";
-            tool: "tool";
             procedure: "procedure";
+            tool: "tool";
+            "task-contract": "task-contract";
+            agent: "agent";
             validator: "validator";
             posture: "posture";
-            "task-contract": "task-contract";
             semantic: "semantic";
             "domain-pack": "domain-pack";
             "binding-profile": "binding-profile";
@@ -226,12 +226,12 @@ export declare const PublicationSessionRequestSchema: z.ZodObject<{
         root_ref: z.ZodString;
         declarations: z.ZodArray<z.ZodObject<{
             kind: z.ZodEnum<{
-                agent: "agent";
-                tool: "tool";
                 procedure: "procedure";
+                tool: "tool";
+                "task-contract": "task-contract";
+                agent: "agent";
                 validator: "validator";
                 posture: "posture";
-                "task-contract": "task-contract";
                 semantic: "semantic";
                 "domain-pack": "domain-pack";
                 "binding-profile": "binding-profile";
@@ -319,12 +319,12 @@ export declare const PublicationViewSchema: z.ZodObject<{
         publication_ref: z.ZodString;
         bundle_ref: z.ZodString;
         root_kind: z.ZodEnum<{
-            agent: "agent";
-            tool: "tool";
             procedure: "procedure";
+            tool: "tool";
+            "task-contract": "task-contract";
+            agent: "agent";
             validator: "validator";
             posture: "posture";
-            "task-contract": "task-contract";
             semantic: "semantic";
             "domain-pack": "domain-pack";
             "binding-profile": "binding-profile";
@@ -430,11 +430,20 @@ export declare const DrainOutcomeSchema: z.ZodObject<{
     recorded: z.ZodLiteral<true>;
 }, z.core.$strict>;
 export type DrainOutcome = z.infer<typeof DrainOutcomeSchema>;
-/** One reconciliation sweep over a run's open effects, through the dispatcher's ladder. */
+/**
+ * One reconciliation sweep over a run's open effects, through the dispatcher's
+ * ladder. A diagnostic says why an effect did not settle on this pass: its
+ * owner could not be reached, its target is no longer registered, its
+ * dispatch is still in flight, or a newer record superseded the answer.
+ */
 export declare const ReconciliationOutcomeSchema: z.ZodObject<{
     reconciled: z.ZodArray<z.ZodObject<{
         effect_id: z.ZodString;
         state: z.ZodString;
+        diagnostic: z.ZodOptional<z.ZodObject<{
+            code: z.ZodString;
+            message: z.ZodString;
+        }, z.core.$strict>>;
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type ReconciliationOutcome = z.infer<typeof ReconciliationOutcomeSchema>;
@@ -449,3 +458,157 @@ export declare const OperatorAuditPageSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type OperatorAuditPage = z.infer<typeof OperatorAuditPageSchema>;
+/** One alias's moves, oldest first. Earlier runs keep the ref they pinned (PUB-018). */
+export declare const AliasHistorySchema: z.ZodObject<{
+    alias: z.ZodString;
+    entries: z.ZodArray<z.ZodObject<{
+        content_ref: z.ZodString;
+        moved_at: z.ZodString;
+        actor: z.ZodString;
+    }, z.core.$strict>>;
+}, z.core.$strict>;
+export type AliasHistory = z.infer<typeof AliasHistorySchema>;
+/** A registry name projection rebuilt from the immutable publication records alone (PUB-029). */
+export declare const RegistryRebuildOutcomeSchema: z.ZodObject<{
+    publications: z.ZodNumber;
+    names: z.ZodNumber;
+    equal: z.ZodBoolean;
+}, z.core.$strict>;
+export type RegistryRebuildOutcome = z.infer<typeof RegistryRebuildOutcomeSchema>;
+/**
+ * One line of a framed publication export: the bundle, each blob, then a
+ * checksum over every prior line. Aliases, grants and credentials are never
+ * framed, so an import establishes content and nothing about authority.
+ */
+export declare const PublicationExportFrameSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+    kind: z.ZodLiteral<"bundle">;
+    bundle: z.ZodObject<{
+        format_version: z.ZodLiteral<"1.0.0">;
+        root_kind: z.ZodEnum<{
+            procedure: "procedure";
+            tool: "tool";
+            "task-contract": "task-contract";
+            agent: "agent";
+            validator: "validator";
+            posture: "posture";
+            semantic: "semantic";
+            "domain-pack": "domain-pack";
+            "binding-profile": "binding-profile";
+        }>;
+        root_ref: z.ZodString;
+        declarations: z.ZodArray<z.ZodObject<{
+            kind: z.ZodEnum<{
+                procedure: "procedure";
+                tool: "tool";
+                "task-contract": "task-contract";
+                agent: "agent";
+                validator: "validator";
+                posture: "posture";
+                semantic: "semantic";
+                "domain-pack": "domain-pack";
+                "binding-profile": "binding-profile";
+            }>;
+            name: z.ZodString;
+            version: z.ZodString;
+            content_ref: z.ZodString;
+        }, z.core.$strict>>;
+        assets: z.ZodArray<z.ZodObject<{
+            content_ref: z.ZodString;
+            bytes: z.ZodNumber;
+            media_type: z.ZodString;
+            classification: z.ZodString;
+            role: z.ZodString;
+        }, z.core.$strict>>;
+        edges: z.ZodArray<z.ZodObject<{
+            from_ref: z.ZodString;
+            to_ref: z.ZodString;
+            kind: z.ZodEnum<{
+                requires: "requires";
+                includes: "includes";
+            }>;
+        }, z.core.$strict>>;
+        compiler: z.ZodObject<{
+            name: z.ZodString;
+            version: z.ZodString;
+            canonicalization: z.ZodString;
+        }, z.core.$strict>;
+        source_maps: z.ZodArray<z.ZodObject<{
+            content_ref: z.ZodString;
+            path: z.ZodString;
+            source_content_ref: z.ZodOptional<z.ZodString>;
+            source_format: z.ZodOptional<z.ZodEnum<{
+                "ramsden/v1": "ramsden/v1";
+                "zero-ar/v1": "zero-ar/v1";
+            }>>;
+        }, z.core.$strict>>;
+        conformance: z.ZodArray<z.ZodObject<{
+            check: z.ZodString;
+            outcome: z.ZodEnum<{
+                refused: "refused";
+                pass: "pass";
+            }>;
+        }, z.core.$strict>>;
+        claims: z.ZodArray<z.ZodObject<{
+            kind: z.ZodString;
+            text: z.ZodString;
+        }, z.core.$strict>>;
+        requested_aliases: z.ZodArray<z.ZodString>;
+        bundle_ref: z.ZodString;
+    }, z.core.$strict>;
+}, z.core.$strict>, z.ZodObject<{
+    kind: z.ZodLiteral<"blob">;
+    content_ref: z.ZodString;
+    encoding: z.ZodEnum<{
+        utf8: "utf8";
+        base64: "base64";
+    }>;
+    bytes: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    kind: z.ZodLiteral<"checksum">;
+    sha256: z.ZodString;
+}, z.core.$strict>], "kind">;
+export type PublicationExportFrame = z.infer<typeof PublicationExportFrameSchema>;
+/** A publication import committed under this tenant: a new receipt for the same closure refs. */
+export declare const PublicationImportOutcomeSchema: z.ZodObject<{
+    receipt: z.ZodObject<{
+        publication_ref: z.ZodString;
+        bundle_ref: z.ZodString;
+        root_kind: z.ZodEnum<{
+            procedure: "procedure";
+            tool: "tool";
+            "task-contract": "task-contract";
+            agent: "agent";
+            validator: "validator";
+            posture: "posture";
+            semantic: "semantic";
+            "domain-pack": "domain-pack";
+            "binding-profile": "binding-profile";
+        }>;
+        root_ref: z.ZodString;
+        agent_ref: z.ZodNullable<z.ZodString>;
+        tenant: z.ZodString;
+        accountable: z.ZodString;
+        compiler: z.ZodObject<{
+            name: z.ZodString;
+            version: z.ZodString;
+            canonicalization: z.ZodString;
+        }, z.core.$strict>;
+        counts: z.ZodObject<{
+            declarations: z.ZodNumber;
+            assets: z.ZodNumber;
+            total_bytes: z.ZodNumber;
+        }, z.core.$strict>;
+        closure_hash: z.ZodString;
+        aliases: z.ZodArray<z.ZodObject<{
+            alias: z.ZodString;
+            outcome: z.ZodEnum<{
+                refused: "refused";
+                set: "set";
+            }>;
+        }, z.core.$strict>>;
+        committed_at: z.ZodString;
+        establishes: z.ZodLiteral<"admitted-and-stored-only">;
+    }, z.core.$strict>;
+    blobs: z.ZodNumber;
+}, z.core.$strict>;
+export type PublicationImportOutcome = z.infer<typeof PublicationImportOutcomeSchema>;

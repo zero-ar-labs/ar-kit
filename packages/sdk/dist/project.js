@@ -15,7 +15,7 @@
  * project pins them (DXI-024).
  */
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { isAbsolute, join, relative, resolve } from 'node:path';
 import { canonicalJson, contentHash, refuse } from '@zero-ar/contracts';
 import { compileProject } from "./publication.js";
 /** The declared source kinds a project may carry. Nothing else is discovered. */
@@ -23,7 +23,7 @@ export const SOURCE_KINDS = ['agent', 'instructions', 'skill', 'tool', 'validato
 const KIND_BY_SUFFIX = [
     { match: (path) => /(^|\/)SKILL\.md$/.test(path), kind: 'skill' },
     { match: (path) => /(^|\/)AGENT\.md$/.test(path), kind: 'instructions' },
-    { match: (path) => /(^|\/)agent\.(yaml|yml|ts)$/.test(path), kind: 'agent' },
+    { match: (path) => /(^|\/)agent\.(yaml|yml|json|ts)$/.test(path) || /(^|\/)agent\.zeroar\.md$/.test(path), kind: 'agent' },
     { match: (path) => /(^|\/)tools\//.test(path), kind: 'tool' },
     { match: (path) => /(^|\/)validators\//.test(path), kind: 'validator' },
     { match: (path) => /(^|\/)contracts\//.test(path), kind: 'task-contract' },
@@ -36,7 +36,7 @@ function kindOf(relativePath) {
 /** Files under one directory, in a stable order, skipping nothing silently. */
 function walk(root, directory, out) {
     for (const name of readdirSync(directory).sort()) {
-        if (name === 'node_modules' || name.startsWith('.'))
+        if (name === 'node_modules' || name.startsWith('.') || name === 'zero-ar.lock.json' || name === 'zero-ar.skill-lock.json')
             continue;
         const path = join(directory, name);
         if (statSync(path).isDirectory())
@@ -52,7 +52,17 @@ function walk(root, directory, out) {
  */
 export async function loadProject(options) {
     const root = resolve(options.root);
-    const entryName = options.entry ?? 'agent.yaml';
+    const rootEntries = new Set(readdirSync(root));
+    const candidates = ['agent.yaml', 'agent.yml', 'agent.json', 'agent.zeroar.md', 'agent.ts'].filter((name) => rootEntries.has(name));
+    if (!options.entry && candidates.length > 1) {
+        refuse({
+            code: 'project.entry.ambiguous',
+            message: `${candidates.join(', ')} are all agent roots under ${root}. A deterministic project has one declared entry.`,
+            fix: 'remove stale roots or pass the exact entry path',
+            clause: 'ADX-001',
+        });
+    }
+    const entryName = options.entry ?? candidates[0] ?? 'agent.yaml';
     const entry = isAbsolute(entryName) ? entryName : join(root, entryName);
     if (!existsSync(entry)) {
         refuse({
@@ -113,19 +123,43 @@ export async function loadProject(options) {
         byPath.set(relativePath, { kind: kindOf(relativePath), path: relativePath, content_ref: contentHash({ bytes: content }), bytes: Buffer.byteLength(content), source: 'overlay' });
         diagnostics.push({ severity: 'note', code: 'project.overlay', message: `${relativePath} exists only as an overlay for this build.`, path: relativePath, fix: null });
     }
-    const resources = [...byPath.values()].sort((left, right) => left.path.localeCompare(right.path));
+    const resources = [...byPath.values()].sort((left, right) => (left.path < right.path ? -1 : left.path > right.path ? 1 : 0));
     const lockBody = {
         entry: relative(root, entry),
         resources: resources.map((resource) => ({ path: resource.path, kind: resource.kind, content_ref: resource.content_ref })),
     };
     const lock = { ...lockBody, lock_ref: contentHash(lockBody) };
+    const heldLockPath = join(root, 'zero-ar.lock.json');
+    if (existsSync(heldLockPath) && !options.ignore_lock) {
+        try {
+            const held = JSON.parse(readFileSync(heldLockPath, 'utf8'));
+            if (canonicalJson(held) !== canonicalJson(lock)) {
+                diagnostics.push({
+                    severity: 'error',
+                    code: 'project.lock.stale',
+                    message: 'zero-ar.lock.json does not match the current source bytes, so this build is not the reviewed project closure.',
+                    path: 'zero-ar.lock.json',
+                    fix: 'review the source changes, then run zeroar validate --write-lock',
+                });
+            }
+        }
+        catch {
+            diagnostics.push({
+                severity: 'error',
+                code: 'project.lock.malformed',
+                message: 'zero-ar.lock.json is not valid JSON, so the project has no usable immutable source lock.',
+                path: 'zero-ar.lock.json',
+                fix: 'remove the malformed file after review, then run zeroar validate --write-lock',
+            });
+        }
+    }
     if (!resources.some((resource) => resource.kind === 'agent')) {
         diagnostics.push({
             severity: 'error',
             code: 'project.agent.missing',
             message: 'no agent source was discovered under the project root, so there is nothing to compile.',
             path: null,
-            fix: 'add agent.yaml or agent.ts at the root',
+            fix: 'add one supported agent root at the project root',
         });
     }
     const project = {
@@ -166,8 +200,4 @@ export function renderDiagnostics(project) {
 /** The canonical bytes of a lock, for comparing two machines' builds. */
 export function lockBytes(project) {
     return canonicalJson(project.lock());
-}
-/** The directory a path belongs to, for diagnostics that name a location. */
-export function projectRootOf(path) {
-    return dirname(resolve(path));
 }

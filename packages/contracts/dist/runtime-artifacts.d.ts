@@ -236,3 +236,59 @@ export declare const RuntimeArtifactSessionStatusSchema: z.ZodDiscriminatedUnion
     }, z.core.$strict>;
 }, z.core.$strict>], "status">;
 export type RuntimeArtifactSessionStatus = z.infer<typeof RuntimeArtifactSessionStatusSchema>;
+/**
+ * An operator's sweep of uncommitted uploads for the authenticated tenant.
+ * The runtime raises a cutoff below the deployment's retention floor to that
+ * floor, so a sweep never removes an upload younger than the floor (PUB-030).
+ */
+export declare const ArtifactSweepRequestSchema: z.ZodObject<{
+    older_than_seconds: z.ZodNumber;
+    reason: z.ZodString;
+}, z.core.$strict>;
+export type ArtifactSweepRequest = z.infer<typeof ArtifactSweepRequestSchema>;
+/** What one tenant sweep removed, and the cutoff it applied after the retention floor. */
+export declare const ArtifactSweepResultSchema: z.ZodObject<{
+    cutoff: z.ZodString;
+    retention_floor_seconds: z.ZodNumber;
+    removed_staged_writes: z.ZodNumber;
+    removed_uncommitted_objects: z.ZodNumber;
+}, z.core.$strict>;
+export type ArtifactSweepResult = z.infer<typeof ArtifactSweepResultSchema>;
+/** Why a run export or import named an artifact without carrying its bytes (UAT-ART-013). */
+export declare const ArtifactTransferOmissionSchema: z.ZodObject<{
+    artifact_ref: z.ZodString;
+    reason: z.ZodEnum<{
+        "tenant-mismatch": "tenant-mismatch";
+        "backend-mismatch": "backend-mismatch";
+        "no-artifact-store": "no-artifact-store";
+        erased: "erased";
+        absent: "absent";
+        "not-in-run": "not-in-run";
+    }>;
+}, z.core.$strict>;
+export type ArtifactTransferOmission = z.infer<typeof ArtifactTransferOmissionSchema>;
+/**
+ * One artifact frame of a run export (UAT-ART-013): an artifact bundle for
+ * one committed scope, a run id or intake:<ref>, with the handles it
+ * carries, or the handles the export named without bytes.
+ */
+export declare const RunBundleArtifactFrameSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+    kind: z.ZodLiteral<"artifact-bundle">;
+    scope: z.ZodString;
+    artifact_refs: z.ZodArray<z.ZodString>;
+    text: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    kind: z.ZodLiteral<"artifact-omissions">;
+    omissions: z.ZodArray<z.ZodObject<{
+        artifact_ref: z.ZodString;
+        reason: z.ZodEnum<{
+            "tenant-mismatch": "tenant-mismatch";
+            "backend-mismatch": "backend-mismatch";
+            "no-artifact-store": "no-artifact-store";
+            erased: "erased";
+            absent: "absent";
+            "not-in-run": "not-in-run";
+        }>;
+    }, z.core.$strict>>;
+}, z.core.$strict>], "kind">;
+export type RunBundleArtifactFrame = z.infer<typeof RunBundleArtifactFrameSchema>;

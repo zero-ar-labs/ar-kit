@@ -111,8 +111,8 @@ export declare const SourceInstanceSchema: z.ZodObject<{
         max_depth: z.ZodDefault<z.ZodNumber>;
     }, z.core.$strict>;
     state: z.ZodEnum<{
-        ready: "ready";
         disabled: "disabled";
+        ready: "ready";
         removed: "removed";
     }>;
     current_snapshot_ref: z.ZodNullable<z.ZodString>;
@@ -158,8 +158,8 @@ export declare const SourceListSchema: z.ZodObject<{
             max_depth: z.ZodDefault<z.ZodNumber>;
         }, z.core.$strict>;
         state: z.ZodEnum<{
-            ready: "ready";
             disabled: "disabled";
+            ready: "ready";
             removed: "removed";
         }>;
         current_snapshot_ref: z.ZodNullable<z.ZodString>;
@@ -306,8 +306,8 @@ export declare const SourcePreflightSchema: z.ZodObject<{
         "local-read-only": "local-read-only";
     }>;
     state: z.ZodEnum<{
-        ready: "ready";
         disabled: "disabled";
+        ready: "ready";
         removed: "removed";
     }>;
     resolved_path: z.ZodString;

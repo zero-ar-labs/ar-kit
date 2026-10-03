@@ -3,7 +3,7 @@
  * Do not edit by hand; add the route to API_ROUTES and regenerate. The
  * drift check in XCV-003 compares these bytes against a fresh render.
  */
-import type { AbandonEnvironmentResult, AdmitModelAdapterRequest, AdmittedModelAdapter, AliasMutationRequest, AliasMutationResult, CancelEnvironmentJobResult, ControlAccepted, ControlRequest, CreateExternalCredentialBindingRequest, CreateProviderInstanceRequest, CreatedRun, CredentialBinding, DatabaseDoctorResponse, DeclarationView, DeclareFallbackSetRequest, DeprecationRequest, DrainOutcome, DrainRequest, EffectApprovalAccepted, EffectApprovalRequest, EnableProviderModelRequest, EnableToolSourceToolsRequest, EnvironmentAbandonJobRequest, EnvironmentConformanceRequest, EnvironmentConformanceResult, EnvironmentCredentialRotationRequest, EnvironmentDeploymentCapabilityList, EnvironmentDoctorRequest, EnvironmentDoctorResult, EnvironmentJobActionRequest, EnvironmentJobList, EnvironmentJobRefRequest, EnvironmentMetrics, EnvironmentProfileList, EnvironmentProfileRegistration, EnvironmentProfileStateRequest, EnvironmentSweepRequest, EnvironmentSweepResult, ErasureOutcome, ErasureRequest, ExternalObservationAccepted, ExternalObservationRequest, ForkRequest, HealthResponse, IdentityMigrationEventOutcome, IdentityMigrationEventRequest, IntakeRequest, MemoryAssertionInput, MemoryHistoryRequest, MemoryHistoryResponse, MemoryReadRequest, MemorySubjectErasureOutcome, MemorySubjectErasureRequest, MemorySupersedeOutcome, MemorySupersedeRequest, MemoryWriteOutcome, ObserveEnvironmentJobResult, OperatorAuditPage, ProtectedCredentialIngestRequest, ProviderCatalogue, ProviderInstance, ProviderInstanceList, ProviderModelEntry, PublicationBlobAck, PublicationBlobFrame, PublicationBlobUploadFinish, PublicationBlobUploadStatus, PublicationCommitRequest, PublicationReceipt, PublicationSession, PublicationSessionRequest, PublicationView, QuarantineRequest, RebuildOutcome, ReconcileEnvironmentJobResult, ReconciliationOutcome, RecordsPage, ReexecuteRequest, RegisterEnvironmentRequest, RegisterSourceRequest, RegisterToolSourceRequest, RegistryActOutcome, ReviewInbox, RevokeCredentialRequest, RotateExternalCredentialRequest, RotateProtectedCredentialRequest, RunLifecycleCommandRequest, RunMemoryReadOutcome, RunRef, RunResult, RunSnapshot, RuntimeArtifactCommittedSession, RuntimeArtifactSessionRequest, RuntimeArtifactSessionStatus, SetDefaultModelAliasRequest, SetModelAliasRequest, SourceInstance, SourceList, SourcePreflight, SourceSnapshot, SourceSnapshotPage, SourceSnapshotPageRequest, StartAccepted, SyncProviderCatalogueRequest, SyncToolSourceCatalogueRequest, TeardownEnvironmentResult, TenantModelPool, ToolSource, ToolSourceCatalogue, ToolSourceEnablement, ToolSourceList, ToolSourceStateRequest, ToolSourceTestResult, WorkQueryPage, WorkQueryRequest } from '@zero-ar/contracts';
+import type { AbandonEnvironmentResult, AdmitModelAdapterRequest, AdmittedModelAdapter, AliasHistory, AliasMutationRequest, AliasMutationResult, ArtifactSweepRequest, ArtifactSweepResult, AttentionCalibrationReport, AttentionCalibrationRequest, AttentionCapacitySnapshot, AttentionCapacitySnapshotPublishRequest, AttentionDashboard, BrowserDestinationDecision, BrowserDestinationDecisionRequest, BrowserDestinationProposal, BrowserDestinationProposalRequest, CancelEnvironmentJobResult, CapabilityAdmissionAccepted, CapabilityAdmissionCancellationRequest, CapabilityAdmissionDecisionRequest, CapabilityAdmissionList, CapabilityAdmissionListRequest, CapabilityAdmissionRequest, CapabilityAdmissionView, ContextReplay, ControlAccepted, ControlRequest, ControllersView, CreateExternalCredentialBindingRequest, CreateProviderInstanceRequest, CreatedRun, CredentialBinding, DatabaseDoctorResponse, DeclarationView, DeclareFallbackSetRequest, DeprecationRequest, DrainOutcome, DrainRequest, EffectApprovalAccepted, EffectApprovalRequest, EffectAuthorityEpochAdvanceOutcome, EffectAuthorityEpochAdvanceRequest, EffectGrantReissueOutcome, EffectGrantReissueRequest, EffectGrantRevocationOutcome, EffectGrantRevocationRequest, EffectTargetList, EnableProviderModelRequest, EnableToolSourceToolsRequest, EnvironmentAbandonJobRequest, EnvironmentConformanceRequest, EnvironmentConformanceResult, EnvironmentCredentialRotationRequest, EnvironmentDeploymentCapabilityList, EnvironmentDoctorRequest, EnvironmentDoctorResult, EnvironmentJobActionRequest, EnvironmentJobList, EnvironmentJobRefRequest, EnvironmentMetrics, EnvironmentProfileList, EnvironmentProfileRegistration, EnvironmentProfileStateRequest, EnvironmentSweepRequest, EnvironmentSweepResult, ErasureOutcome, ErasureRequest, ExternalObservationAccepted, ExternalObservationRequest, ForkRequest, HealthResponse, IdentityMigrationEventOutcome, IdentityMigrationEventRequest, IntakeRequest, LegacyModelPoolImportRequest, MemoryAssertionInput, MemoryHistoryRequest, MemoryHistoryResponse, MemoryReadRequest, MemorySubjectErasureOutcome, MemorySubjectErasureRequest, MemorySubjectImportOutcome, MemorySubjectImportRequest, MemorySubjectTransferBundle, MemorySubjectTransferRequest, MemorySupersedeOutcome, MemorySupersedeRequest, MemoryWriteOutcome, ObserveEnvironmentJobResult, OperatorAuditPage, ProtectedCredentialIngestRequest, ProviderCatalogue, ProviderInstance, ProviderInstanceList, ProviderModelEntry, PublicationBlobAck, PublicationBlobFrame, PublicationBlobUploadFinish, PublicationBlobUploadStatus, PublicationCommitRequest, PublicationReceipt, PublicationSession, PublicationSessionRequest, PublicationView, QuarantineRequest, RebuildOutcome, ReconcileEnvironmentJobResult, ReconciliationOutcome, RecordsPage, ReexecuteRequest, RegisterEnvironmentRequest, RegisterSourceRequest, RegisterToolSourceRequest, RegisterWorkspaceInstanceRequest, RegistryActOutcome, RegistryRebuildOutcome, ReviewInbox, RevokeCredentialRequest, RotateExternalCredentialRequest, RotateProtectedCredentialRequest, RunLifecycleCommandRequest, RunMemoryReadOutcome, RunRef, RunResult, RunResumeDeferredRequest, RunSnapshot, RuntimeArtifactCommittedSession, RuntimeArtifactSessionRequest, RuntimeArtifactSessionStatus, SetDefaultModelAliasRequest, SetModelAliasRequest, SourceInstance, SourceList, SourcePreflight, SourceSnapshot, SourceSnapshotPage, SourceSnapshotPageRequest, StartAccepted, SyncProviderCatalogueRequest, SyncToolSourceCatalogueRequest, TeardownEnvironmentResult, TenantModelPool, ToolSource, ToolSourceCatalogue, ToolSourceDriftReport, ToolSourceEnablement, ToolSourceIngressDelivery, ToolSourceIngressReceipt, ToolSourceList, ToolSourceStateRequest, ToolSourceTestResult, VerificationPlan, WakeSchedulerReport, WorkQueryPage, WorkQueryRequest, WorkspaceInstance, WorkspaceInstanceList } from '@zero-ar/contracts';
 /** The transport a client supplies: one json call, refusals as thrown diagnostics. */
 export interface GeneratedTransport {
     json<T>(method: string, path: string, body?: unknown, headers?: Record<string, string>): Promise<T>;
@@ -17,6 +17,12 @@ export declare class GeneratedRoutes {
     createRun(body: IntakeRequest): Promise<CreatedRun>;
     createDeferredRun(body: IntakeRequest): Promise<CreatedRun>;
     snapshot(run_id: string): Promise<RunSnapshot>;
+    requestCapabilityAdmission(run_id: string, body: CapabilityAdmissionRequest): Promise<CapabilityAdmissionAccepted>;
+    listCapabilityAdmissions(run_id: string, query?: CapabilityAdmissionListRequest): Promise<CapabilityAdmissionList>;
+    inspectCapabilityAdmission(run_id: string, request_id: string): Promise<CapabilityAdmissionView>;
+    decideCapabilityAdmission(run_id: string, request_id: string, body: CapabilityAdmissionDecisionRequest): Promise<CapabilityAdmissionAccepted>;
+    cancelCapabilityAdmission(run_id: string, request_id: string, body: CapabilityAdmissionCancellationRequest): Promise<CapabilityAdmissionAccepted>;
+    verificationPlan(run_id: string): Promise<VerificationPlan>;
     result(run_id: string): Promise<RunResult>;
     records(run_id: string, after?: number | undefined): Promise<RecordsPage>;
     control(run_id: string, body: ControlRequest): Promise<ControlAccepted>;
@@ -26,7 +32,7 @@ export declare class GeneratedRoutes {
     reexecute(run_id: string, body: ReexecuteRequest): Promise<RunRef>;
     start(run_id: string, body: RunLifecycleCommandRequest): Promise<StartAccepted>;
     resume(run_id: string, body: RunLifecycleCommandRequest): Promise<StartAccepted>;
-    resumeDeferred(run_id: string, body: RunLifecycleCommandRequest): Promise<StartAccepted>;
+    resumeDeferred(run_id: string, body: RunResumeDeferredRequest): Promise<StartAccepted>;
     createRuntimeArtifactSession(body: RuntimeArtifactSessionRequest): Promise<RuntimeArtifactSessionStatus>;
     runtimeArtifactUploadStatus(session_id: string): Promise<RuntimeArtifactSessionStatus>;
     commitRuntimeArtifact(session_id: string): Promise<RuntimeArtifactCommittedSession>;
@@ -101,5 +107,29 @@ export declare class GeneratedRoutes {
     supersedeMemoryAssertion(assertion_id: string, body: MemorySupersedeRequest): Promise<MemorySupersedeOutcome>;
     readMemoryHistory(body: MemoryHistoryRequest): Promise<MemoryHistoryResponse>;
     eraseMemorySubject(body: MemorySubjectErasureRequest): Promise<MemorySubjectErasureOutcome>;
+    exportMemorySubject(body: MemorySubjectTransferRequest): Promise<MemorySubjectTransferBundle>;
+    importMemorySubject(body: MemorySubjectImportRequest): Promise<MemorySubjectImportOutcome>;
     readRunMemory(run_id: string, body: MemoryReadRequest): Promise<RunMemoryReadOutcome>;
+    contextReplay(run_id: string, turn: string): Promise<ContextReplay>;
+    wakeSchedulerReport(): Promise<WakeSchedulerReport>;
+    controllers(run_id: string): Promise<ControllersView>;
+    calibrateAttention(body: AttentionCalibrationRequest): Promise<AttentionCalibrationReport>;
+    publishAttentionCapacitySnapshot(body: AttentionCapacitySnapshotPublishRequest): Promise<AttentionCapacitySnapshot>;
+    currentAttentionCapacitySnapshot(): Promise<AttentionCapacitySnapshot>;
+    attentionDashboard(): Promise<AttentionDashboard>;
+    proposeBrowserDestination(run_id: string, body: BrowserDestinationProposalRequest): Promise<BrowserDestinationProposal>;
+    decideBrowserDestination(run_id: string, proposal_ref: string, body: BrowserDestinationDecisionRequest, participant_token: string): Promise<BrowserDestinationDecision>;
+    sweepArtifacts(body: ArtifactSweepRequest): Promise<ArtifactSweepResult>;
+    rebuildRegistry(): Promise<RegistryRebuildOutcome>;
+    registryAliasHistory(alias: string): Promise<AliasHistory>;
+    importLegacyModelPool(body: LegacyModelPoolImportRequest): Promise<TenantModelPool>;
+    toolSourceDrift(source_ref: string): Promise<ToolSourceDriftReport>;
+    toolSourceIngress(tenant: string, source_ref: string, body: ToolSourceIngressDelivery, webhook_id?: string | undefined, webhook_timestamp?: string | undefined, webhook_signature?: string | undefined, merge_webhook_signature?: string | undefined): Promise<ToolSourceIngressReceipt>;
+    reissueEffectGrant(run_id: string, body: EffectGrantReissueRequest, participant_token: string): Promise<EffectGrantReissueOutcome>;
+    revokeEffectGrant(grant_ref: string, body: EffectGrantRevocationRequest): Promise<EffectGrantRevocationOutcome>;
+    advanceEffectAuthorityEpoch(body: EffectAuthorityEpochAdvanceRequest): Promise<EffectAuthorityEpochAdvanceOutcome>;
+    listEffectTargets(): Promise<EffectTargetList>;
+    registerWorkspaceInstance(body: RegisterWorkspaceInstanceRequest): Promise<WorkspaceInstance>;
+    listWorkspaceInstances(): Promise<WorkspaceInstanceList>;
+    inspectWorkspaceInstance(instance_ref: string): Promise<WorkspaceInstance>;
 }

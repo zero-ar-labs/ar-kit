@@ -8,16 +8,20 @@
  * Commands in this surface include run control, replay, export, import,
  * local checks, hosted diagnostics, publication dry runs, environment
  * administration, provider administration, and tool-source administration.
+ * The command table in ./commands answers reserved commands and the
+ * operations a module adds before the built-in dispatch runs.
  */
 import { spawn } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdirSync, readFileSync, statSync, writeFileSync, existsSync } from 'node:fs';
 import { createInterface } from 'node:readline';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { CONTRACT_VERSION, DiagnosticError, AdmitModelAdapterRequestSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, DeclareFallbackSetRequestSchema, EnableProviderModelRequestSchema, EnableToolSourceToolsRequestSchema, ProtectedCredentialIngestRequestSchema, RegisterEnvironmentRequestSchema, RegisterSourceRequestSchema, RegisterToolSourceRequestSchema, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SyncProviderCatalogueRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceStateRequestSchema, canonicalJson, makeId, productEnvironmentNames, productEnvironmentValue, productProjectTemplate, profileCapabilitySummaryFor, resolveCommandTarget, renderDiagnostic, shortId, SUCCESSOR_PRODUCT_IDENTITY, productLocalDataDirectory, } from '@zero-ar/contracts';
+import { CONTRACT_VERSION, AUTHORING_SCAFFOLD_KINDS, CapabilityAdmissionRequestSchema, DiagnosticError, compileBrowserBinding, AdmitModelAdapterRequestSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, DeclareFallbackSetRequestSchema, EnableProviderModelRequestSchema, EnableToolSourceToolsRequestSchema, ProtectedCredentialIngestRequestSchema, RegisterEnvironmentRequestSchema, RegisterSourceRequestSchema, RegisterToolSourceRequestSchema, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SyncProviderCatalogueRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceStateRequestSchema, canonicalJson, makeId, productEnvironmentNames, productEnvironmentValue, profileCapabilitySummaryFor, resolveCommandTarget, renderDiagnostic, shortId, SUCCESSOR_PRODUCT_IDENTITY, SUPPORTED_NODE_RUNTIME, isSupportedNodeRuntime, productLocalDataDirectory, } from '@zero-ar/contracts';
 import { connectRuntimeTarget, ZeroARClient } from '@zero-ar/client';
-import { compileProject, renderPlan, verifyBundle } from '@zero-ar/sdk';
+import { authoringScaffold, compileAuthoringSource, declareBrowserTools, loadProject, lockBytes, publishCapabilitySource, previewPublicationVerificationPlan, renderPlan, renderVerificationPlan, scaffoldProject, verifyBundle, } from '@zero-ar/sdk';
 import { CLI_USAGE_ROWS, cliIdentityReport, createCliContext, isRemoteCapableCommand, } from "./identity.js";
+import { CLI_COMMAND_MODULES } from "./commands/index.js";
+import { exportedArtifactsNote } from "./commands/artifact.js";
 import { externalProductTemplate } from "./external-product-template.js";
 import { Terminal, neutralize, neutralizeDeep, stateFor } from "./terminal.js";
 const t = new Terminal();
@@ -34,12 +38,24 @@ export async function runCli(options = {}) {
     }
     if (command === 'init')
         return init(rest, context);
+    if (command === 'scaffold')
+        return scaffold(rest, context);
+    if (command === 'validate')
+        return validate(rest);
     if (command === 'profile')
         return profile(rest, context);
+    if (command === 'browser')
+        return browser(rest);
     if (command === 'doctor' && !rest.includes('--database'))
         return doctor(rest, context);
     if (command === 'publish' && rest.includes('--dry-run'))
         return publish(null, rest, context);
+    // The command table answers reserved commands, and operations a module
+    // adds, before any runtime target starts.
+    const commandModule = CLI_COMMAND_MODULES.get(command);
+    const answeredLocally = await commandModule?.local?.(rest, context);
+    if (answeredLocally !== undefined && answeredLocally !== null)
+        return answeredLocally;
     if (!isRemoteCapableCommand(command)) {
         console.error(`error: ${command} is not a command. Run ${context.command} help for the list.`);
         return 1;
@@ -48,18 +64,23 @@ export async function runCli(options = {}) {
     const connection = await connectRuntimeTarget({
         target: resolved.target,
         environment: process.env,
-        start_bundled: startServer,
+        start_bundled: () => startServer(localRecoveryScope(command, resolved.command_arguments)),
     });
     const client = connection.client;
     const commandArguments = resolved.command_arguments;
     try {
+        const answeredRemotely = await commandModule?.remote?.(client, commandArguments, context);
+        if (answeredRemotely !== undefined && answeredRemotely !== null)
+            return answeredRemotely;
         switch (command) {
             case 'run':
                 return await run(client, commandArguments, context);
             case 'attach':
-                return await attach(client, need(commandArguments[0], 'run id'), cursorValue(commandArguments, '--after'));
+                return await attach(client, need(commandArguments[0], 'run id'), { command: context.command, after: cursorValue(commandArguments, '--after') });
             case 'inspect':
                 return await inspect(client, need(commandArguments[0], 'run id'));
+            case 'verification-plan':
+                return await verificationPlan(client, need(commandArguments[0], 'run id'), commandArguments.includes('--json'));
             case 'records':
                 return await records(client, need(commandArguments[0], 'run id'));
             case 'result':
@@ -102,20 +123,23 @@ export async function runCli(options = {}) {
                     console.log(`gap dismissed for ${item}; dismissed work never verifies`);
                 if (after.suspend_reason === 'awaiting_answer' && parked === 0) {
                     console.log('every gap is answered; resuming');
-                    await client.resume(run_id, { idempotency_key: `${control_id}:resume`, reason: 'resume after the accepted answer' });
-                    return await attach(client, run_id);
+                    const accepted = await client.resume(run_id, { idempotency_key: `${control_id}:resume`, reason: 'resume after the accepted answer' });
+                    return await attach(client, run_id, { command: context.command, settle_after_record_seq: accepted.accepted_seq });
                 }
                 if (parked > 0)
                     console.log(`${parked} parked items remain`);
                 return 0;
             }
+            case 'attention':
+                // The attention command module answered every operation it accepts above.
+                throw new Error('the attention command module returned without answering. This is a defect in apps/cli/src/commands/attention.ts.');
             case 'resume': {
                 const run_id = need(commandArguments[0], 'run id');
-                await client.resume(run_id, {
+                const accepted = await client.resume(run_id, {
                     idempotency_key: argValue(commandArguments, '--idempotency-key') ?? makeId('ctl'),
                     reason: 'terminal resume command',
                 });
-                return await attach(client, run_id);
+                return await attach(client, run_id, { command: context.command, settle_after_record_seq: accepted.accepted_seq });
             }
             case 'fork': {
                 const run_id = need(commandArguments[0], 'run id');
@@ -130,8 +154,8 @@ export async function runCli(options = {}) {
                 const replay = await client.reexecute(run_id, { idempotency_key: makeId('ctl'), reason: 'terminal replay' });
                 console.log(`re-execution created: ${replay.run_id}`);
                 console.log('models will be called again under a new pinned identity');
-                await client.resume(replay.run_id, { idempotency_key: `${replay.run_id}:first-resume`, reason: 'start the new re-execution' });
-                return await attach(client, replay.run_id);
+                const accepted = await client.resume(replay.run_id, { idempotency_key: `${replay.run_id}:first-resume`, reason: 'start the new re-execution' });
+                return await attach(client, replay.run_id, { command: context.command, settle_after_record_seq: accepted.accepted_seq });
             }
             case 'environment':
                 return await environment(client, commandArguments);
@@ -139,8 +163,14 @@ export async function runCli(options = {}) {
                 return await provider(client, commandArguments);
             case 'tool-source':
                 return await toolSource(client, commandArguments);
+            case 'effect':
+                // The effect command module answers each effect operation before this dispatch.
+                console.error(`error: ${context.command} effect needs targets.`);
+                return 1;
             case 'source':
                 return await source(client, commandArguments);
+            case 'capability':
+                return await capability(client, commandArguments);
             case 'rebuild': {
                 const outcome = await client.rebuildProjection(need(commandArguments[0], 'run id'));
                 console.log(outcome.equal
@@ -153,7 +183,7 @@ export async function runCli(options = {}) {
                 const bundle = await client.exportRun(run_id);
                 const out = argValue(commandArguments, '--out') ?? `${run_id}${SUCCESSOR_PRODUCT_IDENTITY.run_bundle_suffix}`;
                 writeFileSync(out, bundle);
-                console.log(`exported ${bundle.split('\n').length - 1} lines to ${out}, checksummed and chain verified on import`);
+                console.log(`exported ${bundle.split('\n').length - 1} lines to ${out}, checksummed and chain verified on import${exportedArtifactsNote(bundle)}`);
                 return 0;
             }
             case 'import': {
@@ -162,12 +192,26 @@ export async function runCli(options = {}) {
                 console.log(outcome.head_equal
                     ? `imported ${outcome.run_id}: ${outcome.records} records, and the refolded head matches the manifest`
                     : `imported ${outcome.run_id}, and the refolded head does not match the manifest. Do not promote this import.`);
+                if (outcome.artifacts) {
+                    const reasons = [...new Set(outcome.artifacts.not_transferred.map((omission) => omission.reason))].sort();
+                    console.log(`artifacts: ${outcome.artifacts.imported.length} restored, ${outcome.artifacts.not_transferred.length} named but not transferred` +
+                        (reasons.length > 0 ? ` (${reasons.join(', ')})` : ''));
+                }
                 return outcome.head_equal ? 0 : 1;
             }
             case 'publish':
                 return await publish(client, commandArguments, context);
             case 'doctor':
                 return await databaseDoctor(client, commandArguments, connection.target);
+            case 'context':
+                // The context command module answers every replay above.
+                throw new Error('the context command module returned without answering. This is a defect in apps/cli/src/commands/context.ts.');
+            case 'publication':
+            case 'registry':
+            case 'artifact':
+            case 'memory':
+                // Their command modules answer every operation above.
+                throw new Error(`${command} reached the built-in dispatch, but its command module answers every ${command} operation. Check the command table.`);
         }
     }
     finally {
@@ -197,6 +241,7 @@ ${rows}
 identity
   product ${identity.product}
   runtime build ${identity.runtime_build}
+  execution substrate ${identity.execution_substrate}
 
 The deterministic adapter is the default: a first run needs no credential,
 no database server, and no network.
@@ -211,6 +256,7 @@ function versionText(context) {
     return [
         `${identity.product} command ${identity.command}`,
         `runtime build: ${identity.runtime_build}`,
+        `execution substrate: ${identity.execution_substrate}`,
         `contract: ${identity.contract_version}`,
     ].join('\n');
 }
@@ -310,6 +356,38 @@ async function toolSource(client, args) {
     console.log(JSON.stringify(result, null, 2));
     return 0;
 }
+/** Inspect public browser contracts locally without installing the browser host. */
+function browser(args) {
+    const operation = need(args[0], 'a browser operation');
+    if (operation !== 'inspect' && operation !== 'tools') {
+        console.error('error: browser needs inspect or tools followed by an immutable binding JSON file.');
+        return 1;
+    }
+    const file = need(args[1], 'an immutable browser binding JSON file');
+    const binding = compileBrowserBinding(JSON.parse(readFileSync(file, 'utf8')));
+    if (operation === 'tools') {
+        console.log(canonicalJson(declareBrowserTools(binding)));
+        return 0;
+    }
+    console.log(canonicalJson({
+        contract: binding.contract,
+        binding_ref: binding.binding_ref,
+        run_id: binding.run_id,
+        tenant: binding.tenant,
+        profile_ref: binding.profile_ref,
+        adapter: binding.adapter,
+        isolation: binding.isolation,
+        limit_enforcement: binding.limit_enforcement,
+        network_mode: binding.network_mode,
+        destinations: binding.destinations,
+        credential_bindings: binding.credentials.length,
+        effect_policies: binding.effect_policies,
+        limits: binding.limits,
+        supersedes_binding_ref: binding.supersedes_binding_ref,
+        destination_decision_ref: binding.destination_decision_ref,
+    }));
+    return 0;
+}
 /** Local and hosted source lifecycle through generated native client methods only. */
 async function source(client, args) {
     const operation = need(args[0], 'a source operation');
@@ -331,6 +409,171 @@ async function source(client, args) {
     }
     console.log(JSON.stringify(await handler(), null, 2));
     return 0;
+}
+/** One public capability-admission journey for bundled and hosted targets. */
+async function capability(client, args) {
+    const operation = need(args[0], 'a capability operation');
+    const runId = need(args[1], 'a run id');
+    const asJson = args.includes('--json');
+    if (operation === 'request') {
+        const reason = need(argValue(args, '--reason'), 'a reason after --reason');
+        const publicationRef = argValue(args, '--publication');
+        const positionalSource = args[2] && !args[2].startsWith('--') ? args[2] : undefined;
+        if (publicationRef && positionalSource) {
+            throw new DiagnosticError({
+                severity: 'error',
+                code: 'cli.capability.source-conflict',
+                message: 'the capability request names both a local skill directory and --publication. Choose one candidate source so the request has one immutable identity.',
+                clause: 'DCA-004',
+                fix: 'Remove the path to request the exact publication, or remove --publication to compile and publish the local Agent Skill.',
+            });
+        }
+        let request;
+        if (publicationRef) {
+            const requestedCapabilities = argValues(args, '--capability');
+            if (requestedCapabilities.length === 0) {
+                throw new DiagnosticError({
+                    severity: 'error',
+                    code: 'cli.capability.requested-capability-required',
+                    message: 'the exact publication request names no requested capability, so DCA2 cannot compare the requested authority with the inspected package.',
+                    clause: 'DCA-003',
+                    fix: 'Add --capability <exact-procedure-name> and repeat --capability for each existing observation tool named by that procedure.',
+                });
+            }
+            request = {
+                kind: 'add',
+                candidate_locator: publicationRef,
+                ...(argValue(args, '--content-hash') ? { expected_content_hash: argValue(args, '--content-hash') } : {}),
+                declared_package_kind: argValue(args, '--package-kind') ?? 'procedure',
+                requested_capabilities: requestedCapabilities,
+                reason,
+                requested_activation_mode: 'next-safe-boundary',
+                ...(argValue(args, '--expected-epoch') ? { expected_active_epoch: Number(argValue(args, '--expected-epoch')) } : {}),
+                idempotency_key: argValue(args, '--idempotency-key') ?? makeId('ctl'),
+            };
+        }
+        else {
+            const sourcePath = need(positionalSource, 'an Agent Skill directory or --publication <ref>');
+            const candidate = await publishCapabilitySource(client, resolve(sourcePath));
+            request = {
+                kind: 'add',
+                candidate_locator: candidate.publication_ref,
+                expected_content_hash: candidate.root_ref,
+                declared_package_kind: 'procedure',
+                requested_capabilities: [...new Set([candidate.procedure.name, ...(candidate.procedure.allowed_tools ?? [])])].sort(),
+                reason,
+                requested_activation_mode: 'next-safe-boundary',
+                ...(argValue(args, '--expected-epoch') ? { expected_active_epoch: Number(argValue(args, '--expected-epoch')) } : {}),
+                idempotency_key: argValue(args, '--idempotency-key') ?? makeId('ctl'),
+            };
+        }
+        const accepted = await client.requestCapabilityAdmission(runId, CapabilityAdmissionRequestSchema.parse(request));
+        if (asJson)
+            console.log(canonicalJson(accepted));
+        else {
+            console.log(accepted.repeated ? 'the exact request was already recorded' : 'capability request recorded');
+            renderCapabilityAdmission(accepted.admission);
+        }
+        return 0;
+    }
+    if (operation === 'inspect') {
+        const positionalRequest = args[2] && !args[2].startsWith('--') ? args[2] : undefined;
+        if (positionalRequest && !/^cap_[0-9a-f]{32}$/.test(positionalRequest)) {
+            throw new DiagnosticError({
+                severity: 'error',
+                code: 'cli.capability.request-id-invalid',
+                message: `${positionalRequest} is not a capability admission id, so the command cannot decide whether to list or inspect.`,
+                clause: 'DCA-024',
+                fix: 'Use cap_<32 lowercase hex characters>, or omit the request id to list a bounded page.',
+            });
+        }
+        const requestId = positionalRequest;
+        if (requestId) {
+            const admission = await client.inspectCapabilityAdmission(runId, requestId);
+            if (asJson)
+                console.log(canonicalJson(admission));
+            else
+                renderCapabilityAdmission(admission);
+            return 0;
+        }
+        const page = await client.listCapabilityAdmissions(runId, {
+            ...(argValue(args, '--cursor') ? { cursor: argValue(args, '--cursor') } : {}),
+            limit: Number(argValue(args, '--limit') ?? 20),
+        });
+        if (asJson)
+            console.log(canonicalJson(page));
+        else {
+            console.log(t.label(`capability admissions for ${shortId(runId)}`));
+            for (const admission of page.admissions) {
+                const candidate = admission.plan?.candidate;
+                const untrustedCandidate = candidate ? `${candidate.kind} ${candidate.name}@${candidate.version}` : 'classification pending';
+                const candidateLine = neutralize(untrustedCandidate)
+                    .replaceAll('\r', '\\r')
+                    .replaceAll('\n', '\\n')
+                    .replaceAll('\t', '\\t');
+                console.log(`  ${admission.request_id}  ${admission.status}  ${candidateLine}`);
+            }
+            if (page.next_cursor)
+                console.log(`next cursor: ${page.next_cursor}`);
+        }
+        return 0;
+    }
+    if (operation === 'approve' || operation === 'refuse') {
+        const requestId = need(args[2], 'a capability request id');
+        const expectedPlanRef = need(argValue(args, '--plan'), 'the inspected plan ref after --plan');
+        const accepted = await client.decideCapabilityAdmission(runId, requestId, {
+            decision: operation,
+            expected_plan_ref: expectedPlanRef,
+            reason: argValue(args, '--reason') ?? `${operation}d from the terminal after inspecting the exact plan`,
+            idempotency_key: argValue(args, '--idempotency-key') ?? makeId('ctl'),
+        });
+        if (asJson)
+            console.log(canonicalJson(accepted));
+        else
+            renderCapabilityAdmission(accepted.admission);
+        return 0;
+    }
+    if (operation === 'cancel') {
+        const requestId = need(args[2], 'a capability request id');
+        const accepted = await client.cancelCapabilityAdmission(runId, requestId, {
+            reason: argValue(args, '--reason') ?? 'cancelled from the terminal before capability activation',
+            idempotency_key: argValue(args, '--idempotency-key') ?? makeId('ctl'),
+        });
+        if (asJson)
+            console.log(canonicalJson(accepted));
+        else
+            renderCapabilityAdmission(accepted.admission);
+        return 0;
+    }
+    console.error('error: capability needs request, inspect, approve, refuse, or cancel.');
+    return 1;
+}
+/** Render the candidate and its manifest-visible delta without overstating runtime authority. */
+function renderCapabilityAdmission(admission) {
+    const rows = [
+        ['request', admission.request_id],
+        ['status', admission.status],
+        ['active closure', `epoch ${admission.active_closure_epoch}, ${admission.active_closure_ref}`],
+    ];
+    if (admission.plan) {
+        const plan = admission.plan;
+        rows.push(['candidate', `${plan.candidate.kind} ${plan.candidate.name}@${plan.candidate.version}`]);
+        rows.push(['plan', plan.plan_ref]);
+        rows.push(['candidate closure', plan.candidate_closure_ref]);
+        rows.push(['manifest-visible capability delta', `${plan.consequence_diff.procedures.added.length} procedure added, ${plan.consequence_diff.tools.added.length} tools added, ${plan.consequence_diff.tools.required_existing.length} existing observation tools reachable`]);
+        rows.push(['budget', `${plan.required_budget.bytes} bytes, ${plan.required_budget.compute_ms} compute ms, ${plan.required_budget.attention} attention`]);
+    }
+    else {
+        rows.push(['candidate', 'classification pending']);
+    }
+    if (admission.pending_successor)
+        rows.push(['pending successor', `epoch ${admission.pending_successor.closure_epoch} at the next run-loop boundary`]);
+    console.log(t.table(rows.map(([left, right]) => ['  ' + left, neutralize(right)])));
+    for (const blocker of admission.plan?.blockers ?? [])
+        console.log(`blocker: ${neutralize(blocker.message)}`);
+    for (const action of admission.next_actions)
+        console.log(`next: ${action.action}, ${neutralize(action.reason)}`);
+    console.log(t.dim('The delta describes the admitted candidate and manifest-visible capability change. It is not the entire model-visible tool closure, and runtime-reserved operations are not represented here.'));
 }
 /**
  * Provider administration is a remote control-plane surface. Request files
@@ -428,7 +671,7 @@ async function run(client, args, context) {
                 ...(items.length > 0 ? { items } : {}),
                 ...(sources.length > 0 ? { sources } : {}),
             } } : {}),
-        idempotency_key: makeId('ctl'),
+        idempotency_key: argValue(args, '--idempotency-key') ?? makeId('ctl'),
     };
     const created = detached
         ? await client.createDeferredRun(request)
@@ -447,20 +690,56 @@ async function run(client, args, context) {
         console.log('  ' + t.dim(neutralize(line)));
     console.log('');
     void snapshot;
-    return attach(client, created.run_id);
+    return attach(client, created.run_id, { command: context.command });
 }
-async function attach(client, run_id, after = 0) {
+/**
+ * Follow a run through its durable record stream until it settles, then
+ * print the result. The follow reconnects from its cursor when the stream
+ * drops. A suspension at or below settle_after_record_seq is history and
+ * does not end the follow. Ctrl-C detaches and leaves the run going.
+ */
+async function attach(client, run_id, options) {
     const abort = new AbortController();
     const progress = client.streamProgress(run_id, (text) => process.stdout.write(t.dim(neutralize(text))), abort.signal).catch(() => undefined);
-    let sawDelta = false;
-    await client.streamRecords(run_id, after, (event) => {
-        if (!sawDelta)
-            sawDelta = true;
-        renderEvent(event);
-    }, abort.signal);
+    let cursor = options.after ?? 0;
+    let detached = false;
+    const detach = () => {
+        detached = true;
+        abort.abort();
+    };
+    process.once('SIGINT', detach);
+    try {
+        for await (const event of client.followRecords(run_id, {
+            after: cursor,
+            signal: abort.signal,
+            ...(options.settle_after_record_seq ? { settle_after_record_seq: options.settle_after_record_seq } : {}),
+        })) {
+            cursor = event.seq;
+            renderEvent(event);
+        }
+    }
+    catch (error) {
+        abort.abort();
+        await progress;
+        if (error instanceof DiagnosticError && (error.diagnostic.code === 'client.stream.unavailable' || error.diagnostic.code === 'client.stream.unreadable')) {
+            console.error(renderDiagnostic(error.diagnostic));
+            console.error(`attach later: ${options.command} attach ${run_id} --after ${cursor}`);
+            return 1;
+        }
+        throw error;
+    }
+    finally {
+        process.removeListener('SIGINT', detach);
+    }
     abort.abort();
     await progress;
     console.log('');
+    if (detached) {
+        console.log('detached; the run keeps its durable state. A hosted runtime keeps running it, and a local run continues once you attach to it again');
+        console.log(`attach later: ${options.command} attach ${run_id} --after ${cursor}`);
+        console.log(`cancel it: ${options.command} cancel ${run_id}`);
+        return 130;
+    }
     return showResult(client, run_id);
 }
 function cursorValue(args, flag) {
@@ -492,7 +771,7 @@ function renderEvent(raw) {
             console.log(`${at}  ${t.dim(`lease reserved ${String(event.payload['amount'])} ${String(event.payload['denomination'])}`)}`);
             return;
         case 'lease.consumed':
-            console.log(`${at}  ${t.dim(`lease settled ${String(event.payload['amount'])} of ${String(event.payload['reserved'])}`)}`);
+            console.log(`${at}  ${t.dim(`lease settled ${String(event.payload['amount'])} of ${String(event.payload['reserved'])}${event.payload['overrun'] ? `, ${String(event.payload['overrun'])} over the reservation` : ''}`)}`);
             return;
         case 'lease.released':
             return; // the settle line already carries the numbers
@@ -501,7 +780,10 @@ function renderEvent(raw) {
             return;
         case 'checkpoint.passed': {
             const n = event.payload['covered_items'].length;
-            console.log(`${at}  ${t.state('verified')} checkpoint: ${n} items promoted by ${event.payload['validator_versions'].join(', ')}`);
+            // A sampled pass names how much it examined, so promotion never reads as exhaustive.
+            const sampling = event.payload['sampling'];
+            const sampled = sampling ? `, on a sample of ${sampling.examined} of ${sampling.population}` : '';
+            console.log(`${at}  ${t.state('verified')} checkpoint: ${n} items promoted by ${event.payload['validator_versions'].join(', ')}${sampled}`);
             return;
         }
         case 'checkpoint.rejected': {
@@ -576,7 +858,10 @@ async function showResult(client, run_id, asJson = false) {
     return result.terminal === 'complete' || result.terminal === 'unverified_artifact' ? 0 : result.status === 'suspended' ? 2 : 0;
 }
 async function inspect(client, run_id) {
+    // Keep hosted refusals fail-fast: a rejected snapshot must not fan out a
+    // second authenticated request merely to enrich the same inspection.
     const s = await client.snapshot(run_id);
+    const plan = await client.verificationPlan(run_id);
     const rows = [
         ['state', s.status + (s.terminal ? `, ${s.terminal}` : '') + (s.suspend_reason ? `, ${s.suspend_reason}` : '')],
         ['completion', s.completion_state],
@@ -584,7 +869,14 @@ async function inspect(client, run_id) {
         ['objective', s.objective.length > 80 ? s.objective.slice(0, 77) + '...' : s.objective],
         ['turns', String(s.turn)],
         ['entries', String(s.entry_count)],
-        ['verified completion', s.verified_completion_reachable ? 'reachable' : 'unreachable, no validator coverage'],
+        ['active closure', s.active_closure_epoch === undefined ? 'legacy epoch 1' : `epoch ${s.active_closure_epoch}, ${s.active_closure_ref}`],
+        ['pending capability admissions', String(s.pending_capability_admission_count ?? 0)],
+        ['verified completion', plan.reachability.verified_completion_reachable
+                ? 'reachable'
+                : plan.reachability.refusals.some((refusal) => refusal.code === 'contract-absent')
+                    ? 'unreachable, no validator coverage'
+                    : `unreachable, ${plan.reachability.refusals.length} refusal(s)`],
+        ['verification plan', plan.plan_ref],
     ];
     if (s.items) {
         const parts = Object.entries(s.items)
@@ -595,12 +887,61 @@ async function inspect(client, run_id) {
     if (s.contract) {
         rows.push(['contract', `${s.contract.name}, repair ${s.contract.repair_attempts_used} of ${s.contract.repair_budget} attempts used`]);
     }
-    for (const [key, use] of Object.entries(s.usage)) {
-        rows.push([key, `${use.consumed} consumed, ${use.reserved} outstanding`]);
+    if (s.tool_view) {
+        rows.push(['tool closure', `${s.tool_view.closure_size} pinned, ${s.tool_view.hidden} hidden`]);
+        rows.push(['tool view', `${s.tool_view.visible.length} visible, ${s.tool_view.used.schema_tokens}/${s.tool_view.budget.schema_tokens} schema tokens, ${s.tool_view.used.schema_bytes}/${s.tool_view.budget.schema_bytes} bytes`]);
+        rows.push(['visible tools', s.tool_view.visible.map((entry) => `${entry.name} (${entry.reason})`).join(', ') || 'none']);
+        if (s.tool_view.refusals.length > 0)
+            rows.push(['tool refusals', s.tool_view.refusals.map((entry) => `${entry.code}: ${entry.message}`).join('; ')]);
     }
+    else {
+        rows.push(['tool view', 'legacy v0: complete pinned closure visible']);
+    }
+    for (const [key, use] of Object.entries(s.usage)) {
+        rows.push([key, `${use.consumed} consumed, ${use.reserved} outstanding${use.overrun ? `, ${use.overrun} past reservations` : ''}`]);
+    }
+    rows.push(...controllerRows(await controllersView(client, run_id)));
     rows.push(['snapshot version', String(s.snapshot_version)]);
     console.log(t.label(`run ${shortId(run_id)}`) + ' ' + t.dim(run_id));
     console.log(t.table(rows.map(([k, v]) => ['  ' + (k ?? ''), v ?? ''])));
+    console.log('');
+    console.log(neutralize(renderVerificationPlan(plan)));
+    return 0;
+}
+/** The run's controllers view, or null from a server whose build does not wire or offer the route. */
+async function controllersView(client, run_id) {
+    try {
+        return await client.controllers(run_id);
+    }
+    catch (error) {
+        if (error instanceof DiagnosticError && (error.diagnostic.code === 'controllers.view.unwired' || error.diagnostic.code === 'route.unknown'))
+            return null;
+        throw error;
+    }
+}
+/** The inspect rows for the controllers: what the run pinned, then what was only recommended. */
+function controllerRows(view) {
+    if (!view)
+        return [['controllers', 'not wired on this server']];
+    const checkpoint = view.canonical.checkpoint;
+    const rows = [[
+            'checkpoint controller',
+            checkpoint
+                ? `${checkpoint.controller}, every ${checkpoint.interval_items} items under a contract ceiling of ${checkpoint.contract_ceiling}` +
+                    `${checkpoint.fallback_used ? ', pinned fallback' : ''}, canonical`
+                : 'none pinned',
+        ]];
+    const selector = view.canonical.context_selector;
+    if (selector) {
+        rows.push(['context selector', `${selector.selector} ${selector.mode}${selector.posture_ref ? `, pinned by posture ${selector.posture_ref.slice(0, 15)}` : ''}, canonical`]);
+    }
+    const recommendations = view.telemetry.decisions.length;
+    rows.push(['controller telemetry', `${recommendations} noncanonical recommendation${recommendations === 1 ? '' : 's'}`]);
+    return rows;
+}
+async function verificationPlan(client, run_id, asJson) {
+    const plan = await client.verificationPlan(run_id);
+    console.log(asJson ? canonicalJson(plan) : neutralize(renderVerificationPlan(plan)));
     return 0;
 }
 async function records(client, run_id) {
@@ -609,14 +950,14 @@ async function records(client, run_id) {
     return 0;
 }
 async function doctor(rest = [], context) {
-    const [major, minor] = process.versions.node.split('.').map(Number);
     const serverEntry = serverEntrypointPath();
     const identity = cliIdentityReport(context);
     const home = resolveLocalDataHome(process.cwd());
     const checks = [
         ['product identity', true, `${identity.product}, command ${identity.command}`],
         ['runtime build', true, identity.runtime_build],
-        ['node 23.6 or later', (major ?? 0) > 23 || ((major ?? 0) === 23 && (minor ?? 0) >= 6), `found ${process.versions.node}`],
+        ['execution substrate', true, identity.execution_substrate],
+        [`node ${SUPPORTED_NODE_RUNTIME.minimum} through ${SUPPORTED_NODE_RUNTIME.release_line}`, isSupportedNodeRuntime(process.versions.node), `found ${process.versions.node}`],
         ['server entrypoint present', existsSync(serverEntry), serverEntry],
         ['data directory writable', canWrite(home), `${home} under the working directory`],
         ['offline first run', true, 'the deterministic adapter answers with no provider account'],
@@ -769,10 +1110,18 @@ async function publish(client, rest, context) {
         console.error(`publish needs a source, like ${context.command} publish ./agent.yaml --dry-run`);
         return 1;
     }
-    const compiled = await compileProject(source);
+    const compiled = await compileAuthoringSource(source);
     verifyBundle(compiled.bundle, compiled.blobs);
     if (rest.includes('--dry-run')) {
-        console.log(rest.includes('--json') ? JSON.stringify(compiled.bundle, null, 2) : neutralize(renderPlan(compiled)));
+        const verificationInput = argValue(rest, '--verification-input');
+        if (verificationInput) {
+            const input = JSON.parse(readFileSync(verificationInput, 'utf8'));
+            const plan = previewPublicationVerificationPlan(compiled, input);
+            console.log(rest.includes('--json') ? canonicalJson(plan) : neutralize(renderVerificationPlan(plan)));
+        }
+        else {
+            console.log(rest.includes('--json') ? JSON.stringify(compiled.bundle, null, 2) : neutralize(renderPlan(compiled)));
+        }
         return 0;
     }
     if (!client) {
@@ -815,9 +1164,9 @@ async function stagePublicationAssetByChunks(client, session_id, content_ref, by
     }
     await client.finishPublicationBlobUpload(session_id, content_ref);
 }
-function init(rest, context) {
+async function init(rest, context) {
     const optionValues = new Set();
-    for (const option of ['--kind', '--fixture']) {
+    for (const option of ['--kind', '--fixture', '--form']) {
         const index = rest.indexOf(option);
         if (index >= 0)
             optionValues.add(index + 1);
@@ -831,21 +1180,93 @@ function init(rest, context) {
         console.error(`init kind ${kind} is unknown. Use agent or external-product.`);
         return 1;
     }
-    const template = productProjectTemplate();
-    const write = (name, content) => {
-        const path = `${dir}/${name}`;
-        if (existsSync(path)) {
-            console.log(t.dim(`kept existing ${name}`));
-            return;
-        }
-        writeFileSync(path, content);
-        console.log(`wrote ${name}`);
-    };
-    for (const file of template.files)
-        write(file.path, file.content);
+    const form = (argValue(rest, '--form') ?? 'yaml');
+    const template = scaffoldProject({ form });
+    writeAuthoringScaffold(dir, template.files);
+    const lockPath = resolve(dir, 'zero-ar.lock.json');
+    const project = await loadProject({ root: resolve(dir), ...(existsSync(lockPath) ? {} : { ignore_lock: true }) });
+    if (!existsSync(lockPath)) {
+        writeFileSync(lockPath, `${lockBytes(project)}\n`);
+        console.log('wrote zero-ar.lock.json');
+    }
+    else {
+        console.log(t.dim('kept existing zero-ar.lock.json'));
+        await project.compile();
+    }
     console.log('');
     console.log(`start a run: ${context.command} run "Summarise the objective"`);
     return 0;
+}
+/** Generate one extension without installing or executing package scripts. */
+function scaffold(rest, context) {
+    const kind = rest[0];
+    const name = rest[1];
+    if (!kind || kind === 'project') {
+        console.error(`scaffold needs skill, tool, validator, domain-pack or binding-profile. Use ${context.command} init for a project.`);
+        return 1;
+    }
+    if (!AUTHORING_SCAFFOLD_KINDS.includes(kind)) {
+        console.error(`scaffold kind ${kind} is unknown. Use skill, tool, validator, domain-pack or binding-profile.`);
+        return 1;
+    }
+    const optionValues = new Set();
+    for (const option of ['--version', '--form']) {
+        const index = rest.indexOf(option);
+        if (index >= 0)
+            optionValues.add(index + 1);
+    }
+    const selectedDirectory = rest.find((argument, index) => index > 1 && !argument.startsWith('--') && !optionValues.has(index)) ?? name ?? '.';
+    const dir = name && basename(resolve(selectedDirectory)) !== name ? join(selectedDirectory, name) : selectedDirectory;
+    const version = argValue(rest, '--version');
+    const form = argValue(rest, '--form');
+    const generated = authoringScaffold(kind, name, {
+        ...(version ? { version } : {}),
+        ...(form ? { form: form } : {}),
+    });
+    writeAuthoringScaffold(dir, generated.files);
+    console.log('');
+    for (const step of generated.next_steps)
+        console.log(`next: ${step}`);
+    return 0;
+}
+/** Compile and verify locally; a lock update is explicit and visible. */
+async function validate(rest) {
+    const selected = rest.find((argument) => !argument.startsWith('--')) ?? '.';
+    const path = resolve(selected);
+    if (existsSync(path) && statSync(path).isDirectory() && existsSync(resolve(path, 'SKILL.md'))) {
+        const compiled = await compileAuthoringSource(path);
+        verifyBundle(compiled.bundle, compiled.blobs);
+        console.log(`valid skill ${compiled.bundle.root_ref}; ${compiled.bundle.assets.length} immutable assets`);
+        return 0;
+    }
+    if (existsSync(path) && statSync(path).isDirectory()) {
+        const project = await loadProject({ root: path, ignore_lock: rest.includes('--write-lock') });
+        if (rest.includes('--write-lock')) {
+            writeFileSync(resolve(path, 'zero-ar.lock.json'), `${lockBytes(project)}\n`);
+            console.log('wrote zero-ar.lock.json');
+        }
+        const compiled = await project.compile();
+        verifyBundle(compiled.bundle, compiled.blobs);
+        console.log(`valid project ${compiled.bundle.root_ref}; lock ${project.lock().lock_ref}`);
+        return 0;
+    }
+    const compiled = await compileAuthoringSource(path);
+    verifyBundle(compiled.bundle, compiled.blobs);
+    console.log(`valid ${compiled.bundle.root_kind} ${compiled.bundle.root_ref}; bundle ${compiled.bundle.bundle_ref}`);
+    return 0;
+}
+function writeAuthoringScaffold(root, files) {
+    mkdirSync(root, { recursive: true });
+    for (const file of files) {
+        const path = resolve(root, file.path);
+        mkdirSync(dirname(path), { recursive: true });
+        if (existsSync(path)) {
+            console.log(t.dim(`kept existing ${file.path}`));
+            continue;
+        }
+        writeFileSync(path, file.content);
+        console.log(`wrote ${file.path}`);
+    }
 }
 /** Write one versioned external repository while preserving existing files. */
 function initExternalProduct(dir, rest, context) {
@@ -872,10 +1293,23 @@ function writeTemplateFile(root, file) {
     writeFileSync(path, file.content);
     console.log(`wrote ${file.path}`);
 }
-function startServer() {
+/**
+ * The interrupted runs a command's short-lived local server may adopt.
+ * attach adopts the run it follows. Every other command adopts none: its
+ * server stops when the command ends, so a run it relaunched would stop
+ * again a moment later with nothing gained and a provider call spent. A
+ * resume adopts its own run through the resume path itself.
+ */
+function localRecoveryScope(command, args) {
+    return command === 'attach' && args[0] ? `runs:${args[0]}` : 'none';
+}
+function startServer(recovery) {
     const entry = serverEntrypointPath();
     const childEnvironment = { ...process.env };
     delete childEnvironment[productEnvironmentNames('API_KEY').name];
+    // An operator who set the scope explicitly keeps it.
+    const recoveryName = productEnvironmentNames('RECOVERY').name;
+    childEnvironment[recoveryName] ??= recovery;
     const child = spawn(process.execPath, ['--disable-warning=ExperimentalWarning', entry], {
         stdio: ['ignore', 'pipe', 'inherit'],
         env: childEnvironment,

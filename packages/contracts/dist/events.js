@@ -35,6 +35,7 @@ export const RECORD_EVENT_MAP = {
     'tool.finished': 'tool.finished',
     'environment.prepare.requested': null,
     'environment.prepared': 'environment.prepared',
+    'environment.reused': null,
     'environment.job.submit.requested': null,
     'environment.job.submitted': 'environment.job.submitted',
     'environment.job.observe.requested': null,
@@ -57,6 +58,7 @@ export const RECORD_EVENT_MAP = {
     'effect.resolved': 'effect.resolved',
     'grant.superseded': 'grant.superseded',
     'effect.unreconcilable': 'effect.unreconcilable',
+    'effect.answer.late': 'effect.answer.late',
     'item.attempted': null,
     'item.parked': 'item.parked',
     'item.invalidated': 'item.invalidated',
@@ -84,6 +86,18 @@ export const RECORD_EVENT_MAP = {
     'external.observation.received': 'external.observation.received',
     'external.observation.applied': 'external.observation.applied',
     'projection.rebuilt': 'projection.rebuilt',
+    'capability.admission.requested': 'capability.admission.requested',
+    'capability.admission.classified': null,
+    'capability.admission.decided': 'capability.admission.decided',
+    'capability.admission.cancelled': 'capability.admission.cancelled',
+    'closure.epoch.committed': 'closure.epoch.committed',
+    'closure.epoch.activated': 'closure.epoch.activated',
+    // Browser binding records stay internal to the log until the browser
+    // capability names its durable events.
+    'browser.binding.pinned': null,
+    'browser.destination.proposed': null,
+    'browser.destination.decided': null,
+    'browser.binding.superseded': null,
 };
 /** One stable product family for every resumable event name. */
 export const DURABLE_EVENT_FAMILY = {
@@ -103,6 +117,7 @@ export const DURABLE_EVENT_FAMILY = {
     'effect.dispatched': 'effect',
     'effect.resolved': 'effect',
     'effect.unreconcilable': 'effect',
+    'effect.answer.late': 'effect',
     'subrun.opened': 'work',
     'subrun.finished': 'work',
     'tool.invoked': 'work',
@@ -134,4 +149,9 @@ export const DURABLE_EVENT_FAMILY = {
     'run.finished': 'terminal',
     'external.observation.received': 'work',
     'external.observation.applied': 'work',
+    'capability.admission.requested': 'review',
+    'capability.admission.decided': 'review',
+    'capability.admission.cancelled': 'review',
+    'closure.epoch.committed': 'review',
+    'closure.epoch.activated': 'work',
 };

@@ -12,7 +12,7 @@
  * receipt; publication and the tool host decide what actually runs
  * (DXI-020).
  */
-import type { OperationClass, TrustTier } from '@zero-ar/contracts';
+import type { OperationClass, ToolDisclosureClass, TrustTier } from '@zero-ar/contracts';
 /** A schema node that carries its own TypeScript type. */
 export interface Schema<T> {
     readonly json: Record<string, unknown>;
@@ -54,6 +54,15 @@ export interface ToolDefinition<I = unknown, O = unknown> {
         maximum: number;
     };
     timeout_ms?: number;
+    disclosure?: {
+        purpose?: string;
+        use_when?: string;
+        do_not_use_when?: string;
+        cost?: ToolDisclosureClass;
+        latency?: ToolDisclosureClass;
+        result_size?: ToolDisclosureClass;
+        preactivate?: boolean;
+    };
     /** Development handler. Publication carries the contract; a host runs this out of process. */
     execute(input: I, context: ToolContext): Promise<O> | O;
 }
@@ -72,6 +81,7 @@ export interface ToolManifest {
         enforced_max: number;
     } | null;
     timeout_ms: number | null;
+    disclosure?: ToolDefinition['disclosure'];
 }
 /**
  * The erased view a host serves: the contract, the declared bounds, and

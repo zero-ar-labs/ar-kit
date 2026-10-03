@@ -190,23 +190,23 @@ export declare const ResolvedModelPlanSchema: z.ZodObject<{
         }>;
         compatibility: z.ZodObject<{
             streaming: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             tools: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             cancellation: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             context_limits: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             usage: z.ZodEnum<{
@@ -270,23 +270,23 @@ export declare const ResolvedModelPlanSchema: z.ZodObject<{
         }>;
         compatibility: z.ZodObject<{
             streaming: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             tools: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             cancellation: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             context_limits: z.ZodEnum<{
-                supported: "supported";
                 unknown: "unknown";
+                supported: "supported";
                 unsupported: "unsupported";
             }>;
             usage: z.ZodEnum<{
@@ -346,8 +346,8 @@ export declare const GatewayAdapterManifestSchema: z.ZodObject<{
     }>;
     operations: z.ZodArray<z.ZodEnum<{
         steer: "steer";
-        redirect: "redirect";
         cancel: "cancel";
+        redirect: "redirect";
         answer: "answer";
         observe: "observe";
         "create-run": "create-run";

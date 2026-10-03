@@ -14,6 +14,8 @@
  * belongs to the runtime; an adapter only streams (C-ARCH-LOOP-OWNED-002).
  */
 import { refuse } from "./diagnostics.js";
+/** Runtime-local catalogue operations. They inspect visibility, never capability. */
+export const TOOL_CATALOGUE_OPERATIONS = ['tool.search', 'tool.describe', 'tool.activate'];
 /** Refuse an adapter call that is not tied to the kernel's durable run step. */
 export function assertRunOwnedModelRequest(request) {
     const ownership = request.ownership;

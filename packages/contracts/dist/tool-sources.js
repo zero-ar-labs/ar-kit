@@ -10,7 +10,8 @@
  * entries into pinned tool bindings.
  */
 import { z } from 'zod';
-import { AGGREGATOR_PROVIDERS, OPERATION_CLASSES, TOOL_SOURCE_STATES, TOOL_SOURCE_TOOL_STATES } from "./vocab.js";
+import { contentHash } from "./ids.js";
+import { AGGREGATOR_PROVIDERS, OPERATION_CLASSES, TOOL_SOURCE_DRIFT_FIELDS, TOOL_SOURCE_STATES, TOOL_SOURCE_TOOL_STATES } from "./vocab.js";
 const ref = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const name = z.string().regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'expected lowercase dot-separated naming');
 const sourceName = z.string().regex(/^[a-z][a-z0-9-]{0,63}$/, 'expected one lowercase source instance name');
@@ -107,3 +108,47 @@ export const ToolSourceTestResultSchema = z.strictObject({
 export function toolSourceProvider(request) {
     return request.provider;
 }
+/**
+ * The one content address for a discovered provider catalogue. The registry
+ * and the aggregator host both hash through this function, so a snapshot one
+ * pins reads as the same snapshot in the other (TAG-023). Tools sort by name
+ * in UTF-16 code-unit order, which does not depend on the host locale.
+ */
+export function catalogueSnapshotRef(input) {
+    const tools = [...input.tools].sort((left, right) => (left.name < right.name ? -1 : left.name > right.name ? 1 : 0));
+    return contentHash({ provider: input.provider, instance: input.instance, tools });
+}
+/** One recorded difference between a source's pinned catalogue and what the provider now serves (TAG-025). */
+export const ToolSourceDriftRecordSchema = z.strictObject({
+    source_ref: ref,
+    pinned_snapshot_ref: ref,
+    observed_snapshot_ref: ref,
+    added: z.array(z.string().min(1).max(512)).max(10_000),
+    removed: z.array(z.string().min(1).max(512)).max(10_000),
+    changed: z.array(z.strictObject({
+        name: z.string().min(1).max(512),
+        fields: z.array(z.enum(TOOL_SOURCE_DRIFT_FIELDS)).min(1),
+    })).max(10_000),
+    recorded_at: z.string().min(1),
+});
+/** The durable drift history of one source. Drifted means its enabled bindings refuse until re-enabled. */
+export const ToolSourceDriftReportSchema = z.strictObject({
+    source_ref: ref,
+    drifted: z.boolean(),
+    records: z.array(ToolSourceDriftRecordSchema).max(1_000),
+});
+/**
+ * One provider trigger delivery exactly as the provider sent it. The
+ * provider signature over the raw bytes authenticates it; the tenant comes
+ * from deployment configuration, never from these fields (TAG-CV-013).
+ */
+export const ToolSourceIngressDeliverySchema = z.record(z.string(), z.unknown());
+/** What ingress did with one delivery. An unverified delivery is kept as untrusted evidence and wakes nothing. */
+export const ToolSourceIngressReceiptSchema = z.strictObject({
+    source_ref: ref,
+    delivery_id: z.string().min(1).max(512),
+    verified: z.boolean(),
+    duplicate: z.boolean(),
+    evidence_ref: z.string().regex(/^artifact:\/\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$/, 'expected an artifact handle').nullable(),
+    run_id: z.string().regex(/^run_[0-9a-f]{32}$/, 'expected a run id').nullable(),
+});

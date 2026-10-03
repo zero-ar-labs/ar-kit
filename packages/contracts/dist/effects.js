@@ -50,7 +50,10 @@ export const ReceiptSchema = z.strictObject({
     param_hash: sha,
     idempotency_key: z.string().min(1),
     outcome: z.enum(RECEIPT_OUTCOMES),
-    /** Raw owner response bytes or identifier, as returned (EFX-018). */
+    /**
+     * The owner response bytes or identifier, as returned (EFX-018). A definite
+     * HTTP refusal records the status first, as HTTP <status>: <response bytes>.
+     */
     owner_response: z.string().max(4_096),
     assurance: z.enum(RECEIPT_ASSURANCES),
     /** The dispatcher's request-and-response attestation when the owner does not sign. */
@@ -85,6 +88,20 @@ export function receiptBinding(receipt) {
         outcome: receipt.outcome,
         owner_response: receipt.owner_response,
     });
+}
+/**
+ * The key-free half of the receipt gate: the receipt's effect, target,
+ * operation, parameter hash and idempotency key must all equal the prepared
+ * descriptor's. Answers the first field that differs, or null when the
+ * receipt binds (EFX-006). Import checks this without any key; the
+ * dispatcher checks it beside the attestation.
+ */
+export function receiptBindingMismatch(receipt, descriptor) {
+    for (const field of ['effect_id', 'target', 'operation', 'param_hash', 'idempotency_key']) {
+        if (receipt[field] !== descriptor[field])
+            return field;
+    }
+    return null;
 }
 /** The bytes a grant attestation covers: every field except the attestation itself. */
 export function grantBinding(grant) {

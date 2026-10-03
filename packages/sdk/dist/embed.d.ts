@@ -10,8 +10,13 @@
  * run id after a restart gives the same observable behaviour, because the
  * handle holds nothing the server does not (DXI-001 through DXI-004).
  */
-import type { ControlAccepted, ControlRequest, IntakeRequest, ProductPackageGraphInput, RecordEnvelope, RunResult, RunSnapshot, RegisterSourceRequest, SourceBindingInput, SourceInstance, SourceList, SourcePreflight, SourceSnapshot, SourceSnapshotPage, SourceSnapshotPageRequest } from '@zero-ar/contracts';
+import type { CapabilityAdmissionAccepted, CapabilityAdmissionCancellationRequest, CapabilityAdmissionDecisionRequest, CapabilityAdmissionList, CapabilityAdmissionListRequest, CapabilityAdmissionRequest, CapabilityAdmissionView, ControlAccepted, ControlRequest, IntakeRequest, ProductPackageGraphInput, RecordEnvelope, RunResult, RunSnapshot, RegisterSourceRequest, SourceBindingInput, SourceInstance, SourceList, SourcePreflight, SourceSnapshot, SourceSnapshotPage, SourceSnapshotPageRequest, VerificationPlan } from '@zero-ar/contracts';
 import { ZeroARClient } from '@zero-ar/client';
+export interface LocalCapabilityAdmissionInput {
+    reason: string;
+    expected_active_epoch?: number;
+    idempotency_key?: string;
+}
 export interface ZeroAROptions {
     /** The hosted or Local Lite endpoint. Required unless a profile supplies one. */
     endpoint?: string;
@@ -53,11 +58,16 @@ export declare class RunHandle {
     private readonly client;
     constructor(client: ZeroARClient, run_id: string);
     snapshot(): Promise<RunSnapshot>;
+    /** The canonical, content-addressed plan reconstructed from run.created. */
+    verificationPlan(): Promise<VerificationPlan>;
     /**
-     * Durable records in order, resuming from a cursor. The stream ends when
-     * nothing further can arrive on its own: a terminal, or a suspension
+     * Durable records in order, resuming from a record cursor. The stream ends
+     * when nothing further can arrive on its own: a terminal, or a suspension
      * waiting on an act nobody has taken yet. A caller stops earlier with a
-     * signal.
+     * signal. The snapshot is read before each page, so a page read after a
+     * settled snapshot holds every record up to the settle point. Between
+     * pages the handle waits on the durable event stream, which reconnects
+     * from its cursor, never on a timer.
      */
     events(options?: {
         after?: number;
@@ -73,6 +83,16 @@ export declare class RunHandle {
     }, control_id?: string): Promise<ControlAccepted>;
     cancel(reason?: string, control_id?: string): Promise<ControlAccepted>;
     control(request: ControlRequest): Promise<ControlAccepted>;
+    /** Request one immutable publication already available to the runtime. */
+    requestCapability(request: CapabilityAdmissionRequest): Promise<CapabilityAdmissionAccepted>;
+    /** Compile and publish a local Agent Skill, then request its exact hashes. */
+    requestCapabilityFromPath(sourcePath: string, input: LocalCapabilityAdmissionInput): Promise<CapabilityAdmissionAccepted>;
+    capabilityAdmissions(query?: CapabilityAdmissionListRequest): Promise<CapabilityAdmissionList>;
+    inspectCapability(request_id: string): Promise<CapabilityAdmissionView>;
+    decideCapability(request_id: string, decision: CapabilityAdmissionDecisionRequest): Promise<CapabilityAdmissionAccepted>;
+    approveCapability(request_id: string, input: Omit<CapabilityAdmissionDecisionRequest, 'decision'>): Promise<CapabilityAdmissionAccepted>;
+    refuseCapability(request_id: string, input: Omit<CapabilityAdmissionDecisionRequest, 'decision'>): Promise<CapabilityAdmissionAccepted>;
+    cancelCapability(request_id: string, input: CapabilityAdmissionCancellationRequest): Promise<CapabilityAdmissionAccepted>;
     /**
      * The typed result. With wait, the handle follows durable records until
      * the run reaches a terminal; the verdict, gaps, effects, and blocking
@@ -83,19 +103,18 @@ export declare class RunHandle {
         wait?: boolean;
         signal?: AbortSignal;
     }): Promise<RunResult>;
-    /** What this run resolved before any external work: agent, model plan, tools, contract. */
-    explain(): Promise<{
-        agent: string;
-        model: string;
-        verified_completion_reachable: boolean;
-        contract: string | null;
-    }>;
+    /** Explain from the same complete canonical object returned by the public API and CLI. */
+    explain(): Promise<VerificationPlan>;
 }
 /** The configured handle an application holds. It wraps the public client and nothing else. */
 export declare class ZeroAR {
     readonly client: ZeroARClient;
     constructor(client: ZeroARClient);
-    /** Create and start one run, then hand back its durable handle. */
+    /**
+     * Create and start one run, then hand back its durable handle at
+     * acceptance. The run works on in the runtime; follow it with events()
+     * or wait for it with result({ wait: true }).
+     */
     run(input: string | RunInput): Promise<RunHandle>;
     /** The same handle for a run this process did not create (DXI-004). */
     attach(run_id: string): RunHandle;

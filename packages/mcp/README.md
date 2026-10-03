@@ -1,12 +1,10 @@
 # `@zero-ar/mcp`
 
-This package exposes published Zero-AR work through MCP `2026-07-28` and
-imports reviewed MCP tools and resources through immutable discovery
-snapshots. It is an adapter over the native API. It owns no run, task,
-quality, effect, artifact or cancellation state.
-
-See the [package guide](../../docs/npm-packages.md) for where it fits in the
-public package set.
+Bring published Zero-AR work to MCP clients without creating a second owner of
+that work. The package exposes reviewed entrypoints through MCP `2026-07-28`
+and imports reviewed MCP tools and resources through immutable discovery
+snapshots. The native API still owns every run, task, quality decision, effect,
+artifact and cancellation.
 
 ## Server path
 

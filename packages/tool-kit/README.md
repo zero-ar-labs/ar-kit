@@ -1,8 +1,6 @@
-# `@zero-ar/tool-kit`
+# @zero-ar/tool-kit
 
-One typed definition for a tool's schemas, public manifest, handler types,
-development host and conformance fixtures.
+Zero-AR is a log-native runtime for long-horizon agent work.
 
-Tool handlers run outside the Zero-AR server. This package grants no runtime
-write access, effect credential or dispatch authority. See the
-[package guide](../../docs/npm-packages.md).
+This package is part of the Zero-AR public npm surface.
+Source for this package is staged from https://github.com/zero-ar-labs/ar-kit/tree/main/packages/tool-kit.

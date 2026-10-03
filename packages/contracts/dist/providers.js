@@ -278,3 +278,13 @@ export const ModelSelectionSchema = z.strictObject({
     assurance_facts_ref: ref.nullable(),
     credential_epoch: z.number().int().min(1).nullable(),
 });
+/**
+ * An operator's explicit, audited move of a tenant's deprecated single
+ * provider fields into the model pool (DXI-017). The provider model id comes
+ * from the tenant's deployment configuration, never from this body, and an
+ * instance whose adapter differs from the configured one refuses.
+ */
+export const LegacyModelPoolImportRequestSchema = z.strictObject({
+    provider_instance_ref: ref,
+    alias: name.optional(),
+});

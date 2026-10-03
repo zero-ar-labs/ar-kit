@@ -1,14 +1,14 @@
 {
   "name": "@zero-ar/validator-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "One typed validator declaration, its examined-input manifest, and labelled evaluation fixtures.",
   "license": "Apache-2.0",
   "dependencies": {
-    "@zero-ar/contracts": "0.1.0"
+    "@zero-ar/contracts": "0.2.0"
   },
   "engines": {
-    "node": ">=23.6"
+    "node": ">=24.11.0 <25"
   },
   "files": [
     "dist",

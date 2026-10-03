@@ -13,7 +13,9 @@
 /** Model-visible entry roles. Entries form a tree; records never reach a model. */
 export const ENTRY_ROLES = ['system', 'user', 'assistant', 'tool_result', 'steer', 'marker'];
 /** Prefixes for sortable opaque identifiers. A prefix identifies a kind and grants no authority. */
-export const ID_PREFIXES = ['run', 'rec', 'ent', 'lea', 'brn', 'ctl', 'gap', 'eff', 'ead', 'agt', 'chk', 'wak', 'pub', 'env', 'job', 'obs', 'src'];
+export const ID_PREFIXES = ['run', 'rec', 'ent', 'lea', 'brn', 'ctl', 'gap', 'eff', 'ead', 'agt', 'chk', 'wak', 'pub', 'env', 'job', 'obs', 'src', 'cap', 'wsp'];
+/** Durable workspace generation states owned by the Environment Plane. */
+export const SANDBOX_WORKSPACE_STATUSES = ['sealed', 'attached', 'expired', 'deleted'];
 /** Runtime record types. The canonical history is a hash-chained sequence of these. */
 export const RECORD_TYPES = [
     'run.created',
@@ -40,6 +42,7 @@ export const RECORD_TYPES = [
     'tool.finished',
     'environment.prepare.requested',
     'environment.prepared',
+    'environment.reused',
     'environment.job.submit.requested',
     'environment.job.submitted',
     'environment.job.observe.requested',
@@ -61,6 +64,7 @@ export const RECORD_TYPES = [
     'effect.dispatched',
     'effect.resolved',
     'effect.unreconcilable',
+    'effect.answer.late',
     'grant.superseded',
     'item.attempted',
     'item.parked',
@@ -90,11 +94,101 @@ export const RECORD_TYPES = [
     'external.observation.applied',
     'projection.rebuilt',
     'run.lifecycle.command.accepted',
+    'capability.admission.requested',
+    'capability.admission.classified',
+    'capability.admission.decided',
+    'capability.admission.cancelled',
+    'closure.epoch.committed',
+    'closure.epoch.activated',
+    'browser.binding.pinned',
+    'browser.destination.proposed',
+    'browser.destination.decided',
+    'browser.binding.superseded',
+];
+/** Governed amendments to the capability closure of one durable run (DCA-003). */
+export const CAPABILITY_ADMISSION_KINDS = ['add', 'replace', 'remove'];
+/** Immutable publication roots supported by the first admission slice. */
+export const CAPABILITY_PACKAGE_KINDS = ['procedure', 'tool'];
+/** Classification derives from inspected bytes; package metadata never chooses it. */
+export const CAPABILITY_ADMISSION_CLASSES = [
+    'context-only',
+    'existing-tool-use',
+    'signed-executable',
+    'resolved-dependencies',
+    'new-observation-tool',
+    'new-effect-surface',
+    'privilege-expansion',
+];
+/** Caller decisions are separate from the admission lifecycle projection. */
+export const CAPABILITY_ADMISSION_DECISIONS = ['approve', 'refuse'];
+export const CAPABILITY_ADMISSION_STATUSES = [
+    'resolving',
+    'awaiting-review',
+    'awaiting-budget',
+    'awaiting-build',
+    'approved',
+    'committed',
+    'activated',
+    'refused',
+    'superseded',
+    'cancelled',
+    'closed-by-terminal',
+];
+export const CAPABILITY_INVALIDATION_STRATEGIES = [
+    'future-only',
+    'reconsider-named-items',
+    'invalidate-downstream',
+    'fork-required',
+];
+export const CAPABILITY_NEXT_ACTIONS = [
+    'inspect',
+    'approve',
+    'refuse',
+    'cancel',
+    'wait-for-safe-boundary',
+    'continue-run',
+    'retry-against-active-epoch',
+    'publish-exact-candidate',
+    'request-later-phase',
+    'fork-or-continue',
 ];
 /** Events in one subject's encrypted cross-run memory stream (MEM-001 through MEM-010). */
 export const MEMORY_EVENT_KINDS = ['assertion.admitted', 'assertion.superseded', 'subject.erased'];
 /** The v1 memory lattice. A write stores the maximum level of its live supports. */
 export const MEMORY_CLASSIFICATIONS = ['public', 'internal', 'confidential', 'restricted'];
+/**
+ * Where the deployment wrapping key for cross-run memory subject keys comes
+ * from. Ephemeral keeps keys in process memory only, so a restart forgets
+ * every subject. No source here is a KMS or HSM.
+ */
+export const MEMORY_KEY_CUSTODY = ['keychain', 'key-file', 'secret-broker-grant', 'wrapping-key-env', 'ephemeral'];
+/** Local Lite cross-run memory modes (decision E-1). Off is the default; ephemeral forgets every subject at restart. */
+export const MEMORY_MODES = ['off', 'durable', 'ephemeral'];
+/** How an immutable agent binding makes cross-run memory readable to its model loop (MSH-002). */
+export const MEMORY_READ_MODES = ['on-demand', 'at-intake', 'disabled'];
+/** The condition under which a run-owned proposal may enter cross-run memory (MSH-008, MSH-009). */
+export const MEMORY_WRITE_MODES = ['none', 'propose-after-verification', 'human-approved'];
+/** Whether loss of a published memory binding degrades or blocks verified completion (MSH-012, MSH-013). */
+export const MEMORY_AVAILABILITY_MODES = ['optional', 'required'];
+/** Runtime-local memory operations a publication may expose to its model loop. */
+export const MEMORY_MODEL_OPERATIONS = ['memory.read', 'memory.propose'];
+/** Why one exact tool schema entered a model call's bounded view. */
+export const TOOL_VIEW_SELECTION_REASONS = [
+    'reserved-local-catalogue',
+    'reserved-skill',
+    'reserved-artifact',
+    'reserved-source',
+    'reserved-memory',
+    'explicit-author',
+    'explicit-operator',
+    'skill-allowed-tools',
+    'prior-activation',
+    'prior-tool-view',
+    'task-contract',
+    'lifecycle-phase',
+    'objective-match',
+    'small-closure',
+];
 /** Run lifecycle states. One of the four trusted state machines. */
 export const RUN_STATUSES = ['created', 'running', 'suspended', 'cancelled', 'finished'];
 /** Completion states. The machine that makes finished a verdict, not a declaration. */
@@ -116,6 +210,14 @@ export const RUN_TERMINALS = ['complete', 'unverified_artifact', 'cancelled'];
 export const SUSPEND_REASONS = ['budget_exhausted', 'provider_failure', 'awaiting_answer', 'operator_pause', 'stagnation', 'remote_task'];
 /** Why a resume preflight left the canonical run suspended. */
 export const RUN_RESUME_BLOCK_CATEGORIES = ['budget-unavailable', 'answers-outstanding', 'storage-unready', 'authority-unready', 'remote-task-pending'];
+/**
+ * Who settled a scheduled wake other than an ordinary tick: the cancellation
+ * worker, a deadline expiry, a deadline found stale, or a wake found stale or
+ * duplicated, settled durably so a rebuild does not bring it back (MTH-TW-003).
+ */
+export const WAKE_CLAIM_VIAS = ['cancellation', 'deadline', 'deadline-stale', 'stale'];
+/** Open conditions the result surface names as constraining a claim (LIF-038). */
+export const BLOCKING_OUTCOME_KINDS = ['parked-item', 'open-effect', 'artifact-evidence'];
 /** What a lease meters. Attention is a person's time and is leased like tokens. */
 export const LEASE_DENOMINATIONS = ['model_tokens', 'tool_calls', 'bytes', 'compute_ms', 'attention'];
 /** Which pool a lease draws from. Verification is reserved and undrawable by work (K-17). */
@@ -177,6 +279,31 @@ export const ITEM_STATES = [
 ];
 /** Validator classes with different verdict authority (Q-7). */
 export const VALIDATOR_CLASSES = ['deterministic', 'sampled-oracle', 'heuristic', 'named-human'];
+/**
+ * Evidence demonstrated for one exact validator implementation. These are
+ * deliberately separate from source-evidence grades such as original and
+ * derived, and from a task contract's rule-specific sufficient_for decision.
+ */
+export const VALIDATOR_EVIDENCE_GRADES = ['declared', 'protocol-conformant', 'case-evaluated', 'deployment-admitted'];
+/** Stable, typed reasons a verification arrangement cannot reach verified completion. */
+export const VERIFICATION_PLAN_REFUSAL_CODES = [
+    'contract-absent',
+    'rule-uncovered',
+    'sufficiency-missing',
+    'heuristic-sufficiency',
+    'catalogue-entry-missing',
+    'catalogue-identity-mismatch',
+    'evidence-missing',
+    'validator-unavailable',
+    'host-unavailable',
+    'artifact-reader-unavailable',
+    'oracle-unavailable',
+    'sample-frame-unpinned',
+    'attention-capacity-unavailable',
+    'lease-unavailable',
+    'schedule-infeasible',
+    'authority-conflict',
+];
 /** Outcomes a validator implementation must be able to report. */
 export const VALIDATOR_OUTCOMES = ['pass', 'reject', 'indeterminate'];
 /** What a claim asserts about its own standing (Q-20). Open means unresolved on purpose. */
@@ -191,6 +318,47 @@ export const CLAIM_REPRESENTATIONS = ['structured-claims-with-citations'];
 export const FAILURE_CLASSES = ['shape', 'domain', 'grounding', 'infrastructure'];
 /** Tool operation classes (EXT-003). Unknown resolves to effect-proposal, never quieter. */
 export const OPERATION_CLASSES = ['observation', 'run-internal', 'effect-proposal'];
+/** Browser engines admitted by the first-party browser contract. */
+export const BROWSER_ENGINES = ['playwright-chromium'];
+/** Where browser CPU, memory and descendant-process ceilings are enforced. */
+export const BROWSER_LIMIT_ENFORCEMENTS = ['observed-process', 'cgroup-v2'];
+/** Public-only production networking and the explicit loopback fixture mode. */
+export const BROWSER_NETWORK_MODES = ['public-only', 'loopback-test-only'];
+/** Playwright request classes used by immutable destination policy. */
+export const BROWSER_RESOURCE_TYPES = [
+    'document',
+    'stylesheet',
+    'image',
+    'media',
+    'font',
+    'script',
+    'texttrack',
+    'xhr',
+    'fetch',
+    'eventsource',
+    'websocket',
+    'manifest',
+    'other',
+];
+/** HTTP methods that an exact browser destination may admit. */
+export const BROWSER_HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'];
+/** Bounded observation forms returned by the browser host. */
+export const BROWSER_OBSERVATIONS = ['text', 'dom', 'screenshot', 'download'];
+/** Browser-derived content never carries instruction authority. */
+export const BROWSER_CONTENT_LABELS = ['untrusted-external-content'];
+export const BROWSER_INSTRUCTION_AUTHORITIES = ['none'];
+/** Human dispositions on a requested destination expansion. */
+export const BROWSER_DESTINATION_DISPOSITIONS = ['approved', 'refused'];
+/** Where one destination proposal stands: open, or settled by one disposition (BRC-012, BRC-013). */
+export const BROWSER_DESTINATION_PROPOSAL_STATES = ['proposed', 'approved', 'refused'];
+/** How a browser binding isolates its engine: a host process or a container. */
+export const BROWSER_ISOLATIONS = ['process', 'container'];
+/** Consequential browser actions; an unknown interaction stays consequential. */
+export const BROWSER_EFFECT_ACTIONS = ['click', 'submit', 'upload', 'unknown'];
+/** The two admitted duplicate-prevention mechanisms for browser effects. */
+export const BROWSER_IDEMPOTENCY_STRATEGIES = ['provider-key', 'natural-reference'];
+/** Browser profile readiness is separate from installation and enablement. */
+export const BROWSER_PROFILE_STATES = ['disabled', 'installed', 'healthy', 'admitted'];
 /**
  * How a tool's consumption is bounded (BUD-005). enforced reserves a
  * declared maximum before invocation; unmetered cannot, runs at lowered
@@ -221,6 +389,7 @@ export const PROFILE_CAPABILITIES = [
     'environment-modal',
     'environment-daytona',
     'environment-vercel-sandbox',
+    'environment-openai-agents',
     'environment-apptainer',
     'full-cell-docker-linux',
     'canonical-log',
@@ -228,6 +397,11 @@ export const PROFILE_CAPABILITIES = [
     'artifacts',
     'suspension',
     'honest-completion',
+    'published-skills',
+    'runtime-local-tools',
+    'author-defined-tools',
+    'progressive-tool-disclosure',
+    'effect-proposal-tools',
     'unattended-aggregator-mutations',
     'dynamic-authority',
     'production-effect-dispatch',
@@ -242,6 +416,16 @@ export const PROFILE_CAPABILITIES = [
     'mcp-imported-tools',
     'source-local-read-only',
     'document-pdf-extraction',
+    'browser-first-party-playwright',
+    'fair-cell-scheduling',
+    'sequential-sampled-validation',
+    'context-feature-cache',
+    'content-defined-chunking',
+    'attention-admission',
+    'aggregator-trigger-ingress',
+    'gateway-signed-webhook',
+    'gateway-interactive-messaging',
+    'workspace-binding-profiles',
 ];
 /** Capability manifest states. Every capability appears once in one state. */
 export const PROFILE_CAPABILITY_STATES = ['supported', 'conditional', 'excluded'];
@@ -250,7 +434,7 @@ export const ENVIRONMENT_PRODUCT_STATES = ['default-supported', 'conditional-sup
 /** Whether the real-host evidence attached to one environment is usable now. */
 export const ENVIRONMENT_ACCEPTANCE_STATES = ['not-required', 'pending', 'current', 'expired', 'mismatched'];
 /** Conditional backends whose packages are mounted into a deployment explicitly. */
-export const CONDITIONAL_ENVIRONMENT_BACKENDS = ['ssh', 'firecracker', 'apptainer'];
+export const CONDITIONAL_ENVIRONMENT_BACKENDS = ['ssh', 'firecracker', 'apptainer', 'openai-agents'];
 /** The boundary where an excluded capability refuses. */
 export const PROFILE_CAPABILITY_REFUSAL_POINTS = ['profile-compilation', 'publication', 'registration', 'intake', 'route', 'not-applicable'];
 /** Deployment components a profile may require or probe. */
@@ -281,6 +465,36 @@ export const ASSURANCE_EFFECT_DISPOSITIONS = ['none', 'settled', 'open', 'outcom
 export const INTEROP_CACHE_SCOPES = ['private', 'public'];
 /** Artifact backends named by capability manifests. */
 export const ARTIFACT_BACKENDS = ['filesystem', 's3-compatible'];
+/**
+ * Why cited artifact evidence could not stand in a context window or at the
+ * completion gate. The artifact codes are the store's own refusals; the
+ * store-unavailable reason covers a store that did not answer, and
+ * token_budget names a range the window could not hold (CTX-007, QLT-031).
+ */
+export const ARTIFACT_EVIDENCE_REASONS = [
+    'artifact.hash-mismatch',
+    'artifact.classification-mismatch',
+    'artifact.object-missing',
+    'artifact.not-found-or-not-authorized',
+    'artifact.range-invalid',
+    'artifact.range-budget',
+    'artifact.store-unavailable',
+    'memory.envelope-erased',
+    'token_budget',
+];
+/**
+ * Why a run export or import named an artifact without transferring its
+ * bytes (UAT-ART-013). not-in-run names a carried artifact the run's
+ * verified records never cite, so an import does not restore it.
+ */
+export const ARTIFACT_TRANSFER_OMISSIONS = ['tenant-mismatch', 'backend-mismatch', 'no-artifact-store', 'erased', 'absent', 'not-in-run'];
+/**
+ * The frames a run export adds before its checksum line to carry artifacts.
+ * The store's run bundle reader skips frame kinds it does not know.
+ */
+export const RUN_BUNDLE_ARTIFACT_FRAME_KINDS = ['artifact-bundle', 'artifact-omissions'];
+/** How one recorded span reads on replay. Erased or changed bytes are stale, never equal (CTX-012). */
+export const CONTEXT_REPLAY_SPAN_STATUSES = ['resolved', 'stale'];
 /** The two places a product may bind a committed runtime artifact. */
 export const RUNTIME_ARTIFACT_INTENDED_USES = ['run', 'intake'];
 /** Effect plane modes named by capability manifests. */
@@ -296,6 +510,10 @@ export const AUTHORIZATION_MODES = ['trusted-local', 'scoped'];
 /** Public route authorities. Every protected API route cites these names. */
 export const ROUTE_SCOPES = [
     'artifact:write',
+    'capability:cancel',
+    'capability:decide',
+    'capability:read',
+    'capability:request',
     'credential:read',
     'credential:revoke',
     'credential:rotate',
@@ -308,9 +526,12 @@ export const ROUTE_SCOPES = [
     'environment:teardown',
     'environment:write',
     'effect:approve',
+    'effect:grant',
+    'effect:read',
     'memory:erase',
     'memory:read',
     'memory:write',
+    'operator:attention',
     'operator:audit',
     'operator:drain',
     'operator:erase',
@@ -320,6 +541,7 @@ export const ROUTE_SCOPES = [
     'operator:restore',
     'observation:write',
     'platform:adapter-admit',
+    'platform:authority-epoch',
     'provider:read',
     'provider:write',
     'publication:create',
@@ -343,6 +565,12 @@ export const ROUTE_SCOPES = [
     'tool-source:test',
     'tool-source:write',
 ];
+/**
+ * Route scopes no tenant key may hold. Each authorizes an act that reaches
+ * every tenant on the cell, such as advancing the shared authority epoch
+ * (I-4), so only a platform operator credential carries it.
+ */
+export const PLATFORM_ROUTE_SCOPES = ['platform:authority-epoch'];
 /** Product channels accepted as observation provenance, not as authority. */
 export const EXTERNAL_OBSERVATION_CHANNELS = ['web', 'mobile', 'voice', 'sms', 'email', 'chat', 'system', 'other'];
 /** Signature algorithms admitted by the first deployment-owned participant verifier. */
@@ -364,7 +592,15 @@ export const MODEL_USAGE_MEASUREMENTS = ['reported', 'untrusted', 'absent', 'est
 /** Tool-aggregator providers supported by the first hosted beta. */
 export const AGGREGATOR_PROVIDERS = ['composio', 'merge-agent-handler', 'merge-unified'];
 /** Purposes permitted for tenant credential bindings. */
-export const PROVIDER_CREDENTIAL_PURPOSES = ['openai', 'anthropic', 'openrouter', 'together', 'fireworks', 'openai-compatible', 'composio', 'merge-agent-handler', 'merge-unified', 'mcp', 's3-compatible-artifact-store'];
+export const PROVIDER_CREDENTIAL_PURPOSES = ['openai', 'anthropic', 'openrouter', 'together', 'fireworks', 'openai-compatible', 'composio', 'merge-agent-handler', 'merge-unified', 'mcp', 's3-compatible-artifact-store', 'memory-wrapping-key'];
+/**
+ * Callers the hosted managed-secret broker issues a bearer to. Each bearer
+ * is bound to one principal, and the broker takes the tenant from that
+ * binding rather than from the request body.
+ */
+export const SECRET_BROKER_PRINCIPAL_KINDS = ['runtime', 'aggregator-host', 'artifact-store', 'supervisor'];
+/** Operations a managed-secret broker grant may allow, one per broker route. */
+export const SECRET_BROKER_OPERATIONS = ['health', 'bind-external', 'inspect', 'rotate-external', 'revoke', 'resolve'];
 /** Non-secret credential lifecycle states exposed by administration. */
 export const CREDENTIAL_BINDING_STATES = ['active', 'revoked'];
 /** Durable control-plane states for provider instances and discovered models. */
@@ -373,10 +609,75 @@ export const PROVIDER_MODEL_STATES = ['discovered', 'enabled', 'disabled'];
 /** Durable control-plane states for tenant tool-aggregator sources. */
 export const TOOL_SOURCE_STATES = ['configured', 'ready', 'disabled', 'revoked', 'removed'];
 export const TOOL_SOURCE_TOOL_STATES = ['discovered', 'enabled', 'disabled'];
+/** Which provider-authored fields of one catalogue entry changed since the pinned snapshot (TAG-025). */
+export const TOOL_SOURCE_DRIFT_FIELDS = ['description', 'input_schema', 'provider_version', 'annotations'];
 /** Storage kinds a deployment can wire. Profiles name which they require. */
 export const STORE_KINDS = ['sqlite', 'postgres'];
 /** PostgreSQL modes a packaged hosted cell can select at startup. */
 export const POSTGRES_DEPLOYMENT_MODES = ['colocated', 'external'];
+/**
+ * Where an integrity signer's active key stands against its interval. Only
+ * an active key signs new checkpoints; hosted signer health reports the state.
+ */
+export const SIGNER_KEY_STATES = ['active', 'not-yet-valid', 'expired'];
+/**
+ * Children a Full Cell runtime may ask its supervisor to launch. The
+ * supervisor sets each child's argv and environment itself and never takes
+ * a path, an argument or an environment value from the runtime.
+ */
+export const CELL_LAUNCH_ROLES = ['integrity-signer'];
+/**
+ * The Full Cell processes that write startup progress lines to stderr. Each
+ * line's cell_startup field names one of them, so an operator reading the
+ * container log can tell which process a stalled step belongs to.
+ */
+export const CELL_STARTUP_PROCESSES = ['supervisor', 'runtime'];
+/**
+ * How much process isolation a hosted cell requires before it starts.
+ * required refuses a cell whose Node processes are dumpable, whose SIGUSR1
+ * inspector is enabled, or whose child hosts are not confined by Landlock
+ * with an observed self-test; best-effort records what it observed and
+ * starts, and is accepted only for a cell with exactly one tenant.
+ */
+export const CELL_ISOLATION_MODES = ['required', 'best-effort'];
+/**
+ * Guarantees a running hosted cell names in health and its startup report
+ * when the host cannot enforce them. child-code-isolation: child hosts run
+ * unconfined. runtime-anchor-store-custody: the runtime is not confined away
+ * from the cell's custody paths, so it can write the checkpoint store; a
+ * cell with no custody path does not list it. child-network-scoping: child hosts may open any TCP
+ * connection (Landlock below ABI 4). child-signal-scoping: child hosts may
+ * signal processes outside their domain (Landlock below ABI 6).
+ * external-secret-store-tenant-binding: tenant binding happens inside an
+ * external secret store the cell cannot observe. signer-key-custody: the
+ * runtime itself holds a signer key, as the standalone hosted entrypoint does.
+ */
+export const CELL_GUARANTEE_EXCLUSIONS = [
+    'child-code-isolation',
+    'runtime-anchor-store-custody',
+    'child-network-scoping',
+    'child-signal-scoping',
+    'external-secret-store-tenant-binding',
+    'signer-key-custody',
+];
+/** Processes a hosted cell confines with Landlock, each under its own policy. */
+export const CELL_CONFINEMENT_ROLES = ['runtime', 'tool-host', 'aggregator-host', 'authority-host', 'validator-host'];
+/**
+ * Where one confined process class stands after the Landlock probe and its
+ * self-tests, as the startup report names it. confined: a probe child under
+ * the policy observed every denial. self-test-failed: the kernel offers the
+ * ABI, but a probe child did not observe a denial or did not run.
+ * unavailable: the kernel offers no Landlock, or too low an ABI for the
+ * role. not-offered: the entrypoint does not confine this class, as the
+ * standalone hosted entrypoint does not confine its runtime. not-needed: the
+ * cell has no custody path to keep from the runtime, so no runtime policy
+ * is built.
+ */
+export const CELL_CONFINEMENT_STATES = ['confined', 'self-test-failed', 'unavailable', 'not-offered', 'not-needed'];
+/** The outcome of one confinement self-test in the startup report. */
+export const CELL_SELF_TEST_RESULTS = ['passed', 'failed'];
+/** What the startup gating matrix decides for a hosted cell: start, or refuse with cell.isolation.unmet. */
+export const CELL_ISOLATION_DECISIONS = ['start', 'refuse'];
 /** PostgreSQL latency report topologies measured before a UAT evidence claim. */
 export const POSTGRES_LATENCY_TOPOLOGIES = ['colocated', 'same-region-external', 'controlled-added-latency'];
 /** PostgreSQL latency report operations on the canonical-log control path. */
@@ -389,12 +690,84 @@ export const POSTGRES_LATENCY_REPORT_STATUSES = ['fixture-format-only', 'uat-mea
  * touching a run, enforce acts and pins transitively.
  */
 export const CONTROLLER_MODES = ['off', 'observe', 'enforce'];
+/**
+ * Standing of one published attention capacity snapshot (MTH-AT-008). Only
+ * a current snapshot can admit enforced intake; drift beyond the registered
+ * tolerance marks it invalid until an operator publishes the next version.
+ */
+export const ATTENTION_SNAPSHOT_STATES = ['current', 'invalid', 'superseded'];
+/** What the attention preflight concluded for one class at admission (BUD-009). */
+export const ATTENTION_ADMISSION_RESULTS = ['not-evaluated', 'admitted', 'refused'];
+/** What a pinned sampling oracle said about one examined item (MTH-SV-001). */
+export const SAMPLED_ORACLE_OUTCOMES = ['good', 'defect'];
+/** Why a sequential sampled check stopped examining items (MTH-SV-003, MTH-SV-006). */
+export const SEQUENTIAL_STOP_REASONS = ['accept-boundary', 'reject-boundary', 'sample-cap', 'lease-exhausted'];
 /** Workspace mount slots (EXT-018). The slot decides what classes its operations may carry. */
 export const WORKSPACE_SLOTS = ['runtime-scratch', 'customer-readable-external'];
+/** Who ends a workspace instance: the run that attached it, or the deployment that registered it. */
+export const WORKSPACE_INSTANCE_LIFECYCLES = ['run-scoped', 'deployment-owned'];
 /** What a domain-pack machine claim asserts (XCV-012). Limitations are claims too. */
-export const PACK_CLAIM_KINDS = ['capability', 'coverage', 'limitation'];
+export const PACK_CLAIM_KINDS = ['capability', 'coverage', 'limitation', 'requirement', 'omission'];
 /** Diagnostic severities. Severity depends on what happens next, not on drama. */
 export const DIAGNOSTIC_SEVERITIES = ['error', 'warning', 'info'];
+/**
+ * Codes that name a mechanism this build does not wire. A declared route
+ * answers its code after authorization. A reserved input refuses at parse
+ * time: the caller receives that surface's parse refusal (intake.invalid,
+ * control.invalid, or a schema error from the SDK publication compiler)
+ * with this code in its message. An excluded capability entry names its
+ * code. The change that wires one mechanism stops answering its code.
+ */
+export const UNWIRED_DIAGNOSTIC_CODES = [
+    'wake.scheduler.unwired',
+    'controllers.view.unwired',
+    'scheduler.dispatch.unwired',
+    'validator.sampled.unwired',
+    'checkpoint.statistics.unwired',
+    'context.cache.unwired',
+    'source.chunking.unwired',
+    'attention.service.unwired',
+    'attention.admission.unwired',
+    'artifact.sweep.unwired',
+    'publication.transfer.unwired',
+    'registry.rebuild.unwired',
+    'registry.alias-history.unwired',
+    'tool-source.drift.unwired',
+    'tool-source.ingress.unwired',
+    'effect.authority.unwired',
+    'workspace.instances.unwired',
+    'gateway.unwired',
+];
+/**
+ * Codes that name a condition this deployment lacks. The wired mechanism
+ * keeps answering them wherever the condition is absent: no browser port on
+ * the cell, no dynamic effect authority, or no legacy provider fields to
+ * import. A build that does not wire the mechanism lacks the condition too,
+ * so its declared route or reserved input answers the same code now.
+ */
+export const CONDITIONAL_REFUSAL_CODES = [
+    'browser.capability.unavailable',
+    'effect.grant.reissue.unavailable',
+    'model.legacy.unconfigured',
+];
+/**
+ * Refusals a wired mechanism answers when its check fails. The capability
+ * inventory already answers capability-profile.unimplemented. The attention
+ * preflight, browser health, storage writer fence and artifact export
+ * ceiling answer theirs once their packages land. Each code is named once
+ * here so every composition and client reads the same code.
+ */
+export const MECHANISM_REFUSAL_CODES = [
+    'attention.preflight.refused',
+    'attention.snapshot.invalid',
+    'attention.batch.flat-without-evidence',
+    'browser.capability.stale',
+    'browser.capability.unhealthy',
+    'storage.writer.stale',
+    'storage.writer.unavailable',
+    'artifact.bundle-too-large',
+    'capability-profile.unimplemented',
+];
 /**
  * The complete durable observation vocabulary from ERD 9.3. The runtime
  * publishes the subset its current phase emits; the vocabulary itself is
@@ -417,6 +790,7 @@ export const DURABLE_EVENTS = [
     'effect.dispatched',
     'effect.resolved',
     'effect.unreconcilable',
+    'effect.answer.late',
     'subrun.opened',
     'subrun.finished',
     'tool.invoked',
@@ -448,6 +822,11 @@ export const DURABLE_EVENTS = [
     'run.finished',
     'external.observation.received',
     'external.observation.applied',
+    'capability.admission.requested',
+    'capability.admission.decided',
+    'capability.admission.cancelled',
+    'closure.epoch.committed',
+    'closure.epoch.activated',
 ];
 /** Product-facing families on the resumable record stream. */
 export const PRODUCT_EVENT_FAMILIES = ['work', 'review', 'artifact', 'quality', 'effect', 'terminal', 'consumption', 'environment', 'maintenance'];
@@ -471,6 +850,7 @@ export const ENVIRONMENT_BACKENDS = [
     'modal',
     'daytona',
     'vercel-sandbox',
+    'openai-agents',
     'apptainer',
 ];
 /** The exact boundary an environment profile claims. */
@@ -575,6 +955,13 @@ export const ENVIRONMENT_NETWORK_MODES = ['deny', 'allowlist', 'unrestricted'];
 export const ENVIRONMENT_MOUNT_MODES = ['read-only', 'read-write'];
 /** Whether an environment resource belongs to one tenant or the deployment. */
 export const ENVIRONMENT_TENANT_SHARING = ['tenant-owned', 'deployment-shared'];
+/**
+ * Whether one lifecycle runtime serves later calls from an environment it
+ * already prepared. run: a ready environment serves later calls in the same
+ * run, tenant, and profile until run teardown. none: every call prepares its
+ * own environment and tears it down once the call settles.
+ */
+export const ENVIRONMENT_REUSE_POLICIES = ['none', 'run'];
 /** What suspension does with one nonterminal environment handle. */
 export const ENVIRONMENT_SUSPENSION_DISPOSITIONS = [
     'continue-and-observe',
@@ -670,6 +1057,12 @@ export const CLI_TARGET_MODES = ['bundled', 'hosted'];
 /** Which non-secret input selected a public command target (DXI-037). */
 export const CLI_TARGET_SOURCES = ['explicit-url', 'environment-url', 'bundled-default'];
 export const PUBLICATION_EDGE_KINDS = ['requires', 'includes'];
+/** How a publication export frame carries one blob: text as UTF-8, binary assets as base64 (PUB-023). */
+export const PUBLICATION_BLOB_ENCODINGS = ['utf8', 'base64'];
+/** Editable source forms accepted by the ahead-of-time authoring compiler. */
+export const AUTHORING_SOURCE_FORMS = ['yaml', 'json', 'markdown', 'typescript'];
+/** Project and extension shapes emitted by the public scaffold generator. */
+export const AUTHORING_SCAFFOLD_KINDS = ['project', 'skill', 'tool', 'validator', 'domain-pack', 'binding-profile'];
 /**
  * How a workspace package is distributed. The classification is intent, not
  * current manifest state: a package declared public-npm still ships with
