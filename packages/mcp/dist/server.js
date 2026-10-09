@@ -178,12 +178,22 @@ function page(items, cursor, size) {
     const next = offset + selected.length;
     return { items: selected, ...(next < items.length ? { nextCursor: `offset:${next}` } : {}) };
 }
+/** The agent's question an item waits on, from its latest park, or null when a check parked it. */
+function parkedQuestion(records, itemId) {
+    const parked = records.filter((record) => record.type === 'item.parked' && record.payload['item_id'] === itemId).at(-1);
+    return parked?.payload['question'] ?? null;
+}
 function pendingInputs(records) {
     const open = new Map();
     for (const record of records) {
         if (record.type === 'item.parked') {
             const itemId = String(record.payload['item_id'] ?? '');
-            const reason = String(record.payload['reason'] ?? 'This item needs an answer.');
+            // An agent's question shows the question and why it was asked, and
+            // offers its choices when other answers are not allowed (GAP-011).
+            const question = record.payload['question'];
+            const reason = question
+                ? `${question.text} Why: ${question.why}`.slice(0, 2_000)
+                : String(record.payload['reason'] ?? 'This item needs an answer.');
             if (itemId) {
                 open.set(itemId, {
                     request_id: `input:${record.record_id}`,
@@ -193,7 +203,7 @@ function pendingInputs(records) {
                         type: 'object',
                         properties: {
                             action: { type: 'string', enum: ['accept', 'decline'] },
-                            answer: { type: 'string', maxLength: 100_000 },
+                            answer: question?.choices && !question.allow_other ? { type: 'string', enum: question.choices } : { type: 'string', maxLength: 100_000 },
                             reason: { type: 'string', maxLength: 1_000 },
                         },
                         required: ['action'],
@@ -467,26 +477,23 @@ export function createZeroARMcpServer(options) {
                 throw new McpProtocolError(-32602, 'The task update needs one inputResponses object.');
             const current = await state(context.native, taskId);
             const openByRequest = new Map(current.pending.map((pending) => [pending.request_id, pending]));
-            let answered = 0;
             for (const [requestId, rawResponse] of Object.entries(responses)) {
                 const pending = openByRequest.get(requestId);
                 if (!pending)
                     continue;
-                const answer = parseInputResponse(rawResponse);
+                const parsedAnswer = parseInputResponse(rawResponse);
+                // An answer that names one of the question's choices is that choice.
+                const choices = parkedQuestion(current.records, pending.handle)?.choices ?? null;
+                const answer = parsedAnswer.text !== undefined && choices?.includes(parsedAnswer.text) ? { choice: parsedAnswer.text } : parsedAnswer;
                 await context.native.control(current.runId, {
                     verb: 'answer',
                     control_id: nativeControlId('answer', taskId, { requestId, answer }),
                     handle: pending.handle,
                     ...answer,
                 });
-                answered += 1;
             }
-            if (answered > 0 && answered === current.pending.length) {
-                await context.native.resumeDeferred(current.runId, {
-                    idempotency_key: nativeControlId('resume', taskId, Object.keys(responses).sort()),
-                    reason: 'resume after the complete MCP input response set',
-                });
-            }
+            // The answer that settles the last pending input wakes the run in the
+            // runtime, so the update only answers.
             return jsonRpcResult(parsed.id, { resultType: 'complete' });
         }
         if (parsed.method === 'tasks/cancel') {

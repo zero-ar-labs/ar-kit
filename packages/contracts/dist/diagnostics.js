@@ -32,5 +32,6 @@ export function renderDiagnostic(d) {
         parts.push(`fix: ${d.fix}`);
     if (d.clause)
         parts.push(`clause ${d.clause}`);
-    return parts.join('. ');
+    // A message that ends in its own period takes no second one from the join.
+    return parts.map((part, index) => (index < parts.length - 1 ? part.replace(/\.$/, '') : part)).join('. ');
 }

@@ -78,10 +78,13 @@ export type EffectApprovalRecorded = z.infer<typeof EffectApprovalRecordedSchema
 /** Internal command sent from the Effect Plane to the deployment-owned authority service. */
 export declare const EffectAuthorityDecisionCommandSchema: z.ZodObject<{
     reason: z.ZodString;
-    scope: z.ZodLiteral<"effect:approve">;
-    operation: z.ZodString;
+    target: z.ZodString;
     run_id: z.ZodString;
     tenant: z.ZodString;
+    effect_id: z.ZodString;
+    operation: z.ZodString;
+    param_hash: z.ZodString;
+    magnitude: z.ZodNullable<z.ZodNumber>;
     idempotency_key: z.ZodString;
     approver: z.ZodObject<{
         subject: z.ZodString;
@@ -90,18 +93,15 @@ export declare const EffectAuthorityDecisionCommandSchema: z.ZodObject<{
         claims_ref: z.ZodString;
         credential_id: z.ZodNullable<z.ZodString>;
     }, z.core.$strict>;
+    expires_at: z.ZodString;
+    request_fingerprint: z.ZodString;
+    application_principal: z.ZodString;
     decision: z.ZodEnum<{
         approve: "approve";
         refuse: "refuse";
     }>;
-    target: z.ZodString;
-    effect_id: z.ZodString;
-    param_hash: z.ZodString;
-    magnitude: z.ZodNullable<z.ZodNumber>;
-    expires_at: z.ZodString;
     grant_ref: z.ZodString;
-    request_fingerprint: z.ZodString;
-    application_principal: z.ZodString;
+    scope: z.ZodLiteral<"effect:approve">;
     scope_epoch: z.ZodNumber;
 }, z.core.$strict>;
 export type EffectAuthorityDecisionCommand = z.infer<typeof EffectAuthorityDecisionCommandSchema>;

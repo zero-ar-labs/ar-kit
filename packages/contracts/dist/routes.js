@@ -87,6 +87,7 @@ export const API_ROUTES = {
     reexecute: { method: 'POST', path: '/v1/runs/:run_id/reexecutions', kind: 'json', request: 'ReexecuteRequestSchema', response: 'RunRefSchema', area: 'run', authorization: { scopes: ['run:reexecute'] }, product_mutation: { idempotency_source: 'request-idempotency-key', changed_content_code: 'reexecution.idempotency.reused' } },
     start: { method: 'POST', path: '/v1/runs/:run_id/start', kind: 'json', request: 'RunLifecycleCommandRequestSchema', response: 'StartAcceptedSchema', area: 'run', authorization: { scopes: ['run:start'] }, product_mutation: { idempotency_source: 'request-idempotency-key', changed_content_code: 'run.lifecycle.idempotency.reused' } },
     resume: { method: 'POST', path: '/v1/runs/:run_id/resume', kind: 'json', request: 'RunLifecycleCommandRequestSchema', response: 'StartAcceptedSchema', area: 'run', authorization: { scopes: ['run:resume'] }, product_mutation: { idempotency_source: 'request-idempotency-key', changed_content_code: 'run.lifecycle.idempotency.reused' } },
+    amendBudgets: { method: 'POST', path: '/v1/runs/:run_id/budget-amendments', kind: 'json', request: 'BudgetAmendmentRequestSchema', response: 'BudgetAmendmentAcceptedSchema', area: 'run', authorization: { scopes: ['run:budget'] }, product_mutation: { idempotency_source: 'request-idempotency-key', changed_content_code: 'budget.amendment.idempotency.reused' } },
     resumeDeferred: { method: 'POST', path: '/v1/runs/:run_id/resume-deferred', kind: 'json', request: 'RunResumeDeferredRequestSchema', response: 'StartAcceptedSchema', area: 'run', authorization: { scopes: ['run:resume'] }, product_mutation: { idempotency_source: 'request-idempotency-key', changed_content_code: 'run.lifecycle.idempotency.reused' } },
     createRuntimeArtifactSession: { method: 'POST', path: '/v1/artifact-sessions', kind: 'json', request: 'RuntimeArtifactSessionRequestSchema', response: 'RuntimeArtifactSessionStatusSchema', area: 'run', authorization: { scopes: ['artifact:write'] }, product_mutation: { idempotency_source: 'request-idempotency-key', changed_content_code: 'artifact.idempotency-conflict' } },
     runtimeArtifactUploadStatus: { method: 'GET', path: '/v1/artifact-sessions/:session_id', kind: 'json', response: 'RuntimeArtifactSessionStatusSchema', area: 'run', authorization: { scopes: ['artifact:write'] } },
@@ -94,8 +95,10 @@ export const API_ROUTES = {
     commitRuntimeArtifact: { method: 'POST', path: '/v1/artifact-sessions/:session_id/commits', kind: 'json', response: 'RuntimeArtifactCommittedSessionSchema', area: 'run', authorization: { scopes: ['artifact:write'] }, product_mutation: { idempotency_source: 'artifact-session-key', changed_content_code: 'artifact.idempotency-conflict' } },
     rebuildProjection: { method: 'POST', path: '/v1/runs/:run_id/projection-rebuilds', kind: 'json', response: 'RebuildOutcomeSchema', area: 'administration', authorization: { scopes: ['operator:rebuild'] } },
     eraseSubject: { method: 'POST', path: '/v1/runs/:run_id/erasures', kind: 'json', request: 'ErasureRequestSchema', response: 'ErasureOutcomeSchema', area: 'results-and-audit', authorization: { scopes: ['operator:erase'] } },
-    exportRun: { method: 'GET', path: '/v1/runs/:run_id/export', kind: 'bundle', response_media_type: 'application/x-ndjson', area: 'results-and-audit', authorization: { scopes: ['run:read'] } },
+    exportRun: { method: 'GET', path: '/v1/runs/:run_id/export', kind: 'bundle', response_media_type: 'application/x-ndjson', area: 'results-and-audit', authorization: { scopes: ['run:read', 'operator:audit'] } },
     importRun: { method: 'POST', path: '/v1/imports', kind: 'bundle', request_media_type: 'application/x-ndjson', response: 'ImportOutcomeSchema', area: 'administration', authorization: { scopes: ['operator:restore'] } },
+    checkRunContinuation: { method: 'POST', path: '/v1/runs/:run_id/continuation-checks', kind: 'json', request: 'RunContinuationDeclarationSchema', response: 'RunContinuationCompatibilityReportSchema', area: 'administration', authorization: { scopes: ['operator:restore'] } },
+    continueImportedRun: { method: 'POST', path: '/v1/runs/:run_id/continuations', kind: 'json', request: 'RunContinuationAdmissionRequestSchema', response: 'RunContinuationAcceptedSchema', area: 'administration', authorization: { scopes: ['operator:restore', 'run:resume'] }, product_mutation: { idempotency_source: 'request-idempotency-key', changed_content_code: 'run.continuation.idempotency-reused' } },
     streamRecords: {
         method: 'GET',
         path: '/v1/runs/:run_id/records/stream',
@@ -212,8 +215,6 @@ export const API_ROUTES = {
     exportMemorySubject: { method: 'POST', path: '/v1/memory/exports', kind: 'json', request: 'MemorySubjectTransferRequestSchema', response: 'MemorySubjectTransferBundleSchema', area: 'administration', authorization: { scopes: ['operator:audit'] } },
     importMemorySubject: { method: 'POST', path: '/v1/memory/imports', kind: 'json', request: 'MemorySubjectImportRequestSchema', response: 'MemorySubjectImportOutcomeSchema', area: 'administration', authorization: { scopes: ['operator:restore'] } },
     readRunMemory: { method: 'POST', path: '/v1/runs/:run_id/memory-reads', kind: 'json', request: 'MemoryReadRequestSchema', response: 'RunMemoryReadOutcomeSchema', area: 'run', authorization: { scopes: ['memory:read'] } },
-    // Declared ahead of their mechanisms. DECLARED_AHEAD_ROUTES names the
-    // typed diagnostic each one answers after route authorization.
     contextReplay: { method: 'GET', path: '/v1/runs/:run_id/contexts/:turn', kind: 'json', response: 'ContextReplaySchema', area: 'results-and-audit', authorization: { scopes: ['run:read'] } },
     wakeSchedulerReport: { method: 'GET', path: '/v1/scheduler/wakes', kind: 'json', response: 'WakeSchedulerReportSchema', area: 'administration', authorization: { scopes: ['operator:audit'] } },
     controllers: { method: 'GET', path: '/v1/runs/:run_id/controllers', kind: 'json', response: 'ControllersViewSchema', area: 'results-and-audit', authorization: { scopes: ['run:read'] } },
@@ -223,51 +224,12 @@ export const API_ROUTES = {
     // review:read alone: the dashboard aggregates the review workload that
     // key already reads item by item, and plain scope lists are all-of.
     attentionDashboard: { method: 'GET', path: '/v1/attention/dashboard', kind: 'json', response: 'AttentionDashboardSchema', area: 'review-and-authority', authorization: { scopes: ['review:read'] } },
-    proposeBrowserDestination: { method: 'POST', path: '/v1/runs/:run_id/browser-destination-proposals', kind: 'json', request: 'BrowserDestinationProposalRequestSchema', response: 'BrowserDestinationProposalSchema', area: 'run', authorization: { scopes: ['run:control'] } },
-    decideBrowserDestination: {
-        method: 'POST',
-        path: '/v1/runs/:run_id/browser-destination-proposals/:proposal_ref/decisions',
-        kind: 'json',
-        request: 'BrowserDestinationDecisionRequestSchema',
-        response: 'BrowserDestinationDecisionSchema',
-        headers: [{ name: 'X-Zero-AR-Participant-Token', argument: 'participant_token', required: true, maxLength: 16_384, description: 'A JWT from the tenant\'s admitted participant identity provider. The verified subject becomes the destination approver.' }],
-        area: 'review-and-authority',
-        authorization: { scopes: ['effect:approve'] },
-    },
     sweepArtifacts: { method: 'POST', path: '/v1/artifact-sweeps', kind: 'json', request: 'ArtifactSweepRequestSchema', response: 'ArtifactSweepResultSchema', area: 'administration', authorization: { scopes: ['operator:reconcile'] } },
     exportPublication: { method: 'GET', path: '/v1/publications/:publication_ref/export', kind: 'bundle', response_media_type: 'application/x-ndjson', area: 'build-and-publish', authorization: { scopes: ['publication:read'] } },
     importPublication: { method: 'POST', path: '/v1/publication-imports', kind: 'bundle', request_media_type: 'application/x-ndjson', response: 'PublicationImportOutcomeSchema', area: 'build-and-publish', authorization: { scopes: ['publication:create'] } },
     rebuildRegistry: { method: 'POST', path: '/v1/registry/rebuilds', kind: 'json', response: 'RegistryRebuildOutcomeSchema', area: 'administration', authorization: { scopes: ['operator:rebuild'] } },
     registryAliasHistory: { method: 'GET', path: '/v1/registry/aliases/:alias/history', kind: 'json', response: 'AliasHistorySchema', area: 'build-and-publish', authorization: { scopes: ['publication:read'] } },
-    importLegacyModelPool: { method: 'POST', path: '/v1/model-pool/legacy-imports', kind: 'json', request: 'LegacyModelPoolImportRequestSchema', response: 'TenantModelPoolSchema', area: 'administration', authorization: { scopes: ['provider:write'] } },
     toolSourceDrift: { method: 'GET', path: '/v1/tool-sources/:source_ref/drift', kind: 'json', response: 'ToolSourceDriftReportSchema', area: 'administration', authorization: { scopes: ['tool-source:read'] } },
-    toolSourceIngress: {
-        method: 'POST',
-        path: '/v1/tool-source-ingress/:tenant/:source_ref',
-        kind: 'json',
-        request: 'ToolSourceIngressDeliverySchema',
-        response: 'ToolSourceIngressReceiptSchema',
-        headers: [
-            { name: 'webhook-id', argument: 'webhook_id', required: false, maxLength: 512, description: 'The Standard Webhooks delivery id a Composio trigger delivery carries.' },
-            { name: 'webhook-timestamp', argument: 'webhook_timestamp', required: false, maxLength: 64, description: 'The Standard Webhooks delivery time the signature covers.' },
-            { name: 'webhook-signature', argument: 'webhook_signature', required: false, maxLength: 4_096, description: 'The Standard Webhooks signature over the raw delivery bytes.' },
-            { name: 'X-Merge-Webhook-Signature', argument: 'merge_webhook_signature', required: false, maxLength: 4_096, description: 'The Merge signature over the raw delivery bytes.' },
-        ],
-        area: 'administration',
-        authorization: { public: true, reason: 'The provider signature over the raw delivery bytes authenticates a trigger delivery, and the tenant comes from deployment configuration. An unverified delivery starts nothing.' },
-    },
-    reissueEffectGrant: {
-        method: 'POST',
-        path: '/v1/runs/:run_id/effect-grants/reissuances',
-        kind: 'json',
-        request: 'EffectGrantReissueRequestSchema',
-        response: 'EffectGrantReissueOutcomeSchema',
-        headers: [{ name: 'X-Zero-AR-Participant-Token', argument: 'participant_token', required: true, maxLength: 16_384, description: 'A JWT from the tenant\'s admitted participant identity provider. The verified subject becomes the re-issue approver.' }],
-        area: 'review-and-authority',
-        authorization: { scopes: ['effect:grant'] },
-    },
-    revokeEffectGrant: { method: 'POST', path: '/v1/effect-grants/:grant_ref/revocations', kind: 'json', request: 'EffectGrantRevocationRequestSchema', response: 'EffectGrantRevocationOutcomeSchema', area: 'review-and-authority', authorization: { scopes: ['effect:grant'] } },
-    advanceEffectAuthorityEpoch: { method: 'POST', path: '/v1/effect-authority/epoch-advances', kind: 'json', request: 'EffectAuthorityEpochAdvanceRequestSchema', response: 'EffectAuthorityEpochAdvanceOutcomeSchema', area: 'administration', authorization: { scopes: ['platform:authority-epoch'] } },
     listEffectTargets: {
         method: 'GET',
         path: '/v1/effect-targets',
@@ -279,11 +241,6 @@ export const API_ROUTES = {
         area: 'review-and-authority',
         authorization: { scopes: ['effect:read'] },
     },
-    // Instance routes await J3's confirmation. A hosted cell takes instances
-    // only from deployment configuration and refuses registration here.
-    registerWorkspaceInstance: { method: 'POST', path: '/v1/workspace-instances', kind: 'json', request: 'RegisterWorkspaceInstanceRequestSchema', response: 'WorkspaceInstanceSchema', area: 'administration', authorization: { scopes: ['environment:write'] } },
-    listWorkspaceInstances: { method: 'GET', path: '/v1/workspace-instances', kind: 'json', response: 'WorkspaceInstanceListSchema', area: 'administration', authorization: { scopes: ['environment:read'] } },
-    inspectWorkspaceInstance: { method: 'GET', path: '/v1/workspace-instances/:instance_ref', kind: 'json', response: 'WorkspaceInstanceSchema', area: 'administration', authorization: { scopes: ['environment:read'] } },
 };
 /** The :named parameters a route's path carries, in order. */
 export function routeParams(path) {

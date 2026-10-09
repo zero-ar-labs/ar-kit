@@ -44,12 +44,86 @@ export function boolean(options = {}) {
         },
     };
 }
+export function integer(options = {}) {
+    return {
+        json: {
+            type: 'integer',
+            ...(options.minimum !== undefined ? { minimum: options.minimum } : {}),
+            ...(options.maximum !== undefined ? { maximum: options.maximum } : {}),
+            ...(options.description ? { description: options.description } : {}),
+        },
+        parse(value, path = 'value') {
+            if (typeof value !== 'number' || !Number.isInteger(value))
+                refuse({ code: 'tool.input.invalid', message: `${path} must be a whole number, and ${typeof value === 'number' ? value : typeof value} arrived.` });
+            if (options.minimum !== undefined && value < options.minimum)
+                refuse({ code: 'tool.input.invalid', message: `${path} must be at least ${options.minimum}, and ${value} arrived.` });
+            if (options.maximum !== undefined && value > options.maximum)
+                refuse({ code: 'tool.input.invalid', message: `${path} must be at most ${options.maximum}, and ${value} arrived.` });
+            return value;
+        },
+    };
+}
+/** One of a fixed list of strings, numbers or booleans. */
+export function enumOf(values, options = {}) {
+    if (values.length === 0)
+        refuse({ code: 'tool.schema.invalid', message: 'an enum needs at least one value.', fix: "enumOf(['pickup', 'delivery'])" });
+    return {
+        json: { enum: [...values], ...(options.description ? { description: options.description } : {}) },
+        parse(value, path = 'value') {
+            if (!values.some((allowed) => allowed === value))
+                refuse({ code: 'tool.input.invalid', message: `${path} must be one of ${values.map((allowed) => JSON.stringify(allowed)).join(', ')}, and ${JSON.stringify(value) ?? typeof value} arrived.` });
+            return value;
+        },
+    };
+}
+export function array(items, options = {}) {
+    return {
+        json: {
+            type: 'array',
+            items: items.json,
+            ...(options.minItems !== undefined ? { minItems: options.minItems } : {}),
+            ...(options.maxItems !== undefined ? { maxItems: options.maxItems } : {}),
+            ...(options.description ? { description: options.description } : {}),
+        },
+        parse(value, path = 'value') {
+            if (!Array.isArray(value))
+                refuse({ code: 'tool.input.invalid', message: `${path} must be an array, and ${value === null ? 'null' : typeof value} arrived.` });
+            if (options.minItems !== undefined && value.length < options.minItems)
+                refuse({ code: 'tool.input.invalid', message: `${path} needs at least ${options.minItems} item(s), and ${value.length} arrived.` });
+            if (options.maxItems !== undefined && value.length > options.maxItems)
+                refuse({ code: 'tool.input.invalid', message: `${path} takes at most ${options.maxItems} item(s), and ${value.length} arrived.` });
+            return value.map((item, index) => items.parse(item, `${path}[${index}]`));
+        },
+    };
+}
+/** The value, or null. A primitive keeps one type list; anything else becomes a choice with null. */
+export function nullable(schema) {
+    const { description, ...rest } = schema.json;
+    const json = typeof rest['type'] === 'string' && ['string', 'number', 'integer', 'boolean'].includes(rest['type'])
+        ? { ...rest, type: [rest['type'], 'null'] }
+        : { anyOf: [rest, { type: 'null' }] };
+    return {
+        json: { ...json, ...(description ? { description } : {}) },
+        parse(value, path = 'value') {
+            return value === null ? null : schema.parse(value, path);
+        },
+    };
+}
+export function optional(schema) {
+    return { json: schema.json, parse: (value, path) => schema.parse(value, path), optional: true };
+}
+/**
+ * An object with exactly these fields. The required list keeps the order the
+ * fields are written in, which is the order a model sees and fills them, and
+ * leaves out each optional field.
+ */
 export function object(shape, options = {}) {
+    const isOptional = (field) => field.optional === true;
     return {
         json: {
             type: 'object',
             properties: Object.fromEntries(Object.entries(shape).map(([key, field]) => [key, field.json])),
-            required: Object.keys(shape).sort(),
+            required: Object.keys(shape).filter((key) => !isOptional(shape[key])),
             additionalProperties: false,
             ...(options.description ? { description: options.description } : {}),
         },
@@ -63,8 +137,11 @@ export function object(shape, options = {}) {
                 refuse({ code: 'tool.input.unknown-field', message: `${path} carries ${unknown.join(', ')}, which the declared schema does not admit.` });
             }
             const parsed = {};
-            for (const [key, field] of Object.entries(shape))
+            for (const [key, field] of Object.entries(shape)) {
+                if (isOptional(field) && source[key] === undefined)
+                    continue;
                 parsed[key] = field.parse(source[key], `${path}.${key}`);
+            }
             return parsed;
         },
     };

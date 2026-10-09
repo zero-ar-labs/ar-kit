@@ -8,6 +8,8 @@ It cannot write runtime state or promote a run to verified. A weak validator
 can satisfy the protocol and still check the wrong thing. Domain evidence and
 the task contract decide whether its finding is sufficient.
 
+![A recorded Zero-AR verification plan showing each rule, its pinned validator, evidence coverage, cost and stated limits.](https://raw.githubusercontent.com/zero-ar-labs/ar-kit/main/assets/zero-ar-verification-record.svg)
+
 ## Install
 
 Node.js 24.11.0 through the Node 24 LTS line is required.
@@ -141,32 +143,32 @@ until named evidence supports a higher grade.
 - Classification airlocks that allow only declared fields and value types.
 - Catalogue entries, availability checks and the verification-plan compiler.
 
-A validator receives one rule, ordered ledger-shaped items, their outputs and
-states, and the declared population total. The runtime computes a canonical
-hash over that admitted input. A host finding bound to another hash or item
-count becomes infrastructure-indeterminate, never pass.
+A validator receives the rule it checks, the work items and outputs that the
+rule covers, and the total it must account for. A finding about other inputs,
+or about another number of items, counts as indeterminate, never as a pass.
 
 The evidence grades are `declared`, `protocol-conformant`, `case-evaluated`
 and `deployment-admitted`. A grade describes evidence about an exact
 implementation. `sufficient_for` is a separate task-contract decision about
 one validator and one rule.
 
-The verification plan combines every rule, selected validator, evidence
-grade, checkpoint, cost, dependency, repair outcome and limitation in one
-deterministic content-addressed object. Publication preflight, runtime
-admission, the public API, SDK and CLI read that same object.
+The verification plan lists every rule, the validator selected for it, its
+evidence grade, cost, dependencies, repair outcome and limitations. Publication
+preflight, the public API, the SDK and the CLI all show that same plan.
 
 ## What this does not establish
 
-Protocol conformance does not establish task correctness. Production
-admission still needs content-addressed executable identity, repeatability,
-declared coverage, complete labelled cases and deployment evidence for the
-host boundary. A timeout, crash, cancellation, missing answer or input
-identity mismatch becomes infrastructure-indeterminate.
+Protocol conformance does not establish task correctness. Before production
+use, a validator still needs a fixed executable identity, repeatable results,
+declared coverage, complete labelled cases and deployment evidence for its
+host. A timeout, crash, cancellation, missing answer or input mismatch counts
+as indeterminate, never as a pass.
 
-The Effect Plane is separate. Read-only work may omit it.
-Public Alpha records a proposal and refuses dispatch. This package exports no
-effect dispatcher or production target adapter.
+The Effect Plane is separate. Read-only work may omit it. The current release
+records each proposal and refuses general production dispatch. The one
+exception is a configured reversible HTTP target whose exact operation,
+reversal and active grants all match. This package exports no effect
+dispatcher or production target adapter.
 
 ## Where to go next
 

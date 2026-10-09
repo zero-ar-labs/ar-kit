@@ -12,7 +12,7 @@
  */
 import type { ZeroARClient } from '@zero-ar/client';
 import type { McpPublishedWorkEntrypoint } from '@zero-ar/contracts';
-type NativeWorkClient = Pick<ZeroARClient, 'createDeferredRun' | 'snapshot' | 'result' | 'records' | 'control' | 'resumeDeferred'>;
+type NativeWorkClient = Pick<ZeroARClient, 'createDeferredRun' | 'snapshot' | 'result' | 'records' | 'control'>;
 export interface ZeroARMcpRequestContext {
     /** Derived from the authenticated channel by the native server. */
     tenant: string;

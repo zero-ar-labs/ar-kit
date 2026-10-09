@@ -10,19 +10,7 @@
  * chooses a runtime target and once with the connected client, before the
  * built-in dispatch. Modules reach the runtime through @zero-ar/client only.
  */
-import { DECLARED_AHEAD_ROUTES, API_ROUTES, renderDiagnostic } from '@zero-ar/contracts';
-/** The not-wired refusal for a terminal operation whose route this build declares ahead of its mechanism. */
-export function declaredAheadCommandRefusal(context, operation, route) {
-    const row = DECLARED_AHEAD_ROUTES[route];
-    if (!row)
-        throw new Error(`route ${route} is wired, so ${context.command} ${operation} has no not-wired refusal. Wire the command through the client.`);
-    return {
-        severity: 'error',
-        code: row.code,
-        message: `${context.command} ${operation} reaches ${API_ROUTES[route].method} ${API_ROUTES[route].path}, and this build does not wire ${row.missing}. ${row.remedy}.`,
-        ...(row.clause ? { clause: row.clause } : {}),
-    };
-}
+import { renderDiagnostic } from '@zero-ar/contracts';
 /** Print one refusal the way every command error prints, and answer the failing exit code. */
 export function refuseCommand(diagnostic) {
     console.error(renderDiagnostic(diagnostic));

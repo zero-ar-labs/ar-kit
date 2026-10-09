@@ -1,0 +1,584 @@
+{
+  "schema": "zero-ar-run-protocol-golden/1",
+  "vector_id": "ODX-CV-001",
+  "purpose": "One model-free protocol campaign covering model entries, tool output, controls, leases, checkpoints, artifacts, workspace state and a reconciled effect.",
+  "run_id": "run_01a11087cd4d776fad3c9c73aaa51fe2",
+  "frontier": {
+    "record_count": 141,
+    "logical_clock": 141,
+    "record_id": "rec_01a11087cd8176558c7d867b853eca22",
+    "chain_head": "sha256:6129c94265096be251a6a7cda7bbd61f1229bffaa35e145afea6758d610e5e81"
+  },
+  "state_hash": "sha256:75189cd7f419ef136b8dd369b75c3d88c41b22e479a6d323073cd7d6d3e5b425",
+  "projection": {
+    "run_id": "run_01a11087cd4d776fad3c9c73aaa51fe2",
+    "status": "suspended",
+    "completion_state": "working",
+    "terminal": null,
+    "suspend_reason": "stagnation",
+    "turn": 12,
+    "current_branch": "brn_01a11087cd4e72ea875e0609271501be",
+    "head_entry_id": "ent_01a11087cd70753cac8885b8c195978a",
+    "entry_count": 18,
+    "agent_name": "effects-conformance",
+    "model_ref": "scripted/deterministic",
+    "objective": "Build the open durable execution campaign",
+    "created_at": "2026-10-06T09:24:57.805Z",
+    "correlation_id": null,
+    "publication_ref": null,
+    "completion_class": "working",
+    "pending_review_items": [],
+    "budgets": {
+      "consumption": {
+        "model_tokens": 200000,
+        "tool_calls": 4,
+        "bytes": 4096,
+        "compute_ms": 600000
+      },
+      "attention": 0,
+      "verification_reserve_fraction": 0.2,
+      "max_turns": 60
+    },
+    "principals": {
+      "executing": "svc:test",
+      "originating": "conformance",
+      "accountable": "operator:open-durable-vector"
+    },
+    "contract": {
+      "name": "transform.items",
+      "ref": "sha256:ace6cfedc1dddad9c85eef8d35c522dcb2040ac2f7dd7c5e29fa6bfa14c3dbfc",
+      "repair_budget": 3
+    },
+    "checkpoint_interval": null,
+    "checkpoint_phase_schedules": [],
+    "posture_ref": null,
+    "agent_ref": "sha256:4a70aaaae6ece291ec4c3697dc73c887742d5f11a7c3483e4b0984d81b0ce36c",
+    "resolved_manifest": {
+      "schema": "resolved-run-manifest/1",
+      "contract_version": "v1",
+      "runtime": {
+        "name": "zero-ar-kernel",
+        "version": "0.1.0",
+        "ref": "sha256:4d81fe8571f5fd2f22dd144e1df83f25adbeef2e9151e421e2e3e5104986fe78"
+      },
+      "profile_manifest": {
+        "manifest_id": "local-lite",
+        "manifest_ref": "sha256:dff9fa9a1268baeadb41b52b0fe3f29377c18fb6cf4055a40cfbed36b8215f1d",
+        "profile": "local-lite",
+        "version": "1.2.0",
+        "supported": [
+          "artifacts",
+          "author-defined-tools",
+          "automatic-run-recovery",
+          "canonical-log",
+          "document-pdf-extraction",
+          "environment-process",
+          "honest-completion",
+          "local-lite",
+          "model-image-input",
+          "open-goal-execution",
+          "operator-pause-and-budget",
+          "progressive-tool-disclosure",
+          "published-skills",
+          "quality-plane",
+          "research-reference-pack",
+          "run-fork",
+          "runtime-local-tools",
+          "source-local-read-only",
+          "suspension",
+          "transformation-volume-reference-pack"
+        ],
+        "conditional": [
+          {
+            "capability": "browser-workspace",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "environment.capability.unavailable",
+            "summary": "The browser recipe is available when the operator builds and pins its image, selects the browser preset and supplies the reviewed seccomp profile. Without those inputs, Local Lite offers no browser workspace."
+          },
+          {
+            "capability": "cross-run-memory",
+            "refusal_point": "registration",
+            "diagnostic_code": "memory.unwired",
+            "summary": "Cross-run memory is off by default. ZERO_AR_MEMORY=durable attaches it with subject keys wrapped under a deployment key from the macOS keychain or a 0600 key file; ephemeral keeps the keys in process memory and loses its subjects at restart. There is no KMS or HSM custody. With memory off, the memory routes refuse."
+          },
+          {
+            "capability": "gateway-interactive-messaging",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "gateway.host.unavailable",
+            "summary": "Available when an operator runs zeroar gateway serve with a configuration that names an interactive adapter. Commands authenticate with an HMAC and a timestamp window and each one authorizes on its own; a thread is a routing handle only. Without the gateway host, no chat channel can deliver a control. The vectors run it against Local Lite; none yet runs it against a hosted cell."
+          },
+          {
+            "capability": "gateway-signed-webhook",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "gateway.host.unavailable",
+            "summary": "Available when an operator runs zeroar gateway serve with a configuration that names a signed-webhook adapter. The gateway host is its own release bundle, calls only public operations with a scoped runtime key and reads its secrets through env: or file: references; without it, nothing turns a signed webhook into intake. The vectors run it against Local Lite; none yet runs it against a hosted cell."
+          },
+          {
+            "capability": "hierarchical-context",
+            "refusal_point": "publication",
+            "diagnostic_code": "context.hierarchy.artifacts-unavailable",
+            "summary": "A publication can select hierarchical context when immutable artifact write, verify and bounded read support are attached. The source-bound evaluation is not a Full Cell release claim."
+          },
+          {
+            "capability": "provider-anthropic",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "model.adapter.credential-missing",
+            "summary": "Local Lite builds the Anthropic adapter when ZERO_AR_ADAPTER=anthropic and a key arrives through protected input, the OS credential store or ANTHROPIC_API_KEY; startup refuses without a key, and egress is admitted only to that adapter's host. Its release claim follows UAT-CV-017."
+          },
+          {
+            "capability": "provider-fireworks",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "model.adapter.credential-missing",
+            "summary": "Local Lite builds the Fireworks AI adapter when ZERO_AR_ADAPTER=fireworks and a key arrives through protected input, the OS credential store or FIREWORKS_API_KEY; startup refuses without a key, and egress is admitted only to that adapter's host. Its release claim follows PUB-CV-023."
+          },
+          {
+            "capability": "provider-openai",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "model.adapter.credential-missing",
+            "summary": "Local Lite builds the OpenAI adapter when ZERO_AR_ADAPTER=openai and a key arrives through protected input, the OS credential store or OPENAI_API_KEY; startup refuses without a key, and egress is admitted only to that adapter's host. Its release claim follows PUB-CV-024 and UAT-CV-017."
+          },
+          {
+            "capability": "provider-openrouter",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "model.adapter.credential-missing",
+            "summary": "Local Lite builds the OpenRouter adapter when ZERO_AR_ADAPTER=openrouter and a key arrives through protected input, the OS credential store or OPENROUTER_API_KEY; startup refuses without a key, and egress is admitted only to that adapter's host. Its release claim follows PUB-CV-023."
+          },
+          {
+            "capability": "provider-together",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "model.adapter.credential-missing",
+            "summary": "Local Lite builds the Together AI adapter when ZERO_AR_ADAPTER=together and a key arrives through protected input, the OS credential store or TOGETHER_API_KEY; startup refuses without a key, and egress is admitted only to that adapter's host. Its release claim follows PUB-CV-023."
+          },
+          {
+            "capability": "sequential-sampled-validation",
+            "refusal_point": "intake",
+            "diagnostic_code": "contract.validator.unregistered",
+            "summary": "Local Lite registers the transformation pack's items.sampled-output-trace check under the transform.items.sampled contract; a contract that binds any other sampled-oracle validator refuses at intake as unregistered. A sampled pass or reject records its sample on the checkpoint record; a capped check parks its items and the parked record carries only the reason."
+          },
+          {
+            "capability": "workspace-exec",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "environment.capability.unavailable",
+            "summary": "Local Lite offers workspace.exec only when Docker answers and ZERO_AR_WORKSPACE_IMAGE pins an immutable image. Otherwise the tool is absent."
+          }
+        ],
+        "excluded": [
+          {
+            "capability": "aggregator-composio-observation",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Hosted aggregator accounts are not part of Local Lite."
+          },
+          {
+            "capability": "aggregator-merge-observation",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Hosted aggregator accounts are not part of Local Lite."
+          },
+          {
+            "capability": "attention-admission",
+            "refusal_point": "publication",
+            "diagnostic_code": "attention.admission.unwired",
+            "summary": "Attention admission is not wired in this build. Local Lite calibrates review capacity observe-only, publishes versioned capacity snapshots and serves the attention dashboard under /v1/attention; no run is admitted or refused on attention. The SDK publication compiler refuses a posture that declares an attention controller; a closure published through the raw publication API fails when a run binds it, as a server defect rather than a typed refusal. Runs record attention enforcement as not wired."
+          },
+          {
+            "capability": "authored-orchestration",
+            "refusal_point": "publication",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Authored orchestration is not part of Local Lite."
+          },
+          {
+            "capability": "classification-airlocks",
+            "refusal_point": "publication",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Classification airlocks are not part of Local Lite."
+          },
+          {
+            "capability": "content-defined-chunking",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "source.chunking.unwired",
+            "summary": "Source snapshots store each member whole in this build; no chunk manifest is recorded and no chunk is reused across snapshots."
+          },
+          {
+            "capability": "context-feature-cache",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "context.cache.unwired",
+            "summary": "No context feature cache is built in this build; selection computes every candidate's features on every turn."
+          },
+          {
+            "capability": "dynamic-authority",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Dynamic authority is not part of Local Lite."
+          },
+          {
+            "capability": "effect-proposal-tools",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Local Lite has no effect plane, so an effect-proposal tool refuses instead of implying consequential dispatch."
+          },
+          {
+            "capability": "environment-apptainer",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Apptainer execution is not part of Local Lite."
+          },
+          {
+            "capability": "environment-firecracker",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Firecracker execution is not part of Local Lite."
+          },
+          {
+            "capability": "environment-oci",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "OCI execution is not part of Local Lite."
+          },
+          {
+            "capability": "environment-openai-agents",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "OpenAI Agents API execution is optional and not part of account-free Local Lite."
+          },
+          {
+            "capability": "environment-ssh",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "SSH execution is not part of Local Lite."
+          },
+          {
+            "capability": "fair-cell-scheduling",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Local Lite serves one tenant, so fair dispatch across tenants does not apply."
+          },
+          {
+            "capability": "full-cell-docker-linux",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "The Docker/Linux Full Cell is not part of Local Lite."
+          },
+          {
+            "capability": "hosted-postgresql-service",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Hosted PostgreSQL tenancy is not part of Local Lite."
+          },
+          {
+            "capability": "mcp-imported-tools",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Imported MCP tools are not part of Local Lite."
+          },
+          {
+            "capability": "mcp-work-entrypoints",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "MCP work entrypoints are not part of Local Lite."
+          },
+          {
+            "capability": "native-packaged-self-hosting",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Native packaged self-hosting is not part of Local Lite."
+          },
+          {
+            "capability": "production-effect-dispatch",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Production effect dispatch is not part of Local Lite."
+          },
+          {
+            "capability": "regulated-workloads",
+            "refusal_point": "intake",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Regulated workloads are not part of Local Lite."
+          },
+          {
+            "capability": "restricted-effect-plane-attachment",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Effect Plane attachment is not part of Local Lite."
+          },
+          {
+            "capability": "reversible-http-effect-dispatch",
+            "refusal_point": "profile-compilation",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Local Lite has no HTTP effect target or authority service."
+          },
+          {
+            "capability": "unattended-aggregator-mutations",
+            "refusal_point": "publication",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "Local Lite does not dispatch unattended aggregator mutations."
+          },
+          {
+            "capability": "video-reference-pack",
+            "refusal_point": "publication",
+            "diagnostic_code": "profile.capability.excluded",
+            "summary": "The video reference pack is not part of Local Lite."
+          },
+          {
+            "capability": "workspace-binding-profiles",
+            "refusal_point": "intake",
+            "diagnostic_code": "workspace.instances.unwired",
+            "summary": "Workspace instance attachment is not wired in this build: intake refuses inputs.workspace, so a run exposes no workspace tools."
+          }
+        ],
+        "required_components": [
+          "store"
+        ],
+        "health_probes": [
+          "secret_store",
+          "store",
+          "tool_host"
+        ],
+        "artifact_policy": {
+          "tool_result_inline_threshold_bytes": 4096,
+          "tool_result_max_artifact_bytes": 1048576,
+          "tool_result_range_read_max_bytes": 65536
+        }
+      },
+      "agent": {
+        "requested_ref": null,
+        "default_ref": null,
+        "resolved_ref": "sha256:08fb7b5bd43560d09ed3b16ec799dbb8daf14dc1f4373ccaf5871010c8561024",
+        "name": "effects-conformance",
+        "definition_ref": "sha256:ef78819c40780f783363c8afe44f013700d73a4e300daca2248a5e66b48c1368",
+        "instructions_ref": "sha256:9064cde15d4bfd3df7500c54f8430cc2d6b90508266ce54d33a3edbfb752d27e",
+        "publication_ref": null
+      },
+      "context": {
+        "assembler": "coverage-mmr-v1",
+        "version": "1.0.0",
+        "ref": "sha256:38c4c37518dc26a98a96d584092935162cbd4eaa495b5508cc074ccaa2756625",
+        "posture_ref": null
+      },
+      "model": {
+        "adapter": {
+          "name": "scripted",
+          "version": "1.0.0",
+          "ref": "sha256:dfce8a2b85fac7cb4bdce90ff6b1005efd2694528679b45ac389394686cbae7b"
+        },
+        "admitted_adapter_ref": null,
+        "model_ref": "scripted/deterministic",
+        "provider_model_id": null,
+        "provider": null,
+        "protocol_adapter": null,
+        "protocol_version": null,
+        "profile": null,
+        "profile_version": null,
+        "provider_instance_ref": null,
+        "endpoint": null,
+        "destination": null,
+        "endpoint_policy_ref": null,
+        "catalogue_source": null,
+        "compatibility": null,
+        "compatibility_ref": null,
+        "credential_mode": null,
+        "credential_binding_ref": null,
+        "catalogue_entry_ref": null,
+        "provider_model_revision": null,
+        "assurance_facts_ref": null,
+        "credential_epoch": null
+      },
+      "model_plan": null,
+      "input_artifacts": [],
+      "memory_bindings": [],
+      "tools": [
+        {
+          "name": "corpus.search",
+          "version": "1.0.0",
+          "contract_ref": "sha256:19ba0ae015acd349c51b79de9c8fb3d73c55ae8426b9945bc59e462c98ba2524",
+          "binding_ref": null,
+          "operation_class": "observation",
+          "target_ref": null,
+          "environment_ref": null
+        },
+        {
+          "name": "registry.note",
+          "version": "1.0.0",
+          "contract_ref": "sha256:11b0c21122167a7239d54522b7d9e15a0eb611a33c867126bb2810585f08dd70",
+          "binding_ref": null,
+          "operation_class": "effect-proposal",
+          "target_ref": "sha256:0639192ecf7cfc5c2fbf8b6922b44ecf96bdf99ca612234402f537e0ad03fe9b",
+          "environment_ref": null
+        }
+      ],
+      "workspace_profiles": [],
+      "workspace_bindings": [],
+      "procedures": [],
+      "task_contract": {
+        "ref": "sha256:ace6cfedc1dddad9c85eef8d35c522dcb2040ac2f7dd7c5e29fa6bfa14c3dbfc",
+        "validators": [
+          {
+            "name": "items.nonempty-output",
+            "version": "1.0.0",
+            "class": "deterministic",
+            "ref": "sha256:20b2a99f0ae25f0fe519a0c0623e4629c6003707bed2c997e9156e5c4660d6d1"
+          },
+          {
+            "name": "ledger.reconciles",
+            "version": "1.0.0",
+            "class": "deterministic",
+            "ref": "sha256:278c2b397acd732e6863af41032b5251bc1e873093e8e01bd6ffcb4d542361f3"
+          }
+        ]
+      },
+      "semantic_declarations": [],
+      "domain_pack_ref": null,
+      "operation_registry": [
+        {
+          "name": "corpus.search",
+          "operation_class": "observation",
+          "ref": "sha256:1c0a573586c267a3bd80cfd2baa02763f05bebdafe4a77a0ff30323e8a4154e8"
+        },
+        {
+          "name": "registry.note",
+          "operation_class": "effect-proposal",
+          "ref": "sha256:6f233281c2a698e4f49d34bdb1ec4afe455e4f94bab7b19afcc03116fc1d09c0"
+        }
+      ],
+      "target_adapters": [
+        "sha256:0639192ecf7cfc5c2fbf8b6922b44ecf96bdf99ca612234402f537e0ad03fe9b"
+      ],
+      "execution_environments": []
+    },
+    "active_closure_epoch": 1,
+    "active_closure_ref": "sha256:4a70aaaae6ece291ec4c3697dc73c887742d5f11a7c3483e4b0984d81b0ce36c",
+    "active_procedure_refs": [],
+    "pending_closure_epoch": null,
+    "pending_capability_admissions": {},
+    "effects_disabled": false,
+    "items_declared": 1,
+    "repair_attempts": 0,
+    "model_candidate": 0,
+    "checkpoints_passed": 1,
+    "usage": {
+      "work.model_tokens": {
+        "reserved": 0,
+        "consumed": 4528
+      },
+      "verification.model_tokens": {
+        "reserved": 0,
+        "consumed": 0
+      },
+      "work.attention": {
+        "reserved": 0,
+        "consumed": 0
+      },
+      "work.bytes": {
+        "reserved": 0,
+        "consumed": 32
+      },
+      "work.tool_calls": {
+        "reserved": 0,
+        "consumed": 2
+      },
+      "verification.compute_ms": {
+        "reserved": 0,
+        "consumed": 0
+      }
+    },
+    "effects": {
+      "eff_01a11087cd5c75b5b30362d188469aba": {
+        "state": "unreconcilable",
+        "target": "registry",
+        "operation": "note.append"
+      }
+    },
+    "verified_completion_reachable": true,
+    "artifact_entry_id": null,
+    "verdict": null,
+    "verdict_reason": null,
+    "pending_controls": [],
+    "pending_observations": [],
+    "tool_view": {
+      "schema": "zero-ar-tool-view/1",
+      "ref": "sha256:124c3b5f685da74b68032dab38311ba7027b4578d9b137a0701616cc4104236a",
+      "closure_size": 2,
+      "budget": {
+        "schema_tokens": 4096,
+        "schema_bytes": 16384
+      },
+      "used": {
+        "schema_tokens": 397,
+        "schema_bytes": 1578
+      },
+      "visible": [
+        {
+          "name": "corpus.search",
+          "contract_ref": "sha256:19ba0ae015acd349c51b79de9c8fb3d73c55ae8426b9945bc59e462c98ba2524",
+          "reason": "prior-tool-view"
+        },
+        {
+          "name": "registry.note",
+          "contract_ref": "sha256:11b0c21122167a7239d54522b7d9e15a0eb611a33c867126bb2810585f08dd70",
+          "reason": "prior-tool-view"
+        },
+        {
+          "name": "tool.activate",
+          "contract_ref": "sha256:592eded1dd3627c6933547f30c20f7ea6ab007c6bf468eaead8a3c03f181f70a",
+          "reason": "reserved-local-catalogue"
+        },
+        {
+          "name": "tool.describe",
+          "contract_ref": "sha256:f1c0ea315e196f4e9a793d496884245d9c1405e4090dba7935be6e5c59368cfc",
+          "reason": "reserved-local-catalogue"
+        },
+        {
+          "name": "tool.search",
+          "contract_ref": "sha256:433bd9eff131c9c9364800c95f20a98f1c684f25911dd653dbcb712910daad04",
+          "reason": "reserved-local-catalogue"
+        }
+      ],
+      "hidden": 0,
+      "refusals": [
+        {
+          "code": "tool.catalogue.semantic-near-collision",
+          "message": "semantically similar entries include an effect proposal; activate only by exact contract ref",
+          "alternatives": [
+            "corpus.search",
+            "registry.note"
+          ]
+        }
+      ]
+    },
+    "activated_tool_refs": [],
+    "inflight_closure_operations": {},
+    "context_fence_nonce": "33cba5ed3ecf36a7d90b9967e9617e5f"
+  },
+  "record_types": [
+    "artifact.committed",
+    "branch.created",
+    "checkpoint.passed",
+    "checkpoint.started",
+    "context.assembled",
+    "control.applied",
+    "control.received",
+    "effect.dispatched",
+    "effect.prepared",
+    "effect.resolved",
+    "effect.unreconcilable",
+    "entry.appended",
+    "environment.prepared",
+    "environment.teardown.recorded",
+    "environment.teardown.requested",
+    "item.attempted",
+    "lease.consumed",
+    "lease.opened",
+    "lease.released",
+    "lease.reserved",
+    "model.call.finished",
+    "model.call.started",
+    "run.created",
+    "run.started",
+    "run.suspended",
+    "tool.finished",
+    "tool.invoked",
+    "turn.completed"
+  ],
+  "historical_pending_effect": "eff_01a11087cd5c75b5b30362d188469aba",
+  "closure_ref": "sha256:80e9872b8f188e2bf88da5f50042e892f425ae6c60bcc22d1991484196badd2b"
+}

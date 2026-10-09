@@ -137,18 +137,3 @@ export const ToolSourceDriftReportSchema = z.strictObject({
     drifted: z.boolean(),
     records: z.array(ToolSourceDriftRecordSchema).max(1_000),
 });
-/**
- * One provider trigger delivery exactly as the provider sent it. The
- * provider signature over the raw bytes authenticates it; the tenant comes
- * from deployment configuration, never from these fields (TAG-CV-013).
- */
-export const ToolSourceIngressDeliverySchema = z.record(z.string(), z.unknown());
-/** What ingress did with one delivery. An unverified delivery is kept as untrusted evidence and wakes nothing. */
-export const ToolSourceIngressReceiptSchema = z.strictObject({
-    source_ref: ref,
-    delivery_id: z.string().min(1).max(512),
-    verified: z.boolean(),
-    duplicate: z.boolean(),
-    evidence_ref: z.string().regex(/^artifact:\/\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$/, 'expected an artifact handle').nullable(),
-    run_id: z.string().regex(/^run_[0-9a-f]{32}$/, 'expected a run id').nullable(),
-});

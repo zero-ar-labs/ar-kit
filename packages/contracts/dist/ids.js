@@ -7,22 +7,55 @@
  *
  * How it fits: an id locates a thing and never authorizes anything (K-19).
  * Ids are UUIDv7 hex, so storage order and creation order agree without a
- * global counter. A content hash is sha256 over canonical bytes, so two
- * identical values have one identity (ADR-0003).
+ * global counter: across milliseconds by the timestamp, and inside one
+ * process within a millisecond by a counter, so entries one transaction
+ * lands sort in the order it landed them. A content hash is sha256 over
+ * canonical bytes, so two identical values have one identity (ADR-0003).
  */
 import { createHash, randomBytes } from 'node:crypto';
 import { canonicalJson } from "./canonical.js";
 import { ID_PREFIXES } from "./vocab.js";
-/** UUIDv7 as 32 lowercase hex characters: 48 bits of milliseconds, then randomness. */
-export function uuidv7(now = Date.now()) {
+let lastMs = -1;
+let lastCounter = 0;
+/**
+ * UUIDv7 as 32 lowercase hex characters: 48 bits of milliseconds, then
+ * randomness. On the process clock, the 12 bits after the version hold a
+ * counter that rises within one millisecond and moves the timestamp forward
+ * one millisecond when it would wrap, so ids this process mints sort in the
+ * order it minted them (RFC 9562, method 1). An explicit time keeps the
+ * random form.
+ */
+export function uuidv7(now) {
     const bytes = randomBytes(16);
-    bytes[0] = (now / 0x10000000000) & 0xff;
-    bytes[1] = (now / 0x100000000) & 0xff;
-    bytes[2] = (now / 0x1000000) & 0xff;
-    bytes[3] = (now / 0x10000) & 0xff;
-    bytes[4] = (now / 0x100) & 0xff;
-    bytes[5] = now & 0xff;
-    bytes[6] = 0x70 | (bytes[6] & 0x0f);
+    let ms;
+    if (now === undefined) {
+        ms = Date.now();
+        if (ms <= lastMs) {
+            ms = lastMs;
+            lastCounter += 1;
+            if (lastCounter > 0xfff) {
+                ms = lastMs + 1;
+                lastCounter = 0;
+            }
+        }
+        else {
+            // Start in the lower half, so a busy millisecond has room to rise.
+            lastCounter = (bytes[6] << 8 | bytes[7]) & 0x7ff;
+        }
+        lastMs = ms;
+        bytes[6] = 0x70 | ((lastCounter >> 8) & 0x0f);
+        bytes[7] = lastCounter & 0xff;
+    }
+    else {
+        ms = now;
+        bytes[6] = 0x70 | (bytes[6] & 0x0f);
+    }
+    bytes[0] = (ms / 0x10000000000) & 0xff;
+    bytes[1] = (ms / 0x100000000) & 0xff;
+    bytes[2] = (ms / 0x1000000) & 0xff;
+    bytes[3] = (ms / 0x10000) & 0xff;
+    bytes[4] = (ms / 0x100) & 0xff;
+    bytes[5] = ms & 0xff;
     bytes[8] = 0x80 | (bytes[8] & 0x3f);
     return bytes.toString('hex');
 }

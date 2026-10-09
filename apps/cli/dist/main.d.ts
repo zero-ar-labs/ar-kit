@@ -11,6 +11,7 @@
  * The command table in ./commands answers reserved commands and the
  * operations a module adds before the built-in dispatch runs.
  */
+import type { RunPortabilityLevel } from '@zero-ar/contracts';
 export declare function runCli(options?: {
     argv?: string[];
 }): Promise<number>;
@@ -27,3 +28,10 @@ export declare function globalCliArguments(args: readonly string[]): {
     arguments: string[];
     no_color: boolean;
 };
+type RunPortabilityStatus = Readonly<Record<RunPortabilityLevel, {
+    status: string;
+    detail: string;
+}>>;
+/** Print the four levels in stable order so one success cannot imply another. */
+export declare function renderRunPortability(status: RunPortabilityStatus): void;
+export {};

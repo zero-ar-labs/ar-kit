@@ -9,6 +9,8 @@ artifact and cancellation. MCP discovery grants no capability, and a remote
 peer's result remains a peer claim until native validators establish the local
 result.
 
+![A recorded Zero-AR run showing the durable state that remains behind an MCP entrypoint.](https://raw.githubusercontent.com/zero-ar-labs/ar-kit/main/assets/zero-ar-work-record.svg)
+
 ## Install
 
 Node.js 24.11.0 through the Node 24 LTS line is required.

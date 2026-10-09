@@ -171,9 +171,12 @@ export async function loadProject(options) {
         async compile() {
             const errors = diagnostics.filter((diagnostic) => diagnostic.severity === 'error');
             if (errors.length > 0) {
+                // The refusal carries each finding's fix, so the terminal says what to run next.
+                const fixes = [...new Set(errors.flatMap((error) => (error.fix ? [error.fix] : [])))];
                 refuse({
                     code: 'project.incomplete',
-                    message: `${errors.length} project diagnostics must be resolved before compilation: ${errors.map((error) => error.message).join(' ')}`,
+                    message: `${errors.length} project ${errors.length === 1 ? 'diagnostic' : 'diagnostics'} must be resolved before compilation: ${errors.map((error) => error.message).join(' ')}`,
+                    ...(fixes.length > 0 ? { fix: fixes.join('; ') } : {}),
                     clause: 'DXI-023',
                 });
             }

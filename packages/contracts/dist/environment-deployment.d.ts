@@ -46,16 +46,12 @@ export declare const EnvironmentAcceptanceReportBodySchema: z.ZodObject<{
     vector_id: z.ZodString;
     source_commit: z.ZodString;
     backend: z.ZodEnum<{
-        process: "process";
         ssh: "ssh";
         firecracker: "firecracker";
         apptainer: "apptainer";
         "openai-agents": "openai-agents";
+        process: "process";
         oci: "oci";
-        "cloudflare-sandbox": "cloudflare-sandbox";
-        modal: "modal";
-        daytona: "daytona";
-        "vercel-sandbox": "vercel-sandbox";
     }>;
     adapter: z.ZodObject<{
         contract: z.ZodLiteral<"environment-adapter/1">;
@@ -63,24 +59,20 @@ export declare const EnvironmentAcceptanceReportBodySchema: z.ZodObject<{
         version: z.ZodString;
         adapter_digest: z.ZodString;
         backend: z.ZodEnum<{
-            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
             "openai-agents": "openai-agents";
+            process: "process";
             oci: "oci";
-            "cloudflare-sandbox": "cloudflare-sandbox";
-            modal: "modal";
-            daytona: "daytona";
-            "vercel-sandbox": "vercel-sandbox";
         }>;
         operations: z.ZodArray<z.ZodEnum<{
             cancel: "cancel";
-            submit: "submit";
             observe: "observe";
             teardown: "teardown";
             descriptor: "descriptor";
             prepare: "prepare";
+            submit: "submit";
             reconcile: "reconcile";
             collect: "collect";
             abandon: "abandon";
@@ -150,16 +142,12 @@ export declare const EnvironmentAcceptanceReportSchema: z.ZodObject<{
     vector_id: z.ZodString;
     source_commit: z.ZodString;
     backend: z.ZodEnum<{
-        process: "process";
         ssh: "ssh";
         firecracker: "firecracker";
         apptainer: "apptainer";
         "openai-agents": "openai-agents";
+        process: "process";
         oci: "oci";
-        "cloudflare-sandbox": "cloudflare-sandbox";
-        modal: "modal";
-        daytona: "daytona";
-        "vercel-sandbox": "vercel-sandbox";
     }>;
     adapter: z.ZodObject<{
         contract: z.ZodLiteral<"environment-adapter/1">;
@@ -167,24 +155,20 @@ export declare const EnvironmentAcceptanceReportSchema: z.ZodObject<{
         version: z.ZodString;
         adapter_digest: z.ZodString;
         backend: z.ZodEnum<{
-            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
             "openai-agents": "openai-agents";
+            process: "process";
             oci: "oci";
-            "cloudflare-sandbox": "cloudflare-sandbox";
-            modal: "modal";
-            daytona: "daytona";
-            "vercel-sandbox": "vercel-sandbox";
         }>;
         operations: z.ZodArray<z.ZodEnum<{
             cancel: "cancel";
-            submit: "submit";
             observe: "observe";
             teardown: "teardown";
             descriptor: "descriptor";
             prepare: "prepare";
+            submit: "submit";
             reconcile: "reconcile";
             collect: "collect";
             abandon: "abandon";
@@ -252,16 +236,12 @@ export declare const EnvironmentAcceptanceReportSchema: z.ZodObject<{
 export type EnvironmentAcceptanceReport = z.infer<typeof EnvironmentAcceptanceReportSchema>;
 export declare const EnvironmentDeploymentCapabilitySchema: z.ZodObject<{
     backend: z.ZodEnum<{
-        process: "process";
         ssh: "ssh";
         firecracker: "firecracker";
         apptainer: "apptainer";
         "openai-agents": "openai-agents";
+        process: "process";
         oci: "oci";
-        "cloudflare-sandbox": "cloudflare-sandbox";
-        modal: "modal";
-        daytona: "daytona";
-        "vercel-sandbox": "vercel-sandbox";
     }>;
     package: z.ZodString;
     adapter_name: z.ZodNullable<z.ZodString>;
@@ -295,16 +275,12 @@ export type EnvironmentDeploymentCapability = z.infer<typeof EnvironmentDeployme
 export declare const EnvironmentDeploymentCapabilityListSchema: z.ZodObject<{
     capabilities: z.ZodArray<z.ZodObject<{
         backend: z.ZodEnum<{
-            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
             "openai-agents": "openai-agents";
+            process: "process";
             oci: "oci";
-            "cloudflare-sandbox": "cloudflare-sandbox";
-            modal: "modal";
-            daytona: "daytona";
-            "vercel-sandbox": "vercel-sandbox";
         }>;
         package: z.ZodString;
         adapter_name: z.ZodNullable<z.ZodString>;
@@ -346,10 +322,13 @@ export interface ConditionalEnvironmentDeployment {
 }
 /** The streaming artifact port a composition hands an adapter so collected outputs land in the tenant store. */
 export interface EnvironmentArtifactSinkPort {
+    /** Store one output. A media type and classification, when given, are the ones the artifact is stored with. */
     put(input: {
         chunks: AsyncIterable<Uint8Array>;
         destination_ref: string;
         max_bytes: number;
+        media_type?: string;
+        classification?: string;
     }): Promise<{
         artifact_ref: string;
         content_hash: string;

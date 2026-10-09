@@ -392,7 +392,7 @@ export function assuranceEnvelopeFromRunResult(input) {
             ? 'outcome-unknown'
             : result.effects.prepared + result.effects.dispatched > 0
                 ? 'open'
-                : result.effects.committed + result.effects.withdrawn > 0
+                : result.effects.committed + result.effects.withdrawn + (result.effects.refused ?? 0) > 0
                     ? 'settled'
                     : 'none';
     return AssuranceEnvelopeSchema.parse({

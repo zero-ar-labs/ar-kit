@@ -14,7 +14,6 @@ import { contextCommand } from "./context.js";
 import { effectCommand } from "./effect.js";
 import { gatewayCommand } from "./gateway.js";
 import { memoryCommand } from "./memory.js";
-import { providerCommand } from "./provider.js";
 import { publicationCommand } from "./publication.js";
 import { registryCommand } from "./registry.js";
 import { toolSourceCommand } from "./tool-source.js";
@@ -24,7 +23,6 @@ export const CLI_COMMAND_MODULES = new Map([
     artifactCommand,
     registryCommand,
     publicationCommand,
-    providerCommand,
     effectCommand,
     toolSourceCommand,
     gatewayCommand,

@@ -35,6 +35,12 @@ export interface ProductIdentityEgressReviewReport {
     admitted_origins: readonly string[];
 }
 export declare const DEFAULT_PRODUCT_MODEL_PROVIDER_ORIGINS: Readonly<Record<ProductNamedModelProvider, string>>;
+/**
+ * The origins of the web search adapters this build ships. Their hosts are
+ * fixed in code and reviewed with it, as the named model providers' are, so
+ * an operator lists only a host the deployment chooses itself.
+ */
+export declare const DEFAULT_PRODUCT_WEB_SEARCH_ORIGINS: Readonly<Record<'parallel' | 'exa', string>>;
 /** Normalize an endpoint to the exact origin the egress policy compares. */
 export declare function productIdentityEgressOrigin(raw: string): string;
 /** Return the exact host that the runtime egress guard compares. */
@@ -43,5 +49,7 @@ export declare function productIdentityEgressHost(raw: string): string;
 export declare function productModelProviderEgressDestination(provider: ProductHostedModelProvider, endpoint?: string): ProductIdentityRequiredEgressDestination;
 /** The reviewed default model-provider origins for the first-beta hosted cell. */
 export declare function defaultProductModelProviderEgressReviews(providers?: readonly ProductNamedModelProvider[]): ProductIdentityReviewedEgressDestination[];
+/** The reviewed default origins of the shipped web search adapters. */
+export declare function defaultProductWebSearchEgressReviews(): ProductIdentityReviewedEgressDestination[];
 /** Verify that every required outbound origin has an exact reviewed entry. */
 export declare function assertProductIdentityEgressReview(input: ProductIdentityEgressReviewInput): ProductIdentityEgressReviewReport;

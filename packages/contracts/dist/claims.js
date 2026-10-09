@@ -11,11 +11,12 @@
  * How it fits: item outputs and sub-run findings carry claim sets as JSON.
  * The quality plane's grounding check resolves each citation against the
  * application's span store; parseClaimSet is the border where unstructured
- * text is told apart from a claim set, with the reason.
+ * text is told apart from a claim set, with the reason. Entries name the
+ * images they show here too, by digest and never by bytes.
  */
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
-import { ARTIFACT_EVIDENCE_REASONS, CLAIM_LABELS, EVIDENCE_GRADES, MEMORY_CLASSIFICATIONS } from "./vocab.js";
+import { ARTIFACT_EVIDENCE_REASONS, CLAIM_LABELS, CONTEXT_IMAGE_DELIVERIES, CONTEXT_IMAGE_NOTE_REASONS, EVIDENCE_GRADES, IMAGE_MEDIA_TYPES, MEMORY_CLASSIFICATIONS, } from "./vocab.js";
 const spanHashShape = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const artifactHandle = z.string().regex(/^artifact:\/\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$/, 'expected an artifact handle');
 const mediaTypeShape = z.string().regex(/^[^\s/]+\/[^\s]+$/, 'expected a media type').max(128);
@@ -65,6 +66,33 @@ export const EntryEvidenceSchema = z.strictObject({
         span_hash: spanHashShape.optional(),
     })
         .optional(),
+});
+/**
+ * One image an entry shows, by reference and never by bytes (WBR-007). The
+ * entry's content hash covers the reference, and each window loads the
+ * bytes from the artifact store and checks them against content_hash. The
+ * image keeps its artifact's classification.
+ */
+export const EntryImageSchema = z.strictObject({
+    artifact_ref: artifactHandle,
+    content_hash: spanHashShape,
+    media_type: z.enum(IMAGE_MEDIA_TYPES),
+    bytes: z.number().int().min(1),
+    classification: z.enum(MEMORY_CLASSIFICATIONS),
+});
+/** The most image references one entry carries. The deployment's per-turn limit still applies per window. */
+export const ENTRY_IMAGE_MAX = 64;
+/**
+ * One image a window carried, as context.assembled records it: by digest,
+ * media type, size and classification, never by bytes. A note names why
+ * the model received a line naming the image instead of the image.
+ */
+export const ContextImageRecordSchema = EntryImageSchema.extend({
+    entry_id: z.string().min(1).max(256),
+    delivery: z.enum(CONTEXT_IMAGE_DELIVERIES),
+    /** The model tokens the window reserved for this image: the image estimate, or zero for a note, whose text is counted as text. */
+    tokens: z.number().int().min(0),
+    reason: z.enum(CONTEXT_IMAGE_NOTE_REASONS).optional(),
 });
 /** One artifact range placed in a context window behind the run's fence nonce (CTX-007). */
 export const ArtifactContextSpanSchema = CitedSpanSchema.extend({

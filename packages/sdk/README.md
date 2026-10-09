@@ -8,6 +8,8 @@ agents, tools, validators, postures, domain packs and orchestrations.
 The SDK is a client surface. It needs an already-running Zero-AR endpoint and
 does not contain the kernel, database or model provider.
 
+![A recorded Zero-AR run showing the durable work that an SDK run handle addresses.](https://raw.githubusercontent.com/zero-ar-labs/ar-kit/main/assets/zero-ar-work-record.svg)
+
 ## Install
 
 Node.js 24.11.0 through the Node 24 LTS line is required.

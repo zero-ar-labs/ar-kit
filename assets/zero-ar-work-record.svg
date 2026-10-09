@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" role="img" aria-labelledby="title desc">
+  <title id="title">A recorded Zero-AR run</title>
+  <desc id="desc">A real Local Lite run shows its objective, admitted model, reserved leases, checkpoint verdicts and complete result.</desc>
+  <style>
+    .language { font-family: Archivo, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .record { font-family: "Azeret Mono", "SFMono-Regular", Consolas, monospace; }
+  </style>
+
+  <rect width="1200" height="660" fill="#F4F4F2"/>
+  <path d="M50 39h21v5H60v11H50z" fill="#C08A3E"/>
+  <text class="language" x="86" y="55" fill="#8A5F1E" font-size="15" font-weight="600">Recorded Local Lite run</text>
+  <text class="language" x="50" y="104" fill="#16181A" font-size="36" font-weight="650">The work stays attached to the objective.</text>
+  <text class="language" x="50" y="135" fill="#6B7173" font-size="17">A deterministic run recorded by the public CLI. Every state opens toward the underlying record.</text>
+
+  <rect x="50" y="164" width="1100" height="446" rx="8" fill="#16181A"/>
+  <text class="record" x="78" y="200" fill="#E8E9E6" font-size="15">▏ run 01a105b3  run_01a105b3bef37d649b140de211407089</text>
+  <text class="record" x="78" y="229" fill="#8E9497" font-size="13">objective</text>
+  <text class="record" x="190" y="229" fill="#E8E9E6" font-size="13">Normalise the supplier records</text>
+  <text class="record" x="78" y="254" fill="#8E9497" font-size="13">agent</text>
+  <text class="record" x="190" y="254" fill="#E8E9E6" font-size="13">assistant / scripted/deterministic</text>
+  <text class="record" x="78" y="279" fill="#8E9497" font-size="13">work</text>
+  <text class="record" x="190" y="279" fill="#E8E9E6" font-size="13">5 items declared in the ledger</text>
+
+  <line x1="78" y1="302" x2="1122" y2="302" stroke="#43494A"/>
+
+  <text class="record" x="78" y="333" fill="#8E9497" font-size="13">06:57:08</text>
+  <text class="record" x="190" y="333" fill="#E8E9E6" font-size="13">run started</text>
+  <text class="record" x="78" y="360" fill="#8E9497" font-size="13">06:57:08</text>
+  <text class="record" x="190" y="360" fill="#E8E9E6" font-size="13">lease reserved 2018 model_tokens</text>
+  <text class="record" x="78" y="387" fill="#8E9497" font-size="13">06:57:08</text>
+  <circle cx="198" cy="382" r="6" fill="#2F6B3F"/>
+  <text class="record" x="214" y="387" fill="#E8E9E6" font-size="13">verified checkpoint: 5 items promoted by items.nonempty-output@1.0.0</text>
+  <text class="record" x="78" y="414" fill="#8E9497" font-size="13">06:57:08</text>
+  <text class="record" x="190" y="414" fill="#E8E9E6" font-size="13">completion proposed; checking the claim against the verification plan</text>
+  <text class="record" x="78" y="441" fill="#8E9497" font-size="13">06:57:08</text>
+  <circle cx="198" cy="436" r="6" fill="#2F6B3F"/>
+  <text class="record" x="214" y="441" fill="#E8E9E6" font-size="13">verified every declared item is verified and every acceptance rule passed</text>
+
+  <rect x="78" y="468" width="1044" height="112" rx="5" fill="#202325" stroke="#43494A"/>
+  <text class="record" x="102" y="500" fill="#8E9497" font-size="13">result</text>
+  <circle cx="184" cy="495" r="6" fill="#2F6B3F"/>
+  <text class="record" x="200" y="500" fill="#E8E9E6" font-size="15" font-weight="600">complete</text>
+  <text class="record" x="102" y="530" fill="#E8E9E6" font-size="13">Every declared item is worked. Staged result for: Normalise the supplier records</text>
+  <text class="record" x="102" y="558" fill="#8E9497" font-size="12">5 verified · 0 parked · 379 model tokens consumed</text>
+</svg>

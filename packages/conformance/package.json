@@ -1,17 +1,18 @@
 {
   "name": "@zero-ar/conformance",
-  "version": "0.2.1",
+  "version": "0.4.1",
   "type": "module",
   "description": "Check environment adapters against the Zero-AR lifecycle contract.",
   "license": "Apache-2.0",
   "dependencies": {
-    "@zero-ar/contracts": "0.2.1"
+    "@zero-ar/contracts": "0.4.1"
   },
   "engines": {
     "node": ">=24.11.0 <25"
   },
   "files": [
     "dist",
+    "vectors",
     "README.md",
     "LICENSE",
     "NOTICE"
@@ -34,7 +35,13 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./run-protocol": {
+      "types": "./dist/run-protocol.d.ts",
+      "default": "./dist/run-protocol.js"
+    },
+    "./vectors/open-durable-execution.jsonl": "./vectors/open-durable-execution.jsonl",
+    "./vectors/open-durable-execution.expected.json": "./vectors/open-durable-execution.expected.json"
   },
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js"

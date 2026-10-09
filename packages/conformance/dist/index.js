@@ -12,3 +12,4 @@
  * offering a harness anyone else can run.
  */
 export { runEnvironmentAdapterConformance } from "./environment-adapter.js";
+export { materializeRunBundle } from "./run-protocol.js";

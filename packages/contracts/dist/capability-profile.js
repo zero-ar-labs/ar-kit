@@ -7,7 +7,9 @@
  *
  * How it fits: composition roots consume this instead of maintaining private
  * health or release capability maps. The manifest ref is pinned into new runs,
- * so a profile change is visible in durable history.
+ * so a profile change is visible in durable history. Before changing a
+ * manifest, capture it with scripts/capture-profile-manifest-history.ts so
+ * runs pinned to it stay continuable (profile-compatibility.ts).
  */
 import { z } from 'zod';
 import { refuse } from "./diagnostics.js";
@@ -325,18 +327,23 @@ function conditionalAt(capability, refusal_point, diagnostic_code, summary, vect
     return { capability, state: 'conditional', summary, refusal_point, diagnostic_code, requirements, vectors };
 }
 const localLiteSupported = [
+    supported('automatic-run-recovery', 'Local Lite rebuilds accepted work from the canonical log and delivers durable retry wakes without an operator resume command.', ['KCV-008', 'UAT-CV-018']),
     supported('artifacts', 'Local artifact storage serves run artifacts and streamed publication blobs. Cited ranges are read back behind the run fence; a run export carries the committed artifacts its log cites and names any it cannot carry; an import restores them before the records and names what it did not transfer; uncommitted uploads are swept after the retention floor at start and through the operator route.', ['XCV-002', 'UAT-CV-012', 'UAT-CV-013', 'UAT-CV-016', 'PUB-CV-014', 'PUB-CV-016']),
     supported('canonical-log', 'Runs append to the canonical log and rebuild projections from it.', ['KCV-001']),
     supported('document-pdf-extraction', 'PDF text extraction uses the bounded process tool host with Poppler and Tesseract fallback.', ['SRC-CV-008'], ['SRC-011', 'SRC-012', 'SRC-013', 'SRC-017', 'SRC-029', 'SRC-030']),
     supported('environment-process', 'Local process execution is available under the development profile.', ['ENV-CV-003']),
     supported('honest-completion', 'Completion stays tied to validator verdicts and explicit unverified outcomes. A cited artifact range, required input artifact or required source binding that is changed, absent or unreadable ends the run indeterminate with the blocker named, never verified.', ['QCV-003', 'UAT-CV-013']),
     supported('local-lite', 'The local development profile runs with SQLite and deterministic providers.', ['XCV-002']),
+    supported('model-image-input', 'An admitted image reaches a model adapter that declares image input support; another adapter receives a bounded text note instead.', ['WBR-CV-003']),
+    supported('open-goal-execution', 'An open goal can plan, name checks, repair failed work and propose completion without an owner-authored task contract.', ['QCV-003', 'KCV-009', 'XCV-014']),
+    supported('operator-pause-and-budget', 'The public control path pauses at a turn boundary, and a non-agent principal can add admitted budget before resume.', ['LIF-CV-012', 'KCV-008']),
     supported('quality-plane', 'The validator seam and quality ledger run in the local composition.', ['QCV-004']),
     supported('published-skills', 'Standard Agent Skills compile into immutable procedures. Local Lite exposes bounded descriptors and admits skill.search, skill.open and skill.read only for the run-pinned closure.', ['DXI-CV-001', 'ADX-CV-002']),
     supported('runtime-local-tools', 'Artifact, source, document, skill and tool-catalogue operations appear only when their publication and deployment bindings are present.', ['DXI-CV-001', 'SRC-CV-008']),
     supported('author-defined-tools', 'The SDK bundles a typed Tool Kit handler at authoring time, and Local Lite executes its exact published binding in a bounded child host without the author source tree.', ['ADX-CV-003']),
     supported('progressive-tool-disclosure', 'Tool descriptors are bounded, and exact tool.activate changes only the next model-call view while ordinary lease, binding and operation-class checks remain in force.', ['DXI-CV-041', 'DXI-CV-042', 'DXI-CV-043']),
     supported('research-reference-pack', 'The research pack\'s claim-set contract and citation validators run in Local Lite: claims cite artifact ranges whose citations come back from artifact.read, an unresolved citation is never admitted as support, and identical spans count once.', ['QCV-006', 'QCV-008'], ['CLM-001', 'CLM-002']),
+    supported('run-fork', 'The public API forks from a named frontier into a new run, carries the plan with items restarted and inherits no active grant, lease, credential or completion state.', ['KCV-002']),
     supported('suspension', 'Suspended runs persist their handles and resume from durable state.', ['KCV-008']),
     supported('source-local-read-only', 'Local directories register as read-only source instances and commit immutable artifact-backed snapshots.', ['SRC-CV-001', 'SRC-CV-002', 'SRC-CV-003', 'SRC-CV-005', 'SRC-CV-014'], ['SRC-001', 'SRC-002', 'SRC-003', 'SRC-004', 'SRC-005', 'SRC-006', 'SRC-007', 'SRC-009', 'SRC-021', 'SRC-022', 'SRC-023']),
     supported('transformation-volume-reference-pack', 'The transformation fixture is available at conformance scale.', ['UAT-CV-015']),
@@ -361,6 +368,41 @@ const hostedSupported = [
     supported('source-local-read-only', 'Admitted read-only directories resolve into immutable artifact-backed source bindings.', ['SRC-CV-001', 'SRC-CV-002', 'SRC-CV-003', 'SRC-CV-005', 'SRC-CV-014'], ['SRC-001', 'SRC-002', 'SRC-003', 'SRC-004', 'SRC-005', 'SRC-006', 'SRC-007', 'SRC-009', 'SRC-021', 'SRC-022', 'SRC-023']),
     supported('transformation-volume-reference-pack', 'The volume pack is the UAT domain reference.', ['UAT-CV-015']),
 ];
+/** Version 0.3 mechanisms that Local Lite offers only with named deployment inputs. */
+const localVersionThreeConditions = [
+    conditionalAt('browser-workspace', 'profile-compilation', 'environment.capability.unavailable', 'The browser recipe is available when the operator builds and pins its image, selects the browser preset and supplies the reviewed seccomp profile. Without those inputs, Local Lite offers no browser workspace.', ['WBR-CV-002', 'WBR-CV-005'], ['UAT-PRO-001']),
+    conditionalAt('hierarchical-context', 'publication', 'context.hierarchy.artifacts-unavailable', 'A publication can select hierarchical context when immutable artifact write, verify and bounded read support are attached. The source-bound evaluation is not a Full Cell release claim.', ['PUB-CV-005'], ['UAT-PRO-001']),
+    conditionalAt('workspace-exec', 'profile-compilation', 'environment.capability.unavailable', 'Local Lite offers workspace.exec only when Docker answers and ZERO_AR_WORKSPACE_IMAGE pins an immutable image. Otherwise the tool is absent.', ['KCV-009', 'WBR-CV-001', 'WBR-CV-007', 'WBR-CV-008'], ['UAT-PRO-001']),
+];
+/** Version 0.3 mechanisms present in hosted bytes but still conditional on deployment or source-bound proof. */
+const hostedVersionThreeConditions = [
+    conditionalAt('automatic-run-recovery', 'profile-compilation', 'profile.capability.excluded', 'The kernel and durable wake path recover work without an operator command. A Full Cell release claim remains conditional until the exact candidate proves the journey after a process restart.', ['KCV-008', 'UAT-CV-018'], ['UAT-PRO-001']),
+    conditionalAt('browser-workspace', 'profile-compilation', 'environment.capability.unavailable', 'The browser workspace requires a separately built digest-pinned image, the browser preset, reviewed seccomp and available OCI capacity.', ['WBR-CV-002', 'WBR-CV-005'], ['UAT-PRO-001']),
+    conditionalAt('hierarchical-context', 'publication', 'context.hierarchy.artifacts-unavailable', 'The hierarchical selector is present, but its source-bound evaluation creates no Full Cell release claim until the candidate proves artifact-backed assembly and expansion.', ['PUB-CV-005'], ['UAT-PRO-001']),
+    conditionalAt('model-image-input', 'profile-compilation', 'profile.capability.excluded', 'The image path is present, but a Full Cell release claim requires a candidate adapter that declares image input and a source-bound image journey.', ['WBR-CV-003'], ['UAT-PRO-001']),
+    conditionalAt('open-goal-execution', 'profile-compilation', 'profile.capability.excluded', 'The kernel can execute open goals, but the Full Cell claim remains conditional until the candidate runs an open goal through the hosted topology.', ['QCV-003', 'XCV-014'], ['UAT-PRO-001']),
+    conditionalAt('operator-pause-and-budget', 'profile-compilation', 'profile.capability.excluded', 'Pause and budget-amendment routes are present, but the Full Cell claim remains conditional until the candidate proves both controls through authenticated hosted APIs.', ['LIF-CV-012', 'KCV-008'], ['UAT-PRO-001']),
+    conditionalAt('reversible-http-effect-dispatch', 'profile-compilation', 'profile.capability.excluded', 'A hosted deployment can attach one reviewed HTTP target and dispatch a reversible operation only when the operation, reversal and active grants match. General production effect dispatch remains excluded.', [], ['UAT-PRO-001']),
+    conditionalAt('run-fork', 'profile-compilation', 'profile.capability.excluded', 'The public fork contract is present, but the Full Cell claim remains conditional until the candidate proves plan and sealed-workspace inheritance through the hosted topology.', ['KCV-002'], ['UAT-PRO-001']),
+    conditionalAt('workspace-exec', 'profile-compilation', 'environment.capability.unavailable', 'The hosted cell offers workspace.exec only for a tenant configuration that pins an immutable workspace image and has available OCI capacity.', ['KCV-009', 'WBR-CV-001', 'WBR-CV-007', 'WBR-CV-008'], ['UAT-PRO-001']),
+];
+/** Version 0.3 mechanisms excluded from the unfinished regulated profile. */
+const regulatedVersionThreeExclusions = [
+    excluded('automatic-run-recovery', 'profile-compilation', 'profile.capability.excluded', 'Regulated automatic recovery waits for a completed regulated composition.', ['KCV-008']),
+    excluded('browser-workspace', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit the browser workspace.', ['WBR-CV-002']),
+    excluded('hierarchical-context', 'publication', 'profile.capability.excluded', 'The regulated profile does not admit hierarchical context.', ['PUB-CV-005']),
+    excluded('model-image-input', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit model image input.', ['WBR-CV-003']),
+    excluded('open-goal-execution', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit open-goal execution.', ['QCV-003']),
+    excluded('operator-pause-and-budget', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit public pause or budget amendment.', ['LIF-CV-012', 'KCV-008']),
+    excluded('reversible-http-effect-dispatch', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile has no admitted HTTP effect target.', ['UAT-CV-001']),
+    excluded('run-fork', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit public run forks.', ['KCV-002']),
+    excluded('workspace-exec', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit workspace.exec.', ['KCV-009']),
+];
+/** Web search and fetch (web search appendix). Local Lite offers them under named configuration. */
+const localLiteWebSearch = conditionalAt('web-search', 'profile-compilation', 'web.provider.unknown', 'Local Lite offers web.search and web.fetch only when ZERO_AR_WEB_SEARCH_PROVIDER names an admitted provider and its key is supplied. Otherwise the tools are absent and the ready line says why.', ['WEB-CV-002', 'WEB-CV-005', 'WEB-CV-006', 'WEB-CV-007'], ['WEB-002', 'WEB-003', 'WEB-008']);
+/** The hosted cell offers the web tools per tenant, from its web_search block. */
+const hostedWebSearch = conditionalAt('web-search', 'profile-compilation', 'web.provider.unknown', 'The hosted cell offers web.search and web.fetch only to a tenant whose web_search block names a shipped provider and an active web-search key binding, with a filesystem or S3-compatible artifact store. Otherwise the tenant has neither tool.', ['WEB-CV-009'], ['WEB-002', 'WEB-008', 'WEB-010']);
+const regulatedWebSearch = excluded('web-search', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit web.search or web.fetch.', ['WEB-CV-005']);
 /** Required release capabilities that stay conditional until their named candidate proof passes. */
 const hostedReleaseConditions = [
     conditionalAt('cross-run-memory', 'registration', 'memory.unwired', 'Cross-run memory attaches only for a tenant whose hosted configuration names an active memory-wrapping-key binding and whose PostgreSQL log, wrapped-key tables and artifact backend all pass their separate health probes. Without that exact configuration, memory routes refuse and runs keep session memory only.', ['MSH-CV-002', 'MSH-CV-003', 'MSH-CV-004', 'MSH-CV-006', 'MSH-CV-007', 'XCV-016'], ['MSH-001', 'MSH-002', 'MSH-003', 'MSH-004', 'MSH-005', 'MSH-006', 'MSH-007', 'MSH-008', 'MSH-009', 'MSH-010', 'MSH-011', 'MSH-012', 'MSH-013', 'MSH-014', 'MSH-015', 'MSH-016', 'MSH-017', 'MSH-018']),
@@ -400,30 +442,13 @@ const conditionalHostedEnvironments = [
     conditional('environment-apptainer', 'Apptainer is available only on an admitted Linux host or cluster with a pinned SIF and a current ENV-CV-019 report.', ['ENV-CV-016', 'ENV-CV-019']),
     conditional('environment-openai-agents', 'OpenAI Agents API execution is available only after the optional package, operation-scoped secret and egress ports, explicit admission and current DXI-CV-040 real-account report all pass.', ['DXI-CV-033', 'DXI-CV-040'], ['DXI-050', 'DXI-063']),
 ];
-const conditionalHostedBrowser = {
-    capability: 'browser-first-party-playwright',
-    state: 'conditional',
-    summary: 'First-party Chromium browsing requires the separate browser package, exact run binding, checked proxy, admitted engine and current browser conformance evidence.',
-    refusal_point: 'profile-compilation',
-    diagnostic_code: 'browser.capability.unavailable',
-    requirements: ['BRC-001', 'BRC-031', 'BRC-038'],
-    vectors: ['BRC-CV-001', 'BRC-CV-011'],
-};
-const futureEnvironmentExclusions = [
-    excluded('environment-cloudflare-sandbox', 'profile-compilation', 'profile.capability.excluded', 'Cloudflare Sandbox execution waits for a real account campaign.', ['ENV-CV-009']),
-    excluded('environment-modal', 'profile-compilation', 'profile.capability.excluded', 'Modal execution is a later optional environment.', ['ENV-CV-016']),
-    excluded('environment-daytona', 'profile-compilation', 'profile.capability.excluded', 'Daytona execution is a later optional environment.', ['ENV-CV-016']),
-    excluded('environment-vercel-sandbox', 'profile-compilation', 'profile.capability.excluded', 'Vercel Sandbox execution is a later optional environment.', ['ENV-CV-016']),
-];
 const allNonDefaultEnvironmentExclusions = [
     excluded('environment-ssh', 'profile-compilation', 'profile.capability.excluded', 'SSH execution is not admitted by this profile.', ['ENV-CV-006']),
     excluded('environment-firecracker', 'profile-compilation', 'profile.capability.excluded', 'Firecracker execution is not admitted by this profile.', ['ENV-CV-008']),
     excluded('environment-apptainer', 'profile-compilation', 'profile.capability.excluded', 'Apptainer execution is not admitted by this profile.', ['ENV-CV-016']),
     excluded('environment-openai-agents', 'profile-compilation', 'profile.capability.excluded', 'OpenAI Agents API execution is not admitted by this profile.', ['DXI-CV-033'], ['DXI-050', 'DXI-063']),
-    ...futureEnvironmentExclusions,
 ];
 const firstBetaExclusions = [
-    ...futureEnvironmentExclusions,
     excluded('classification-airlocks', 'publication', 'profile.capability.excluded', 'Classification airlocks are outside first-beta UAT.', ['UAT-CV-001']),
     excluded('dynamic-authority', 'profile-compilation', 'profile.capability.excluded', 'Dynamic authority is not part of the first-beta UAT profile.', ['UAT-CV-001']),
     excluded('native-packaged-self-hosting', 'profile-compilation', 'profile.capability.excluded', 'Native packaged self-hosting is outside the Docker/Linux UAT cell.', ['UAT-CV-001']),
@@ -434,18 +459,13 @@ const firstBetaExclusions = [
     excluded('video-reference-pack', 'publication', 'profile.capability.excluded', 'The video reference pack is deferred from first-beta UAT.', ['UAT-CV-001']),
 ];
 const localLiteExclusions = [
-    excluded('browser-first-party-playwright', 'profile-compilation', 'browser.capability.unavailable', 'Chromium and Playwright are not part of Local Lite or W0.', ['BRC-CV-001'], ['BRC-002', 'BRC-031']),
     excluded('aggregator-composio-observation', 'profile-compilation', 'profile.capability.excluded', 'Hosted aggregator accounts are not part of Local Lite.', ['UAT-CV-007']),
     excluded('aggregator-merge-observation', 'profile-compilation', 'profile.capability.excluded', 'Hosted aggregator accounts are not part of Local Lite.', ['UAT-CV-008']),
     excluded('dynamic-authority', 'profile-compilation', 'profile.capability.excluded', 'Dynamic authority is not part of Local Lite.', ['XCV-002']),
     excluded('environment-apptainer', 'profile-compilation', 'profile.capability.excluded', 'Apptainer execution is not part of Local Lite.', ['ENV-CV-016']),
-    excluded('environment-cloudflare-sandbox', 'profile-compilation', 'profile.capability.excluded', 'Cloudflare Sandbox execution is not part of Local Lite.', ['ENV-CV-009']),
-    excluded('environment-daytona', 'profile-compilation', 'profile.capability.excluded', 'Daytona execution is not part of Local Lite.', ['ENV-CV-016']),
     excluded('environment-firecracker', 'profile-compilation', 'profile.capability.excluded', 'Firecracker execution is not part of Local Lite.', ['ENV-CV-008']),
-    excluded('environment-modal', 'profile-compilation', 'profile.capability.excluded', 'Modal execution is not part of Local Lite.', ['ENV-CV-016']),
     excluded('environment-oci', 'profile-compilation', 'profile.capability.excluded', 'OCI execution is not part of Local Lite.', ['ENV-CV-004']),
     excluded('environment-ssh', 'profile-compilation', 'profile.capability.excluded', 'SSH execution is not part of Local Lite.', ['ENV-CV-006']),
-    excluded('environment-vercel-sandbox', 'profile-compilation', 'profile.capability.excluded', 'Vercel Sandbox execution is not part of Local Lite.', ['ENV-CV-016']),
     excluded('environment-openai-agents', 'profile-compilation', 'profile.capability.excluded', 'OpenAI Agents API execution is optional and not part of account-free Local Lite.', ['DXI-CV-033'], ['DXI-050', 'DXI-062']),
     excluded('full-cell-docker-linux', 'profile-compilation', 'profile.capability.excluded', 'The Docker/Linux Full Cell is not part of Local Lite.', ['XCV-007']),
     excluded('effect-proposal-tools', 'profile-compilation', 'profile.capability.excluded', 'Local Lite has no effect plane, so an effect-proposal tool refuses instead of implying consequential dispatch.', ['UAT-CV-009']),
@@ -460,6 +480,7 @@ const localLiteExclusions = [
     excluded('native-packaged-self-hosting', 'profile-compilation', 'profile.capability.excluded', 'Native packaged self-hosting is not part of Local Lite.', ['UAT-CV-001']),
     excluded('classification-airlocks', 'publication', 'profile.capability.excluded', 'Classification airlocks are not part of Local Lite.', ['UAT-CV-001']),
     excluded('authored-orchestration', 'publication', 'profile.capability.excluded', 'Authored orchestration is not part of Local Lite.', ['UAT-CV-001']),
+    excluded('reversible-http-effect-dispatch', 'profile-compilation', 'profile.capability.excluded', 'Local Lite has no HTTP effect target or authority service.', ['UAT-CV-009']),
 ];
 /** A provider profile Local Lite builds through ZERO_AR_ADAPTER (decision J-3). */
 function localLiteProvider(capability, label, profile, keyVariable, vectors) {
@@ -485,7 +506,7 @@ function unwired(capability, refusal_point, diagnostic_code, summary, vectors, r
 const unwiredInEveryComposition = [
     unwired('context-feature-cache', 'profile-compilation', 'context.cache.unwired', 'No context feature cache is built in this build; selection computes every candidate\'s features on every turn.', ['MTH-CV-090'], ['MTH-SO-001', 'MTH-SO-002']),
     unwired('content-defined-chunking', 'profile-compilation', 'source.chunking.unwired', 'Source snapshots store each member whole in this build; no chunk manifest is recorded and no chunk is reused across snapshots.', ['MTH-CV-091'], ['MTH-SO-003', 'MTH-SO-004']),
-    unwired('workspace-binding-profiles', 'route', 'workspace.instances.unwired', 'Workspace instance attachment is not wired in this build: the instance routes refuse and intake refuses inputs.workspace, so a run exposes no workspace tools.', ['KCV-009', 'LIF-CV-021'], ['ADX-013', 'EXT-018']),
+    unwired('workspace-binding-profiles', 'intake', 'workspace.instances.unwired', 'Workspace instance attachment is not wired in this build: intake refuses inputs.workspace, so a run exposes no workspace tools.', ['KCV-009', 'LIF-CV-021'], ['ADX-013', 'EXT-018']),
 ];
 /** The gateway host is its own release bundle the CLI starts (decision J-1); it calls only public operations. */
 const gatewayConditional = [
@@ -494,14 +515,12 @@ const gatewayConditional = [
 ];
 const localLiteUnwired = [
     excluded('fair-cell-scheduling', 'profile-compilation', 'profile.capability.excluded', 'Local Lite serves one tenant, so fair dispatch across tenants does not apply.', ['MTH-CV-040'], ['MTH-SC-001', 'TEN-004']),
-    unwired('aggregator-trigger-ingress', 'route', 'tool-source.ingress.unwired', 'Local Lite runs no aggregator host; the trigger ingress route refuses every delivery and starts no run.', ['TAG-CV-013'], ['TAG-060']),
     unwired('attention-admission', 'publication', 'attention.admission.unwired', 'Attention admission is not wired in this build. Local Lite calibrates review capacity observe-only, publishes versioned capacity snapshots and serves the attention dashboard under /v1/attention; no run is admitted or refused on attention. The SDK publication compiler refuses a posture that declares an attention controller; a closure published through the raw publication API fails when a run binds it, as a server defect rather than a typed refusal. Runs record attention enforcement as not wired.', ['MTH-CV-080', 'MTH-CV-081', 'MTH-CV-082'], ['BUD-009', 'MTH-AT-004']),
     ...unwiredInEveryComposition,
     ...gatewayConditional,
 ];
 const hostedUnwired = [
     unwired('fair-cell-scheduling', 'profile-compilation', 'scheduler.dispatch.unwired', 'Fair dispatch across tenants is not wired in this build; runs launch in arrival order and the cell applies no dominant-resource share.', ['MTH-CV-040', 'MTH-CV-041', 'MTH-CV-042'], ['MTH-SC-001', 'TEN-004']),
-    unwired('aggregator-trigger-ingress', 'route', 'tool-source.ingress.unwired', 'Provider trigger ingress is not wired in this build; the ingress route refuses every delivery and starts no run.', ['TAG-CV-013'], ['TAG-060']),
     unwired('sequential-sampled-validation', 'profile-compilation', 'validator.sampled.unwired', 'The hosted cell does not register the sampled check or its contract in this build, so a task contract that binds a sampled-oracle validator refuses at intake as unregistered. No hosted vector covers sampled validation or the controllers route.', ['MTH-CV-030', 'MTH-CV-031', 'MTH-CV-032'], ['MTH-SV-001', 'VPC-030']),
     unwired('attention-admission', 'publication', 'attention.admission.unwired', 'Attention admission is not wired in this build. The SDK publication compiler refuses a posture that declares an attention controller; a closure published through the raw publication API fails when a run binds it, as a server defect rather than a typed refusal. Runs record attention enforcement as not wired, and a hosted tenant has no attention service in this build, so its attention routes refuse with attention.service.unwired.', ['MTH-CV-080', 'MTH-CV-081', 'MTH-CV-082'], ['BUD-009', 'MTH-AT-004']),
     ...unwiredInEveryComposition,
@@ -513,10 +532,9 @@ const regulatedLaterWork = [
     excluded('context-feature-cache', 'profile-compilation', 'profile.capability.excluded', 'The context feature cache remains later work for regulated deployments.', ['MTH-CV-090'], ['MTH-SO-001']),
     excluded('content-defined-chunking', 'profile-compilation', 'profile.capability.excluded', 'Content-defined chunking remains later work for regulated deployments.', ['MTH-CV-091'], ['MTH-SO-003']),
     excluded('attention-admission', 'publication', 'profile.capability.excluded', 'Attention admission remains later work for regulated deployments.', ['MTH-CV-081'], ['BUD-009']),
-    excluded('aggregator-trigger-ingress', 'route', 'profile.capability.excluded', 'Provider trigger ingress remains later work for regulated deployments.', ['TAG-CV-013'], ['TAG-060']),
     excluded('gateway-signed-webhook', 'profile-compilation', 'profile.capability.excluded', 'The signed-webhook gateway remains later work for regulated deployments.', ['DXI-CV-017'], ['DXI-029']),
     excluded('gateway-interactive-messaging', 'profile-compilation', 'profile.capability.excluded', 'The interactive messaging gateway remains later work for regulated deployments.', ['DXI-CV-017'], ['DXI-031']),
-    excluded('workspace-binding-profiles', 'route', 'profile.capability.excluded', 'Workspace instance attachment remains later work for regulated deployments.', ['KCV-009'], ['ADX-013']),
+    excluded('workspace-binding-profiles', 'intake', 'profile.capability.excluded', 'Workspace instance attachment remains later work for regulated deployments.', ['KCV-009'], ['ADX-013']),
 ];
 const firstBetaArtifactPolicy = {
     tool_result_inline_threshold_bytes: 4_096,
@@ -528,7 +546,7 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
         schema: 'zero-ar-profile-capability-manifest/1',
         manifest_id: 'local-lite',
         profile: 'local-lite',
-        version: '1.1.0',
+        version: '1.3.0',
         capability_vocabulary_ref: contentHash(PROFILE_CAPABILITIES),
         model_providers: ['scripted', 'openai', 'anthropic', 'openrouter', 'together', 'fireworks', 'openai-compatible'],
         aggregator_providers: [],
@@ -538,13 +556,13 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
         tool_operation_classes: ['observation', 'run-internal', 'effect-proposal'],
         effect_plane: 'absent',
         components: { required: ['store'], health_probes: ['store', 'tool_host', 'secret_store'] },
-        capabilities: [...localLiteSupported, ...localLiteExclusions, ...localLiteConditional, ...localLiteUnwired],
+        capabilities: [...localLiteSupported, ...localVersionThreeConditions, localLiteWebSearch, ...localLiteExclusions, ...localLiteConditional, ...localLiteUnwired],
     }),
     'small-production': seal({
         schema: 'zero-ar-profile-capability-manifest/1',
         manifest_id: 'first-beta-uat',
         profile: 'small-production',
-        version: '1.1.0',
+        version: '1.3.0',
         capability_vocabulary_ref: contentHash(PROFILE_CAPABILITIES),
         model_providers: ['openai', 'anthropic'],
         aggregator_providers: [],
@@ -554,13 +572,13 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
         tool_operation_classes: ['observation', 'run-internal', 'effect-proposal'],
         effect_plane: 'restricted-attachment',
         components: { required: ['artifact', 'migration', 'queue', 'store'], health_probes: ['artifact', 'migration', 'queue', 'secret_store', 'store', 'tool_host'] },
-        capabilities: [...hostedSupported, ...hostedReleaseConditions, ...hostedDeferredReleaseCapabilities, hostedMcpCapability, hostedMcpClientCapability, conditionalHostedBrowser, ...conditionalHostedEnvironments, excluded('full-cell-docker-linux', 'profile-compilation', 'profile.capability.excluded', 'The self-contained Docker/Linux Full Cell uses the full-cell manifest.', ['XCV-007']), ...firstBetaExclusions, ...hostedUnwired],
+        capabilities: [...hostedSupported, ...hostedVersionThreeConditions, hostedWebSearch, ...hostedReleaseConditions, ...hostedDeferredReleaseCapabilities, hostedMcpCapability, hostedMcpClientCapability, ...conditionalHostedEnvironments, excluded('full-cell-docker-linux', 'profile-compilation', 'profile.capability.excluded', 'The self-contained Docker/Linux Full Cell uses the full-cell manifest.', ['XCV-007']), ...firstBetaExclusions, ...hostedUnwired],
     }),
     'full-cell': seal({
         schema: 'zero-ar-profile-capability-manifest/1',
         manifest_id: 'first-beta-full-cell',
         profile: 'full-cell',
-        version: '1.1.0',
+        version: '1.3.0',
         capability_vocabulary_ref: contentHash(PROFILE_CAPABILITIES),
         model_providers: ['openai', 'anthropic'],
         aggregator_providers: [],
@@ -570,13 +588,13 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
         tool_operation_classes: ['observation', 'run-internal', 'effect-proposal'],
         effect_plane: 'restricted-attachment',
         components: { required: ['artifact', 'migration', 'queue', 'store', 'tool_host', 'validator_host'], health_probes: ['artifact', 'authority', 'migration', 'queue', 'secret_store', 'store', 'tool_host', 'validator_host'] },
-        capabilities: [...hostedSupported, ...hostedReleaseConditions, ...hostedDeferredReleaseCapabilities, hostedMcpCapability, hostedMcpClientCapability, conditionalHostedBrowser, ...conditionalHostedEnvironments, supported('full-cell-docker-linux', 'The Docker/Linux Full Cell packages the hosted runtime and child hosts together.', ['XCV-007']), ...firstBetaExclusions, ...hostedUnwired],
+        capabilities: [...hostedSupported, ...hostedVersionThreeConditions, hostedWebSearch, ...hostedReleaseConditions, ...hostedDeferredReleaseCapabilities, hostedMcpCapability, hostedMcpClientCapability, ...conditionalHostedEnvironments, supported('full-cell-docker-linux', 'The Docker/Linux Full Cell packages the hosted runtime and child hosts together.', ['XCV-007']), ...firstBetaExclusions, ...hostedUnwired],
     }),
     regulated: seal({
         schema: 'zero-ar-profile-capability-manifest/1',
         manifest_id: 'regulated-future',
         profile: 'regulated',
-        version: '1.1.0',
+        version: '1.3.0',
         capability_vocabulary_ref: contentHash(PROFILE_CAPABILITIES),
         model_providers: ['openai', 'anthropic'],
         aggregator_providers: [],
@@ -598,7 +616,6 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
             excluded('full-cell-docker-linux', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile waits for its own packaged cell profile.', ['UAT-CV-001']),
             excluded('mcp-work-entrypoints', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile waits for a separately admitted interoperability listener.', ['IOP-CV-001'], ['IOP-114']),
             excluded('mcp-imported-tools', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile waits for separately admitted imported-tool egress.', ['IOP-CV-028'], ['IOP-031']),
-            conditionalHostedBrowser,
             ...allNonDefaultEnvironmentExclusions,
             excluded('authored-orchestration', 'publication', 'profile.capability.excluded', 'Authored orchestration remains later work for regulated deployments.', ['UAT-CV-001']),
             excluded('classification-airlocks', 'publication', 'profile.capability.excluded', 'Classification airlocks remain later work for regulated deployments.', ['UAT-CV-001']),
@@ -608,6 +625,8 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
             excluded('unattended-aggregator-mutations', 'publication', 'profile.capability.excluded', 'Unattended aggregator mutations remain later work for regulated deployments.', ['UAT-CV-001']),
             excluded('video-reference-pack', 'publication', 'profile.capability.excluded', 'The video reference pack remains later work for regulated deployments.', ['UAT-CV-001']),
             ...regulatedLaterWork,
+            ...regulatedVersionThreeExclusions,
+            regulatedWebSearch,
         ],
     }),
 };

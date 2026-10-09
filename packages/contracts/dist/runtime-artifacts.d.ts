@@ -1,5 +1,5 @@
 /**
- * Runtime artifact ingest contracts.
+ * Runtime artifact ingest and run state-closure contracts.
  *
  * What this is: the public metadata, durable upload position and committed
  * handle a product backend uses for input or later run evidence. Raw chunks
@@ -7,9 +7,10 @@
  * JSON. Publication uploads use a separate contract and lifecycle.
  *
  * How it fits: the authenticated tenant and application principal come from
- * deployment, while the request declares content and intended use. Commit
- * returns a manifest only after the artifact store verifies both byte count
- * and hash.
+ * deployment. Commit returns a manifest only after byte verification. Run
+ * export keeps ordinary evidence in artifact bundles, carries protected
+ * runtime state only in an authorized transfer, and accounts for every
+ * member in one content-addressed closure.
  */
 import { z } from 'zod';
 /** One immutable destination for the artifact after commit. */
@@ -267,6 +268,153 @@ export declare const ArtifactTransferOmissionSchema: z.ZodObject<{
     }>;
 }, z.core.$strict>;
 export type ArtifactTransferOmission = z.infer<typeof ArtifactTransferOmissionSchema>;
+/** One external or inline object that the exported run needs or names. */
+export declare const RunStateClosureMemberSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+    status: z.ZodLiteral<"present">;
+    content_ref: z.ZodString;
+    artifact_ref: z.ZodOptional<z.ZodString>;
+    state_transfer_ref: z.ZodOptional<z.ZodString>;
+    kind: z.ZodEnum<{
+        publication: "publication";
+        artifact: "artifact";
+        memory: "memory";
+        integrity: "integrity";
+        workspace: "workspace";
+        context: "context";
+    }>;
+    locator: z.ZodString;
+    required: z.ZodBoolean;
+}, z.core.$strict>, z.ZodObject<{
+    status: z.ZodLiteral<"omitted">;
+    reason: z.ZodString;
+    kind: z.ZodEnum<{
+        publication: "publication";
+        artifact: "artifact";
+        memory: "memory";
+        integrity: "integrity";
+        workspace: "workspace";
+        context: "context";
+    }>;
+    locator: z.ZodString;
+    required: z.ZodBoolean;
+}, z.core.$strict>, z.ZodObject<{
+    status: z.ZodLiteral<"unavailable">;
+    reason: z.ZodString;
+    kind: z.ZodEnum<{
+        publication: "publication";
+        artifact: "artifact";
+        memory: "memory";
+        integrity: "integrity";
+        workspace: "workspace";
+        context: "context";
+    }>;
+    locator: z.ZodString;
+    required: z.ZodBoolean;
+}, z.core.$strict>], "status">;
+export type RunStateClosureMember = z.infer<typeof RunStateClosureMemberSchema>;
+/** The exact frontier and referenced-state accounting sealed into one export. */
+export declare const RunStateClosureManifestSchema: z.ZodObject<{
+    schema: z.ZodLiteral<"zero-ar-run-state-closure/1">;
+    run_id: z.ZodString;
+    frontier: z.ZodObject<{
+        record_count: z.ZodNumber;
+        logical_clock: z.ZodNumber;
+        record_id: z.ZodString;
+        chain_head: z.ZodString;
+        head_projection_hash: z.ZodString;
+    }, z.core.$strict>;
+    members: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+        status: z.ZodLiteral<"present">;
+        content_ref: z.ZodString;
+        artifact_ref: z.ZodOptional<z.ZodString>;
+        state_transfer_ref: z.ZodOptional<z.ZodString>;
+        kind: z.ZodEnum<{
+            publication: "publication";
+            artifact: "artifact";
+            memory: "memory";
+            integrity: "integrity";
+            workspace: "workspace";
+            context: "context";
+        }>;
+        locator: z.ZodString;
+        required: z.ZodBoolean;
+    }, z.core.$strict>, z.ZodObject<{
+        status: z.ZodLiteral<"omitted">;
+        reason: z.ZodString;
+        kind: z.ZodEnum<{
+            publication: "publication";
+            artifact: "artifact";
+            memory: "memory";
+            integrity: "integrity";
+            workspace: "workspace";
+            context: "context";
+        }>;
+        locator: z.ZodString;
+        required: z.ZodBoolean;
+    }, z.core.$strict>, z.ZodObject<{
+        status: z.ZodLiteral<"unavailable">;
+        reason: z.ZodString;
+        kind: z.ZodEnum<{
+            publication: "publication";
+            artifact: "artifact";
+            memory: "memory";
+            integrity: "integrity";
+            workspace: "workspace";
+            context: "context";
+        }>;
+        locator: z.ZodString;
+        required: z.ZodBoolean;
+    }, z.core.$strict>], "status">>;
+    closure_ref: z.ZodString;
+}, z.core.$strict>;
+export type RunStateClosureManifest = z.infer<typeof RunStateClosureManifestSchema>;
+/** One member's destination disposition after content verification and service import. */
+export declare const RunStateRehydrationMemberSchema: z.ZodObject<{
+    kind: z.ZodEnum<{
+        publication: "publication";
+        artifact: "artifact";
+        memory: "memory";
+        integrity: "integrity";
+        workspace: "workspace";
+        context: "context";
+    }>;
+    locator: z.ZodString;
+    required: z.ZodBoolean;
+    status: z.ZodEnum<{
+        omitted: "omitted";
+        unavailable: "unavailable";
+        rehydrated: "rehydrated";
+        "present-inline": "present-inline";
+    }>;
+    reason: z.ZodOptional<z.ZodString>;
+}, z.core.$strict>;
+export type RunStateRehydrationMember = z.infer<typeof RunStateRehydrationMemberSchema>;
+/** Rehydrate is true only when every required closure member is available at the destination. */
+export declare const RunStateRehydrationReportSchema: z.ZodObject<{
+    level: z.ZodLiteral<"rehydrate">;
+    closure_ref: z.ZodString;
+    rehydrated: z.ZodBoolean;
+    members: z.ZodArray<z.ZodObject<{
+        kind: z.ZodEnum<{
+            publication: "publication";
+            artifact: "artifact";
+            memory: "memory";
+            integrity: "integrity";
+            workspace: "workspace";
+            context: "context";
+        }>;
+        locator: z.ZodString;
+        required: z.ZodBoolean;
+        status: z.ZodEnum<{
+            omitted: "omitted";
+            unavailable: "unavailable";
+            rehydrated: "rehydrated";
+            "present-inline": "present-inline";
+        }>;
+        reason: z.ZodOptional<z.ZodString>;
+    }, z.core.$strict>>;
+}, z.core.$strict>;
+export type RunStateRehydrationReport = z.infer<typeof RunStateRehydrationReportSchema>;
 /**
  * One artifact frame of a run export (UAT-ART-013): an artifact bundle for
  * one committed scope, a run id or intake:<ref>, with the handles it
@@ -290,5 +438,180 @@ export declare const RunBundleArtifactFrameSchema: z.ZodDiscriminatedUnion<[z.Zo
             "not-in-run": "not-in-run";
         }>;
     }, z.core.$strict>>;
+}, z.core.$strict>, z.ZodObject<{
+    kind: z.ZodLiteral<"state-transfer">;
+    transfer_ref: z.ZodString;
+    member_kind: z.ZodEnum<{
+        publication: "publication";
+        memory: "memory";
+        workspace: "workspace";
+    }>;
+    tenant_ref: z.ZodString;
+    locator: z.ZodString;
+    media_type: z.ZodString;
+    content_ref: z.ZodString;
+    bytes: z.ZodNumber;
+    content_base64: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    kind: z.ZodLiteral<"state-closure">;
+    manifest: z.ZodObject<{
+        schema: z.ZodLiteral<"zero-ar-run-state-closure/1">;
+        run_id: z.ZodString;
+        frontier: z.ZodObject<{
+            record_count: z.ZodNumber;
+            logical_clock: z.ZodNumber;
+            record_id: z.ZodString;
+            chain_head: z.ZodString;
+            head_projection_hash: z.ZodString;
+        }, z.core.$strict>;
+        members: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+            status: z.ZodLiteral<"present">;
+            content_ref: z.ZodString;
+            artifact_ref: z.ZodOptional<z.ZodString>;
+            state_transfer_ref: z.ZodOptional<z.ZodString>;
+            kind: z.ZodEnum<{
+                publication: "publication";
+                artifact: "artifact";
+                memory: "memory";
+                integrity: "integrity";
+                workspace: "workspace";
+                context: "context";
+            }>;
+            locator: z.ZodString;
+            required: z.ZodBoolean;
+        }, z.core.$strict>, z.ZodObject<{
+            status: z.ZodLiteral<"omitted">;
+            reason: z.ZodString;
+            kind: z.ZodEnum<{
+                publication: "publication";
+                artifact: "artifact";
+                memory: "memory";
+                integrity: "integrity";
+                workspace: "workspace";
+                context: "context";
+            }>;
+            locator: z.ZodString;
+            required: z.ZodBoolean;
+        }, z.core.$strict>, z.ZodObject<{
+            status: z.ZodLiteral<"unavailable">;
+            reason: z.ZodString;
+            kind: z.ZodEnum<{
+                publication: "publication";
+                artifact: "artifact";
+                memory: "memory";
+                integrity: "integrity";
+                workspace: "workspace";
+                context: "context";
+            }>;
+            locator: z.ZodString;
+            required: z.ZodBoolean;
+        }, z.core.$strict>], "status">>;
+        closure_ref: z.ZodString;
+    }, z.core.$strict>;
+}, z.core.$strict>, z.ZodObject<{
+    kind: z.ZodLiteral<"continuation-capsule">;
+    capsule: z.ZodObject<{
+        schema: z.ZodLiteral<"zero-ar-run-continuation/1">;
+        run_id: z.ZodString;
+        frontier: z.ZodObject<{
+            record_count: z.ZodNumber;
+            logical_clock: z.ZodNumber;
+            record_id: z.ZodString;
+            chain_head: z.ZodString;
+            head_projection_hash: z.ZodString;
+        }, z.core.$strict>;
+        protocol: z.ZodObject<{
+            bundle_format_version: z.ZodLiteral<2>;
+            canonicalization: z.ZodEnum<{
+                "canonical-json-1": "canonical-json-1";
+            }>;
+            record_catalogue_ref: z.ZodString;
+            fold_profile: z.ZodEnum<{
+                "run-head-v9": "run-head-v9";
+            }>;
+        }, z.core.$strict>;
+        continuation_authority_ref: z.ZodDefault<z.ZodNullable<z.ZodString>>;
+        state_closure_ref: z.ZodString;
+        lifecycle: z.ZodObject<{
+            status: z.ZodEnum<{
+                cancelled: "cancelled";
+                created: "created";
+                running: "running";
+                suspended: "suspended";
+                finished: "finished";
+            }>;
+            completion_state: z.ZodEnum<{
+                working: "working";
+                checkpoint_verifying: "checkpoint_verifying";
+                completion_proposed: "completion_proposed";
+                verifying: "verifying";
+                gap_open: "gap_open";
+                repair: "repair";
+                complete: "complete";
+                unverified_artifact: "unverified_artifact";
+            }>;
+            turn: z.ZodNumber;
+            pending_review_items: z.ZodArray<z.ZodString>;
+        }, z.core.$strict>;
+        open_leases: z.ZodArray<z.ZodObject<{
+            lease_id: z.ZodString;
+            pool: z.ZodEnum<{
+                repair: "repair";
+                work: "work";
+                verification: "verification";
+            }>;
+            denomination: z.ZodEnum<{
+                model_tokens: "model_tokens";
+                tool_calls: "tool_calls";
+                bytes: "bytes";
+                compute_ms: "compute_ms";
+                attention: "attention";
+            }>;
+            amount: z.ZodNumber;
+        }, z.core.$strict>>;
+        nonterminal_effects: z.ZodArray<z.ZodObject<{
+            effect_id: z.ZodString;
+            state: z.ZodEnum<{
+                committed: "committed";
+                prepared: "prepared";
+                dispatched: "dispatched";
+                withdrawn: "withdrawn";
+                outcome_unknown: "outcome_unknown";
+                unreconcilable: "unreconcilable";
+            }>;
+            target: z.ZodString;
+            operation: z.ZodString;
+        }, z.core.$strict>>;
+        pending_controls: z.ZodArray<z.ZodObject<{
+            control_id: z.ZodString;
+            verb: z.ZodString;
+        }, z.core.$strict>>;
+        pending_wakes: z.ZodArray<z.ZodObject<{
+            wake_id: z.ZodString;
+            due_at: z.ZodString;
+            condition: z.ZodString;
+        }, z.core.$strict>>;
+        inflight_operations: z.ZodArray<z.ZodString>;
+        required_bindings: z.ZodArray<z.ZodObject<{
+            kind: z.ZodEnum<{
+                procedure: "procedure";
+                tool: "tool";
+                publication: "publication";
+                memory: "memory";
+                agent: "agent";
+                closure: "closure";
+                "model-adapter": "model-adapter";
+                validator: "validator";
+                workspace: "workspace";
+                source: "source";
+                environment: "environment";
+                "domain-pack": "domain-pack";
+                "target-adapter": "target-adapter";
+                profile: "profile";
+            }>;
+            ref: z.ZodString;
+        }, z.core.$strict>>;
+        capsule_ref: z.ZodString;
+    }, z.core.$strict>;
 }, z.core.$strict>], "kind">;
 export type RunBundleArtifactFrame = z.infer<typeof RunBundleArtifactFrameSchema>;

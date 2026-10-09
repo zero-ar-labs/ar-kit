@@ -7,7 +7,9 @@
  *
  * How it fits: composition roots consume this instead of maintaining private
  * health or release capability maps. The manifest ref is pinned into new runs,
- * so a profile change is visible in durable history.
+ * so a profile change is visible in durable history. Before changing a
+ * manifest, capture it with scripts/capture-profile-manifest-history.ts so
+ * runs pinned to it stay continuable (profile-compatibility.ts).
  */
 import { z } from 'zod';
 import type { CellGuaranteeExclusion, Profile, ProfileCapability, ProfileCapabilityRefusalPoint } from './vocab.js';
@@ -34,10 +36,6 @@ export declare const ProfileCapabilityEntrySchema: z.ZodObject<{
         "environment-oci": "environment-oci";
         "environment-ssh": "environment-ssh";
         "environment-firecracker": "environment-firecracker";
-        "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-        "environment-modal": "environment-modal";
-        "environment-daytona": "environment-daytona";
-        "environment-vercel-sandbox": "environment-vercel-sandbox";
         "environment-openai-agents": "environment-openai-agents";
         "environment-apptainer": "environment-apptainer";
         "full-cell-docker-linux": "full-cell-docker-linux";
@@ -65,16 +63,24 @@ export declare const ProfileCapabilityEntrySchema: z.ZodObject<{
         "mcp-imported-tools": "mcp-imported-tools";
         "source-local-read-only": "source-local-read-only";
         "document-pdf-extraction": "document-pdf-extraction";
-        "browser-first-party-playwright": "browser-first-party-playwright";
         "fair-cell-scheduling": "fair-cell-scheduling";
         "sequential-sampled-validation": "sequential-sampled-validation";
         "context-feature-cache": "context-feature-cache";
         "content-defined-chunking": "content-defined-chunking";
         "attention-admission": "attention-admission";
-        "aggregator-trigger-ingress": "aggregator-trigger-ingress";
         "gateway-signed-webhook": "gateway-signed-webhook";
         "gateway-interactive-messaging": "gateway-interactive-messaging";
         "workspace-binding-profiles": "workspace-binding-profiles";
+        "automatic-run-recovery": "automatic-run-recovery";
+        "open-goal-execution": "open-goal-execution";
+        "operator-pause-and-budget": "operator-pause-and-budget";
+        "run-fork": "run-fork";
+        "model-image-input": "model-image-input";
+        "workspace-exec": "workspace-exec";
+        "browser-workspace": "browser-workspace";
+        "hierarchical-context": "hierarchical-context";
+        "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+        "web-search": "web-search";
     }>;
     state: z.ZodEnum<{
         supported: "supported";
@@ -122,16 +128,12 @@ export declare const ProfileCapabilityManifestSchema: z.ZodObject<{
         "merge-unified": "merge-unified";
     }>>;
     environment_backends: z.ZodArray<z.ZodEnum<{
-        process: "process";
         ssh: "ssh";
         firecracker: "firecracker";
         apptainer: "apptainer";
         "openai-agents": "openai-agents";
+        process: "process";
         oci: "oci";
-        "cloudflare-sandbox": "cloudflare-sandbox";
-        modal: "modal";
-        daytona: "daytona";
-        "vercel-sandbox": "vercel-sandbox";
     }>>;
     artifact_backends: z.ZodArray<z.ZodEnum<{
         filesystem: "filesystem";
@@ -199,10 +201,6 @@ export declare const ProfileCapabilityManifestSchema: z.ZodObject<{
             "environment-oci": "environment-oci";
             "environment-ssh": "environment-ssh";
             "environment-firecracker": "environment-firecracker";
-            "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-            "environment-modal": "environment-modal";
-            "environment-daytona": "environment-daytona";
-            "environment-vercel-sandbox": "environment-vercel-sandbox";
             "environment-openai-agents": "environment-openai-agents";
             "environment-apptainer": "environment-apptainer";
             "full-cell-docker-linux": "full-cell-docker-linux";
@@ -230,16 +228,24 @@ export declare const ProfileCapabilityManifestSchema: z.ZodObject<{
             "mcp-imported-tools": "mcp-imported-tools";
             "source-local-read-only": "source-local-read-only";
             "document-pdf-extraction": "document-pdf-extraction";
-            "browser-first-party-playwright": "browser-first-party-playwright";
             "fair-cell-scheduling": "fair-cell-scheduling";
             "sequential-sampled-validation": "sequential-sampled-validation";
             "context-feature-cache": "context-feature-cache";
             "content-defined-chunking": "content-defined-chunking";
             "attention-admission": "attention-admission";
-            "aggregator-trigger-ingress": "aggregator-trigger-ingress";
             "gateway-signed-webhook": "gateway-signed-webhook";
             "gateway-interactive-messaging": "gateway-interactive-messaging";
             "workspace-binding-profiles": "workspace-binding-profiles";
+            "automatic-run-recovery": "automatic-run-recovery";
+            "open-goal-execution": "open-goal-execution";
+            "operator-pause-and-budget": "operator-pause-and-budget";
+            "run-fork": "run-fork";
+            "model-image-input": "model-image-input";
+            "workspace-exec": "workspace-exec";
+            "browser-workspace": "browser-workspace";
+            "hierarchical-context": "hierarchical-context";
+            "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+            "web-search": "web-search";
         }>;
         state: z.ZodEnum<{
             supported: "supported";
@@ -287,10 +293,6 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
         "environment-oci": "environment-oci";
         "environment-ssh": "environment-ssh";
         "environment-firecracker": "environment-firecracker";
-        "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-        "environment-modal": "environment-modal";
-        "environment-daytona": "environment-daytona";
-        "environment-vercel-sandbox": "environment-vercel-sandbox";
         "environment-openai-agents": "environment-openai-agents";
         "environment-apptainer": "environment-apptainer";
         "full-cell-docker-linux": "full-cell-docker-linux";
@@ -318,16 +320,24 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
         "mcp-imported-tools": "mcp-imported-tools";
         "source-local-read-only": "source-local-read-only";
         "document-pdf-extraction": "document-pdf-extraction";
-        "browser-first-party-playwright": "browser-first-party-playwright";
         "fair-cell-scheduling": "fair-cell-scheduling";
         "sequential-sampled-validation": "sequential-sampled-validation";
         "context-feature-cache": "context-feature-cache";
         "content-defined-chunking": "content-defined-chunking";
         "attention-admission": "attention-admission";
-        "aggregator-trigger-ingress": "aggregator-trigger-ingress";
         "gateway-signed-webhook": "gateway-signed-webhook";
         "gateway-interactive-messaging": "gateway-interactive-messaging";
         "workspace-binding-profiles": "workspace-binding-profiles";
+        "automatic-run-recovery": "automatic-run-recovery";
+        "open-goal-execution": "open-goal-execution";
+        "operator-pause-and-budget": "operator-pause-and-budget";
+        "run-fork": "run-fork";
+        "model-image-input": "model-image-input";
+        "workspace-exec": "workspace-exec";
+        "browser-workspace": "browser-workspace";
+        "hierarchical-context": "hierarchical-context";
+        "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+        "web-search": "web-search";
     }>>;
     conditional: z.ZodArray<z.ZodObject<{
         capability: z.ZodEnum<{
@@ -346,10 +356,6 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
             "environment-oci": "environment-oci";
             "environment-ssh": "environment-ssh";
             "environment-firecracker": "environment-firecracker";
-            "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-            "environment-modal": "environment-modal";
-            "environment-daytona": "environment-daytona";
-            "environment-vercel-sandbox": "environment-vercel-sandbox";
             "environment-openai-agents": "environment-openai-agents";
             "environment-apptainer": "environment-apptainer";
             "full-cell-docker-linux": "full-cell-docker-linux";
@@ -377,16 +383,24 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
             "mcp-imported-tools": "mcp-imported-tools";
             "source-local-read-only": "source-local-read-only";
             "document-pdf-extraction": "document-pdf-extraction";
-            "browser-first-party-playwright": "browser-first-party-playwright";
             "fair-cell-scheduling": "fair-cell-scheduling";
             "sequential-sampled-validation": "sequential-sampled-validation";
             "context-feature-cache": "context-feature-cache";
             "content-defined-chunking": "content-defined-chunking";
             "attention-admission": "attention-admission";
-            "aggregator-trigger-ingress": "aggregator-trigger-ingress";
             "gateway-signed-webhook": "gateway-signed-webhook";
             "gateway-interactive-messaging": "gateway-interactive-messaging";
             "workspace-binding-profiles": "workspace-binding-profiles";
+            "automatic-run-recovery": "automatic-run-recovery";
+            "open-goal-execution": "open-goal-execution";
+            "operator-pause-and-budget": "operator-pause-and-budget";
+            "run-fork": "run-fork";
+            "model-image-input": "model-image-input";
+            "workspace-exec": "workspace-exec";
+            "browser-workspace": "browser-workspace";
+            "hierarchical-context": "hierarchical-context";
+            "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+            "web-search": "web-search";
         }>;
         refusal_point: z.ZodEnum<{
             "profile-compilation": "profile-compilation";
@@ -416,10 +430,6 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
             "environment-oci": "environment-oci";
             "environment-ssh": "environment-ssh";
             "environment-firecracker": "environment-firecracker";
-            "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-            "environment-modal": "environment-modal";
-            "environment-daytona": "environment-daytona";
-            "environment-vercel-sandbox": "environment-vercel-sandbox";
             "environment-openai-agents": "environment-openai-agents";
             "environment-apptainer": "environment-apptainer";
             "full-cell-docker-linux": "full-cell-docker-linux";
@@ -447,16 +457,24 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
             "mcp-imported-tools": "mcp-imported-tools";
             "source-local-read-only": "source-local-read-only";
             "document-pdf-extraction": "document-pdf-extraction";
-            "browser-first-party-playwright": "browser-first-party-playwright";
             "fair-cell-scheduling": "fair-cell-scheduling";
             "sequential-sampled-validation": "sequential-sampled-validation";
             "context-feature-cache": "context-feature-cache";
             "content-defined-chunking": "content-defined-chunking";
             "attention-admission": "attention-admission";
-            "aggregator-trigger-ingress": "aggregator-trigger-ingress";
             "gateway-signed-webhook": "gateway-signed-webhook";
             "gateway-interactive-messaging": "gateway-interactive-messaging";
             "workspace-binding-profiles": "workspace-binding-profiles";
+            "automatic-run-recovery": "automatic-run-recovery";
+            "open-goal-execution": "open-goal-execution";
+            "operator-pause-and-budget": "operator-pause-and-budget";
+            "run-fork": "run-fork";
+            "model-image-input": "model-image-input";
+            "workspace-exec": "workspace-exec";
+            "browser-workspace": "browser-workspace";
+            "hierarchical-context": "hierarchical-context";
+            "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+            "web-search": "web-search";
         }>;
         refusal_point: z.ZodEnum<{
             "profile-compilation": "profile-compilation";

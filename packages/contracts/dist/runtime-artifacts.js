@@ -1,5 +1,5 @@
 /**
- * Runtime artifact ingest contracts.
+ * Runtime artifact ingest and run state-closure contracts.
  *
  * What this is: the public metadata, durable upload position and committed
  * handle a product backend uses for input or later run evidence. Raw chunks
@@ -7,12 +7,14 @@
  * JSON. Publication uploads use a separate contract and lifecycle.
  *
  * How it fits: the authenticated tenant and application principal come from
- * deployment, while the request declares content and intended use. Commit
- * returns a manifest only after the artifact store verifies both byte count
- * and hash.
+ * deployment. Commit returns a manifest only after byte verification. Run
+ * export keeps ordinary evidence in artifact bundles, carries protected
+ * runtime state only in an authorized transfer, and accounts for every
+ * member in one content-addressed closure.
  */
 import { z } from 'zod';
-import { ARTIFACT_BACKENDS, ARTIFACT_TRANSFER_OMISSIONS, EVIDENCE_GRADES, MEMORY_CLASSIFICATIONS, RUN_BUNDLE_ARTIFACT_FRAME_KINDS, } from "./vocab.js";
+import { ARTIFACT_BACKENDS, ARTIFACT_TRANSFER_OMISSIONS, EVIDENCE_GRADES, MEMORY_CLASSIFICATIONS, RUN_BUNDLE_ARTIFACT_FRAME_KINDS, RUN_STATE_TRANSFER_KINDS, RUN_STATE_CLOSURE_MEMBER_KINDS, RUN_STATE_CLOSURE_MEMBER_STATUSES, RUN_STATE_REHYDRATION_STATUSES, } from "./vocab.js";
+import { RunContinuationCapsuleSchema } from "./run-transfer.js";
 const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const runId = z.string().regex(/^run_[0-9a-f]{32}$/, 'expected a run id');
 const sessionId = z.string().regex(/^artw_[0-9a-f]{32}$/, 'expected an artifact session id');
@@ -108,7 +110,61 @@ export const ArtifactTransferOmissionSchema = z.strictObject({
     artifact_ref: artifactHandle,
     reason: z.enum(ARTIFACT_TRANSFER_OMISSIONS),
 });
-const [ARTIFACT_BUNDLE_FRAME, ARTIFACT_OMISSIONS_FRAME] = RUN_BUNDLE_ARTIFACT_FRAME_KINDS;
+const [ARTIFACT_BUNDLE_FRAME, ARTIFACT_OMISSIONS_FRAME, STATE_TRANSFER_FRAME, STATE_CLOSURE_FRAME, CONTINUATION_CAPSULE_FRAME] = RUN_BUNDLE_ARTIFACT_FRAME_KINDS;
+const stateClosureMemberBase = {
+    kind: z.enum(RUN_STATE_CLOSURE_MEMBER_KINDS),
+    locator: z.string().min(1).max(2_048),
+    required: z.boolean(),
+};
+/** One external or inline object that the exported run needs or names. */
+export const RunStateClosureMemberSchema = z.discriminatedUnion('status', [
+    z.strictObject({
+        ...stateClosureMemberBase,
+        status: z.literal(RUN_STATE_CLOSURE_MEMBER_STATUSES[0]),
+        content_ref: hash,
+        artifact_ref: artifactHandle.optional(),
+        state_transfer_ref: hash.optional(),
+    }),
+    z.strictObject({
+        ...stateClosureMemberBase,
+        status: z.literal(RUN_STATE_CLOSURE_MEMBER_STATUSES[1]),
+        reason: z.string().min(1).max(1_000),
+    }),
+    z.strictObject({
+        ...stateClosureMemberBase,
+        status: z.literal(RUN_STATE_CLOSURE_MEMBER_STATUSES[2]),
+        reason: z.string().min(1).max(1_000),
+    }),
+]);
+/** The exact frontier and referenced-state accounting sealed into one export. */
+export const RunStateClosureManifestSchema = z.strictObject({
+    schema: z.literal('zero-ar-run-state-closure/1'),
+    run_id: runId,
+    frontier: z.strictObject({
+        record_count: z.number().int().positive(),
+        logical_clock: z.number().int().nonnegative(),
+        record_id: z.string().regex(/^rec_[0-9a-f]{32}$/),
+        chain_head: hash,
+        head_projection_hash: hash,
+    }),
+    members: z.array(RunStateClosureMemberSchema),
+    closure_ref: hash,
+});
+/** One member's destination disposition after content verification and service import. */
+export const RunStateRehydrationMemberSchema = z.strictObject({
+    kind: z.enum(RUN_STATE_CLOSURE_MEMBER_KINDS),
+    locator: z.string().min(1).max(2_048),
+    required: z.boolean(),
+    status: z.enum(RUN_STATE_REHYDRATION_STATUSES),
+    reason: z.string().min(1).max(1_000).optional(),
+});
+/** Rehydrate is true only when every required closure member is available at the destination. */
+export const RunStateRehydrationReportSchema = z.strictObject({
+    level: z.literal('rehydrate'),
+    closure_ref: hash,
+    rehydrated: z.boolean(),
+    members: z.array(RunStateRehydrationMemberSchema),
+});
 /**
  * One artifact frame of a run export (UAT-ART-013): an artifact bundle for
  * one committed scope, a run id or intake:<ref>, with the handles it
@@ -124,5 +180,24 @@ export const RunBundleArtifactFrameSchema = z.discriminatedUnion('kind', [
     z.strictObject({
         kind: z.literal(ARTIFACT_OMISSIONS_FRAME),
         omissions: z.array(ArtifactTransferOmissionSchema).min(1),
+    }),
+    z.strictObject({
+        kind: z.literal(STATE_TRANSFER_FRAME),
+        transfer_ref: hash,
+        member_kind: z.enum(RUN_STATE_TRANSFER_KINDS),
+        tenant_ref: hash,
+        locator: z.string().min(1).max(2_048),
+        media_type: z.string().min(1).max(256),
+        content_ref: hash,
+        bytes: z.number().int().nonnegative(),
+        content_base64: z.string(),
+    }),
+    z.strictObject({
+        kind: z.literal(STATE_CLOSURE_FRAME),
+        manifest: RunStateClosureManifestSchema,
+    }),
+    z.strictObject({
+        kind: z.literal(CONTINUATION_CAPSULE_FRAME),
+        capsule: RunContinuationCapsuleSchema,
     }),
 ]);

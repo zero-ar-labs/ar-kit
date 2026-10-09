@@ -10,7 +10,7 @@
  * run id after a restart gives the same observable behaviour, because the
  * handle holds nothing the server does not (DXI-001 through DXI-004).
  */
-import type { CapabilityAdmissionAccepted, CapabilityAdmissionCancellationRequest, CapabilityAdmissionDecisionRequest, CapabilityAdmissionList, CapabilityAdmissionListRequest, CapabilityAdmissionRequest, CapabilityAdmissionView, ControlAccepted, ControlRequest, IntakeRequest, ProductPackageGraphInput, RecordEnvelope, RunResult, RunSnapshot, RegisterSourceRequest, SourceBindingInput, SourceInstance, SourceList, SourcePreflight, SourceSnapshot, SourceSnapshotPage, SourceSnapshotPageRequest, VerificationPlan } from '@zero-ar/contracts';
+import type { BudgetAddition, BudgetAmendmentAccepted, CapabilityAdmissionAccepted, CapabilityAdmissionCancellationRequest, CapabilityAdmissionDecisionRequest, CapabilityAdmissionList, CapabilityAdmissionListRequest, CapabilityAdmissionRequest, CapabilityAdmissionView, ControlAccepted, ControlRequest, IntakeRequest, ProductPackageGraphInput, RecordEnvelope, RunResult, RunSnapshot, RegisterSourceRequest, SourceBindingInput, SourceInstance, SourceList, SourcePreflight, SourceSnapshot, SourceSnapshotPage, SourceSnapshotPageRequest, VerificationPlan } from '@zero-ar/contracts';
 import { ZeroARClient } from '@zero-ar/client';
 export interface LocalCapabilityAdmissionInput {
     reason: string;
@@ -75,14 +75,20 @@ export declare class RunHandle {
     }): AsyncIterable<RecordEnvelope>;
     steer(text: string, control_id?: string): Promise<ControlAccepted>;
     redirect(text: string, control_id?: string): Promise<ControlAccepted>;
-    /** Settle one parked handle with output, or dismiss it with a reason. */
+    /** Suspend the run at its next turn boundary, or now if it is suspended, until a person resumes it. */
+    pause(reason?: string, control_id?: string): Promise<ControlAccepted>;
+    /** Settle one parked handle with output or one of its question's choices, or dismiss it with a reason. */
     answer(handle: string, settlement: {
         text: string;
+    } | {
+        choice: string;
     } | {
         reason: string;
     }, control_id?: string): Promise<ControlAccepted>;
     cancel(reason?: string, control_id?: string): Promise<ControlAccepted>;
     control(request: ControlRequest): Promise<ControlAccepted>;
+    /** Add budget to this run. A suspended run keeps waiting until resume() continues it. */
+    amendBudgets(add: BudgetAddition, reason?: string, idempotency_key?: string): Promise<BudgetAmendmentAccepted>;
     /** Request one immutable publication already available to the runtime. */
     requestCapability(request: CapabilityAdmissionRequest): Promise<CapabilityAdmissionAccepted>;
     /** Compile and publish a local Agent Skill, then request its exact hashes. */

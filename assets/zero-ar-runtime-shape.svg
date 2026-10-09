@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">The Zero-AR runtime boundary</title>
+  <desc id="desc">Applications use the API, SDK, CLI or MCP adapter. The W0 Kernel owns the canonical record and execution loop. The Quality Plane establishes completion, and the optional Effect Plane controls consequential actions.</desc>
+  <style>
+    .language { font-family: Archivo, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .record { font-family: "Azeret Mono", "SFMono-Regular", Consolas, monospace; }
+  </style>
+
+  <rect width="1200" height="650" fill="#F4F4F2"/>
+  <path d="M50 39h21v5H60v11H50z" fill="#C08A3E"/>
+  <text class="language" x="86" y="55" fill="#8A5F1E" font-size="15" font-weight="600">Runtime boundary</text>
+  <text class="language" x="50" y="104" fill="#16181A" font-size="36" font-weight="650">One API. One durable record.</text>
+  <text class="language" x="50" y="135" fill="#6B7173" font-size="17">Models, tools and hosts can change. The objective, history and finish line do not.</text>
+
+  <rect x="50" y="168" width="1100" height="72" rx="6" fill="#FBFBFA" stroke="#CBCDC9"/>
+  <text class="language" x="78" y="195" fill="#6B7173" font-size="13">Application entry points</text>
+  <text class="record" x="78" y="221" fill="#16181A" font-size="15">Native API  ·  TypeScript SDK  ·  CLI  ·  MCP adapter  ·  generated clients</text>
+
+  <line x1="600" y1="240" x2="600" y2="274" stroke="#CBCDC9" stroke-width="2"/>
+  <path d="M594 268l6 8 6-8" fill="none" stroke="#CBCDC9" stroke-width="2"/>
+
+  <rect x="50" y="276" width="525" height="206" rx="6" fill="#FBFBFA" stroke="#CBCDC9"/>
+  <text class="language" x="78" y="310" fill="#8A5F1E" font-size="14" font-weight="600">Always present</text>
+  <text class="language" x="78" y="346" fill="#16181A" font-size="24" font-weight="650">W0 Kernel</text>
+  <line x1="78" y1="364" x2="547" y2="364" stroke="#E0E1DE"/>
+  <text class="language" x="78" y="394" fill="#43494A" font-size="15">Appends the canonical work log</text>
+  <text class="language" x="78" y="420" fill="#43494A" font-size="15">Assembles context and controls the run</text>
+  <text class="language" x="78" y="446" fill="#43494A" font-size="15">Reserves admitted capacity before every call</text>
+  <text class="record" x="400" y="310" fill="#6B7173" font-size="12">log → projections</text>
+
+  <rect x="625" y="276" width="525" height="206" rx="6" fill="#FBFBFA" stroke="#CBCDC9"/>
+  <text class="language" x="653" y="310" fill="#8A5F1E" font-size="14" font-weight="600">Completion authority</text>
+  <text class="language" x="653" y="346" fill="#16181A" font-size="24" font-weight="650">Quality Plane</text>
+  <line x1="653" y1="364" x2="1122" y2="364" stroke="#E0E1DE"/>
+  <text class="language" x="653" y="394" fill="#43494A" font-size="15">Applies the pinned task contract</text>
+  <text class="language" x="653" y="420" fill="#43494A" font-size="15">Runs the declared validators and checkpoints</text>
+  <text class="language" x="653" y="446" fill="#43494A" font-size="15">Returns verified only when sufficient evidence passes</text>
+  <circle cx="1065" cy="305" r="6" fill="#2F6B3F"/>
+  <text class="record" x="1080" y="310" fill="#2F6B3F" font-size="12">verified</text>
+
+  <line x1="312" y1="482" x2="312" y2="516" stroke="#CBCDC9" stroke-width="2"/>
+  <line x1="887" y1="482" x2="887" y2="516" stroke="#CBCDC9" stroke-width="2"/>
+
+  <rect x="50" y="518" width="525" height="82" rx="6" fill="#FBFBFA" stroke="#CBCDC9"/>
+  <text class="language" x="78" y="548" fill="#16181A" font-size="17" font-weight="600">Replaceable execution</text>
+  <text class="record" x="78" y="577" fill="#6B7173" font-size="13">models · tools · environments · artifact stores</text>
+
+  <rect x="625" y="518" width="525" height="82" rx="6" fill="#FBFBFA" stroke="#CBCDC9" stroke-dasharray="5 5"/>
+  <text class="language" x="653" y="548" fill="#16181A" font-size="17" font-weight="600">Optional Effect Plane</text>
+  <text class="record" x="653" y="577" fill="#6B7173" font-size="13">outside authority · credentials · receipts · reconciliation</text>
+</svg>

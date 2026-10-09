@@ -342,20 +342,3 @@ export declare const ToolSourceDriftReportSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type ToolSourceDriftReport = z.infer<typeof ToolSourceDriftReportSchema>;
-/**
- * One provider trigger delivery exactly as the provider sent it. The
- * provider signature over the raw bytes authenticates it; the tenant comes
- * from deployment configuration, never from these fields (TAG-CV-013).
- */
-export declare const ToolSourceIngressDeliverySchema: z.ZodRecord<z.ZodString, z.ZodUnknown>;
-export type ToolSourceIngressDelivery = z.infer<typeof ToolSourceIngressDeliverySchema>;
-/** What ingress did with one delivery. An unverified delivery is kept as untrusted evidence and wakes nothing. */
-export declare const ToolSourceIngressReceiptSchema: z.ZodObject<{
-    source_ref: z.ZodString;
-    delivery_id: z.ZodString;
-    verified: z.ZodBoolean;
-    duplicate: z.ZodBoolean;
-    evidence_ref: z.ZodNullable<z.ZodString>;
-    run_id: z.ZodNullable<z.ZodString>;
-}, z.core.$strict>;
-export type ToolSourceIngressReceipt = z.infer<typeof ToolSourceIngressReceiptSchema>;

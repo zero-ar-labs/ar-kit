@@ -68,7 +68,7 @@ export function exportedArtifactsNote(bundle) {
         const frame = RunBundleArtifactFrameSchema.parse(value);
         if (frame.kind === 'artifact-bundle')
             carried += frame.artifact_refs.length;
-        else
+        else if (frame.kind === 'artifact-omissions')
             named += frame.omissions.length;
     }
     return carried + named === 0 ? '' : `; it carries ${carried} artifacts and names ${named} it could not carry`;

@@ -56,6 +56,8 @@ export interface GroundingReport {
         span_hash: string;
         status: 'missing' | 'hash_mismatch' | 'stale';
     }[];
+    /** Claims labelled guarantee that cite nothing. A guarantee needs evidence, so each one fails grounding. */
+    uncited_guarantees: string[];
     /** Distinct resolved span hashes across the whole set. Duplicates count once. */
     distinct_support: number;
     duplicate_citations: number;
@@ -79,6 +81,8 @@ export declare function groundClaims(set: ClaimSet, resolver: SpanResolver): Gro
  * claim set is a shape rejection, because evidence-completeness only scopes
  * to the structured representation (CLM-001); a citation that does not
  * resolve is a grounding rejection and is never admitted as established
- * support (CLM-002, QCV-006).
+ * support (CLM-002, QCV-006). A claim labelled guarantee that cites nothing
+ * is a grounding rejection too: no citations means no evidence, not an
+ * empty set of failures.
  */
 export declare function groundedClaims(resolver: SpanResolver): ValidatorImplementation;

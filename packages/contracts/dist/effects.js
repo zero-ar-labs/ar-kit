@@ -72,7 +72,9 @@ export const StaticGrantSchema = z.strictObject({
     accountable: z.string().min(1),
     /** The named non-agent approver. An agent has no path to author this (EFX-015). */
     approver: z.string().min(1),
-    expires_at: z.string().min(1),
+    /** An RFC 3339 instant in UTC. Expiry compares as time, never as text (EFX-022). */
+    expires_at: z.string().datetime(),
+    /** Caps the proposal's declared magnitude. A proposal that declares none never matches a capped grant. */
     max_magnitude: z.number().nonnegative().nullable(),
     /** The deployment's attestation over every other field. */
     attestation: z.string().min(1),

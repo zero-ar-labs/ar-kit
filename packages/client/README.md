@@ -8,6 +8,8 @@ sources, artifacts or administration.
 The client needs an already-running Zero-AR endpoint. It does not contain the
 runtime server, start Local Lite or retain a second copy of run state.
 
+![A recorded Zero-AR run showing the durable state that the client can inspect and stream.](https://raw.githubusercontent.com/zero-ar-labs/ar-kit/main/assets/zero-ar-work-record.svg)
+
 ## Install
 
 Node.js 24.11.0 through the Node 24 LTS line is required.

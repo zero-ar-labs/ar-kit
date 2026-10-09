@@ -8,7 +8,7 @@
  */
 import { z } from 'zod';
 import { contentHash } from "./ids.js";
-import { ENVIRONMENT_BACKENDS, ENVIRONMENT_ISOLATIONS, ENVIRONMENT_LIFECYCLE_OPERATIONS, ENVIRONMENT_MOUNT_MODES, ENVIRONMENT_NETWORK_MODES, ENVIRONMENT_PROFILE_STATES, ENVIRONMENT_REUSE_POLICIES, ENVIRONMENT_STATUSES, ENVIRONMENT_SUSPENSION_DISPOSITIONS, ENVIRONMENT_TENANT_SHARING, OPERATION_CLASSES, } from "./vocab.js";
+import { BROWSER_SANDBOX_MODES, CONTAINER_LIFETIMES, SEGMENT_END_REASONS, SEGMENT_PROCESSES, ENVIRONMENT_BACKENDS, ENVIRONMENT_ISOLATIONS, ENVIRONMENT_LIFECYCLE_OPERATIONS, ENVIRONMENT_MOUNT_MODES, ENVIRONMENT_NETWORK_MODES, ENVIRONMENT_PROFILE_STATES, ENVIRONMENT_REUSE_POLICIES, ENVIRONMENT_STATUSES, ENVIRONMENT_SUSPENSION_DISPOSITIONS, ENVIRONMENT_TENANT_SHARING, OPERATION_CLASSES, } from "./vocab.js";
 const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const runId = z.string().regex(/^run_[0-9a-f]{32}$/, 'expected a run id');
 const leaseId = z.string().regex(/^lea_[0-9a-f]{32}$/, 'expected a lease id');
@@ -99,6 +99,73 @@ export const EnvironmentAdapterDescriptorSchema = z.strictObject({
     reviewer: z.string().min(1),
     conformance_refs: z.array(hash).min(1),
 });
+/**
+ * Container runtime settings a browser needs (browser workspace appendix, C3):
+ * shared memory, bounded in-memory mounts, an init process that reaps zombie
+ * processes, a reviewed seccomp profile pinned by digest, and the declared
+ * browser sandbox mode. A browser keeps its own sandbox only under a reviewed
+ * syscall profile; without one the profile must say the sandbox is off.
+ */
+export const EnvironmentRuntimeSettingsSchema = z
+    .strictObject({
+    shm_mib: z.number().int().positive().max(65_536).optional(),
+    tmpfs: z
+        .array(z.strictObject({ target: z.string().regex(/^\/[A-Za-z0-9._/-]*$/).max(256), size_mib: z.number().int().positive().max(65_536) }))
+        .max(4)
+        .optional(),
+    init: z.boolean().optional(),
+    syscall_profile_ref: z.string().regex(/^sha256:[0-9a-f]{64}$/).optional(),
+    browser_sandbox: z.enum(BROWSER_SANDBOX_MODES).optional(),
+    /** per-run keeps one live container per run segment and runs each command in it (C1). */
+    container_lifetime: z.enum(CONTAINER_LIFETIMES).optional(),
+    segment_process: z.enum(SEGMENT_PROCESSES).optional(),
+    /** A segment idle this long ends; default 10 minutes. */
+    idle_ms: z.number().int().min(1_000).max(86_400_000).optional(),
+    /** A segment this old ends before its next command; default 2 hours. */
+    max_segment_ms: z.number().int().min(10_000).max(604_800_000).optional(),
+    /** Keep the sealed generation before the latest when older ones are deleted (C5). */
+    keep_previous_generation: z.boolean().optional(),
+})
+    .superRefine((settings, context) => {
+    if (settings.browser_sandbox === 'enabled' && !settings.syscall_profile_ref) {
+        context.addIssue({ code: 'custom', message: 'a browser keeps its own sandbox only under a reviewed syscall profile. Pin syscall_profile_ref, or declare browser_sandbox disabled-by-declaration.' });
+    }
+    const targets = (settings.tmpfs ?? []).map((mount) => mount.target);
+    if (new Set(targets).size !== targets.length) {
+        context.addIssue({ code: 'custom', message: 'each tmpfs mount needs its own target.' });
+    }
+    if (targets.some((target) => target === '/' || target === '/workspace' || target.startsWith('/workspace/'))) {
+        context.addIssue({ code: 'custom', message: 'a tmpfs mount may not cover the root or the workspace mount.' });
+    }
+});
+/** A run's container segment started (browser workspace appendix, C1). */
+export const EnvironmentSegmentStartedSchema = z.strictObject({
+    environment_id: environmentId,
+    segment_id: z.string().regex(/^seg_[0-9a-f]{32}$/),
+    container: z.string().min(1).max(128),
+    owner: z.string().min(1).max(200),
+});
+/**
+ * A run's container segment is about to end, and why (C5). It is recorded
+ * before the container is stopped or removed or the workspace sealed, so no
+ * segment ends without canonical evidence; the matching ended record states
+ * the outcome.
+ */
+export const EnvironmentSegmentEndingSchema = z.strictObject({
+    environment_id: environmentId,
+    segment_id: z.string().regex(/^seg_[0-9a-f]{32}$/),
+    container: z.string().min(1).max(128),
+    reason: z.enum(SEGMENT_END_REASONS),
+});
+/** A run's container segment ended, with the reason and the workspace generation it sealed, if any (C1, C5). */
+export const EnvironmentSegmentEndedSchema = z.strictObject({
+    environment_id: environmentId,
+    segment_id: z.string().regex(/^seg_[0-9a-f]{32}$/),
+    container: z.string().min(1).max(128),
+    reason: z.enum(SEGMENT_END_REASONS),
+    sealed_generation: z.number().int().positive().nullable(),
+    detail: z.string().max(1_000).nullable(),
+});
 /** Immutable operator configuration. Enablement is separate mutable state. */
 export const EnvironmentProfileSchema = z.strictObject({
     profile_ref: hash,
@@ -128,6 +195,8 @@ export const EnvironmentProfileSchema = z.strictObject({
     cost_dimensions: z.array(z.string().min(1)).max(32),
     created_by: z.string().min(1),
     reviewed_by: z.string().min(1),
+    /** Absent for every profile made before C3, so their identities do not move. */
+    runtime: EnvironmentRuntimeSettingsSchema.optional(),
 });
 /**
  * Compute the immutable profile identity from every material field. The
@@ -239,6 +308,12 @@ export const ObserveEnvironmentJobResultSchema = z
     inline_output_json: z.string().max(4_096).nullable(),
     /** Cost the adapter reports for a terminal job, by declared cost dimension. Absent when it reports none. */
     known_cost: z.record(z.string(), count).optional(),
+    /**
+     * Files the finished job left under declared output paths that no earlier
+     * job left, relative to the output root, for collection (browser
+     * workspace appendix, C2). Absent when the adapter lists none.
+     */
+    outputs_ready: z.array(z.string().min(1).max(1_024)).max(32).optional(),
 })
     .superRefine((result, context) => matchingStatus(result, result.job, 'job', context));
 export const ReconcileEnvironmentJobRequestSchema = z.strictObject({
@@ -290,6 +365,8 @@ export const CollectedEnvironmentArtifactSchema = z.strictObject({
     source_job_id: jobId,
     adapter_digest: hash,
     destination_ref: z.string().min(1),
+    /** The media type the artifact was stored with, when the adapter names one (C2). */
+    media_type: z.string().min(1).max(128).optional(),
 });
 export const CollectEnvironmentArtifactResultSchema = z
     .strictObject({
@@ -408,11 +485,24 @@ export const EnvironmentExecutionRequestSchema = z.strictObject({
         context.addIssue({ code: 'custom', path: ['closure_epoch'], message: 'closure_epoch and closure_ref must be present or absent together' });
     }
 });
+/** One output a call left, stored as an artifact (C2). The tool result names each, and an image reaches the model. */
+export const EnvironmentResultArtifactSchema = z.strictObject({
+    artifact_ref: z.string().min(1),
+    source_path: z.string().min(1).max(1_024),
+    content_hash: hash,
+    bytes: count,
+    media_type: z.string().min(1).max(128),
+    classification: z.string().min(1),
+});
 export const EnvironmentExecutionResultSchema = z.strictObject({
     ok: z.boolean(),
     output: z.record(z.string(), z.unknown()).optional(),
     error: z.string().optional(),
     used: count.optional(),
+    /** Outputs the call left under declared paths, each collected as an artifact. */
+    artifacts: z.array(EnvironmentResultArtifactSchema).max(32).optional(),
+    /** Why an output the call left was not collected, one line each. */
+    artifact_refusals: z.array(z.string().min(1).max(1_000)).max(32).optional(),
 });
 /** Only these lifecycle states carry work that still needs disposition. */
 export function isNonTerminalEnvironmentStatus(status) {

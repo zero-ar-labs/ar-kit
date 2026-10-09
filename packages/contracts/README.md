@@ -8,6 +8,8 @@ It does not connect to a runtime, authorize a model or tool call, or decide
 whether work is correct. Schemas establish that a value has the declared
 shape. Domain validators establish what the value means for a task.
 
+![A recorded Zero-AR verification plan showing how public contracts bind acceptance rules to pinned validators and declared limits.](https://raw.githubusercontent.com/zero-ar-labs/ar-kit/main/assets/zero-ar-verification-record.svg)
+
 ## Install
 
 Node.js 24.11.0 through the Node 24 LTS line is required.
@@ -54,11 +56,11 @@ content identity, not an authorization token.
 ## Public surface
 
 - Zod schemas and inferred TypeScript types for every public API payload.
-- Run, item, effect, lease and environment state vocabularies.
+- Run, item, effect, budget and environment state vocabularies.
 - State transition tables and assertion helpers.
 - Time-ordered ids and canonical content hashes.
 - Route definitions shared by the generated client and OpenAPI document.
-- Publication, provider, source, browser and interoperability contracts.
+- Publication, provider, source and interoperability contracts.
 - Typed diagnostics that state the problem, reason and required change.
 
 Import from the package root. Closed vocabularies are exported from that root

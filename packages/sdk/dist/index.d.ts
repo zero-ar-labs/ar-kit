@@ -306,7 +306,6 @@ export { developmentLoop } from './development.js';
 export type { ConformanceOutcome, DevelopmentLoop, DevelopmentLoopOptions, DevelopmentPublication } from './development.js';
 export type { ZeroAROptions, RunInput, LocalCapabilityAdmissionInput } from './embed.js';
 export type { PublishedCapabilityCandidate } from './capability-admission.js';
-export { authorizeBrowserDestination, declareBrowserTools, defineBrowserBinding, proposeBrowserDestination, recordBrowserDestinationDecision, } from './browser.js';
 export { authoringScaffold, scaffoldBindingProfile, scaffoldBytes, scaffoldDomainPack, scaffoldProject, scaffoldSkill, scaffoldTool, scaffoldValidator, } from './scaffolds.js';
 export type { AuthoringScaffold, ProjectScaffoldOptions, ScaffoldFile } from './scaffolds.js';
 export declare function createRuntimeClient(baseUrl: string): ZeroARClient;

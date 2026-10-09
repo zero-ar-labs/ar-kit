@@ -7,6 +7,8 @@ input, output, cancellation and declared cost against that definition.
 The handler remains in the tool host. It is not serialized into an agent
 publication or imported into the runtime server.
 
+![The Zero-AR runtime boundary showing replaceable tools outside the W0 Kernel and Quality Plane.](https://raw.githubusercontent.com/zero-ar-labs/ar-kit/main/assets/zero-ar-runtime-shape.svg)
+
 ## Install
 
 Node.js 24.11.0 through the Node 24 LTS line is required.
@@ -57,9 +59,38 @@ console.log(archiveSearch.manifest_ref, answer);
 An undeclared field or wrong type returns a typed failed answer. It does not
 reach the handler.
 
+## Lists, choices and optional fields
+
+A tool that takes structured input declares it with typed builders, so the
+model sees the schema and the host refuses a wrong value by its path.
+
+```ts
+import { array, boolean, enumOf, integer, nullable, object, optional, string } from '@zero-ar/tool-kit';
+
+const stops = object({
+  stop: enumOf(['pickup', 'delivery']),
+  arrival: string(),
+  minutes: integer({ minimum: 0, maximum: 1_440 }),
+});
+
+const input = object({
+  load_id: string(),
+  stops: array(stops, { minItems: 1 }),
+  lumper_receipt: nullable(string()),
+  lumper_allowed: boolean(),
+  note: optional(string()),
+});
+```
+
+`object` lists required fields in the order they are written, the order a
+model sees and fills them, and leaves out each `optional` field. A
+declaration may list its required fields in another order; publication
+compares them as a set and publishes the declaration's order.
+
 ## Public surface
 
-- `string`, `number`, `boolean` and `object` schema builders.
+- `string`, `number`, `integer`, `boolean`, `enumOf`, `array`, `nullable`,
+  `optional` and `object` schema builders.
 - `defineTool` for one typed declaration and handler.
 - `serveTools` for the development Tool Host protocol.
 - `conformance` for positive and negative input fixtures.
@@ -69,8 +100,9 @@ reach the handler.
 
 Defining or serving a tool does not register it with a tenant or grant it
 authority to change another system. A run can call only an admitted manifest
-through an admitted host, after the runtime reserves its declared lease. A
-consequential action also needs the separate Effect Plane.
+through an admitted host, and only when its budget covers the declared cost. A
+change to an outside system also needs the separate Effect Plane and a
+matching grant.
 
 ## Where to go next
 

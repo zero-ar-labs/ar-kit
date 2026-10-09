@@ -25,7 +25,7 @@ export declare const CLI_COMMAND_EXAMPLES: Readonly<Record<string, readonly stri
 /** The full guide groups the command table by the job a person is doing. */
 export declare const CLI_HELP_SECTIONS: readonly CliHelpSection[];
 /** Commands whose work can run against bundled or hosted Zero-AR. */
-export declare const CLI_REMOTE_CAPABLE_COMMANDS: readonly ["run", "attach", "inspect", "verification-plan", "records", "context", "result", "steer", "redirect", "cancel", "answer", "attention", "resume", "fork", "replay", "rebuild", "export", "import", "publish", "doctor", "environment", "provider", "tool-source", "effect", "source", "capability", "publication", "registry", "artifact", "memory"];
+export declare const CLI_REMOTE_CAPABLE_COMMANDS: readonly ["run", "attach", "inspect", "verification-plan", "records", "context", "result", "steer", "redirect", "pause", "budget", "cancel", "answer", "attention", "resume", "fork", "replay", "rebuild", "export", "import", "publish", "doctor", "environment", "provider", "tool-source", "effect", "source", "capability", "publication", "registry", "artifact", "memory"];
 export type CliRemoteCapableCommand = (typeof CLI_REMOTE_CAPABLE_COMMANDS)[number];
 export declare function isRemoteCapableCommand(command: string): command is CliRemoteCapableCommand;
 export declare function createCliContext(): CliContext;
