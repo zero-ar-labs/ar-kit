@@ -18,6 +18,15 @@ export const DEFAULT_PRODUCT_MODEL_PROVIDER_ORIGINS = {
     together: 'https://api.together.ai',
     fireworks: 'https://api.fireworks.ai',
 };
+/**
+ * The origins of the web search adapters this build ships. Their hosts are
+ * fixed in code and reviewed with it, as the named model providers' are, so
+ * an operator lists only a host the deployment chooses itself.
+ */
+export const DEFAULT_PRODUCT_WEB_SEARCH_ORIGINS = {
+    parallel: 'https://api.parallel.ai',
+    exa: 'https://api.exa.ai',
+};
 /** Normalize an endpoint to the exact origin the egress policy compares. */
 export function productIdentityEgressOrigin(raw) {
     return parsedEgressUrl(raw).origin;
@@ -56,6 +65,16 @@ export function defaultProductModelProviderEgressReviews(providers = ['openai', 
     return providers.map((provider) => ({
         url: DEFAULT_PRODUCT_MODEL_PROVIDER_ORIGINS[provider],
         purpose: 'model-provider',
+        reviewed_by: 'operator:first-beta-runtime',
+        reviewed_at: PRODUCT_IDENTITY.ratification.ratified_at,
+        change_ref: PRODUCT_IDENTITY.ratification.decision_ref,
+    }));
+}
+/** The reviewed default origins of the shipped web search adapters. */
+export function defaultProductWebSearchEgressReviews() {
+    return Object.values(DEFAULT_PRODUCT_WEB_SEARCH_ORIGINS).map((url) => ({
+        url,
+        purpose: 'web-search',
         reviewed_by: 'operator:first-beta-runtime',
         reviewed_at: PRODUCT_IDENTITY.ratification.ratified_at,
         change_ref: PRODUCT_IDENTITY.ratification.decision_ref,

@@ -12,36 +12,40 @@
  * from the registry fails the build (DX-016, XCV-011).
  */
 import { z } from 'zod';
+import { ITEM_OUTPUT_SCHEMA_BINDINGS_MAX, ItemOutputSchemaBindingSchema, MODEL_CONTROL_OPERATIONS_MAX } from "./item-output.js";
+import { INPUT_ARTIFACT_ALIAS_PATTERN } from "./artifact-aliases.js";
 import { CapabilityAdmissionAcceptedSchema, CapabilityAdmissionCancellationRequestSchema, CapabilityAdmissionDecisionRequestSchema, CapabilityAdmissionListSchema, CapabilityAdmissionListRequestSchema, CapabilityAdmissionPlanSchema, CapabilityAdmissionPolicySchema, CapabilityAdmissionRequestSchema, CapabilityAdmissionViewSchema, CapabilityConsequenceDiffSchema, CapabilityNextActionSchema, } from "./capability-admission.js";
-import { ArtifactContextSpanSchema, ArtifactEvidenceBlockerSchema, CitedSpanSchema, ClaimSetSchema, ContextFenceNonceSchema, EntryEvidenceSchema, } from "./claims.js";
+import { ArtifactContextSpanSchema, ArtifactEvidenceBlockerSchema, CitedSpanSchema, ClaimSetSchema, ContextFenceNonceSchema, ContextImageRecordSchema, ENTRY_IMAGE_MAX, EntryEvidenceSchema, EntryImageSchema, } from "./claims.js";
 import { ContextReplayArtifactSpanSchema, ContextReplaySchema, ContextReplaySpanSchema } from "./context-replay.js";
+import { ContextExpandRequestSchema, ContextExpansionResultSchema, ContextSegmentCoverageSchema, ContextHierarchyWindowSchema, ContextSegmentManifestSchema, ContextSegmentSummarizerSchema, HierarchicalContextPolicySchema, } from "./context-hierarchy.js";
 import { ControllersViewSchema, PinnedCheckpointDecisionSchema } from "./controllers-view.js";
 import { WakeClockDiagnosticSchema, WakeSchedulerDeclarationSchema, WakeSchedulerReportSchema } from "./wake-scheduler.js";
 import { AttentionCalibrationReportSchema, AttentionCalibrationRequestSchema, AttentionCapacitySnapshotPublishRequestSchema, AttentionCapacitySnapshotSchema, AttentionClassModelSchema, AttentionDashboardSchema, AttentionDistributionSchema, } from "./attention.js";
-import { EffectAuthorityEpochAdvanceOutcomeSchema, EffectAuthorityEpochAdvanceRequestSchema, EffectGrantReissueOutcomeSchema, EffectGrantReissueRequestSchema, EffectGrantRevocationOutcomeSchema, EffectGrantRevocationRequestSchema, EffectTargetListSchema, } from "./effect-authority.js";
-import { RegisterWorkspaceInstanceRequestSchema, ResolvedWorkspaceInstanceSchema, WorkspaceInstanceListSchema, WorkspaceInstanceSchema, WorkspaceIntakeBindingSchema, } from "./workspace-instances.js";
-import { BrowserAdapterDescriptorSchema, BrowserBindingSchema, BrowserBindingTemplateSchema, BrowserCredentialBindingSchema, BrowserDestinationDecisionRequestSchema, BrowserDestinationDecisionSchema, BrowserDestinationProposalRequestSchema, BrowserDestinationProposalSchema, BrowserDestinationSchema, BrowserIntakeInputSchema, ResolvedBrowserTemplateSchema, BrowserEffectParametersSchema, BrowserEffectPolicySchema, BrowserLatencySummarySchema, BrowserLimitsSchema, BrowserMeasurementReportSchema, BrowserObservationResultSchema, BrowserProfileHealthSchema, BrowserProvenanceSchema, BrowserRequestProvenanceSchema, } from "./browser.js";
+import { EffectTargetListSchema } from "./effect-authority.js";
+import { ResolvedWorkspaceInstanceSchema, WorkspaceIntakeBindingSchema } from "./workspace-instances.js";
 import { ProfileCapabilityEntrySchema, ProfileCapabilityManifestSchema, ProfileCapabilitySummarySchema, } from "./capability-profile.js";
 import { AliasHistorySchema, AliasMutationRequestSchema, DrainOutcomeSchema, DrainRequestSchema, IdentityMigrationEventOutcomeSchema, IdentityMigrationEventRequestSchema, OperatorAuditPageSchema, ReconciliationOutcomeSchema, AliasMutationResultSchema, DeclarationViewSchema, DeprecationRequestSchema, ProcedureManifestSchema, PublicationAssetEntrySchema, PublicationBlobAckSchema, PublicationBlobFrameSchema, PublicationBlobUploadFinishSchema, PublicationBlobUploadStatusSchema, PublicationBundleManifestSchema, PublicationCommitRequestSchema, PublicationDeclarationEntrySchema, PublicationDependencyEdgeSchema, PublicationExportFrameSchema, PublicationImportOutcomeSchema, PublicationReceiptSchema, PublicationSessionRequestSchema, PublicationSessionSchema, PublicationViewSchema, QuarantineRequestSchema, RegistryActOutcomeSchema, RegistryRebuildOutcomeSchema, } from "./publication.js";
 import { EffectDescriptorSchema, ReceiptSchema, StaticGrantSchema } from "./effects.js";
 import { EffectApprovalAcceptedSchema, EffectApprovalActorSchema, EffectApprovalInvalidatedSchema, EffectApprovalRecordedSchema, EffectApprovalRequestSchema, EffectAuthorityDecisionCommandSchema, EffectAuthorityDecisionLookupSchema, } from "./effect-approvals.js";
-import { AbandonEnvironmentRequestSchema, AbandonEnvironmentResultSchema, CancelEnvironmentJobRequestSchema, CancelEnvironmentJobResultSchema, CollectEnvironmentArtifactRequestSchema, CollectEnvironmentArtifactResultSchema, CollectedEnvironmentArtifactSchema, EnvironmentAdapterDescriptorSchema, EnvironmentExecutionRequestSchema, EnvironmentExecutionResultSchema, EnvironmentHandleBindingSchema, EnvironmentHandleSchema, EnvironmentJobHandleSchema, EnvironmentLifecycleAssuranceSchema, EnvironmentLimitsSchema, EnvironmentMountPolicySchema, EnvironmentNetworkPolicySchema, EnvironmentOutputDeclarationSchema, EnvironmentProfileRegistrationSchema, EnvironmentProfileSchema, EnvironmentResumeContextSchema, EnvironmentReuseRecordSchema, ObserveEnvironmentJobRequestSchema, ObserveEnvironmentJobResultSchema, PrepareEnvironmentRequestSchema, PrepareEnvironmentResultSchema, ReconcileEnvironmentJobRequestSchema, ReconcileEnvironmentJobResultSchema, SubmitEnvironmentJobRequestSchema, SubmitEnvironmentJobResultSchema, SuspendedEnvironmentHandleSchema, TeardownEnvironmentRequestSchema, TeardownEnvironmentResultSchema, } from "./environment.js";
-import { SandboxWorkspaceAccessRequestSchema, SandboxWorkspaceBindingSchema, SandboxWorkspaceHandleSchema, } from "./environment-workspace.js";
+import { AbandonEnvironmentRequestSchema, AbandonEnvironmentResultSchema, CancelEnvironmentJobRequestSchema, CancelEnvironmentJobResultSchema, CollectEnvironmentArtifactRequestSchema, CollectEnvironmentArtifactResultSchema, CollectedEnvironmentArtifactSchema, EnvironmentAdapterDescriptorSchema, EnvironmentExecutionRequestSchema, EnvironmentExecutionResultSchema, EnvironmentHandleBindingSchema, EnvironmentHandleSchema, EnvironmentJobHandleSchema, EnvironmentLifecycleAssuranceSchema, EnvironmentLimitsSchema, EnvironmentMountPolicySchema, EnvironmentNetworkPolicySchema, EnvironmentOutputDeclarationSchema, EnvironmentProfileRegistrationSchema, EnvironmentProfileSchema, EnvironmentResumeContextSchema, EnvironmentReuseRecordSchema, EnvironmentSegmentEndedSchema, EnvironmentSegmentEndingSchema, EnvironmentSegmentStartedSchema, ObserveEnvironmentJobRequestSchema, ObserveEnvironmentJobResultSchema, PrepareEnvironmentRequestSchema, PrepareEnvironmentResultSchema, ReconcileEnvironmentJobRequestSchema, ReconcileEnvironmentJobResultSchema, SubmitEnvironmentJobRequestSchema, SubmitEnvironmentJobResultSchema, SuspendedEnvironmentHandleSchema, TeardownEnvironmentRequestSchema, TeardownEnvironmentResultSchema, } from "./environment.js";
+import { SandboxWorkspaceAccessRequestSchema, SandboxWorkspaceBindingSchema, SandboxWorkspaceHandleSchema, SandboxWorkspacePolicySchema, SandboxWorkspaceTransferBundleSchema, SandboxWorkspaceTransferEntrySchema, } from "./environment-workspace.js";
 import { EnvironmentAbandonJobRequestSchema, EnvironmentConformanceRequestSchema, EnvironmentConformanceResultSchema, EnvironmentCredentialRotationRequestSchema, EnvironmentDoctorRequestSchema, EnvironmentDoctorResultSchema, EnvironmentJobActionRequestSchema, EnvironmentJobListSchema, EnvironmentJobRefRequestSchema, EnvironmentMeasurementSummarySchema, EnvironmentMetricsSchema, EnvironmentProfileListSchema, EnvironmentProfileRefRequestSchema, EnvironmentProfileStateRequestSchema, EnvironmentSweepRequestSchema, EnvironmentSweepResultSchema, EnvironmentResolutionRequestSchema, EnvironmentResolutionResultSchema, RegisterEnvironmentRequestSchema, } from "./environment-management.js";
 import { EnvironmentAdapterCompatibilitySchema, EnvironmentAdapterReleaseBodySchema, EnvironmentAdapterReleaseManifestSchema, } from "./environment-release.js";
 import { EnvironmentAcceptanceLifecycleSchema, EnvironmentAcceptanceReportBodySchema, EnvironmentAcceptanceReportSchema, EnvironmentDeploymentCapabilityListSchema, EnvironmentDeploymentCapabilitySchema, EnvironmentHostObservationSchema, EnvironmentPrerequisiteObservationSchema, } from "./environment-deployment.js";
-import { ArtifactSweepRequestSchema, ArtifactSweepResultSchema, ArtifactTransferOmissionSchema, RuntimeArtifactCommittedRecordSchema, RuntimeArtifactCommittedSessionSchema, RuntimeArtifactIntendedUseSchema, RuntimeArtifactManifestSchema, RuntimeArtifactProvenanceInputSchema, RuntimeArtifactReadySessionSchema, RuntimeArtifactSessionRequestSchema, RuntimeArtifactSessionStatusSchema, } from "./runtime-artifacts.js";
+import { ArtifactSweepRequestSchema, ArtifactSweepResultSchema, ArtifactTransferOmissionSchema, RunStateClosureManifestSchema, RunStateClosureMemberSchema, RunStateRehydrationMemberSchema, RunStateRehydrationReportSchema, RuntimeArtifactCommittedRecordSchema, RuntimeArtifactCommittedSessionSchema, RuntimeArtifactIntendedUseSchema, RuntimeArtifactManifestSchema, RuntimeArtifactProvenanceInputSchema, RuntimeArtifactReadySessionSchema, RuntimeArtifactSessionRequestSchema, RuntimeArtifactSessionStatusSchema, } from "./runtime-artifacts.js";
+import { RunContinuationAcceptedSchema, RunContinuationAdmissionRequestSchema, RunContinuationCapsuleSchema, RunContinuationCompatibilityReportSchema, RunContinuationDeclarationSchema, RunContinuationExecutorSchema, } from "./run-transfer.js";
 import { ExternalObservationAcceptedSchema, ExternalObservationAppliedSchema, ExternalObservationArtifactSchema, ExternalObservationContentSchema, ExternalObservationProvenanceSchema, ExternalObservationRecordedSchema, ExternalObservationRequestSchema, VerifiedRepresentedActorSchema, } from "./external-observations.js";
 import { GatewayAdapterManifestSchema, GatewayDeliveryCursorSchema, ArtifactReadRequestSchema, DeclareFallbackSetRequestSchema, ModelFallbackSetSchema, ResolvedModelPlanSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SkillDescriptorSchema, SkillLoadResultSchema, SkillOpenRequestSchema, SkillReadRequestSchema, SkillSearchRequestSchema, SkillSearchResultSchema, TenantModelPoolSchema, } from "./integration.js";
-import { AdmitModelAdapterRequestSchema, AdmittedModelAdapterSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, CredentialBindingSchema, EnableProviderModelRequestSchema, LegacyModelPoolImportRequestSchema, ModelSelectionSchema, ProtectedCredentialIngestRequestSchema, ProviderCompatibilitySchema, ProviderCatalogueSchema, ProviderInstanceListSchema, ProviderInstanceSchema, ProviderModelEntrySchema, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SyncProviderCatalogueRequestSchema, } from "./providers.js";
-import { EnableToolSourceToolsRequestSchema, RegisterToolSourceRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceCatalogueSchema, ToolSourceDriftRecordSchema, ToolSourceDriftReportSchema, ToolSourceEnablementSchema, ToolSourceIngressDeliverySchema, ToolSourceIngressReceiptSchema, ToolSourceListSchema, ToolSourceSchema, ToolSourceStateRequestSchema, ToolSourceTestResultSchema, ToolSourceToolEntrySchema, } from "./tool-sources.js";
+import { AdmitModelAdapterRequestSchema, AdmittedModelAdapterSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, CredentialBindingSchema, EnableProviderModelRequestSchema, ModelSelectionSchema, ProtectedCredentialIngestRequestSchema, ProviderCompatibilitySchema, ProviderCatalogueSchema, ProviderInstanceListSchema, ProviderInstanceSchema, ProviderModelEntrySchema, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SyncProviderCatalogueRequestSchema, } from "./providers.js";
+import { EnableToolSourceToolsRequestSchema, RegisterToolSourceRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceCatalogueSchema, ToolSourceDriftRecordSchema, ToolSourceDriftReportSchema, ToolSourceEnablementSchema, ToolSourceListSchema, ToolSourceSchema, ToolSourceStateRequestSchema, ToolSourceTestResultSchema, ToolSourceToolEntrySchema, } from "./tool-sources.js";
 import { DocumentExtractionPageSchema, DocumentExtractionResultSchema, RegisterSourceRequestSchema, ResolvedSourceBindingSchema, SourceBindingInputSchema, SourceInstanceSchema, SourceExtractorIdentitySchema, SourceListSchema, SourceLocatorSchema, SourceBoundsSchema, SourceOperationRequestSchema, SourceOperationResultSchema, SourcePreflightSchema, SourceSnapshotMemberSchema, SourceSnapshotPageRequestSchema, SourceSnapshotPageSchema, SourceSnapshotSchema, } from "./sources.js";
 import { MemoryAssertionInputSchema, MemoryAssertionSchema, MemorySubjectErasureRequestSchema, MemorySubjectErasureOutcomeSchema, MemorySubjectImportOutcomeSchema, MemorySubjectImportRequestSchema, MemorySubjectKeyMaterialSchema, MemorySubjectTransferBundleSchema, MemorySubjectTransferRequestSchema, MemoryWrappedKeySchema, MemoryHistoryRequestSchema, MemoryHistoryResponseSchema, MemoryBindingSchema, MemoryReadEnvelopeSchema, MemoryReadRequestSchema, MemoryReadResponseSchema, ModelMemoryProposalSchema, ModelMemoryReadRequestSchema, ProtectedMemoryReadEnvelopeSchema, ResolvedMemoryBindingSchema, MemorySupersedeRequestSchema, MemorySupersedeOutcomeSchema, MemoryWriteOutcomeSchema, RunMemoryReadOutcomeSchema, } from "./memory.js";
 import { AssuranceEnvelopeSchema, InteropBindingManifestBodySchema, InteropBindingManifestSchema, InteropCapabilitySchema, InteropConnectionSchema, InteropJsonSchema, InteropProtocolRegistryEntrySchema, InteropProtocolRegistrySchema, McpImportedToolPlanSchema, McpImportedResourcePlanSchema, McpPeerResourceSchema, McpPeerSnapshotBodySchema, McpPeerSnapshotSchema, McpPeerToolSchema, McpPendingInputSchema, McpPublishedWorkEntrypointSchema, McpTaskAliasSchema, McpTaskProjectionSchema, } from "./interop.js";
-import { ATTENTION_ADMISSION_RESULTS, BLOCKING_OUTCOME_KINDS, BRANCH_REASONS, CLAIM_REPRESENTATIONS, CONTROLLER_MODES, SAMPLED_ORACLE_OUTCOMES, SEQUENTIAL_STOP_REASONS, WAKE_CLAIM_VIAS, OPERATION_CLASSES, PACK_CLAIM_KINDS, TOOL_EXECUTION_OUTCOMES, TOOL_METERING, TOOL_VIEW_SELECTION_REASONS, WORKSPACE_SLOTS, CONTROL_VERBS, DURABLE_EVENTS, ENTRY_ROLES, EVIDENCE_GRADES, EXTERNAL_EVIDENCE_CLASSIFICATIONS, EXTERNAL_EVIDENCE_CAMPAIGN_MODES, EXTERNAL_EVIDENCE_DECISION_KINDS, EXTERNAL_EVIDENCE_DEGRADATIONS, EXTERNAL_EVIDENCE_DEMONSTRATION_SIDES, EXTERNAL_EVIDENCE_ENVIRONMENT_KINDS, EXTERNAL_EVIDENCE_INVARIANTS, EXTERNAL_EVIDENCE_INVARIANT_STATUSES, EXTERNAL_EVIDENCE_PROPERTY_FAMILIES, EXTERNAL_EVIDENCE_REFERENCE_VECTORS, EXTERNAL_EVIDENCE_STANDINGS, EXTERNAL_EVIDENCE_STRENGTHS, FAILURE_CLASSES, ITEM_STATES, LEASE_DENOMINATIONS, LEASE_POOLS, LEASE_STATES, MEMORY_CLASSIFICATIONS, MEMORY_EVENT_KINDS, MCP_REMOTE_TASK_CAUSES, MCP_REMOTE_TASK_STATES, MODEL_CATALOGUE_SOURCES, MODEL_CREDENTIAL_MODES, MODEL_PROTOCOL_ADAPTERS, MODEL_PROVIDERS, MODEL_PROVIDER_PROFILES, MODEL_USAGE_MEASUREMENTS, PROFILES, PRODUCT_EVENT_FAMILIES, RECORD_TYPES, SKILL_RETENTIONS, REVIEW_ITEM_KINDS, REVIEW_ITEM_STATES, RUN_REVIEW_STATES, RUN_STATUSES, RUN_TERMINALS, RUN_RESUME_BLOCK_CATEGORIES, RUN_LIFECYCLE_COMMANDS, SUSPEND_REASONS, COMPLETION_STATES, STOP_REASONS, POSTGRES_DEPLOYMENT_MODES, POSTGRES_LATENCY_OPERATIONS, POSTGRES_LATENCY_REPORT_STATUSES, POSTGRES_LATENCY_TOPOLOGIES, STORE_KINDS, VALIDATOR_CLASSES, VALIDATOR_EVIDENCE_GRADES, VERIFICATION_PLAN_REFUSAL_CODES, VALIDATOR_OUTCOMES, VERDICTS, DIAGNOSTIC_SEVERITIES, TRUST_TIERS, ASSURANCE_COMPLETION_CLASSES, } from "./vocab.js";
+import { ATTENTION_ADMISSION_RESULTS, BLOCKING_OUTCOME_KINDS, BRANCH_REASONS, CLAIM_REPRESENTATIONS, ASK_TIMINGS, VALIDATOR_INPUT_EXTENSIONS, CHECKPOINT_VIEWS, CONTROLLER_MODES, SAMPLED_ORACLE_OUTCOMES, SEQUENTIAL_STOP_REASONS, WAKE_CLAIM_VIAS, OPERATION_CLASSES, PACK_CLAIM_KINDS, TOOL_EXECUTION_OUTCOMES, TOOL_METERING, TOOL_VIEW_SELECTION_REASONS, WORKSPACE_SLOTS, CONTROL_VERBS, DURABLE_EVENTS, ENTRY_ROLES, EVIDENCE_GRADES, EXTERNAL_EVIDENCE_CLASSIFICATIONS, EXTERNAL_EVIDENCE_CAMPAIGN_MODES, EXTERNAL_EVIDENCE_DECISION_KINDS, EXTERNAL_EVIDENCE_DEGRADATIONS, EXTERNAL_EVIDENCE_DEMONSTRATION_SIDES, EXTERNAL_EVIDENCE_ENVIRONMENT_KINDS, EXTERNAL_EVIDENCE_INVARIANTS, EXTERNAL_EVIDENCE_INVARIANT_STATUSES, EXTERNAL_EVIDENCE_PROPERTY_FAMILIES, EXTERNAL_EVIDENCE_REFERENCE_VECTORS, EXTERNAL_EVIDENCE_STANDINGS, EXTERNAL_EVIDENCE_STRENGTHS, FAILURE_CLASSES, ITEM_STATES, LEASE_DENOMINATIONS, LEASE_POOLS, LEASE_STATES, MEMORY_CLASSIFICATIONS, MEMORY_EVENT_KINDS, MCP_REMOTE_TASK_CAUSES, MCP_REMOTE_TASK_STATES, MODEL_CATALOGUE_SOURCES, MODEL_CONTROL_OPERATION_KINDS, MODEL_CREDENTIAL_MODES, MODEL_PROTOCOL_ADAPTERS, MODEL_PROVIDERS, MODEL_PROVIDER_PROFILES, MODEL_USAGE_MEASUREMENTS, INPUT_BOUND_BASES, PROFILES, PRODUCT_EVENT_FAMILIES, PRODUCT_RUN_BUNDLE_FORMATS, RECORD_TYPES, RECORD_TYPE_VERSIONS, SKILL_RETENTIONS, REVIEW_ITEM_KINDS, REVIEW_ITEM_STATES, RUN_REVIEW_STATES, RUN_STATUSES, RUN_TERMINALS, RUN_RESUME_BLOCK_CATEGORIES, RUN_LIFECYCLE_COMMANDS, RUN_BUNDLE_CANONICALIZATIONS, RUN_HEAD_FOLD_PROFILES, SUSPEND_REASONS, COMPLETION_STATES, STOP_REASONS, POSTGRES_DEPLOYMENT_MODES, POSTGRES_LATENCY_OPERATIONS, POSTGRES_LATENCY_REPORT_STATUSES, POSTGRES_LATENCY_TOPOLOGIES, STORE_KINDS, VALIDATOR_CLASSES, VALIDATOR_EVIDENCE_GRADES, VERIFICATION_PLAN_REFUSAL_CODES, VALIDATOR_OUTCOMES, VERDICTS, DIAGNOSTIC_SEVERITIES, TRUST_TIERS, ASSURANCE_COMPLETION_CLASSES, PLAN_CHECK_KINDS, } from "./vocab.js";
 const id = (prefix) => z.string().regex(new RegExp(`^${prefix}_[0-9a-f]{32}$`), `expected a ${prefix} id`);
 const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const count = z.number().int().nonnegative();
+const modelToolCallId = z.string().min(1).max(512).regex(/^[^\u0000-\u001f\u007f]+$/, 'expected an opaque tool-call id without control characters');
 /**
  * An input whose shape is fixed while its mechanism is not wired in this
  * build. Any value, well formed or not, fails the parse before its shape is
@@ -90,6 +94,16 @@ const ToolViewRecordSchema = z.strictObject({
     hidden: count,
     refusals: z.array(z.strictObject({ code: z.string(), message: z.string(), alternatives: z.array(z.string()) })),
 });
+/** One exact runtime-owned operation exposed in a recorded model window. */
+const ModelControlOperationSchema = z.strictObject({
+    kind: z.enum(MODEL_CONTROL_OPERATION_KINDS),
+    name: z.string().min(1).max(256),
+    description: z.string().min(1).max(4_096),
+    input_schema: z.record(z.string(), z.unknown()).refine((value) => value['type'] === 'object', {
+        message: 'a model control operation must publish an object input schema',
+    }),
+    strict: z.boolean().optional(),
+});
 /** Internal persistence and composition parsers for live closed-vocabulary fields. */
 export const LeaseStateSchema = z.enum(LEASE_STATES);
 export const StoreKindSchema = z.enum(STORE_KINDS);
@@ -114,10 +128,23 @@ export const BudgetsSchema = z.strictObject({
     verification_reserve_fraction: z.number().min(0).max(0.9),
     max_turns: z.number().int().positive().max(10_000),
 });
+/**
+ * The turn ceiling a caller derives when it sets none. Spend bounds the run:
+ * one turn per two thousand work tokens, never fewer than the item count
+ * needs and never past the schema limit, so a larger budget buys a longer
+ * unattended run instead of meeting a fixed default.
+ */
+export function turnCeilingForBudget(model_tokens, items = 0) {
+    const bySpend = Math.ceil(model_tokens / 2_000);
+    const byItems = Math.ceil(items / 2) + 12;
+    return Math.min(10_000, Math.max(bySpend, byItems));
+}
 const artifactHandle = z.string().regex(/^artifact:\/\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$/, 'expected an artifact handle');
 const mediaType = z.string().regex(/^[^\s/]+\/[^\s]+$/, 'expected a media type').max(128);
 /** One input artifact the caller asks the run to depend on. */
 export const InputArtifactBindingSchema = z.strictObject({
+    /** Optional caller name; intake pins it to this run and tenant. */
+    alias: z.string().regex(INPUT_ARTIFACT_ALIAS_PATTERN).optional(),
     artifact_ref: artifactHandle,
     content_hash: hash,
     bytes: count,
@@ -128,6 +155,8 @@ export const InputArtifactBindingSchema = z.strictObject({
 });
 /** The verified input artifact descriptor pinned into the run manifest. */
 export const ResolvedInputArtifactSchema = z.strictObject({
+    /** Short run-local name. Older imported manifests may not carry one. */
+    alias: z.string().regex(INPUT_ARTIFACT_ALIAS_PATTERN).optional(),
     artifact_ref: artifactHandle,
     manifest_ref: hash,
     tenant: z.string().min(1),
@@ -143,6 +172,8 @@ export const ResolvedInputArtifactSchema = z.strictObject({
 export const RemoteToolTaskHandleSchema = z.strictObject({
     protocol: z.literal('mcp'),
     invoke_id: z.string().min(1).max(256),
+    /** Provider-neutral model correlation, when this remote task began as a model call. */
+    model_tool_call_id: modelToolCallId.optional(),
     tool: z.string().min(1).max(256),
     original_call_ref: hash,
     peer_binding_ref: hash,
@@ -172,8 +203,6 @@ export const IntakeRequestSchema = z.strictObject({
         sources: z.array(SourceBindingInputSchema).max(64).optional(),
         /** Authenticated values a published memory binding may derive its subject from. */
         memory_subjects: z.record(z.string().regex(/^[a-z][a-z0-9-]{0,62}$/), z.string().min(1).max(256)).optional(),
-        /** One reviewed browser binding template, by name. Reserved until the browser run port is wired. */
-        browser: reserved(BrowserIntakeInputSchema, 'inputs.browser', 'browser.capability.unavailable').optional(),
         /** Deployment workspace instances attached to published mounts. Reserved until instance attachment is wired. */
         workspace: reserved(z.array(WorkspaceIntakeBindingSchema).min(1).max(32), 'inputs.workspace', 'workspace.instances.unwired').optional(),
     })
@@ -260,8 +289,6 @@ export const ResolvedRunManifestSchema = z.strictObject({
     operation_registry: z.array(z.strictObject({ name: z.string(), operation_class: z.enum(OPERATION_CLASSES), ref: hash })),
     target_adapters: z.array(hash),
     execution_environments: z.array(hash),
-    /** The browser template a run pinned. The per-run binding follows in browser.binding.pinned. */
-    browser: ResolvedBrowserTemplateSchema.nullable().optional(),
     /** The registered environment profile each run-internal tool resolved to at admission (ENV-012). */
     environment_profiles: z.record(z.string().min(1).max(200), hash).optional(),
     /** Every workspace instance the run attached, with its profile and per-tool manifest hashes (ADX-013). */
@@ -302,12 +329,52 @@ export const TaskContractSchema = z.strictObject({
     dependency_frontier: z.enum(['independent-items', 'run-start', 'declared-dependencies']),
     /** Bounded retry. Exhaustion terminates as an unverified artifact (QLT-030). */
     repair_budget_attempts: z.number().int().min(0).max(100),
+    /** Optional provider-strict object schemas selected by exact item id or prefix. */
+    item_output_schemas: z.array(ItemOutputSchemaBindingSchema).min(1).max(ITEM_OUTPUT_SCHEMA_BINDINGS_MAX).optional(),
     /**
      * Declared only when outputs are structured claim sets. Declaring it scopes
      * every evidence-completeness statement to that shape (CLM-001); leaving it
      * out means no such statement appears on any surface.
      */
     claim_representation: z.enum(CLAIM_REPRESENTATIONS).optional(),
+    /**
+     * When a parked item reaches a person. Absent is at-completion: parked
+     * items are asked when completion is proposed and every other check
+     * passes. when-parked suspends the run as soon as a checkpoint parks an
+     * item the attention budget can fund, so work that needs the answer can
+     * wait for it.
+     */
+    ask_when: z.enum(ASK_TIMINGS).optional(),
+    /**
+     * How many questions the agent may ask a person in one run (GAP-008).
+     * Absent allows DEFAULT_MAX_AGENT_QUESTIONS; 0 turns questions off.
+     */
+    max_agent_questions: z.number().int().min(0).max(64).optional(),
+    /**
+     * What this contract's checks receive beyond item outputs. document-text
+     * gives each check the text of every page the run extracted, the latest
+     * extraction of each document, verified against its hash and bounded, so
+     * a check can confirm a quote appears on the page it cites.
+     * effect-outcomes gives each check every effect the run prepared, with its
+     * parameters, its approver's decision and where it stands, so a check can
+     * confirm that what an item says was done was approved and done (G23).
+     * workspace-output gives each check the command and output of every
+     * workspace command the run ran, so a check can confirm a value an item
+     * took from a web page appears on the page the agent read (G22).
+     * web-pages gives each check the text of every page the run fetched with
+     * web.fetch, read from its artifact and kept only when the text matches
+     * its digest (WEB-017).
+     */
+    validator_inputs: z.array(z.enum(VALIDATOR_INPUT_EXTENSIONS)).min(1).max(4).optional(),
+    /**
+     * What each checkpoint's checks see. Absent or covered-items gives them the
+     * items the checkpoint judges. worked-items adds the run's other verified
+     * items as context, so a check that compares items across the run, such as
+     * an audit against its documents, runs at every checkpoint instead of only
+     * at completion. A check may reject a context item, which is then repaired;
+     * a finding undecided about context items alone parks nothing (G24).
+     */
+    checkpoint_view: z.enum(CHECKPOINT_VIEWS).optional(),
     /**
      * How long a parked item waits for each named-human class before its
      * deadline wake dismisses it (LIF-035). With no matching window an item
@@ -330,7 +397,15 @@ export const TaskContractSchema = z.strictObject({
          * evaluates.
          */
         sufficient_for: z.array(z.string()),
+        /** The verification compute a checkpoint reserves and charges for this binding. */
         cost_wall_ms: z.number().int().positive().max(600_000),
+        /**
+         * How long one evaluation may run, when that differs from its cost:
+         * a validator whose own work is cheap but which waits on separately
+         * metered work, such as a workspace check command. Absent means the
+         * cost is the window.
+         */
+        timeout_ms: z.number().int().positive().max(600_000).optional(),
     }))
         .min(1),
     /**
@@ -344,6 +419,39 @@ export const TaskContractSchema = z.strictObject({
         rules: z.array(z.string().min(1)).min(2),
     }))
         .optional(),
+});
+/**
+ * One acceptance check an agent attaches to an item of its own plan. A
+ * json-shape check holds when the item output is one JSON object with
+ * exactly the named primitive fields, the bounded shape validator-kit's
+ * factory judges. A workspace-command check holds when its command, run with
+ * /bin/sh -c in the run's workspace, exits 0.
+ */
+const planFieldName = z.string().regex(/^[a-z][a-z0-9_]{0,63}$/);
+export const PlanCheckSchema = z.discriminatedUnion('kind', [
+    z.strictObject({
+        kind: z.literal(PLAN_CHECK_KINDS[0]),
+        properties: z.record(planFieldName, z.enum(['string', 'number', 'integer', 'boolean']))
+            .refine((properties) => Object.keys(properties).length >= 1 && Object.keys(properties).length <= 32, 'a json-shape check names between 1 and 32 fields'),
+        required: z.array(planFieldName).max(32),
+    }),
+    z.strictObject({
+        kind: z.literal(PLAN_CHECK_KINDS[1]),
+        command: z.string().min(1).max(2_000),
+        /** How long the check may run. One item's checks share the plan-check validator's 60 second window. */
+        timeout_ms: z.number().int().min(1_000).max(50_000).optional(),
+    }),
+]);
+/** One work item of an agent's plan, with the checks fixed before the work they judge. */
+export const PlanItemSchema = z.strictObject({
+    item_id: z.string().regex(/^[a-z0-9][a-z0-9._-]{0,63}$/, 'item ids are lowercase letters, digits, dots, dashes and underscores'),
+    objective: z.string().min(1).max(2_000),
+    checks: z.array(PlanCheckSchema).min(1).max(8),
+});
+/** What the model sends through plan.record: items to add, or existing items to revise. */
+export const PlanRecordRequestSchema = z.strictObject({
+    items: z.array(PlanItemSchema).min(1).max(200),
+    reason: z.string().min(1).max(1_000),
 });
 // ---- validator catalogue and the read-only visible verification plan ----
 const ValidatorEvidenceDimensionsSchema = z.strictObject({
@@ -629,11 +737,27 @@ export const VerificationPlanBodySchema = z.strictObject({
     limits: z.array(z.string().min(1)),
 });
 export const VerificationPlanSchema = VerificationPlanBodySchema.extend({ plan_ref: hash });
+/**
+ * The longest answer a person may settle a parked item with. The settling
+ * record keeps the answer whole, and checks read it from there, so a longer
+ * answer is refused rather than cut.
+ */
+export const GAP_ANSWER_MAX_CHARS = 4_096;
+/** An agent's question as its item records it and the review inbox shows it (GAP-010). */
+export const AgentQuestionRecordSchema = z.strictObject({
+    asked_by: z.literal('agent'),
+    text: z.string().min(1).max(500),
+    why: z.string().min(1).max(300),
+    choices: z.array(z.string().min(1).max(120)).min(2).max(8).nullable(),
+    allow_other: z.boolean(),
+});
 /** A control addressed to a run. The id locates; principal and scope authorize (K-19). */
 export const ControlRequestSchema = z.strictObject({
     verb: z.enum(CONTROL_VERBS),
     control_id: z.string().min(1).max(128),
     text: z.string().min(1).max(100_000).optional(),
+    /** One of the choices an agent's question offered, exactly (GAP-011). */
+    choice: z.string().min(1).max(120).optional(),
     handle: z.string().optional(),
     reason: z.string().max(1_000).optional(),
     /**
@@ -644,6 +768,13 @@ export const ControlRequestSchema = z.strictObject({
      */
     active_handling_ms: z.number().int().min(0).max(31_536_000_000).optional(),
 }).superRefine((control, context) => {
+    if (control.choice !== undefined && (control.verb !== 'answer' || control.text !== undefined || control.reason !== undefined)) {
+        context.addIssue({
+            code: 'custom',
+            path: ['choice'],
+            message: 'choice answers an agent\'s question with one of its offered choices, alone. Send it with verb answer and without text or reason',
+        });
+    }
     if (control.active_handling_ms !== undefined && control.verb !== 'answer') {
         context.addIssue({
             code: 'custom',
@@ -655,6 +786,24 @@ export const ControlRequestSchema = z.strictObject({
 /** One retryable public request to start or resume an existing run. */
 export const RunLifecycleCommandRequestSchema = z.strictObject({
     idempotency_key: z.string().min(1).max(256),
+    reason: z.string().min(1).max(1_000).optional(),
+});
+/**
+ * What one budget amendment adds (BUD-012). It only adds: no field lowers a
+ * budget, and the verification reserve fraction stays as the run declared it.
+ */
+export const BudgetAdditionSchema = z.strictObject({
+    model_tokens: z.number().int().positive().optional(),
+    tool_calls: z.number().int().positive().optional(),
+    bytes: z.number().int().positive().optional(),
+    compute_ms: z.number().int().positive().optional(),
+    attention: z.number().int().positive().optional(),
+    max_turns: z.number().int().positive().max(10_000).optional(),
+}).refine((added) => Object.keys(added).length > 0, { message: 'an amendment adds at least one of model_tokens, tool_calls, bytes, compute_ms, attention or max_turns' });
+/** One retryable request to add budget to a run that has not ended. */
+export const BudgetAmendmentRequestSchema = z.strictObject({
+    idempotency_key: z.string().min(1).max(256),
+    add: BudgetAdditionSchema,
     reason: z.string().min(1).max(1_000).optional(),
 });
 /**
@@ -688,9 +837,29 @@ export const EntrySchema = z.strictObject({
     run_id: id('run'),
     parent_id: id('ent').nullable(),
     role: z.enum(ENTRY_ROLES),
-    /** Evidence facts ride beside the text, so the content hash covers them (CTX-002). */
-    content: z.strictObject({ text: z.string(), evidence: EntryEvidenceSchema.optional() }),
+    /** Evidence facts and image references ride beside the text, so the content hash covers them (CTX-002, WBR-007). */
+    content: z.strictObject({
+        text: z.string(),
+        evidence: EntryEvidenceSchema.optional(),
+        images: z.array(EntryImageSchema).min(1).max(ENTRY_IMAGE_MAX).optional(),
+        tool_calls: z.array(z.strictObject({
+            call_id: modelToolCallId,
+            name: z.string().min(1).max(256),
+            input: z.record(z.string(), z.unknown()),
+        })).min(1).max(128).optional(),
+        tool_result: z.strictObject({
+            call_id: modelToolCallId,
+            name: z.string().min(1).max(256),
+        }).optional(),
+    }),
     content_hash: hash,
+}).superRefine((entry, ctx) => {
+    if (entry.content.tool_calls && entry.role !== 'assistant') {
+        ctx.addIssue({ code: 'custom', path: ['content', 'tool_calls'], message: 'tool calls belong on an assistant entry.' });
+    }
+    if (entry.content.tool_result && entry.role !== 'tool_result') {
+        ctx.addIssue({ code: 'custom', path: ['content', 'tool_result'], message: 'tool correlation belongs on a tool_result entry.' });
+    }
 });
 /** The envelope every runtime record travels in. Payloads validate per type. */
 export const RecordEnvelopeSchema = z.strictObject({
@@ -704,6 +873,54 @@ export const RecordEnvelopeSchema = z.strictObject({
     at: z.string(),
     payload: z.record(z.string(), z.unknown()),
     chain_hash: hash,
+});
+/** A canonical record in a portable bundle. Storage assigns `seq` on import. */
+export const PortableRecordEnvelopeSchema = RecordEnvelopeSchema.omit({ seq: true });
+const RunBundleManifestBaseSchema = z.strictObject({
+    run_id: id('run'),
+    entry_count: count,
+    record_count: count,
+    chain_head: hash.nullable(),
+    head_projection_hash: hash,
+});
+/** The historical Zero-AR bundle manifest remains readable after version two. */
+export const RunBundleManifestV1Schema = RunBundleManifestBaseSchema.extend({
+    format: z.enum(PRODUCT_RUN_BUNDLE_FORMATS),
+    format_version: z.literal(1),
+});
+/** Version two binds the public schema catalogue and projection semantics. */
+export const RunBundleManifestV2Schema = RunBundleManifestBaseSchema.extend({
+    format: z.enum(PRODUCT_RUN_BUNDLE_FORMATS),
+    format_version: z.literal(2),
+    canonicalization: z.enum(RUN_BUNDLE_CANONICALIZATIONS),
+    record_catalogue_ref: hash,
+    projection_kind: z.literal('run-head'),
+    fold_profile: z.enum(RUN_HEAD_FOLD_PROFILES),
+});
+export const RunBundleManifestSchema = z.discriminatedUnion('format_version', [
+    RunBundleManifestV1Schema,
+    RunBundleManifestV2Schema,
+]);
+/** A verified, stateless materialization of one portable run bundle. */
+export const RunMaterializationSchema = z.strictObject({
+    schema: z.literal('zero-ar-run-materialization/1'),
+    level: z.literal('materialize'),
+    run_id: id('run'),
+    format_version: z.union([z.literal(1), z.literal(2)]),
+    canonicalization: z.enum(RUN_BUNDLE_CANONICALIZATIONS),
+    record_catalogue_ref: hash,
+    projection_kind: z.literal('run-head'),
+    fold_profile: z.enum(RUN_HEAD_FOLD_PROFILES),
+    frontier: z.strictObject({
+        record_count: count,
+        logical_clock: count,
+        record_id: id('rec').nullable(),
+        chain_head: hash.nullable(),
+    }),
+    state_hash: hash,
+    projection: z.record(z.string(), z.unknown()),
+    /** Successful materialization has no diagnostics; refusals throw the public typed diagnostic. */
+    diagnostics: z.array(z.never()),
 });
 const leaseFields = {
     lease_id: id('lea'),
@@ -745,6 +962,53 @@ export const AttentionEstimateRecordSchema = z.strictObject({
     amortized_per_item_ms: count,
 });
 /** Payload schemas per record type. Strict: an unknown field is a defect, not data. */
+const ModelCallStartedV1Shape = {
+    turn: count,
+    call_id: hash,
+    adapter: z.string(),
+    model_ref: z.string(),
+    context_ref: hash,
+    lease_id: id('lea'),
+    credential_epoch: z.number().int().min(1).nullable(),
+    /** Absent means historical v0 behavior: the complete pinned closure was visible. */
+    tool_view: ToolViewRecordSchema.optional(),
+    /** The input tokens the reservation holds the provider to, and what that bound rests on. Absent on calls reserved before bounds. */
+    input_bound: z.strictObject({ tokens: count, basis: z.enum(INPUT_BOUND_BASES) }).optional(),
+};
+const ModelCallStartedV1Schema = closureAttributed(ModelCallStartedV1Shape);
+const ModelCallStartedV2Schema = closureAttributed({
+    ...ModelCallStartedV1Shape,
+    /** The output tokens the call asked for, which the reservation holds. */
+    max_output_tokens: z.number().int().min(1),
+});
+/** Read the short-lived pre-versioning writer without broadening either strict shape. */
+const ModelCallStartedV1ReaderSchema = z.union([ModelCallStartedV1Schema, ModelCallStartedV2Schema]);
+const StateClosureRehydratedV1Schema = z.strictObject({
+    report: RunStateRehydrationReportSchema,
+    capsule_ref: hash,
+});
+const StateClosureRehydratedV2Schema = StateClosureRehydratedV1Schema.extend({
+    continuation_authority_ref: hash.nullable(),
+});
+const ExecutorContinuationAcceptedV1Schema = z.strictObject({
+    idempotency_key: z.string().min(1).max(256),
+    request_fingerprint: hash,
+    executor: RunContinuationExecutorSchema,
+    capsule: RunContinuationCapsuleSchema,
+});
+const ExecutorContinuationAcceptedV2Schema = ExecutorContinuationAcceptedV1Schema.extend({
+    destination_ref: hash,
+    authorized_by: z.strictObject({
+        principal: z.string().min(1).max(512),
+        scopes: z.tuple([z.literal('operator:restore'), z.literal('run:resume')]),
+        scope_epoch: z.number().int().positive(),
+    }),
+    fence: z.strictObject({
+        authority_ref: hash,
+        claim_ref: hash,
+        source_capsule_ref: hash,
+    }),
+});
 export const RECORD_PAYLOADS = {
     'run.created': z.strictObject({
         /** The admitted creation time. Older records fall back to the record envelope time. */
@@ -835,6 +1099,18 @@ export const RECORD_PAYLOADS = {
         /** The assembly inputs, so the exact window replays from the log alone (CTX-012). */
         head_entry_id: id('ent').nullable(),
         budget_tokens: count,
+        /**
+         * How budget_tokens came from the model's declared context window: the
+         * window, the output the call asks for, the estimate of its tool and
+         * control schemas, and the adapter's framing (CTX-003). Absent when the
+         * deployment's budget or the kernel default sized the window.
+         */
+        window: z.strictObject({
+            context_window: count,
+            output_tokens: count,
+            schema_tokens: count,
+            framing_tokens: count,
+        }).optional(),
         instructions_hash: hash,
         /** The omission set covers found and excluded only, never undiscovered sources (CTX-004). */
         covers: z.literal('discovered-candidates-only'),
@@ -857,6 +1133,12 @@ export const RECORD_PAYLOADS = {
             .optional(),
         /** New writers record the same canonical view attached to model.call.started. */
         tools: ToolViewRecordSchema.optional(),
+        /**
+         * Exact runtime-owned operations exposed to this call: item operations,
+         * one per published output schema, and the completion operation. Absent
+         * on historical windows.
+         */
+        control_operations: z.array(ModelControlOperationSchema).max(MODEL_CONTROL_OPERATIONS_MAX).optional(),
         /** Every included entry as a cited span. Absent in windows recorded before spans were persisted (CTX-002). */
         spans: z.array(CitedSpanSchema).optional(),
         /** The artifact ranges the window asked for, by handle and range, never by bytes. */
@@ -873,21 +1155,47 @@ export const RECORD_PAYLOADS = {
         fence_nonce: ContextFenceNonceSchema.optional(),
         /** Cited artifact evidence that could not stand in this window (QLT-031). */
         evidence_blockers: z.array(ArtifactEvidenceBlockerSchema).optional(),
+        /** Each image the included entries carried, by digest and never by bytes, and how it reached the model (WBR-007). */
+        images: z.array(ContextImageRecordSchema).optional(),
+        /** Exact summary manifests and omissions for the opt-in hierarchical policy. */
+        hierarchy: ContextHierarchyWindowSchema.optional(),
         instructions_tokens: count.optional(),
         /** The work status the instructions named, so replay composes them without the store's ledger order (CTX-012). */
         work_status: z.strictObject({ items_declared: count, remaining: z.array(z.string()).max(13), untouched: count }).optional(),
     }),
-    'model.call.started': closureAttributed({
-        turn: count,
+    'context.segment.started': closureAttributed({
+        request_ref: hash,
+        /** Stable derivation plan. Retries receive distinct request refs. */
+        plan_ref: hash,
+        policy_ref: hash,
+        branch_id: id('brn'),
+        frontier_ref: hash,
+        coverage: ContextSegmentCoverageSchema,
+        children: z.array(hash).max(16),
+        summarizer: ContextSegmentSummarizerSchema.omit({ call_id: true }),
         call_id: hash,
-        adapter: z.string(),
-        model_ref: z.string(),
         context_ref: hash,
         lease_id: id('lea'),
         credential_epoch: z.number().int().min(1).nullable(),
-        /** Absent means historical v0 behavior: the complete pinned closure was visible. */
-        tool_view: ToolViewRecordSchema.optional(),
+        source_tokens: z.number().int().positive(),
+        maximum_output_tokens: z.number().int().positive(),
     }),
+    'context.segment.committed': closureAttributed({
+        request_ref: hash,
+        manifest: ContextSegmentManifestSchema,
+    }),
+    'context.segment.failed': closureAttributed({
+        request_ref: hash,
+        provider_code: z.string().min(1).max(200),
+        message: z.string().min(1).max(2_000),
+    }),
+    'context.segment.expanded': closureAttributed({
+        turn: count,
+        request: ContextExpandRequestSchema,
+        result: ContextExpansionResultSchema,
+        lease_id: id('lea'),
+    }),
+    'model.call.started': ModelCallStartedV2Schema,
     'model.call.finished': closureAttributed({
         turn: count,
         /** Absent when a known pre-dispatch cancellation produced no transcript entry. */
@@ -921,6 +1229,8 @@ export const RECORD_PAYLOADS = {
         control_id: z.string(),
         verb: z.enum(CONTROL_VERBS),
         text: z.string().nullable(),
+        /** The offered choice an answer picked. Absent on every other control. */
+        choice: z.string().optional(),
         reason: z.string().nullable(),
         handle: z.string().nullable(),
         /** Authenticated by the transport, never accepted from the request body. */
@@ -983,6 +1293,16 @@ export const RECORD_PAYLOADS = {
     }),
     'tool.invoked': closureAttributed({
         invoke_id: z.string(),
+        /** Model-emitted correlation. Absent for intake and operator-originated calls and older records. */
+        model_tool_call_id: modelToolCallId.optional(),
+        /** Exact canonical arguments emitted by the model. */
+        input: z.record(z.string(), z.unknown()).optional(),
+        /**
+         * The digest of the arguments, in place of them, for a tool whose input
+         * leaves the run as outside content, such as a web search query; the
+         * text stays in the entry that erasure can remove (WEB-014).
+         */
+        input_digest: hash.optional(),
         tool: z.string(),
         version: z.string(),
         operation_class: z.enum(OPERATION_CLASSES),
@@ -1001,6 +1321,8 @@ export const RECORD_PAYLOADS = {
     'tool.remote.pending': closureAttributedSchema(RemoteToolTaskHandleSchema),
     'tool.finished': closureAttributed({
         invoke_id: z.string(),
+        /** Same provider-neutral id as tool.invoked when the model originated the call. */
+        model_tool_call_id: modelToolCallId.optional(),
         ok: z.boolean(),
         /** Older durable logs predate typed outcomes. New writers always include one. */
         outcome: z.enum(TOOL_EXECUTION_OUTCOMES).optional(),
@@ -1011,6 +1333,9 @@ export const RECORD_PAYLOADS = {
     'environment.prepare.requested': closureAttributedSchema(PrepareEnvironmentRequestSchema),
     'environment.prepared': closureAttributedSchema(PrepareEnvironmentResultSchema),
     'environment.reused': closureAttributedSchema(EnvironmentReuseRecordSchema),
+    'environment.segment.started': EnvironmentSegmentStartedSchema,
+    'environment.segment.ending': EnvironmentSegmentEndingSchema,
+    'environment.segment.ended': EnvironmentSegmentEndedSchema,
     'environment.job.submit.requested': closureAttributedSchema(SubmitEnvironmentJobRequestSchema),
     'environment.job.submitted': closureAttributedSchema(SubmitEnvironmentJobResultSchema),
     'environment.job.observe.requested': closureAttributedSchema(ObserveEnvironmentJobRequestSchema),
@@ -1108,9 +1433,12 @@ export const RECORD_PAYLOADS = {
     'item.parked': z.strictObject({
         item_id: z.string(),
         reason: z.string(),
+        /** The checkpoint that parked the item, or `question:<call id>` for an agent's question. */
         checkpoint_id: z.string(),
         /** The attention class the parked item waits in (MTH-AT-002). */
         escalation_class: z.string().min(1).max(200).optional(),
+        /** Present when the agent asked: its question for a person (GAP-010). Absent when a check parked the item. */
+        question: AgentQuestionRecordSchema.optional(),
     }),
     'item.invalidated': z.strictObject({
         item_id: z.string(),
@@ -1121,9 +1449,14 @@ export const RECORD_PAYLOADS = {
         item_id: z.string(),
         /** The named person who supplied the evidence (Q-15). */
         resolver: z.string(),
-        output: z.string().max(4_096),
+        output: z.string().max(GAP_ANSWER_MAX_CHARS),
         /** Active handling the reviewer reported, bounded by the wait (MTH-AT-001). */
         active_handling_ms: count.optional(),
+        /**
+         * True when the answer settled an agent's question: the item returns to
+         * untouched and output records the answer, not the item's output (GAP-012).
+         */
+        reopened: z.literal(true).optional(),
     }),
     'gap.dismissed': z.strictObject({
         item_id: z.string(),
@@ -1263,6 +1596,14 @@ export const RECORD_PAYLOADS = {
         /** The named non-agent principal who ordered the erasure. */
         by: z.string().min(1),
         reason: z.string().min(1),
+        /**
+         * Entries that kept their tool exchange beside the tombstone: a call
+         * whose input was erased, or a result that keeps only its call id, so
+         * the other calls of that turn still pair with their results. Each names
+         * the hash of what the entry now holds, and a reader accepts that and
+         * nothing else (WEB-015).
+         */
+        kept_entries: z.array(z.strictObject({ entry_id: id('ent'), content_hash: hash })).optional(),
     }),
     /** The exact wake condition stays canonical; wheel buckets are projections (MTH-TW-001). */
     'wake.scheduled': z.strictObject({
@@ -1413,25 +1754,81 @@ export const RECORD_PAYLOADS = {
         plan_ref: hash,
         activated_at: z.string().datetime(),
     }),
-    /** The run-scoped browser binding materialized from the pinned template after the run id existed (BRC-001). */
-    'browser.binding.pinned': z.strictObject({
-        template_ref: hash,
-        binding: BrowserBindingSchema,
+    'state.closure.rehydrated': StateClosureRehydratedV2Schema,
+    'executor.continuation.accepted': ExecutorContinuationAcceptedV2Schema,
+    /**
+     * The whole plan after one revision. revised names items whose checks
+     * changed; loosened names the revised items a checkpoint had already
+     * rejected, so a person sees every check changed after it failed.
+     */
+    'plan.recorded': z.strictObject({
+        revision: z.number().int().positive(),
+        items: z.array(PlanItemSchema).min(1).max(200),
+        added: z.array(z.string()),
+        revised: z.array(z.string()),
+        loosened: z.array(z.string()),
+        reason: z.string().min(1).max(1_000),
     }),
-    /** A durable destination proposal; the relay keeps refusing the origin until a decision (BRC-012). */
-    'browser.destination.proposed': z.strictObject({
-        proposal: BrowserDestinationProposalSchema,
-    }),
-    /** An authenticated disposition on one proposal (BRC-013). A refusal grants nothing. */
-    'browser.destination.decided': z.strictObject({
-        decision: BrowserDestinationDecisionSchema,
-    }),
-    /** The successor binding an approval produced; it activates at the next turn boundary (BRC-014). */
-    'browser.binding.superseded': z.strictObject({
-        superseded_binding_ref: hash,
-        binding: BrowserBindingSchema,
+    /**
+     * A person added budget to a run (BUD-012). budgets is the whole budget
+     * after the amendment; pools names each pool that grew and by how much,
+     * in the same commit as its lease.opened record.
+     */
+    'budgets.amended': z.strictObject({
+        idempotency_key: z.string().min(1).max(256),
+        request_fingerprint: hash,
+        added: BudgetAdditionSchema,
+        budgets: BudgetsSchema,
+        pools: z.array(z.strictObject({ pool: z.enum(LEASE_POOLS), denomination: z.enum(LEASE_DENOMINATIONS), amount: count })),
+        principal: z.string().min(1),
+        reason: z.string().max(1_000).nullable(),
     }),
 };
+/** Historical payload readers for record types whose current writer is newer. */
+const HISTORICAL_RECORD_PAYLOADS = {
+    'model.call.started': { 1: ModelCallStartedV1ReaderSchema },
+    'state.closure.rehydrated': { 1: StateClosureRehydratedV1Schema },
+    'executor.continuation.accepted': { 1: ExecutorContinuationAcceptedV1Schema },
+};
+/** Resolve the payload semantics named by one portable record envelope. */
+export function recordPayloadSchema(type, version) {
+    if (!RECORD_TYPES.includes(type))
+        return null;
+    const recordType = type;
+    const versions = RECORD_TYPE_VERSIONS[recordType];
+    if (!versions.includes(version))
+        return null;
+    return HISTORICAL_RECORD_PAYLOADS[recordType]?.[version] ?? RECORD_PAYLOADS[recordType];
+}
+/** The newest payload version written for one canonical record type. */
+export function latestRecordPayloadVersion(type) {
+    return Math.max(...RECORD_TYPE_VERSIONS[type]);
+}
+/** A runtime-independent list of record payload versions this release reads. */
+export function recordVersionCatalogue() {
+    return {
+        schema: 'zero-ar-record-version-catalogue/1',
+        records: Object.fromEntries(RECORD_TYPES.map((type) => [
+            type,
+            { versions: [...RECORD_TYPE_VERSIONS[type]] },
+        ])),
+    };
+}
+/** Language-neutral JSON Schemas for every record type and supported version. */
+export function recordSchemaCatalogue() {
+    return {
+        schema: 'zero-ar-record-schema-catalogue/1',
+        records: Object.fromEntries(RECORD_TYPES.map((type) => [
+            type,
+            {
+                versions: Object.fromEntries(RECORD_TYPE_VERSIONS[type].map((version) => [
+                    String(version),
+                    z.toJSONSchema(recordPayloadSchema(type, version), { io: 'input' }),
+                ])),
+            },
+        ])),
+    };
+}
 /** The run head snapshot: a synchronization checkpoint, never the canonical source (X-2). */
 export const RunSnapshotSchema = z.strictObject({
     run_id: id('run'),
@@ -1731,8 +2128,13 @@ export const RunResultSchema = z.strictObject({
         invalidated: count,
         untouched: count,
     }).nullable(),
-    /** Effect outcomes by state; unreconcilable is an effect state, never a run terminal (LIF-024). */
-    effects: z.strictObject({ prepared: count, dispatched: count, committed: count, withdrawn: count, outcome_unknown: count, unreconcilable: count }),
+    /**
+     * Effect outcomes by state; unreconcilable is an effect state, never a run
+     * terminal (LIF-024). committed counts effects the owner applied or had
+     * already applied. refused counts effects settled on a definite owner
+     * refusal, which applied nothing; an older server omits it.
+     */
+    effects: z.strictObject({ prepared: count, dispatched: count, committed: count, withdrawn: count, outcome_unknown: count, unreconcilable: count, refused: count.optional() }),
     /** What constrains the claim: each open condition with its reference and next action (LIF-038). */
     blocking_operational_outcomes: z.array(z.strictObject({ kind: z.enum(BLOCKING_OUTCOME_KINDS), reference: z.string(), state: z.string(), next: z.string() })),
     not_established: z.array(z.string()),
@@ -1887,6 +2289,14 @@ export const StartAcceptedSchema = z.strictObject({
     repeated: z.boolean(),
     accepted_seq: z.number().int().positive(),
 });
+/** The answer to a budget amendment: the whole budget after it, and whether it repeats an earlier acceptance. */
+export const BudgetAmendmentAcceptedSchema = z.strictObject({
+    run_id: id('run'),
+    accepted: z.literal(true),
+    repeated: z.boolean(),
+    accepted_seq: z.number().int().positive(),
+    budgets: BudgetsSchema,
+});
 export const RebuildOutcomeSchema = z.strictObject({ equal: z.boolean(), healed: z.boolean() });
 export const ImportOutcomeSchema = z.strictObject({
     run_id: id('run'),
@@ -1897,6 +2307,10 @@ export const ImportOutcomeSchema = z.strictObject({
         imported: z.array(artifactHandle),
         not_transferred: z.array(ArtifactTransferOmissionSchema),
     }).optional(),
+    /** Referenced-state verification and restoration, present on continuation-grade bundles. */
+    state_closure: RunStateRehydrationReportSchema.optional(),
+    /** Data-only continuation summary, present on a continuation-grade bundle. */
+    continuation: RunContinuationCapsuleSchema.optional(),
 });
 export const RecordsPageSchema = z.strictObject({ records: z.array(RecordEnvelopeSchema) });
 /** One tenant-visible review item reconstructed from its durable run records. */
@@ -1911,6 +2325,8 @@ export const ReviewItemSchema = z.strictObject({
     checkpoint_id: z.string().min(1),
     /** When the item's answer deadline falls, where its task contract declares an answer window (LIF-035). */
     due_at: z.string().datetime().nullable().optional(),
+    /** The agent's question, when the agent asked rather than a check (GAP-010). */
+    question: AgentQuestionRecordSchema.optional(),
 });
 export const ReviewInboxSchema = z.strictObject({
     items: z.array(ReviewItemSchema),
@@ -1973,15 +2389,18 @@ export const PostureSchema = z.strictObject({
         })
             .optional(),
         context: z
-            .strictObject({
-            selector: z.literal('coverage-mmr-v1'),
-            mode: z.enum(CONTROLLER_MODES),
-            coverage_weight_ppm: z.number().int().min(0),
-            recency_weight_ppm: z.number().int().min(0),
-            redundancy_weight_ppm: z.number().int().min(0),
-            candidate_cutoff: z.number().int().min(1),
-            arithmetic: z.literal('integer-score-v1'),
-        })
+            .union([
+            z.strictObject({
+                selector: z.literal('coverage-mmr-v1'),
+                mode: z.enum(CONTROLLER_MODES),
+                coverage_weight_ppm: z.number().int().min(0),
+                recency_weight_ppm: z.number().int().min(0),
+                redundancy_weight_ppm: z.number().int().min(0),
+                candidate_cutoff: z.number().int().min(1),
+                arithmetic: z.literal('integer-score-v1'),
+            }),
+            HierarchicalContextPolicySchema,
+        ])
             .optional(),
         /**
          * The attention controller (BUD-009): each class's expected escalation
@@ -2048,21 +2467,6 @@ export const SCHEMA_REGISTRY = {
     CapabilityAdmissionListRequestSchema: { schema: CapabilityAdmissionListRequestSchema, placement: 'run-management', owner: 'runtime-core' },
     CapabilityAdmissionListSchema: { schema: CapabilityAdmissionListSchema, placement: 'observation', owner: 'runtime-core' },
     CapabilityAdmissionAcceptedSchema: { schema: CapabilityAdmissionAcceptedSchema, placement: 'observation', owner: 'runtime-core' },
-    BrowserLimitsSchema: { schema: BrowserLimitsSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserDestinationSchema: { schema: BrowserDestinationSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserCredentialBindingSchema: { schema: BrowserCredentialBindingSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserEffectPolicySchema: { schema: BrowserEffectPolicySchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserAdapterDescriptorSchema: { schema: BrowserAdapterDescriptorSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserBindingSchema: { schema: BrowserBindingSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserDestinationProposalSchema: { schema: BrowserDestinationProposalSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserDestinationDecisionSchema: { schema: BrowserDestinationDecisionSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserRequestProvenanceSchema: { schema: BrowserRequestProvenanceSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserProvenanceSchema: { schema: BrowserProvenanceSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserObservationResultSchema: { schema: BrowserObservationResultSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserEffectParametersSchema: { schema: BrowserEffectParametersSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserProfileHealthSchema: { schema: BrowserProfileHealthSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserLatencySummarySchema: { schema: BrowserLatencySummarySchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserMeasurementReportSchema: { schema: BrowserMeasurementReportSchema, placement: 'browser', owner: 'browser-capability' },
     PrincipalsSchema: { schema: PrincipalsSchema, placement: 'intake', owner: 'runtime-core' },
     ConsumptionSchema: { schema: ConsumptionSchema, placement: 'intake', owner: 'runtime-resources' },
     BudgetsSchema: { schema: BudgetsSchema, placement: 'intake', owner: 'runtime-resources' },
@@ -2199,6 +2603,9 @@ export const SCHEMA_REGISTRY = {
     SandboxWorkspaceBindingSchema: { schema: SandboxWorkspaceBindingSchema, placement: 'environment', owner: 'runtime-environments' },
     SandboxWorkspaceHandleSchema: { schema: SandboxWorkspaceHandleSchema, placement: 'environment', owner: 'runtime-environments' },
     SandboxWorkspaceAccessRequestSchema: { schema: SandboxWorkspaceAccessRequestSchema, placement: 'environment', owner: 'runtime-environments' },
+    SandboxWorkspacePolicySchema: { schema: SandboxWorkspacePolicySchema, placement: 'environment', owner: 'runtime-environments' },
+    SandboxWorkspaceTransferEntrySchema: { schema: SandboxWorkspaceTransferEntrySchema, placement: 'environment', owner: 'runtime-environments' },
+    SandboxWorkspaceTransferBundleSchema: { schema: SandboxWorkspaceTransferBundleSchema, placement: 'environment', owner: 'runtime-environments' },
     EnvironmentJobHandleSchema: { schema: EnvironmentJobHandleSchema, placement: 'environment', owner: 'runtime-core' },
     PrepareEnvironmentRequestSchema: { schema: PrepareEnvironmentRequestSchema, placement: 'environment', owner: 'runtime-core' },
     PrepareEnvironmentResultSchema: { schema: PrepareEnvironmentResultSchema, placement: 'environment', owner: 'runtime-core' },
@@ -2219,6 +2626,11 @@ export const SCHEMA_REGISTRY = {
     AbandonEnvironmentResultSchema: { schema: AbandonEnvironmentResultSchema, placement: 'environment', owner: 'runtime-core' },
     EntrySchema: { schema: EntrySchema, placement: 'observation', owner: 'runtime-core' },
     RecordEnvelopeSchema: { schema: RecordEnvelopeSchema, placement: 'observation', owner: 'runtime-core' },
+    PortableRecordEnvelopeSchema: { schema: PortableRecordEnvelopeSchema, placement: 'observation', owner: 'runtime-core' },
+    RunBundleManifestV1Schema: { schema: RunBundleManifestV1Schema, placement: 'observation', owner: 'runtime-core' },
+    RunBundleManifestV2Schema: { schema: RunBundleManifestV2Schema, placement: 'observation', owner: 'runtime-core' },
+    RunBundleManifestSchema: { schema: RunBundleManifestSchema, placement: 'observation', owner: 'runtime-core' },
+    RunMaterializationSchema: { schema: RunMaterializationSchema, placement: 'observation', owner: 'runtime-core' },
     RunSnapshotSchema: { schema: RunSnapshotSchema, placement: 'observation', owner: 'runtime-core' },
     WorkQueryRequestSchema: { schema: WorkQueryRequestSchema, placement: 'observation', owner: 'runtime-core' },
     WorkQueryItemSchema: { schema: WorkQueryItemSchema, placement: 'observation', owner: 'runtime-core' },
@@ -2253,10 +2665,18 @@ export const SCHEMA_REGISTRY = {
     CreatedRunSchema: { schema: CreatedRunSchema, placement: 'intake', owner: 'runtime-core' },
     ControlAcceptedSchema: { schema: ControlAcceptedSchema, placement: 'control', owner: 'runtime-core' },
     RunLifecycleCommandRequestSchema: { schema: RunLifecycleCommandRequestSchema, placement: 'run-management', owner: 'runtime-core' },
+    BudgetAmendmentRequestSchema: { schema: BudgetAmendmentRequestSchema, placement: 'run-management', owner: 'runtime-core' },
+    BudgetAmendmentAcceptedSchema: { schema: BudgetAmendmentAcceptedSchema, placement: 'run-management', owner: 'runtime-core' },
     RunRefSchema: { schema: RunRefSchema, placement: 'run-management', owner: 'runtime-core' },
     StartAcceptedSchema: { schema: StartAcceptedSchema, placement: 'run-management', owner: 'runtime-core' },
     RebuildOutcomeSchema: { schema: RebuildOutcomeSchema, placement: 'run-management', owner: 'runtime-core' },
     ImportOutcomeSchema: { schema: ImportOutcomeSchema, placement: 'run-management', owner: 'runtime-core' },
+    RunContinuationCapsuleSchema: { schema: RunContinuationCapsuleSchema, placement: 'run-management', owner: 'runtime-core' },
+    RunContinuationExecutorSchema: { schema: RunContinuationExecutorSchema, placement: 'run-management', owner: 'runtime-core' },
+    RunContinuationDeclarationSchema: { schema: RunContinuationDeclarationSchema, placement: 'run-management', owner: 'runtime-core' },
+    RunContinuationAdmissionRequestSchema: { schema: RunContinuationAdmissionRequestSchema, placement: 'run-management', owner: 'runtime-core' },
+    RunContinuationCompatibilityReportSchema: { schema: RunContinuationCompatibilityReportSchema, placement: 'run-management', owner: 'runtime-core' },
+    RunContinuationAcceptedSchema: { schema: RunContinuationAcceptedSchema, placement: 'run-management', owner: 'runtime-core' },
     RecordsPageSchema: { schema: RecordsPageSchema, placement: 'observation', owner: 'runtime-core' },
     ReviewItemSchema: { schema: ReviewItemSchema, placement: 'observation', owner: 'quality-plane' },
     ReviewInboxSchema: { schema: ReviewInboxSchema, placement: 'observation', owner: 'quality-plane' },
@@ -2363,6 +2783,12 @@ export const SCHEMA_REGISTRY = {
     ContextReplaySpanSchema: { schema: ContextReplaySpanSchema, placement: 'observation', owner: 'runtime-core' },
     ContextReplayArtifactSpanSchema: { schema: ContextReplayArtifactSpanSchema, placement: 'observation', owner: 'runtime-core' },
     ContextReplaySchema: { schema: ContextReplaySchema, placement: 'observation', owner: 'runtime-core' },
+    HierarchicalContextPolicySchema: { schema: HierarchicalContextPolicySchema, placement: 'runtime-identity', owner: 'runtime-core' },
+    ContextSegmentCoverageSchema: { schema: ContextSegmentCoverageSchema, placement: 'runtime-identity', owner: 'runtime-core' },
+    ContextSegmentSummarizerSchema: { schema: ContextSegmentSummarizerSchema, placement: 'runtime-identity', owner: 'runtime-core' },
+    ContextSegmentManifestSchema: { schema: ContextSegmentManifestSchema, placement: 'observation', owner: 'runtime-core' },
+    ContextExpandRequestSchema: { schema: ContextExpandRequestSchema, placement: 'run-management', owner: 'runtime-core' },
+    ContextExpansionResultSchema: { schema: ContextExpansionResultSchema, placement: 'observation', owner: 'runtime-core' },
     WakeSchedulerDeclarationSchema: { schema: WakeSchedulerDeclarationSchema, placement: 'operator-management', owner: 'runtime-core' },
     WakeClockDiagnosticSchema: { schema: WakeClockDiagnosticSchema, placement: 'operator-management', owner: 'runtime-core' },
     WakeSchedulerReportSchema: { schema: WakeSchedulerReportSchema, placement: 'operator-management', owner: 'runtime-core' },
@@ -2379,34 +2805,21 @@ export const SCHEMA_REGISTRY = {
     AttentionCapacitySnapshotPublishRequestSchema: { schema: AttentionCapacitySnapshotPublishRequestSchema, placement: 'operator-management', owner: 'quality-plane' },
     AttentionCapacitySnapshotSchema: { schema: AttentionCapacitySnapshotSchema, placement: 'operator-management', owner: 'quality-plane' },
     AttentionDashboardSchema: { schema: AttentionDashboardSchema, placement: 'operator-management', owner: 'quality-plane' },
-    BrowserBindingTemplateSchema: { schema: BrowserBindingTemplateSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserIntakeInputSchema: { schema: BrowserIntakeInputSchema, placement: 'intake', owner: 'browser-capability' },
-    ResolvedBrowserTemplateSchema: { schema: ResolvedBrowserTemplateSchema, placement: 'runtime-identity', owner: 'browser-capability' },
-    BrowserDestinationProposalRequestSchema: { schema: BrowserDestinationProposalRequestSchema, placement: 'browser', owner: 'browser-capability' },
-    BrowserDestinationDecisionRequestSchema: { schema: BrowserDestinationDecisionRequestSchema, placement: 'browser', owner: 'browser-capability' },
     ArtifactSweepRequestSchema: { schema: ArtifactSweepRequestSchema, placement: 'operator-management', owner: 'runtime-core' },
     ArtifactSweepResultSchema: { schema: ArtifactSweepResultSchema, placement: 'operator-management', owner: 'runtime-core' },
     ArtifactTransferOmissionSchema: { schema: ArtifactTransferOmissionSchema, placement: 'run-management', owner: 'runtime-core' },
+    RunStateClosureMemberSchema: { schema: RunStateClosureMemberSchema, placement: 'run-management', owner: 'runtime-core' },
+    RunStateClosureManifestSchema: { schema: RunStateClosureManifestSchema, placement: 'run-management', owner: 'runtime-core' },
+    RunStateRehydrationMemberSchema: { schema: RunStateRehydrationMemberSchema, placement: 'run-management', owner: 'runtime-core' },
+    RunStateRehydrationReportSchema: { schema: RunStateRehydrationReportSchema, placement: 'run-management', owner: 'runtime-core' },
     AliasHistorySchema: { schema: AliasHistorySchema, placement: 'publication', owner: 'contracts-dx' },
     RegistryRebuildOutcomeSchema: { schema: RegistryRebuildOutcomeSchema, placement: 'publication', owner: 'contracts-dx' },
     PublicationExportFrameSchema: { schema: PublicationExportFrameSchema, placement: 'publication', owner: 'contracts-dx' },
     PublicationImportOutcomeSchema: { schema: PublicationImportOutcomeSchema, placement: 'publication', owner: 'contracts-dx' },
-    LegacyModelPoolImportRequestSchema: { schema: LegacyModelPoolImportRequestSchema, placement: 'operator-management', owner: 'runtime-core' },
     ToolSourceDriftRecordSchema: { schema: ToolSourceDriftRecordSchema, placement: 'operator-management', owner: 'runtime-core' },
     ToolSourceDriftReportSchema: { schema: ToolSourceDriftReportSchema, placement: 'operator-management', owner: 'runtime-core' },
-    ToolSourceIngressDeliverySchema: { schema: ToolSourceIngressDeliverySchema, placement: 'operator-management', owner: 'runtime-core' },
-    ToolSourceIngressReceiptSchema: { schema: ToolSourceIngressReceiptSchema, placement: 'operator-management', owner: 'runtime-core' },
-    EffectGrantReissueRequestSchema: { schema: EffectGrantReissueRequestSchema, placement: 'effect-dispatch', owner: 'effect-plane' },
-    EffectGrantReissueOutcomeSchema: { schema: EffectGrantReissueOutcomeSchema, placement: 'effect-dispatch', owner: 'effect-plane' },
-    EffectGrantRevocationRequestSchema: { schema: EffectGrantRevocationRequestSchema, placement: 'effect-dispatch', owner: 'effect-plane' },
-    EffectGrantRevocationOutcomeSchema: { schema: EffectGrantRevocationOutcomeSchema, placement: 'effect-dispatch', owner: 'effect-plane' },
-    EffectAuthorityEpochAdvanceRequestSchema: { schema: EffectAuthorityEpochAdvanceRequestSchema, placement: 'effect-dispatch', owner: 'effect-plane' },
-    EffectAuthorityEpochAdvanceOutcomeSchema: { schema: EffectAuthorityEpochAdvanceOutcomeSchema, placement: 'effect-dispatch', owner: 'effect-plane' },
     EffectTargetListSchema: { schema: EffectTargetListSchema, placement: 'effect-dispatch', owner: 'effect-plane' },
     WorkspaceIntakeBindingSchema: { schema: WorkspaceIntakeBindingSchema, placement: 'intake', owner: 'runtime-core' },
-    RegisterWorkspaceInstanceRequestSchema: { schema: RegisterWorkspaceInstanceRequestSchema, placement: 'environment', owner: 'runtime-core' },
-    WorkspaceInstanceSchema: { schema: WorkspaceInstanceSchema, placement: 'environment', owner: 'runtime-core' },
-    WorkspaceInstanceListSchema: { schema: WorkspaceInstanceListSchema, placement: 'environment', owner: 'runtime-core' },
     ResolvedWorkspaceInstanceSchema: { schema: ResolvedWorkspaceInstanceSchema, placement: 'runtime-identity', owner: 'runtime-core' },
     RunResumeDeferredRequestSchema: { schema: RunResumeDeferredRequestSchema, placement: 'run-management', owner: 'runtime-core' },
 };

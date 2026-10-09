@@ -20,24 +20,20 @@ export declare const RegisterEnvironmentRequestSchema: z.ZodObject<{
             version: z.ZodString;
             adapter_digest: z.ZodString;
             backend: z.ZodEnum<{
-                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
                 "openai-agents": "openai-agents";
+                process: "process";
                 oci: "oci";
-                "cloudflare-sandbox": "cloudflare-sandbox";
-                modal: "modal";
-                daytona: "daytona";
-                "vercel-sandbox": "vercel-sandbox";
             }>;
             operations: z.ZodArray<z.ZodEnum<{
                 cancel: "cancel";
-                submit: "submit";
                 observe: "observe";
                 teardown: "teardown";
                 descriptor: "descriptor";
                 prepare: "prepare";
+                submit: "submit";
                 reconcile: "reconcile";
                 collect: "collect";
                 abandon: "abandon";
@@ -127,6 +123,30 @@ export declare const RegisterEnvironmentRequestSchema: z.ZodObject<{
         cost_dimensions: z.ZodArray<z.ZodString>;
         created_by: z.ZodString;
         reviewed_by: z.ZodString;
+        runtime: z.ZodOptional<z.ZodObject<{
+            shm_mib: z.ZodOptional<z.ZodNumber>;
+            tmpfs: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                target: z.ZodString;
+                size_mib: z.ZodNumber;
+            }, z.core.$strict>>>;
+            init: z.ZodOptional<z.ZodBoolean>;
+            syscall_profile_ref: z.ZodOptional<z.ZodString>;
+            browser_sandbox: z.ZodOptional<z.ZodEnum<{
+                enabled: "enabled";
+                "disabled-by-declaration": "disabled-by-declaration";
+            }>>;
+            container_lifetime: z.ZodOptional<z.ZodEnum<{
+                "per-command": "per-command";
+                "per-run": "per-run";
+            }>>;
+            segment_process: z.ZodOptional<z.ZodEnum<{
+                image: "image";
+                keepalive: "keepalive";
+            }>>;
+            idle_ms: z.ZodOptional<z.ZodNumber>;
+            max_segment_ms: z.ZodOptional<z.ZodNumber>;
+            keep_previous_generation: z.ZodOptional<z.ZodBoolean>;
+        }, z.core.$strict>>;
     }, z.core.$strict>;
     secret_issuance_epoch: z.ZodNumber;
 }, z.core.$strict>;
@@ -162,24 +182,20 @@ export declare const EnvironmentProfileListSchema: z.ZodObject<{
                 version: z.ZodString;
                 adapter_digest: z.ZodString;
                 backend: z.ZodEnum<{
-                    process: "process";
                     ssh: "ssh";
                     firecracker: "firecracker";
                     apptainer: "apptainer";
                     "openai-agents": "openai-agents";
+                    process: "process";
                     oci: "oci";
-                    "cloudflare-sandbox": "cloudflare-sandbox";
-                    modal: "modal";
-                    daytona: "daytona";
-                    "vercel-sandbox": "vercel-sandbox";
                 }>;
                 operations: z.ZodArray<z.ZodEnum<{
                     cancel: "cancel";
-                    submit: "submit";
                     observe: "observe";
                     teardown: "teardown";
                     descriptor: "descriptor";
                     prepare: "prepare";
+                    submit: "submit";
                     reconcile: "reconcile";
                     collect: "collect";
                     abandon: "abandon";
@@ -269,6 +285,30 @@ export declare const EnvironmentProfileListSchema: z.ZodObject<{
             cost_dimensions: z.ZodArray<z.ZodString>;
             created_by: z.ZodString;
             reviewed_by: z.ZodString;
+            runtime: z.ZodOptional<z.ZodObject<{
+                shm_mib: z.ZodOptional<z.ZodNumber>;
+                tmpfs: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    target: z.ZodString;
+                    size_mib: z.ZodNumber;
+                }, z.core.$strict>>>;
+                init: z.ZodOptional<z.ZodBoolean>;
+                syscall_profile_ref: z.ZodOptional<z.ZodString>;
+                browser_sandbox: z.ZodOptional<z.ZodEnum<{
+                    enabled: "enabled";
+                    "disabled-by-declaration": "disabled-by-declaration";
+                }>>;
+                container_lifetime: z.ZodOptional<z.ZodEnum<{
+                    "per-command": "per-command";
+                    "per-run": "per-run";
+                }>>;
+                segment_process: z.ZodOptional<z.ZodEnum<{
+                    image: "image";
+                    keepalive: "keepalive";
+                }>>;
+                idle_ms: z.ZodOptional<z.ZodNumber>;
+                max_segment_ms: z.ZodOptional<z.ZodNumber>;
+                keep_previous_generation: z.ZodOptional<z.ZodBoolean>;
+            }, z.core.$strict>>;
         }, z.core.$strict>;
         state: z.ZodEnum<{
             disabled: "disabled";
@@ -294,24 +334,20 @@ export declare const EnvironmentDoctorResultSchema: z.ZodObject<{
         version: z.ZodString;
         adapter_digest: z.ZodString;
         backend: z.ZodEnum<{
-            process: "process";
             ssh: "ssh";
             firecracker: "firecracker";
             apptainer: "apptainer";
             "openai-agents": "openai-agents";
+            process: "process";
             oci: "oci";
-            "cloudflare-sandbox": "cloudflare-sandbox";
-            modal: "modal";
-            daytona: "daytona";
-            "vercel-sandbox": "vercel-sandbox";
         }>;
         operations: z.ZodArray<z.ZodEnum<{
             cancel: "cancel";
-            submit: "submit";
             observe: "observe";
             teardown: "teardown";
             descriptor: "descriptor";
             prepare: "prepare";
+            submit: "submit";
             reconcile: "reconcile";
             collect: "collect";
             abandon: "abandon";
@@ -570,16 +606,12 @@ export declare const EnvironmentResolutionRequestSchema: z.ZodObject<{
         "effect-proposal": "effect-proposal";
     }> & z.ZodType<"observation" | "run-internal", "observation" | "run-internal" | "effect-proposal", z.core.$ZodTypeInternals<"observation" | "run-internal", "observation" | "run-internal" | "effect-proposal">>;
     acceptable_backends: z.ZodArray<z.ZodEnum<{
-        process: "process";
         ssh: "ssh";
         firecracker: "firecracker";
         apptainer: "apptainer";
         "openai-agents": "openai-agents";
+        process: "process";
         oci: "oci";
-        "cloudflare-sandbox": "cloudflare-sandbox";
-        modal: "modal";
-        daytona: "daytona";
-        "vercel-sandbox": "vercel-sandbox";
     }>>;
     acceptable_isolations: z.ZodArray<z.ZodEnum<{
         none: "none";
@@ -616,24 +648,20 @@ export declare const EnvironmentResolutionResultSchema: z.ZodObject<{
             version: z.ZodString;
             adapter_digest: z.ZodString;
             backend: z.ZodEnum<{
-                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
                 "openai-agents": "openai-agents";
+                process: "process";
                 oci: "oci";
-                "cloudflare-sandbox": "cloudflare-sandbox";
-                modal: "modal";
-                daytona: "daytona";
-                "vercel-sandbox": "vercel-sandbox";
             }>;
             operations: z.ZodArray<z.ZodEnum<{
                 cancel: "cancel";
-                submit: "submit";
                 observe: "observe";
                 teardown: "teardown";
                 descriptor: "descriptor";
                 prepare: "prepare";
+                submit: "submit";
                 reconcile: "reconcile";
                 collect: "collect";
                 abandon: "abandon";
@@ -723,6 +751,30 @@ export declare const EnvironmentResolutionResultSchema: z.ZodObject<{
         cost_dimensions: z.ZodArray<z.ZodString>;
         created_by: z.ZodString;
         reviewed_by: z.ZodString;
+        runtime: z.ZodOptional<z.ZodObject<{
+            shm_mib: z.ZodOptional<z.ZodNumber>;
+            tmpfs: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                target: z.ZodString;
+                size_mib: z.ZodNumber;
+            }, z.core.$strict>>>;
+            init: z.ZodOptional<z.ZodBoolean>;
+            syscall_profile_ref: z.ZodOptional<z.ZodString>;
+            browser_sandbox: z.ZodOptional<z.ZodEnum<{
+                enabled: "enabled";
+                "disabled-by-declaration": "disabled-by-declaration";
+            }>>;
+            container_lifetime: z.ZodOptional<z.ZodEnum<{
+                "per-command": "per-command";
+                "per-run": "per-run";
+            }>>;
+            segment_process: z.ZodOptional<z.ZodEnum<{
+                image: "image";
+                keepalive: "keepalive";
+            }>>;
+            idle_ms: z.ZodOptional<z.ZodNumber>;
+            max_segment_ms: z.ZodOptional<z.ZodNumber>;
+            keep_previous_generation: z.ZodOptional<z.ZodBoolean>;
+        }, z.core.$strict>>;
     }, z.core.$strict>;
     considered_profile_refs: z.ZodArray<z.ZodString>;
 }, z.core.$strict>;

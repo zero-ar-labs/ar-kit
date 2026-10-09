@@ -81,6 +81,7 @@ export class CorpusStore {
 /** Resolve every citation in a claim set and account the support. */
 export function groundClaims(set, resolver) {
     const unresolved = [];
+    const uncited_guarantees = [];
     const resolvedHashes = new Set();
     let citations = 0;
     const byText = new Map();
@@ -88,6 +89,8 @@ export function groundClaims(set, resolver) {
         const group = byText.get(claim.text) ?? { claim_ids: [], spans: new Set() };
         group.claim_ids.push(claim.claim_id);
         byText.set(claim.text, group);
+        if (claim.label === 'guarantee' && claim.citations.length === 0)
+            uncited_guarantees.push(claim.claim_id);
         for (const citation of claim.citations) {
             citations += 1;
             const resolution = resolver.resolve(citation);
@@ -104,6 +107,7 @@ export function groundClaims(set, resolver) {
         claims: set.claims.length,
         citations,
         unresolved,
+        uncited_guarantees,
         distinct_support: resolvedHashes.size,
         duplicate_citations: citations - unresolved.length - resolvedHashes.size,
         support: [...byText.values()].map((g) => ({ claim_ids: g.claim_ids, distinct_spans: g.spans.size })),
@@ -116,7 +120,9 @@ export function groundClaims(set, resolver) {
  * claim set is a shape rejection, because evidence-completeness only scopes
  * to the structured representation (CLM-001); a citation that does not
  * resolve is a grounding rejection and is never admitted as established
- * support (CLM-002, QCV-006).
+ * support (CLM-002, QCV-006). A claim labelled guarantee that cites nothing
+ * is a grounding rejection too: no citations means no evidence, not an
+ * empty set of failures.
  */
 export function groundedClaims(resolver) {
     return {
@@ -126,6 +132,7 @@ export function groundedClaims(resolver) {
         evaluate(input) {
             const unstructured = [];
             const ungrounded = [];
+            const uncited = [];
             let resolvedSpans = 0;
             for (const item of input.items) {
                 if (item.state !== 'completed_unverified' && item.state !== 'verified')
@@ -138,10 +145,12 @@ export function groundedClaims(resolver) {
                 const report = groundClaims(parsed.set, resolver);
                 if (report.unresolved.length > 0)
                     ungrounded.push(item.item_id);
+                else if (report.uncited_guarantees.length > 0)
+                    uncited.push(item.item_id);
                 else
                     resolvedSpans += report.distinct_support;
             }
-            const rejected = [...unstructured, ...ungrounded];
+            const rejected = [...unstructured, ...ungrounded, ...uncited];
             if (rejected.length === 0) {
                 return {
                     verdict: 'pass',
@@ -154,6 +163,7 @@ export function groundedClaims(resolver) {
                 failure_class: unstructured.length > 0 ? 'shape' : 'grounding',
                 reason: (unstructured.length > 0 ? `${unstructured.length} outputs are not structured claim sets, so no completeness statement covers them. ` : '') +
                     (ungrounded.length > 0 ? `${ungrounded.length} outputs cite spans that do not resolve to original bytes. ` : '') +
+                    (uncited.length > 0 ? `${uncited.length} outputs state a guarantee that cites nothing; cite the span that supports it or label it an assumption, heuristic or open question. ` : '') +
                     `This check is ${GROUNDING_LIMIT}`,
             };
         },

@@ -12,6 +12,7 @@
  */
 import { z } from 'zod';
 import { ArtifactContextSpanSchema, ArtifactEvidenceBlockerSchema, CitedSpanSchema, ContextFenceNonceSchema } from "./claims.js";
+import { ContextSegmentManifestSchema } from "./context-hierarchy.js";
 import { CONTEXT_REPLAY_SPAN_STATUSES } from "./vocab.js";
 const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const runId = z.string().regex(/^run_[0-9a-f]{32}$/, 'expected a run id');
@@ -29,6 +30,12 @@ export const ContextReplayArtifactSpanSchema = z.strictObject({
     status: z.enum(CONTEXT_REPLAY_SPAN_STATUSES),
     reason: replayReason,
 });
+/** One summary artifact from the recorded window and how it reads now. */
+export const ContextReplaySegmentSchema = z.strictObject({
+    manifest: ContextSegmentManifestSchema,
+    status: z.enum(CONTEXT_REPLAY_SPAN_STATUSES),
+    reason: replayReason,
+});
 /** The replay of one turn's window. Equal holds only when every span resolves and the refs match. */
 export const ContextReplaySchema = z.strictObject({
     run_id: runId,
@@ -40,6 +47,7 @@ export const ContextReplaySchema = z.strictObject({
     spans_recorded: z.boolean(),
     spans: z.array(ContextReplaySpanSchema),
     artifact_spans: z.array(ContextReplayArtifactSpanSchema),
+    segments: z.array(ContextReplaySegmentSchema),
     fence_nonce: ContextFenceNonceSchema.nullable(),
     evidence_blockers: z.array(ArtifactEvidenceBlockerSchema),
 });

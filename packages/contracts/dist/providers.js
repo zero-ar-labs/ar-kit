@@ -10,7 +10,7 @@
  * no contract in this file is an inference request.
  */
 import { z } from 'zod';
-import { CREDENTIAL_BINDING_STATES, MODEL_CATALOGUE_SOURCES, MODEL_COMPATIBILITY_STATES, MODEL_CREDENTIAL_MODES, MODEL_PROTOCOL_ADAPTERS, MODEL_PROVIDERS, MODEL_PROVIDER_PROFILES, MODEL_USAGE_MEASUREMENTS, PROVIDER_CREDENTIAL_PURPOSES, PROVIDER_INSTANCE_STATES, PROVIDER_MODEL_STATES, } from "./vocab.js";
+import { CREDENTIAL_BINDING_STATES, MODEL_CATALOGUE_SOURCES, MODEL_COMPATIBILITY_STATES, MODEL_CREDENTIAL_MODES, MODEL_IMAGE_INPUT_STATES, MODEL_PROTOCOL_ADAPTERS, MODEL_PROVIDERS, MODEL_PROVIDER_PROFILES, MODEL_USAGE_MEASUREMENTS, PROVIDER_CREDENTIAL_PURPOSES, PROVIDER_INSTANCE_STATES, PROVIDER_MODEL_STATES, } from "./vocab.js";
 import { contentHash } from "./ids.js";
 const ref = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const name = z.string().regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'expected lowercase dot-separated naming');
@@ -89,7 +89,24 @@ export const ProviderCompatibilitySchema = z.strictObject({
     usage: z.enum(MODEL_USAGE_MEASUREMENTS).exclude(['estimated']),
     upstream_attestation_ref: ref.nullable(),
     notes: z.array(z.string().min(1).max(500)).max(16),
+    /** Whether the model accepts image content. Absent takes the profile default from providerImageInput. */
+    image_input: z.enum(MODEL_IMAGE_INPUT_STATES).optional(),
+    /** Whether prior assistant calls and correlated tool results use the Chat Completions message protocol. */
+    tool_call_correlation: z.enum(MODEL_COMPATIBILITY_STATES).optional(),
+    /** Whether function definitions accept the provider strict-schema flag. */
+    strict_function_schemas: z.enum(MODEL_COMPATIBILITY_STATES).optional(),
 });
+/** Profiles whose tested defaults accept image content. Every other profile receives a note naming each image. */
+const IMAGE_INPUT_PROFILES = new Set(['anthropic', 'openai']);
+/**
+ * Whether one profile's model accepts images: what its admitted statement
+ * declares, else the profile default, which is supported for anthropic and
+ * openai and unsupported for every other profile. A statement admitted
+ * before this fact existed keeps its identity and takes the default.
+ */
+export function providerImageInput(profile, compatibility) {
+    return compatibility?.image_input ?? (IMAGE_INPUT_PROFILES.has(profile) ? 'supported' : 'unsupported');
+}
 /** Content identity for the admitted compatibility statement. */
 export function modelCompatibilityRef(compatibility) {
     return contentHash(ProviderCompatibilitySchema.parse(compatibility));
@@ -118,6 +135,8 @@ export function providerProfileCompatibility(profile) {
         usage: 'reported',
         upstream_attestation_ref: null,
         notes: [],
+        tool_call_correlation: profile === 'anthropic' || profile === 'scripted' ? 'unsupported' : 'supported',
+        strict_function_schemas: profile === 'openai' ? 'supported' : 'unsupported',
     };
     if (profile === 'generic-openai-compatible') {
         return {
@@ -128,20 +147,22 @@ export function providerProfileCompatibility(profile) {
             usage: 'absent',
             upstream_attestation_ref: null,
             notes: ['No compatible behavior is inferred from an endpoint URL or model name.'],
+            tool_call_correlation: 'unknown',
+            strict_function_schemas: 'unknown',
         };
     }
     if (profile === 'litellm') {
         return {
             ...full,
             usage: 'untrusted',
-            notes: ['The configured LiteLLM upstream is opaque without a separate admitted attestation.'],
+            notes: ['The configured LiteLLM upstream is opaque without a separate admitted attestation. Strict function schemas stay disabled until the upstream declares them.'],
         };
     }
     if (profile === 'ollama') {
         return {
             ...full,
             usage: 'untrusted',
-            notes: ['The tested Ollama profile uses explicit no-auth mode.'],
+            notes: ['The tested Ollama profile uses explicit no-auth mode. Strict function schemas stay disabled for this profile.'],
         };
     }
     return full;
@@ -277,14 +298,4 @@ export const ModelSelectionSchema = z.strictObject({
     provider_model_revision: z.string().min(1).max(256),
     assurance_facts_ref: ref.nullable(),
     credential_epoch: z.number().int().min(1).nullable(),
-});
-/**
- * An operator's explicit, audited move of a tenant's deprecated single
- * provider fields into the model pool (DXI-017). The provider model id comes
- * from the tenant's deployment configuration, never from this body, and an
- * instance whose adapter differs from the configured one refuses.
- */
-export const LegacyModelPoolImportRequestSchema = z.strictObject({
-    provider_instance_ref: ref,
-    alias: name.optional(),
 });

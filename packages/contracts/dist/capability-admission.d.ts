@@ -142,6 +142,7 @@ export declare const CapabilityNextActionSchema: z.ZodObject<{
         "registry:quarantine": "registry:quarantine";
         "review:answer": "review:answer";
         "review:read": "review:read";
+        "run:budget": "run:budget";
         "run:cancel": "run:cancel";
         "run:control": "run:control";
         "run:create": "run:create";
@@ -313,6 +314,7 @@ export declare const CapabilityAdmissionPlanSchema: z.ZodObject<{
             "registry:quarantine": "registry:quarantine";
             "review:answer": "review:answer";
             "review:read": "review:read";
+            "run:budget": "run:budget";
             "run:cancel": "run:cancel";
             "run:control": "run:control";
             "run:create": "run:create";
@@ -414,6 +416,7 @@ export declare const CapabilityAdmissionViewSchema: z.ZodObject<{
             "registry:quarantine": "registry:quarantine";
             "review:answer": "review:answer";
             "review:read": "review:read";
+            "run:budget": "run:budget";
             "run:cancel": "run:cancel";
             "run:control": "run:control";
             "run:create": "run:create";
@@ -585,6 +588,7 @@ export declare const CapabilityAdmissionViewSchema: z.ZodObject<{
                 "registry:quarantine": "registry:quarantine";
                 "review:answer": "review:answer";
                 "review:read": "review:read";
+                "run:budget": "run:budget";
                 "run:cancel": "run:cancel";
                 "run:control": "run:control";
                 "run:create": "run:create";
@@ -688,6 +692,7 @@ export declare const CapabilityAdmissionViewSchema: z.ZodObject<{
             "registry:quarantine": "registry:quarantine";
             "review:answer": "review:answer";
             "review:read": "review:read";
+            "run:budget": "run:budget";
             "run:cancel": "run:cancel";
             "run:control": "run:control";
             "run:create": "run:create";
@@ -778,6 +783,7 @@ export declare const CapabilityAdmissionListSchema: z.ZodObject<{
                 "registry:quarantine": "registry:quarantine";
                 "review:answer": "review:answer";
                 "review:read": "review:read";
+                "run:budget": "run:budget";
                 "run:cancel": "run:cancel";
                 "run:control": "run:control";
                 "run:create": "run:create";
@@ -949,6 +955,7 @@ export declare const CapabilityAdmissionListSchema: z.ZodObject<{
                     "registry:quarantine": "registry:quarantine";
                     "review:answer": "review:answer";
                     "review:read": "review:read";
+                    "run:budget": "run:budget";
                     "run:cancel": "run:cancel";
                     "run:control": "run:control";
                     "run:create": "run:create";
@@ -1052,6 +1059,7 @@ export declare const CapabilityAdmissionListSchema: z.ZodObject<{
                 "registry:quarantine": "registry:quarantine";
                 "review:answer": "review:answer";
                 "review:read": "review:read";
+                "run:budget": "run:budget";
                 "run:cancel": "run:cancel";
                 "run:control": "run:control";
                 "run:create": "run:create";
@@ -1149,6 +1157,7 @@ export declare const CapabilityAdmissionAcceptedSchema: z.ZodObject<{
                 "registry:quarantine": "registry:quarantine";
                 "review:answer": "review:answer";
                 "review:read": "review:read";
+                "run:budget": "run:budget";
                 "run:cancel": "run:cancel";
                 "run:control": "run:control";
                 "run:create": "run:create";
@@ -1320,6 +1329,7 @@ export declare const CapabilityAdmissionAcceptedSchema: z.ZodObject<{
                     "registry:quarantine": "registry:quarantine";
                     "review:answer": "review:answer";
                     "review:read": "review:read";
+                    "run:budget": "run:budget";
                     "run:cancel": "run:cancel";
                     "run:control": "run:control";
                     "run:create": "run:create";
@@ -1423,6 +1433,7 @@ export declare const CapabilityAdmissionAcceptedSchema: z.ZodObject<{
                 "registry:quarantine": "registry:quarantine";
                 "review:answer": "review:answer";
                 "review:read": "review:read";
+                "run:budget": "run:budget";
                 "run:cancel": "run:cancel";
                 "run:control": "run:control";
                 "run:create": "run:create";

@@ -107,7 +107,6 @@ export { createZeroAR, ZeroAR, RunHandle } from "./embed.js";
 export { commitCompiledPublication, publishCapabilitySource } from "./capability-admission.js";
 export { SOURCE_KINDS, loadProject, lockBytes, renderDiagnostics } from "./project.js";
 export { developmentLoop } from "./development.js";
-export { authorizeBrowserDestination, declareBrowserTools, defineBrowserBinding, proposeBrowserDestination, recordBrowserDestinationDecision, } from "./browser.js";
 export { authoringScaffold, scaffoldBindingProfile, scaffoldBytes, scaffoldDomainPack, scaffoldProject, scaffoldSkill, scaffoldTool, scaffoldValidator, } from "./scaffolds.js";
 export function createRuntimeClient(baseUrl) {
     return new ZeroARClient(baseUrl);

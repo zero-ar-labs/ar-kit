@@ -1,0 +1,21 @@
+{
+  "schema": "zero-ar-release-images/1",
+  "images": [
+    {
+      "image": "ghcr.io/zero-ar-labs/zero-ar/full-cell:v0.4.1",
+      "digest": "sha256:5ae4c4c8afae0e7beaca5ee982d301a5baa332f650f3c3192918dc793405a71b",
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ]
+    },
+    {
+      "image": "ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.4.1",
+      "digest": "sha256:ab88fa135b6e1fd388c1d5398e8b1f28ee5754b9667bb8ea3fd3e0ca6d0fd5ae",
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ]
+    }
+  ]
+}

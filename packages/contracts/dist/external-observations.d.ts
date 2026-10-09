@@ -8,7 +8,9 @@
  *
  * How it fits: the runtime records one typed observation and queues its content
  * for the next model turn. It never accepts a caller-selected record type and
- * never treats an observation as an answer or an effect approval.
+ * never treats an observation as an answer or an effect approval. An image
+ * artifact is recorded with the media type and size its committed manifest
+ * names, so the landed entry shows it to a model that accepts images.
  */
 import { z } from 'zod';
 /** Text and structured JSON are separate so a model-visible rendering is deterministic. */
@@ -26,6 +28,23 @@ export declare const ExternalObservationArtifactSchema: z.ZodObject<{
     content_hash: z.ZodString;
 }, z.core.$strict>;
 export type ExternalObservationArtifact = z.infer<typeof ExternalObservationArtifactSchema>;
+/**
+ * A committed artifact as acceptance recorded it. An image also carries the
+ * media type and byte size from the store's manifest (WBR-007); any other
+ * artifact keeps the handle and digest alone.
+ */
+export declare const ExternalObservationRecordedArtifactSchema: z.ZodObject<{
+    artifact_ref: z.ZodString;
+    content_hash: z.ZodString;
+    media_type: z.ZodOptional<z.ZodEnum<{
+        "image/png": "image/png";
+        "image/jpeg": "image/jpeg";
+        "image/webp": "image/webp";
+        "image/gif": "image/gif";
+    }>>;
+    bytes: z.ZodOptional<z.ZodNumber>;
+}, z.core.$strict>;
+export type ExternalObservationRecordedArtifact = z.infer<typeof ExternalObservationRecordedArtifactSchema>;
 /** Caller-owned provenance remains information and grants no authority. */
 export declare const ExternalObservationProvenanceSchema: z.ZodObject<{
     source: z.ZodString;
@@ -39,13 +58,13 @@ export declare const ExternalObservationRequestSchema: z.ZodObject<{
     source: z.ZodObject<{
         channel: z.ZodEnum<{
             system: "system";
-            other: "other";
             web: "web";
             mobile: "mobile";
             voice: "voice";
             sms: "sms";
             email: "email";
             chat: "chat";
+            other: "other";
         }>;
         event_id: z.ZodString;
     }, z.core.$strict>;
@@ -91,13 +110,13 @@ export declare const ExternalObservationRecordedSchema: z.ZodObject<{
     source: z.ZodObject<{
         channel: z.ZodEnum<{
             system: "system";
-            other: "other";
             web: "web";
             mobile: "mobile";
             voice: "voice";
             sms: "sms";
             email: "email";
             chat: "chat";
+            other: "other";
         }>;
         event_id: z.ZodString;
     }, z.core.$strict>;
@@ -113,6 +132,13 @@ export declare const ExternalObservationRecordedSchema: z.ZodObject<{
     artifacts: z.ZodArray<z.ZodObject<{
         artifact_ref: z.ZodString;
         content_hash: z.ZodString;
+        media_type: z.ZodOptional<z.ZodEnum<{
+            "image/png": "image/png";
+            "image/jpeg": "image/jpeg";
+            "image/webp": "image/webp";
+            "image/gif": "image/gif";
+        }>>;
+        bytes: z.ZodOptional<z.ZodNumber>;
     }, z.core.$strict>>;
     classification: z.ZodEnum<{
         public: "public";

@@ -10,14 +10,14 @@
  * run id after a restart gives the same observable behaviour, because the
  * handle holds nothing the server does not (DXI-001 through DXI-004).
  */
-import { DiagnosticError, SourceBindingInputSchema, assertProductPackageGraph, makeId, productEnvironmentValue, refuse } from '@zero-ar/contracts';
+import { DiagnosticError, SourceBindingInputSchema, assertProductPackageGraph, makeId, productEnvironmentValue, refuse, turnCeilingForBudget } from '@zero-ar/contracts';
 import { ZeroARClient } from '@zero-ar/client';
 import { publishCapabilitySource } from "./capability-admission.js";
 const DEFAULT_BUDGETS = {
-    consumption: { model_tokens: 100_000 },
+    consumption: { model_tokens: 100_000, compute_ms: 600_000, tool_calls: 64, bytes: 64 * 1_048_576 },
     attention: 0,
     verification_reserve_fraction: 0.2,
-    max_turns: 24,
+    max_turns: turnCeilingForBudget(100_000),
 };
 const DEFAULT_PRINCIPALS = {
     executing: 'svc:application',
@@ -99,7 +99,11 @@ export class RunHandle {
     redirect(text, control_id = makeId('ctl')) {
         return this.control({ verb: 'redirect', control_id, text });
     }
-    /** Settle one parked handle with output, or dismiss it with a reason. */
+    /** Suspend the run at its next turn boundary, or now if it is suspended, until a person resumes it. */
+    pause(reason, control_id = makeId('ctl')) {
+        return this.control({ verb: 'pause', control_id, ...(reason ? { reason } : {}) });
+    }
+    /** Settle one parked handle with output or one of its question's choices, or dismiss it with a reason. */
     answer(handle, settlement, control_id = makeId('ctl')) {
         return this.control({ verb: 'answer', control_id, handle, ...settlement });
     }
@@ -108,6 +112,10 @@ export class RunHandle {
     }
     control(request) {
         return this.client.control(this.id, request);
+    }
+    /** Add budget to this run. A suspended run keeps waiting until resume() continues it. */
+    amendBudgets(add, reason, idempotency_key = makeId('ctl')) {
+        return this.client.amendBudgets(this.id, { idempotency_key, add, ...(reason ? { reason } : {}) });
     }
     /** Request one immutable publication already available to the runtime. */
     requestCapability(request) {

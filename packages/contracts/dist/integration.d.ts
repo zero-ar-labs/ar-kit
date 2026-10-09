@@ -190,23 +190,23 @@ export declare const ResolvedModelPlanSchema: z.ZodObject<{
         }>;
         compatibility: z.ZodObject<{
             streaming: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             tools: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             cancellation: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             context_limits: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             usage: z.ZodEnum<{
@@ -216,6 +216,20 @@ export declare const ResolvedModelPlanSchema: z.ZodObject<{
             }>;
             upstream_attestation_ref: z.ZodNullable<z.ZodString>;
             notes: z.ZodArray<z.ZodString>;
+            image_input: z.ZodOptional<z.ZodEnum<{
+                supported: "supported";
+                unsupported: "unsupported";
+            }>>;
+            tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                supported: "supported";
+                unknown: "unknown";
+                unsupported: "unsupported";
+            }>>;
+            strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                supported: "supported";
+                unknown: "unknown";
+                unsupported: "unsupported";
+            }>>;
         }, z.core.$strict>;
         compatibility_ref: z.ZodString;
         credential_mode: z.ZodEnum<{
@@ -270,23 +284,23 @@ export declare const ResolvedModelPlanSchema: z.ZodObject<{
         }>;
         compatibility: z.ZodObject<{
             streaming: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             tools: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             cancellation: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             context_limits: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             usage: z.ZodEnum<{
@@ -296,6 +310,20 @@ export declare const ResolvedModelPlanSchema: z.ZodObject<{
             }>;
             upstream_attestation_ref: z.ZodNullable<z.ZodString>;
             notes: z.ZodArray<z.ZodString>;
+            image_input: z.ZodOptional<z.ZodEnum<{
+                supported: "supported";
+                unsupported: "unsupported";
+            }>>;
+            tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                supported: "supported";
+                unknown: "unknown";
+                unsupported: "unsupported";
+            }>>;
+            strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                supported: "supported";
+                unknown: "unknown";
+                unsupported: "unsupported";
+            }>>;
         }, z.core.$strict>;
         compatibility_ref: z.ZodString;
         credential_mode: z.ZodEnum<{

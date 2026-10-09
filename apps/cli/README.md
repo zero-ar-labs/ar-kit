@@ -8,6 +8,8 @@ The npm package is a client. It does not contain or start the runtime server.
 Point it at an already-running hosted or Local Lite endpoint. The source-free
 Local Lite distribution carries its own command and runtime together.
 
+![A recorded Zero-AR CLI run showing its objective, admitted model, budget use, check verdicts and complete result.](https://raw.githubusercontent.com/zero-ar-labs/ar-kit/main/assets/zero-ar-work-record.svg)
+
 ## Install
 
 Node.js 24.11.0 through the Node 24 LTS line is required.

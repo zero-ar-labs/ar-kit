@@ -8,6 +8,8 @@ directories outside the Git checkout.
 Use it for protocol, lifecycle and reconstruction tests. Keep real-provider
 and deployment acceptance as separate evidence.
 
+![A recorded Zero-AR verification plan showing the contract evidence that deterministic tests can establish.](https://raw.githubusercontent.com/zero-ar-labs/ar-kit/main/assets/zero-ar-verification-record.svg)
+
 ## Install
 
 Node.js 24.11.0 through the Node 24 LTS line is required.

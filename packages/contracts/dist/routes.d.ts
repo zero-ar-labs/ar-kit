@@ -430,6 +430,21 @@ export declare const API_ROUTES: {
             readonly changed_content_code: "run.lifecycle.idempotency.reused";
         };
     };
+    readonly amendBudgets: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/budget-amendments";
+        readonly kind: "json";
+        readonly request: "BudgetAmendmentRequestSchema";
+        readonly response: "BudgetAmendmentAcceptedSchema";
+        readonly area: "run";
+        readonly authorization: {
+            readonly scopes: readonly ["run:budget"];
+        };
+        readonly product_mutation: {
+            readonly idempotency_source: "request-idempotency-key";
+            readonly changed_content_code: "budget.amendment.idempotency.reused";
+        };
+    };
     readonly resumeDeferred: {
         readonly method: "POST";
         readonly path: "/v1/runs/:run_id/resume-deferred";
@@ -523,7 +538,7 @@ export declare const API_ROUTES: {
         readonly response_media_type: "application/x-ndjson";
         readonly area: "results-and-audit";
         readonly authorization: {
-            readonly scopes: readonly ["run:read"];
+            readonly scopes: readonly ["run:read", "operator:audit"];
         };
     };
     readonly importRun: {
@@ -535,6 +550,32 @@ export declare const API_ROUTES: {
         readonly area: "administration";
         readonly authorization: {
             readonly scopes: readonly ["operator:restore"];
+        };
+    };
+    readonly checkRunContinuation: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/continuation-checks";
+        readonly kind: "json";
+        readonly request: "RunContinuationDeclarationSchema";
+        readonly response: "RunContinuationCompatibilityReportSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:restore"];
+        };
+    };
+    readonly continueImportedRun: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/continuations";
+        readonly kind: "json";
+        readonly request: "RunContinuationAdmissionRequestSchema";
+        readonly response: "RunContinuationAcceptedSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:restore", "run:resume"];
+        };
+        readonly product_mutation: {
+            readonly idempotency_source: "request-idempotency-key";
+            readonly changed_content_code: "run.continuation.idempotency-reused";
         };
     };
     readonly streamRecords: {
@@ -1447,35 +1488,6 @@ export declare const API_ROUTES: {
             readonly scopes: readonly ["review:read"];
         };
     };
-    readonly proposeBrowserDestination: {
-        readonly method: "POST";
-        readonly path: "/v1/runs/:run_id/browser-destination-proposals";
-        readonly kind: "json";
-        readonly request: "BrowserDestinationProposalRequestSchema";
-        readonly response: "BrowserDestinationProposalSchema";
-        readonly area: "run";
-        readonly authorization: {
-            readonly scopes: readonly ["run:control"];
-        };
-    };
-    readonly decideBrowserDestination: {
-        readonly method: "POST";
-        readonly path: "/v1/runs/:run_id/browser-destination-proposals/:proposal_ref/decisions";
-        readonly kind: "json";
-        readonly request: "BrowserDestinationDecisionRequestSchema";
-        readonly response: "BrowserDestinationDecisionSchema";
-        readonly headers: readonly [{
-            readonly name: "X-Zero-AR-Participant-Token";
-            readonly argument: "participant_token";
-            readonly required: true;
-            readonly maxLength: 16384;
-            readonly description: "A JWT from the tenant's admitted participant identity provider. The verified subject becomes the destination approver.";
-        }];
-        readonly area: "review-and-authority";
-        readonly authorization: {
-            readonly scopes: readonly ["effect:approve"];
-        };
-    };
     readonly sweepArtifacts: {
         readonly method: "POST";
         readonly path: "/v1/artifact-sweeps";
@@ -1528,17 +1540,6 @@ export declare const API_ROUTES: {
             readonly scopes: readonly ["publication:read"];
         };
     };
-    readonly importLegacyModelPool: {
-        readonly method: "POST";
-        readonly path: "/v1/model-pool/legacy-imports";
-        readonly kind: "json";
-        readonly request: "LegacyModelPoolImportRequestSchema";
-        readonly response: "TenantModelPoolSchema";
-        readonly area: "administration";
-        readonly authorization: {
-            readonly scopes: readonly ["provider:write"];
-        };
-    };
     readonly toolSourceDrift: {
         readonly method: "GET";
         readonly path: "/v1/tool-sources/:source_ref/drift";
@@ -1547,83 +1548,6 @@ export declare const API_ROUTES: {
         readonly area: "administration";
         readonly authorization: {
             readonly scopes: readonly ["tool-source:read"];
-        };
-    };
-    readonly toolSourceIngress: {
-        readonly method: "POST";
-        readonly path: "/v1/tool-source-ingress/:tenant/:source_ref";
-        readonly kind: "json";
-        readonly request: "ToolSourceIngressDeliverySchema";
-        readonly response: "ToolSourceIngressReceiptSchema";
-        readonly headers: readonly [{
-            readonly name: "webhook-id";
-            readonly argument: "webhook_id";
-            readonly required: false;
-            readonly maxLength: 512;
-            readonly description: "The Standard Webhooks delivery id a Composio trigger delivery carries.";
-        }, {
-            readonly name: "webhook-timestamp";
-            readonly argument: "webhook_timestamp";
-            readonly required: false;
-            readonly maxLength: 64;
-            readonly description: "The Standard Webhooks delivery time the signature covers.";
-        }, {
-            readonly name: "webhook-signature";
-            readonly argument: "webhook_signature";
-            readonly required: false;
-            readonly maxLength: 4096;
-            readonly description: "The Standard Webhooks signature over the raw delivery bytes.";
-        }, {
-            readonly name: "X-Merge-Webhook-Signature";
-            readonly argument: "merge_webhook_signature";
-            readonly required: false;
-            readonly maxLength: 4096;
-            readonly description: "The Merge signature over the raw delivery bytes.";
-        }];
-        readonly area: "administration";
-        readonly authorization: {
-            readonly public: true;
-            readonly reason: "The provider signature over the raw delivery bytes authenticates a trigger delivery, and the tenant comes from deployment configuration. An unverified delivery starts nothing.";
-        };
-    };
-    readonly reissueEffectGrant: {
-        readonly method: "POST";
-        readonly path: "/v1/runs/:run_id/effect-grants/reissuances";
-        readonly kind: "json";
-        readonly request: "EffectGrantReissueRequestSchema";
-        readonly response: "EffectGrantReissueOutcomeSchema";
-        readonly headers: readonly [{
-            readonly name: "X-Zero-AR-Participant-Token";
-            readonly argument: "participant_token";
-            readonly required: true;
-            readonly maxLength: 16384;
-            readonly description: "A JWT from the tenant's admitted participant identity provider. The verified subject becomes the re-issue approver.";
-        }];
-        readonly area: "review-and-authority";
-        readonly authorization: {
-            readonly scopes: readonly ["effect:grant"];
-        };
-    };
-    readonly revokeEffectGrant: {
-        readonly method: "POST";
-        readonly path: "/v1/effect-grants/:grant_ref/revocations";
-        readonly kind: "json";
-        readonly request: "EffectGrantRevocationRequestSchema";
-        readonly response: "EffectGrantRevocationOutcomeSchema";
-        readonly area: "review-and-authority";
-        readonly authorization: {
-            readonly scopes: readonly ["effect:grant"];
-        };
-    };
-    readonly advanceEffectAuthorityEpoch: {
-        readonly method: "POST";
-        readonly path: "/v1/effect-authority/epoch-advances";
-        readonly kind: "json";
-        readonly request: "EffectAuthorityEpochAdvanceRequestSchema";
-        readonly response: "EffectAuthorityEpochAdvanceOutcomeSchema";
-        readonly area: "administration";
-        readonly authorization: {
-            readonly scopes: readonly ["platform:authority-epoch"];
         };
     };
     readonly listEffectTargets: {
@@ -1639,37 +1563,6 @@ export declare const API_ROUTES: {
         readonly area: "review-and-authority";
         readonly authorization: {
             readonly scopes: readonly ["effect:read"];
-        };
-    };
-    readonly registerWorkspaceInstance: {
-        readonly method: "POST";
-        readonly path: "/v1/workspace-instances";
-        readonly kind: "json";
-        readonly request: "RegisterWorkspaceInstanceRequestSchema";
-        readonly response: "WorkspaceInstanceSchema";
-        readonly area: "administration";
-        readonly authorization: {
-            readonly scopes: readonly ["environment:write"];
-        };
-    };
-    readonly listWorkspaceInstances: {
-        readonly method: "GET";
-        readonly path: "/v1/workspace-instances";
-        readonly kind: "json";
-        readonly response: "WorkspaceInstanceListSchema";
-        readonly area: "administration";
-        readonly authorization: {
-            readonly scopes: readonly ["environment:read"];
-        };
-    };
-    readonly inspectWorkspaceInstance: {
-        readonly method: "GET";
-        readonly path: "/v1/workspace-instances/:instance_ref";
-        readonly kind: "json";
-        readonly response: "WorkspaceInstanceSchema";
-        readonly area: "administration";
-        readonly authorization: {
-            readonly scopes: readonly ["environment:read"];
         };
     };
 };

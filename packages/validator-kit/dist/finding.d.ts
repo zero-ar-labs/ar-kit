@@ -4,7 +4,8 @@
  * What this is: a pure function that names what makes a raw finding
  * malformed. The verdict must be pass, reject or indeterminate, the reason
  * non-empty, any failure class from the closed vocabulary; a reject names at
- * least one item, a pass names none, and every named item was given to it.
+ * least one item, a pass names none, only an indeterminate names undecided
+ * items, and every named item was given to it.
  *
  * How it fits: defineValidator and runLabelledCases refuse a malformed finding
  * with the code returned here, and the quality plane's runner turns the same

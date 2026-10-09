@@ -1,11 +1,11 @@
 {
   "name": "@zero-ar/validator-kit",
-  "version": "0.2.1",
+  "version": "0.4.1",
   "type": "module",
   "description": "Define completion validators and exercise them against labelled cases.",
   "license": "Apache-2.0",
   "dependencies": {
-    "@zero-ar/contracts": "0.2.1"
+    "@zero-ar/contracts": "0.4.1"
   },
   "engines": {
     "node": ">=24.11.0 <25"

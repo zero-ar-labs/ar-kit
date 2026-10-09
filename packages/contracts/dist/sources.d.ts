@@ -19,7 +19,55 @@ export declare const LOCAL_READ_ONLY_SOURCE_POLICY: Readonly<{
 }>;
 /** Compare labels using the one contracts-owned classification ordering. */
 export declare function sourceClassificationAdmitted(classification: MemoryClassification, floor?: MemoryClassification, ceiling?: MemoryClassification): boolean;
+/** One Tesseract language code, such as eng, fra or chi_sim. */
+export declare const DOCUMENT_OCR_LANGUAGE_PATTERN: RegExp;
+/** The OCR languages an extraction reads when its call declares none. */
+export declare const DOCUMENT_OCR_DEFAULT_LANGUAGES: readonly string[];
+/** The most OCR languages one extraction may declare. */
+export declare const DOCUMENT_OCR_MAX_LANGUAGES = 4;
+/**
+ * The bounds one document extraction keeps. The tool host enforces them and
+ * source preflight states them. A kept page image fits the default image
+ * limit a model reads under, so a vision model can open it whole.
+ */
+export declare const DOCUMENT_EXTRACTION_LIMITS: Readonly<{
+    max_document_bytes: number;
+    max_pages: 500;
+    max_text_bytes: number;
+    max_command_output_bytes: number;
+    command_timeout_ms: 30000;
+    max_image_edge_pixels: 12000;
+    max_image_pixels: 50000000;
+    max_page_image_bytes: number;
+    max_extraction_image_bytes: number;
+}>;
 export declare const SourceExtractorIdentitySchema: z.ZodObject<{
+    name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+    version: z.ZodString;
+    poppler_version: z.ZodString;
+    tesseract_version: z.ZodNullable<z.ZodString>;
+    languages: z.ZodArray<z.ZodString>;
+    dpi: z.ZodNumber;
+    sandbox_mode: z.ZodEnum<{
+        "linux-bwrap-no-network": "linux-bwrap-no-network";
+        "resource-limited-process": "resource-limited-process";
+        "oci-no-network-read-only": "oci-no-network-read-only";
+    }>;
+    binding: z.ZodEnum<{
+        "host-process": "host-process";
+        "oci-document": "oci-document";
+    }>;
+    image_digest: z.ZodNullable<z.ZodString>;
+    code_hash: z.ZodOptional<z.ZodString>;
+}, z.core.$strict>;
+export type SourceExtractorIdentity = z.infer<typeof SourceExtractorIdentitySchema>;
+/**
+ * The identity extractor 1.0.0 pinned: English OCR with host binaries. Runs
+ * resolved before 1.1.0 and their exported bundles carry it, so their logs
+ * still read. Such a run refuses extraction as identity drift and resumes
+ * extraction only under a new run that pins the current extractor.
+ */
+export declare const SourceExtractorIdentityV1Schema: z.ZodObject<{
     name: z.ZodLiteral<"zero-ar.pdf-extractor">;
     version: z.ZodString;
     poppler_version: z.ZodString;
@@ -31,7 +79,9 @@ export declare const SourceExtractorIdentitySchema: z.ZodObject<{
         "resource-limited-process": "resource-limited-process";
     }>;
 }, z.core.$strict>;
-export type SourceExtractorIdentity = z.infer<typeof SourceExtractorIdentitySchema>;
+export type SourceExtractorIdentityV1 = z.infer<typeof SourceExtractorIdentityV1Schema>;
+/** The OCR languages an extraction under this pinned identity reads when its call declares none. */
+export declare function extractorDefaultLanguages(identity: SourceExtractorIdentity | SourceExtractorIdentityV1): readonly string[];
 export declare const SourceLocatorSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     kind: z.ZodLiteral<"local-directory">;
     path: z.ZodString;
@@ -284,7 +334,25 @@ export declare const ResolvedSourceBindingSchema: z.ZodObject<{
     total_bytes: z.ZodNumber;
     manifest_artifact_ref: z.ZodString;
     manifest_ref: z.ZodString;
-    extractor: z.ZodObject<{
+    extractor: z.ZodUnion<readonly [z.ZodObject<{
+        name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+        version: z.ZodString;
+        poppler_version: z.ZodString;
+        tesseract_version: z.ZodNullable<z.ZodString>;
+        languages: z.ZodArray<z.ZodString>;
+        dpi: z.ZodNumber;
+        sandbox_mode: z.ZodEnum<{
+            "linux-bwrap-no-network": "linux-bwrap-no-network";
+            "resource-limited-process": "resource-limited-process";
+            "oci-no-network-read-only": "oci-no-network-read-only";
+        }>;
+        binding: z.ZodEnum<{
+            "host-process": "host-process";
+            "oci-document": "oci-document";
+        }>;
+        image_digest: z.ZodNullable<z.ZodString>;
+        code_hash: z.ZodOptional<z.ZodString>;
+    }, z.core.$strict>, z.ZodObject<{
         name: z.ZodLiteral<"zero-ar.pdf-extractor">;
         version: z.ZodString;
         poppler_version: z.ZodString;
@@ -295,7 +363,7 @@ export declare const ResolvedSourceBindingSchema: z.ZodObject<{
             "linux-bwrap-no-network": "linux-bwrap-no-network";
             "resource-limited-process": "resource-limited-process";
         }>;
-    }, z.core.$strict>;
+    }, z.core.$strict>]>;
     required_for_completion: z.ZodBoolean;
 }, z.core.$strict>;
 export type ResolvedSourceBinding = z.infer<typeof ResolvedSourceBindingSchema>;
@@ -351,12 +419,19 @@ export declare const SourcePreflightSchema: z.ZodObject<{
         version: z.ZodString;
         poppler_version: z.ZodString;
         tesseract_version: z.ZodNullable<z.ZodString>;
-        language: z.ZodLiteral<"eng">;
+        languages: z.ZodArray<z.ZodString>;
         dpi: z.ZodNumber;
         sandbox_mode: z.ZodEnum<{
             "linux-bwrap-no-network": "linux-bwrap-no-network";
             "resource-limited-process": "resource-limited-process";
+            "oci-no-network-read-only": "oci-no-network-read-only";
         }>;
+        binding: z.ZodEnum<{
+            "host-process": "host-process";
+            "oci-document": "oci-document";
+        }>;
+        image_digest: z.ZodNullable<z.ZodString>;
+        code_hash: z.ZodOptional<z.ZodString>;
     }, z.core.$strict>>;
     budget_requirements: z.ZodObject<{
         tool_calls_per_operation: z.ZodLiteral<1>;
@@ -370,6 +445,10 @@ export declare const SourcePreflightSchema: z.ZodObject<{
         max_text_bytes: z.ZodNumber;
         max_command_output_bytes: z.ZodNumber;
         command_timeout_ms: z.ZodNumber;
+        max_image_edge_pixels: z.ZodNumber;
+        max_image_pixels: z.ZodNumber;
+        max_page_image_bytes: z.ZodNumber;
+        max_extraction_image_bytes: z.ZodNumber;
     }, z.core.$strict>;
     validator_coverage: z.ZodArray<z.ZodString>;
     completion_reachability: z.ZodLiteral<"run-contract-dependent">;
@@ -406,6 +485,7 @@ export declare const SourceOperationRequestSchema: z.ZodDiscriminatedUnion<[z.Zo
     operation: z.ZodLiteral<"document.extract">;
     locator: z.ZodString;
     max_pages: z.ZodOptional<z.ZodNumber>;
+    languages: z.ZodOptional<z.ZodArray<z.ZodString>>;
 }, z.core.$strict>], "operation">;
 export type SourceOperationRequest = z.infer<typeof SourceOperationRequestSchema>;
 export declare const SourceOperationResultSchema: z.ZodObject<{
@@ -424,11 +504,51 @@ export declare const SourceOperationResultSchema: z.ZodObject<{
     provenance_ref: z.ZodString;
 }, z.core.$strict>;
 export type SourceOperationResult = z.infer<typeof SourceOperationResultSchema>;
+/**
+ * The page text one extraction carries inline, in UTF-8 bytes across all its
+ * pages. Whole pages go in, in page order, while they fit, so a short
+ * document reaches the model in the same result that extracted it and its
+ * view stays under the default tool result inline threshold of 4,096 bytes.
+ * A page that does not fit is read through its text artifact.
+ */
+export declare const DOCUMENT_EXTRACTION_INLINE_TEXT_BYTES = 2048;
+/**
+ * The image an OCR page was read from. A kept image is a derived artifact
+ * bound to the run, so a model that reads images opens it with
+ * artifact.read. An image over the per-page bound, or over what the
+ * extraction had left, is not kept, and the page says which bound it met.
+ */
+export declare const DocumentPageImageSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+    kept: z.ZodLiteral<true>;
+    artifact_ref: z.ZodString;
+    content_hash: z.ZodString;
+    media_type: z.ZodEnum<{
+        "image/png": "image/png";
+        "image/jpeg": "image/jpeg";
+    }>;
+    bytes: z.ZodNumber;
+}, z.core.$strict>, z.ZodObject<{
+    kept: z.ZodLiteral<false>;
+    media_type: z.ZodEnum<{
+        "image/png": "image/png";
+        "image/jpeg": "image/jpeg";
+    }>;
+    bytes: z.ZodNumber;
+    reason: z.ZodEnum<{
+        "page-image-bytes": "page-image-bytes";
+        "extraction-image-bytes": "extraction-image-bytes";
+    }>;
+    max_bytes: z.ZodNumber;
+}, z.core.$strict>], "kept">;
+export type DocumentPageImage = z.infer<typeof DocumentPageImageSchema>;
 export declare const DocumentExtractionPageSchema: z.ZodObject<{
     page: z.ZodNumber;
     width: z.ZodNullable<z.ZodNumber>;
     height: z.ZodNullable<z.ZodNumber>;
-    coordinate_space: z.ZodLiteral<"pdf-points">;
+    coordinate_space: z.ZodEnum<{
+        "pdf-points": "pdf-points";
+        "image-pixels": "image-pixels";
+    }>;
     text_artifact_ref: z.ZodString;
     text_content_hash: z.ZodString;
     text_bytes: z.ZodNumber;
@@ -437,31 +557,77 @@ export declare const DocumentExtractionPageSchema: z.ZodObject<{
         "tesseract-ocr": "tesseract-ocr";
     }>;
     confidence: z.ZodNullable<z.ZodNumber>;
+    text: z.ZodOptional<z.ZodString>;
+    image: z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
+        kept: z.ZodLiteral<true>;
+        artifact_ref: z.ZodString;
+        content_hash: z.ZodString;
+        media_type: z.ZodEnum<{
+            "image/png": "image/png";
+            "image/jpeg": "image/jpeg";
+        }>;
+        bytes: z.ZodNumber;
+    }, z.core.$strict>, z.ZodObject<{
+        kept: z.ZodLiteral<false>;
+        media_type: z.ZodEnum<{
+            "image/png": "image/png";
+            "image/jpeg": "image/jpeg";
+        }>;
+        bytes: z.ZodNumber;
+        reason: z.ZodEnum<{
+            "page-image-bytes": "page-image-bytes";
+            "extraction-image-bytes": "extraction-image-bytes";
+        }>;
+        max_bytes: z.ZodNumber;
+    }, z.core.$strict>], "kept">>;
 }, z.core.$strict>;
 export type DocumentExtractionPage = z.infer<typeof DocumentExtractionPageSchema>;
+/**
+ * Which pages carry their text inline: whole pages in page order while the
+ * UTF-8 bytes stay within the budget. A page that does not fit ends the run
+ * of inline pages, so inline text is always a prefix of the document.
+ */
+export declare function inlinePageNumbers(pages: readonly {
+    page: number;
+    text_bytes: number;
+}[], budget?: number): Set<number>;
 export declare const DocumentExtractionResultSchema: z.ZodObject<{
     source_alias: z.ZodString;
     member_ref: z.ZodString;
     original_artifact_ref: z.ZodString;
     original_content_hash: z.ZodString;
-    media_type: z.ZodLiteral<"application/pdf">;
+    media_type: z.ZodEnum<{
+        "image/png": "image/png";
+        "image/jpeg": "image/jpeg";
+        "application/pdf": "application/pdf";
+    }>;
     extractor: z.ZodObject<{
         name: z.ZodLiteral<"zero-ar.pdf-extractor">;
         version: z.ZodString;
         poppler_version: z.ZodString;
         tesseract_version: z.ZodNullable<z.ZodString>;
-        language: z.ZodLiteral<"eng">;
+        languages: z.ZodArray<z.ZodString>;
         dpi: z.ZodNumber;
         sandbox_mode: z.ZodEnum<{
             "linux-bwrap-no-network": "linux-bwrap-no-network";
             "resource-limited-process": "resource-limited-process";
+            "oci-no-network-read-only": "oci-no-network-read-only";
         }>;
+        binding: z.ZodEnum<{
+            "host-process": "host-process";
+            "oci-document": "oci-document";
+        }>;
+        image_digest: z.ZodNullable<z.ZodString>;
+        code_hash: z.ZodOptional<z.ZodString>;
     }, z.core.$strict>;
     pages: z.ZodArray<z.ZodObject<{
         page: z.ZodNumber;
         width: z.ZodNullable<z.ZodNumber>;
         height: z.ZodNullable<z.ZodNumber>;
-        coordinate_space: z.ZodLiteral<"pdf-points">;
+        coordinate_space: z.ZodEnum<{
+            "pdf-points": "pdf-points";
+            "image-pixels": "image-pixels";
+        }>;
         text_artifact_ref: z.ZodString;
         text_content_hash: z.ZodString;
         text_bytes: z.ZodNumber;
@@ -470,6 +636,29 @@ export declare const DocumentExtractionResultSchema: z.ZodObject<{
             "tesseract-ocr": "tesseract-ocr";
         }>;
         confidence: z.ZodNullable<z.ZodNumber>;
+        text: z.ZodOptional<z.ZodString>;
+        image: z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
+            kept: z.ZodLiteral<true>;
+            artifact_ref: z.ZodString;
+            content_hash: z.ZodString;
+            media_type: z.ZodEnum<{
+                "image/png": "image/png";
+                "image/jpeg": "image/jpeg";
+            }>;
+            bytes: z.ZodNumber;
+        }, z.core.$strict>, z.ZodObject<{
+            kept: z.ZodLiteral<false>;
+            media_type: z.ZodEnum<{
+                "image/png": "image/png";
+                "image/jpeg": "image/jpeg";
+            }>;
+            bytes: z.ZodNumber;
+            reason: z.ZodEnum<{
+                "page-image-bytes": "page-image-bytes";
+                "extraction-image-bytes": "extraction-image-bytes";
+            }>;
+            max_bytes: z.ZodNumber;
+        }, z.core.$strict>], "kept">>;
     }, z.core.$strict>>;
     page_count: z.ZodNumber;
     total_text_bytes: z.ZodNumber;

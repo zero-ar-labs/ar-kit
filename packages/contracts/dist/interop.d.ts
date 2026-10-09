@@ -67,8 +67,8 @@ export declare const InteropBindingManifestBodySchema: z.ZodObject<{
     }>;
     remote_consequence_posture: z.ZodEnum<{
         none: "none";
-        unknown: "unknown";
         "declared-external": "declared-external";
+        unknown: "unknown";
     }>;
     timeouts: z.ZodObject<{
         connect_ms: z.ZodNumber;
@@ -130,8 +130,8 @@ export declare const InteropBindingManifestSchema: z.ZodObject<{
     }>;
     remote_consequence_posture: z.ZodEnum<{
         none: "none";
-        unknown: "unknown";
         "declared-external": "declared-external";
+        unknown: "unknown";
     }>;
     timeouts: z.ZodObject<{
         connect_ms: z.ZodNumber;
@@ -443,10 +443,10 @@ export declare const InteropCapabilitySchema: z.ZodObject<{
         server: "server";
     }>;
     state: z.ZodEnum<{
-        healthy: "healthy";
-        admitted: "admitted";
         implemented: "implemented";
         configured: "configured";
+        healthy: "healthy";
+        admitted: "admitted";
         selectable: "selectable";
     }>;
     configured: z.ZodBoolean;

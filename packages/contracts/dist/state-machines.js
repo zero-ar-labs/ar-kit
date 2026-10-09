@@ -9,8 +9,7 @@
  * How it fits: the central honesty claim is structural here. The only
  * transition a model may cause is proposing completion. Complete is reachable
  * through a verification verdict alone, so no model output can reach it
- * (QLT-031, QLT-032, C-ARCH-VERIFIED-COMPLETION-005). The browser destination
- * proposal table below is capability state, not a fifth trusted machine.
+ * (QLT-031, QLT-032, C-ARCH-VERIFIED-COMPLETION-005).
  */
 export const RUN_MACHINE = [
     { from: 'created', to: 'running', on: 'run.started', actor: 'runtime' },
@@ -64,17 +63,6 @@ export const MACHINES = {
     lease: LEASE_MACHINE,
     effect: EFFECT_MACHINE,
 };
-/**
- * One browser destination proposal (BRC-012, BRC-013). A participant opens
- * it through the operator route, and one authenticated disposition settles
- * it. The model has no move here, and a refusal grants nothing. It stays
- * outside MACHINES because it moves no run, completion, lease or effect
- * state; the relay refuses the origin until an approval is recorded.
- */
-export const BROWSER_DESTINATION_PROPOSAL_TRANSITIONS = [
-    { from: 'proposed', to: 'approved', on: 'browser.destination.decided', actor: 'caller' },
-    { from: 'proposed', to: 'refused', on: 'browser.destination.decided', actor: 'caller' },
-];
 /** The matched transition, or null when the machine does not permit the move. */
 export function findTransition(machine, from, to, on, actor) {
     const table = MACHINES[machine];

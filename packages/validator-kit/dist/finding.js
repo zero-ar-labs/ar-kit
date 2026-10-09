@@ -4,7 +4,8 @@
  * What this is: a pure function that names what makes a raw finding
  * malformed. The verdict must be pass, reject or indeterminate, the reason
  * non-empty, any failure class from the closed vocabulary; a reject names at
- * least one item, a pass names none, and every named item was given to it.
+ * least one item, a pass names none, only an indeterminate names undecided
+ * items, and every named item was given to it.
  *
  * How it fits: defineValidator and runLabelledCases refuse a malformed finding
  * with the code returned here, and the quality plane's runner turns the same
@@ -59,12 +60,21 @@ export function validatorFindingProblem(raw, population) {
     if (verdict === 'pass' && named.length > 0) {
         return { code: 'validator.finding.contradictory', problem: 'the pass also names rejected items, so the finding contradicts itself' };
     }
-    const outside = [...new Set(named.filter((item) => !population.has(item)))];
+    const undecided = finding['undecided_items'];
+    if (undecided !== undefined && (!Array.isArray(undecided) || undecided.length === 0 || undecided.some((item) => typeof item !== 'string'))) {
+        return { code: 'validator.finding.shape', problem: 'undecided_items is not a non-empty list of item ids' };
+    }
+    if (undecided !== undefined && verdict !== 'indeterminate') {
+        return { code: 'validator.finding.contradictory', problem: `the ${String(verdict)} also names undecided items, and only an indeterminate finding has any` };
+    }
+    const outsideRejected = [...new Set(named.filter((item) => !population.has(item)))];
+    const outsideUndecided = [...new Set((undecided ?? []).filter((item) => !population.has(item)))];
+    const outside = outsideRejected.length > 0 ? outsideRejected : outsideUndecided;
     if (outside.length > 0) {
         const listed = `${outside.slice(0, 5).join(', ')}${outside.length > 5 ? ` and ${outside.length - 5} more` : ''}`;
         return {
             code: 'validator.finding.outside-population',
-            problem: `rejected items ${listed} are not among the ${population.size} items the validator was given`,
+            problem: `${outsideRejected.length > 0 ? 'rejected' : 'undecided'} items ${listed} are not among the ${population.size} items the validator was given`,
         };
     }
     return null;

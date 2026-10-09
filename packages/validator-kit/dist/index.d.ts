@@ -14,7 +14,7 @@
  * quality plane remains the seam that admits a finding; this package only
  * helps an author write one and test it out of process.
  */
-import type { FailureClass, ItemState, ValidatorCatalogueEntry, ValidatorClass } from '@zero-ar/contracts';
+import type { EffectAuthorityDecision, EffectState, FailureClass, ItemState, ValidatorCatalogueEntry, ValidatorClass } from '@zero-ar/contracts';
 export { validatorFindingProblem } from './finding.js';
 export type { ValidatorFindingProblem } from './finding.js';
 export { admitAvailabilitySnapshot, admitCatalogueEntry, canonicalCatalogueEntry, catalogueDefaults, catalogueEvidenceRef, defineAvailabilitySnapshot, defineCatalogueEntry, defineCustomCatalogueEntry, defineFirstPartyCatalogueEntry, deriveValidatorEvidenceGrade, } from './catalogue.js';
@@ -30,17 +30,95 @@ export type { AirlockField, AirlockType, ClassificationLattice } from './classif
 /** The three answers a validator may give. Nothing here says complete. */
 export declare const VALIDATOR_FINDINGS: readonly ["pass", "reject", "indeterminate"];
 export type ValidatorFindingKind = (typeof VALIDATOR_FINDINGS)[number];
+/** One answer a person gave to the agent's own question on an item (GAP-013). */
+export interface ExaminedAnswer {
+    question: string;
+    choices: readonly string[] | null;
+    answer: string;
+    /** The principal who answered. */
+    resolver: string;
+    /** The sequence of the gap.settled record that holds the answer. */
+    settled_seq: number;
+}
 /**
  * One item placed before a validator: its ledger position, how many
- * attempts it has taken, and the output the agent produced for it. This is
- * the row the quality plane's ledger holds, so a validator written here
- * runs unchanged inside the runtime's runner.
+ * attempts it has taken, and its output. This is the row the quality
+ * plane's ledger holds, so a validator written here runs unchanged inside
+ * the runtime's runner. Two optional fields say where the output came
+ * from, and are absent when they do not apply.
  */
 export interface ExaminedItem {
     item_id: string;
     state: ItemState;
     attempts: number;
     output: string | null;
+    /**
+     * The principal whose answer is this output, when a person settled the
+     * item and the agent has not replaced the output since. Absent when the
+     * agent produced it, so agent text never reads as a person's decision.
+     */
+    settled_by?: string;
+    /** The answers to the agent's questions on this item, oldest first. */
+    answers?: readonly ExaminedAnswer[];
+}
+/**
+ * One workspace command the run ran and what it printed, as a check that
+ * reads workspace output receives it (G22): the pages a browser workspace
+ * read, so a check can find a value an item took from a page on that page.
+ * Only workspace.exec calls that ran in the run's workspace are given.
+ */
+export interface ExaminedWorkspaceOutput {
+    /** Always workspace.exec. */
+    tool: string;
+    /** The command the agent ran, as recorded. */
+    command: string;
+    exit_code: number | null;
+    stdout: string;
+    /** The SHA-256 of stdout, which the runtime checked any spilled copy against. */
+    stdout_content_hash: string;
+}
+/**
+ * One effect the run prepared, as a check that reads effect outcomes
+ * receives it (G23): what was asked, whether its approver approved it, and
+ * where it stands, so a check never takes an item's word that it was done.
+ */
+export interface ExaminedEffect {
+    effect_id: string;
+    target: string;
+    operation: string;
+    /** The parameters the effect was prepared with, as recorded. */
+    params: Record<string, unknown>;
+    /** prepared, dispatched, committed, withdrawn, outcome_unknown or unreconcilable. */
+    state: EffectState;
+    /** The approver's latest decision, or null when none is recorded. */
+    decision: EffectAuthorityDecision | null;
+    /** The reason its latest resolution gave, or null before one. */
+    reason: string | null;
+}
+/**
+ * One page the run fetched with web.fetch, as a check that reads web pages
+ * receives it (WEB-017): the whole text, read from its artifact and kept
+ * only when it matches its digest.
+ */
+export interface ExaminedWebPage {
+    url: string;
+    title: string;
+    fetched_at: string;
+    text: string;
+    /** The SHA-256 the page artifact names, which the runtime checked the text against. */
+    content_hash: string;
+}
+/** One page of a document the run extracted, as a check that reads documents receives it. */
+export interface ExaminedDocumentPage {
+    source_alias: string;
+    /** The document's locator within its source, such as invoice.pdf. */
+    locator: string;
+    page: number;
+    method: string;
+    confidence: number | null;
+    text: string;
+    /** The page text's content hash, which the runtime checked the text against. */
+    text_content_hash: string;
 }
 /** What the validator was given. The declared total is what it was told exists. */
 export interface ValidatorCaseInput {
@@ -48,6 +126,50 @@ export interface ValidatorCaseInput {
     rule: string;
     items: readonly ExaminedItem[];
     declared_total: number;
+    /**
+     * The text of every page the run extracted, when the task contract asks
+     * for document-text: the latest extraction of each document, in source
+     * and page order. Absent otherwise.
+     */
+    documents?: readonly ExaminedDocumentPage[];
+    /**
+     * True when the pages stopped at the runtime's byte bound or an
+     * extraction's result could not be read, so a check knows it did not see
+     * every page.
+     */
+    documents_truncated?: boolean;
+    /**
+     * Every effect the run prepared, in the order prepared, when the task
+     * contract asks for effect-outcomes. Absent otherwise.
+     */
+    effects?: readonly ExaminedEffect[];
+    /**
+     * True when the effects stopped at the runtime's byte bound. A check that
+     * would pass because an effect is absent answers indeterminate instead,
+     * since the effect could lie past the bound.
+     */
+    effects_truncated?: boolean;
+    /**
+     * What every workspace.exec command the run ran in its workspace printed,
+     * in the order run, when the task contract asks for workspace-output.
+     * Absent otherwise.
+     */
+    workspace_outputs?: readonly ExaminedWorkspaceOutput[];
+    /**
+     * True when the outputs stopped at the runtime's byte bound or a
+     * command's result could not be read.
+     */
+    workspace_outputs_truncated?: boolean;
+    /**
+     * The text of every page the run fetched with web.fetch, in the order
+     * fetched, when the task contract asks for web-pages. Absent otherwise.
+     */
+    web_pages?: readonly ExaminedWebPage[];
+    /**
+     * True when the pages stopped at the runtime's byte bound, or a page could
+     * not be read, as after its web content retention ended.
+     */
+    web_pages_truncated?: boolean;
 }
 /**
  * What the validator found, and why. The reason is required and non-empty.
@@ -58,6 +180,12 @@ export interface ValidatorCaseFinding {
     verdict: ValidatorFindingKind;
     reason: string;
     rejected_items?: readonly string[];
+    /**
+     * The items an indeterminate finding could not decide, when it can say
+     * which. A checkpoint then parks only these and judges the rest again
+     * without them; absent, it parks every item it covered.
+     */
+    undecided_items?: readonly string[];
     /** Which kind of wrong, so repair knows what it got (Q-10). */
     failure_class?: FailureClass;
 }
@@ -82,7 +210,15 @@ export interface ValidatorDefinition {
     can_answer_indeterminate: true;
     /** Exact inert catalogue declaration for this implementation or factory. */
     catalogue_entry: ValidatorCatalogueEntry;
-    evaluate(input: ValidatorCaseInput): Promise<ValidatorCaseFinding> | ValidatorCaseFinding;
+    evaluate(input: ValidatorCaseInput, context?: ValidatorEvaluationContext): Promise<ValidatorCaseFinding> | ValidatorCaseFinding;
+}
+/**
+ * What the runner hands an evaluation besides its input. The signal aborts
+ * when the validator's window closes or its run is cancelled, so work the
+ * evaluation started, such as a command, stops with it.
+ */
+export interface ValidatorEvaluationContext {
+    signal: AbortSignal;
 }
 export interface ValidatorManifest {
     kind: 'validator';
@@ -104,12 +240,12 @@ export interface ValidatorImplementation {
     version: string;
     class: ValidatorClass;
     catalogue_entry?: ValidatorCatalogueEntry;
-    evaluate(input: ValidatorCaseInput): Promise<ValidatorCaseFinding> | ValidatorCaseFinding;
+    evaluate(input: ValidatorCaseInput, context?: ValidatorEvaluationContext): Promise<ValidatorCaseFinding> | ValidatorCaseFinding;
 }
 export interface DefinedValidator extends ValidatorImplementation {
     catalogue_entry: ValidatorCatalogueEntry;
     manifest: ValidatorManifest;
-    evaluate(input: ValidatorCaseInput): Promise<ValidatorCaseFinding>;
+    evaluate(input: ValidatorCaseInput, context?: ValidatorEvaluationContext): Promise<ValidatorCaseFinding>;
     examined(input: ValidatorCaseInput): ExaminedManifest;
 }
 /** The manifest of exactly what was placed before a validator. */

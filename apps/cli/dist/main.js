@@ -16,9 +16,9 @@ import { mkdirSync, readFileSync, statSync, writeFileSync, existsSync } from 'no
 import { createInterface } from 'node:readline';
 import { basename, dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { CONTRACT_VERSION, AUTHORING_SCAFFOLD_KINDS, CapabilityAdmissionRequestSchema, DiagnosticError, compileBrowserBinding, AdmitModelAdapterRequestSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, DeclareFallbackSetRequestSchema, EnableProviderModelRequestSchema, EnableToolSourceToolsRequestSchema, ProtectedCredentialIngestRequestSchema, RegisterEnvironmentRequestSchema, RegisterSourceRequestSchema, RegisterToolSourceRequestSchema, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SyncProviderCatalogueRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceStateRequestSchema, canonicalJson, makeId, productEnvironmentNames, productEnvironmentValue, profileCapabilitySummaryFor, resolveCommandTarget, renderDiagnostic, shortId, SUCCESSOR_PRODUCT_IDENTITY, SUPPORTED_NODE_RUNTIME, isSupportedNodeRuntime, productLocalDataDirectory, } from '@zero-ar/contracts';
+import { CONTRACT_VERSION, AUTHORING_SCAFFOLD_KINDS, CapabilityAdmissionRequestSchema, DiagnosticError, AdmitModelAdapterRequestSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, DeclareFallbackSetRequestSchema, EnableProviderModelRequestSchema, EnableToolSourceToolsRequestSchema, ProtectedCredentialIngestRequestSchema, RegisterEnvironmentRequestSchema, RegisterSourceRequestSchema, RegisterToolSourceRequestSchema, RunContinuationDeclarationSchema, RUN_PORTABILITY_LEVELS, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SyncProviderCatalogueRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceStateRequestSchema, canonicalJson, makeId, turnCeilingForBudget, productEnvironmentNames, productEnvironmentValue, profileCapabilitySummaryFor, resolveCommandTarget, renderDiagnostic, shortId, SUCCESSOR_PRODUCT_IDENTITY, SUPPORTED_NODE_RUNTIME, isSupportedNodeRuntime, productLocalDataDirectory, } from '@zero-ar/contracts';
 import { connectRuntimeTarget, ZeroARClient } from '@zero-ar/client';
-import { authoringScaffold, compileAuthoringSource, declareBrowserTools, loadProject, lockBytes, publishCapabilitySource, previewPublicationVerificationPlan, renderPlan, renderVerificationPlan, scaffoldProject, verifyBundle, } from '@zero-ar/sdk';
+import { authoringScaffold, compileAuthoringSource, loadProject, lockBytes, publishCapabilitySource, previewPublicationVerificationPlan, renderPlan, renderVerificationPlan, scaffoldProject, verifyBundle, } from '@zero-ar/sdk';
 import { CLI_COMMANDS, CLI_COMMAND_EXAMPLES, CLI_HELP_SECTIONS, CLI_USAGE_ROWS, cliIdentityReport, createCliContext, isRemoteCapableCommand, } from "./identity.js";
 import { CLI_COMMAND_MODULES } from "./commands/index.js";
 import { exportedArtifactsNote } from "./commands/artifact.js";
@@ -55,8 +55,6 @@ export async function runCli(options = {}) {
         return validate(rest);
     if (command === 'profile')
         return profile(rest, context);
-    if (command === 'browser')
-        return browser(rest);
     if (command === 'doctor' && !rest.includes('--database'))
         return doctor(rest, context);
     if (command === 'publish' && rest.includes('--dry-run'))
@@ -104,6 +102,27 @@ export async function runCli(options = {}) {
                 });
                 console.log(`${command} accepted; it applies without breaking the turn`);
                 return 0;
+            case 'pause':
+                await client.control(need(commandArguments[0], 'run id'), {
+                    verb: 'pause',
+                    control_id: makeId('ctl'),
+                    ...(commandArguments.length > 1 ? { reason: commandArguments.slice(1).join(' ') } : {}),
+                });
+                console.log('pause accepted; the run suspends at its next turn boundary, or now if it is already suspended, and resume continues it');
+                return 0;
+            case 'budget': {
+                const run_id = need(commandArguments[0], 'run id');
+                const add = {};
+                for (const [flag, field] of [['--model-tokens', 'model_tokens'], ['--tool-calls', 'tool_calls'], ['--bytes', 'bytes'], ['--compute-ms', 'compute_ms'], ['--attention', 'attention'], ['--turns', 'max_turns']]) {
+                    const value = argValue(commandArguments, flag);
+                    if (value !== undefined)
+                        add[field] = Number(value);
+                }
+                const reason = argValue(commandArguments, '--reason');
+                const amended = await client.amendBudgets(run_id, { idempotency_key: argValue(commandArguments, '--idempotency-key') ?? makeId('ctl'), add, ...(reason ? { reason } : {}) });
+                console.log(`budget amended; the run now has ${amended.budgets.consumption.model_tokens} model tokens and ${amended.budgets.max_turns} turns, and a suspended run continues after resume`);
+                return 0;
+            }
             case 'cancel':
                 await client.control(need(commandArguments[0], 'run id'), {
                     verb: 'cancel',
@@ -116,24 +135,27 @@ export async function runCli(options = {}) {
                 const run_id = need(commandArguments[0], 'run id');
                 const item = need(commandArguments[1], 'a parked item id');
                 const output = argValue(commandArguments, '--output');
+                const choice = argValue(commandArguments, '--choice');
                 const dismiss = argValue(commandArguments, '--dismiss');
                 const control_id = makeId('ctl');
-                await client.control(run_id, {
+                const accepted = await client.control(run_id, {
                     verb: 'answer',
                     control_id,
                     handle: item,
                     ...(output ? { text: output } : {}),
+                    ...(choice ? { choice } : {}),
                     ...(dismiss ? { reason: dismiss } : {}),
                 });
                 const after = await client.snapshot(run_id);
                 const parked = after.items?.parked ?? 0;
-                if (output)
-                    console.log(`gap settled for ${item}; the validator decides at the next checkpoint`);
+                if (output || choice)
+                    console.log(`answered ${item}; a check's item goes to its validator at the next checkpoint, and an agent's question returns to the agent`);
                 else
                     console.log(`gap dismissed for ${item}; dismissed work never verifies`);
-                if (after.suspend_reason === 'awaiting_answer' && parked === 0) {
-                    console.log('every gap is answered; resuming');
-                    const accepted = await client.resume(run_id, { idempotency_key: `${control_id}:resume`, reason: 'resume after the accepted answer' });
+                // The answer that settles the last parked item wakes the run on its
+                // own, so the CLI follows it rather than resuming it.
+                if (parked === 0 && (after.suspend_reason === 'awaiting_answer' || after.status === 'running')) {
+                    console.log('every gap is answered; the run wakes on its own');
                     return await attach(client, run_id, { command: context.command, settle_after_record_seq: accepted.accepted_seq });
                 }
                 if (parked > 0)
@@ -193,21 +215,48 @@ export async function runCli(options = {}) {
                 const bundle = await client.exportRun(run_id);
                 const out = argValue(commandArguments, '--out') ?? `${run_id}${SUCCESSOR_PRODUCT_IDENTITY.run_bundle_suffix}`;
                 writeFileSync(out, bundle);
-                console.log(`exported ${bundle.split('\n').length - 1} lines to ${out}, checksummed and chain verified on import${exportedArtifactsNote(bundle)}`);
+                const portability = exportedRunPortability(bundle);
+                if (commandArguments.includes('--json')) {
+                    console.log(canonicalJson({ run_id, file: out, lines: bundle.split('\n').length - 1, portability }));
+                }
+                else {
+                    console.log(`exported ${bundle.split('\n').length - 1} lines to ${out}, checksummed and chain verified on import${exportedArtifactsNote(bundle)}`);
+                    renderRunPortability(portability);
+                }
                 return 0;
             }
             case 'import': {
                 const file = need(commandArguments[0], 'a bundle file');
+                const declaration = continuationDeclaration(commandArguments);
                 const outcome = await client.importRun(readFileSync(file, 'utf8'));
-                console.log(outcome.head_equal
-                    ? `imported ${outcome.run_id}: ${outcome.records} records, and the refolded head matches the manifest`
-                    : `imported ${outcome.run_id}, and the refolded head does not match the manifest. Do not promote this import.`);
-                if (outcome.artifacts) {
-                    const reasons = [...new Set(outcome.artifacts.not_transferred.map((omission) => omission.reason))].sort();
-                    console.log(`artifacts: ${outcome.artifacts.imported.length} restored, ${outcome.artifacts.not_transferred.length} named but not transferred` +
-                        (reasons.length > 0 ? ` (${reasons.join(', ')})` : ''));
+                const compatibility = declaration && outcome.continuation
+                    ? await client.checkRunContinuation(outcome.run_id, declaration)
+                    : null;
+                const continueRequested = commandArguments.includes('--continue');
+                const continued = continueRequested && compatibility?.compatible
+                    ? await client.continueImportedRun(outcome.run_id, {
+                        idempotency_key: argValue(commandArguments, '--idempotency-key') ?? makeId('ctl'),
+                        declaration: need(declaration ?? undefined, 'an executor declaration after --executor when --continue is set'),
+                    })
+                    : null;
+                const portability = importedRunPortability(outcome, compatibility, continued?.accepted ?? false);
+                if (commandArguments.includes('--json')) {
+                    console.log(canonicalJson({ ...outcome, portability, ...(compatibility ? { compatibility } : {}), ...(continued ? { continued } : {}) }));
                 }
-                return outcome.head_equal ? 0 : 1;
+                else {
+                    console.log(outcome.head_equal
+                        ? `imported ${outcome.run_id}: ${outcome.records} records, and the refolded head matches the manifest`
+                        : `imported ${outcome.run_id}, and the refolded head does not match the manifest. Do not promote this import.`);
+                    if (outcome.artifacts) {
+                        const reasons = [...new Set(outcome.artifacts.not_transferred.map((omission) => omission.reason))].sort();
+                        console.log(`artifacts: ${outcome.artifacts.imported.length} restored, ${outcome.artifacts.not_transferred.length} named but not transferred` +
+                            (reasons.length > 0 ? ` (${reasons.join(', ')})` : ''));
+                    }
+                    renderRunPortability(portability);
+                }
+                const compatibilityPassed = !declaration || compatibility?.compatible === true;
+                const continuationPassed = !continueRequested || continued?.accepted === true;
+                return outcome.head_equal && compatibilityPassed && continuationPassed ? 0 : 1;
             }
             case 'publish':
                 return await publish(client, commandArguments, context);
@@ -480,38 +529,6 @@ async function toolSource(client, args) {
     console.log(JSON.stringify(result, null, 2));
     return 0;
 }
-/** Inspect public browser contracts locally without installing the browser host. */
-function browser(args) {
-    const operation = need(args[0], 'a browser operation');
-    if (operation !== 'inspect' && operation !== 'tools') {
-        console.error('error: browser needs inspect or tools followed by an immutable binding JSON file.');
-        return 1;
-    }
-    const file = need(args[1], 'an immutable browser binding JSON file');
-    const binding = compileBrowserBinding(JSON.parse(readFileSync(file, 'utf8')));
-    if (operation === 'tools') {
-        console.log(canonicalJson(declareBrowserTools(binding)));
-        return 0;
-    }
-    console.log(canonicalJson({
-        contract: binding.contract,
-        binding_ref: binding.binding_ref,
-        run_id: binding.run_id,
-        tenant: binding.tenant,
-        profile_ref: binding.profile_ref,
-        adapter: binding.adapter,
-        isolation: binding.isolation,
-        limit_enforcement: binding.limit_enforcement,
-        network_mode: binding.network_mode,
-        destinations: binding.destinations,
-        credential_bindings: binding.credentials.length,
-        effect_policies: binding.effect_policies,
-        limits: binding.limits,
-        supersedes_binding_ref: binding.supersedes_binding_ref,
-        destination_decision_ref: binding.destination_decision_ref,
-    }));
-    return 0;
-}
 /** Local and hosted source lifecycle through generated native client methods only. */
 async function source(client, args) {
     const operation = need(args[0], 'a source operation');
@@ -781,14 +798,14 @@ async function run(client, args, context) {
             consumption: {
                 model_tokens: Number(argValue(args, '--tokens') ?? 50_000),
                 compute_ms: Number(argValue(args, '--compute-ms') ?? 600_000),
-                ...(sources.length > 0 ? {
-                    tool_calls: Number(argValue(args, '--tool-calls') ?? 64),
-                    bytes: Number(argValue(args, '--bytes') ?? 64 * 1_048_576),
-                } : {}),
+                // Tool calls and bytes are always declared, so a run can use its
+                // workspace and record its own plan within a budget it can see.
+                tool_calls: Number(argValue(args, '--tool-calls') ?? 64),
+                bytes: Number(argValue(args, '--bytes') ?? 64 * 1_048_576),
             },
             attention: Number(argValue(args, '--attention') ?? 0),
             verification_reserve_fraction: 0.2,
-            max_turns: Number(argValue(args, '--max-turns') ?? (items.length > 0 ? Math.ceil(items.length / 2) + 12 : 12)),
+            max_turns: Number(argValue(args, '--max-turns') ?? turnCeilingForBudget(Number(argValue(args, '--tokens') ?? 50_000), items.length)),
         },
         ...(contractRef ? { task_contract_ref: contractRef } : {}),
         ...(items.length > 0 || sources.length > 0 ? { inputs: {
@@ -1089,6 +1106,7 @@ async function doctor(rest = [], context) {
         ['server entrypoint present', existsSync(serverEntry), serverEntry],
         ['data directory writable', canWrite(home), `${home} under the working directory`],
         ['offline first run', true, 'the deterministic adapter answers with no provider account'],
+        ['run portability levels', true, 'export seals, import verifies and refolds, referenced state rehydrates separately, and executor compatibility is explicit'],
     ];
     const failed = checks.filter(([, ok]) => !ok).length;
     // A stable machine-readable report for an installer or an operator
@@ -1110,6 +1128,70 @@ async function doctor(rest = [], context) {
         console.log(`${ok ? t.state('verified', 'ok') : t.state('rejected', 'failing')}  ${name}  ${t.dim(detail)}`);
     }
     return failed === 0 ? 0 : 1;
+}
+/** Describe what an export carries without claiming destination-side work happened. */
+function exportedRunPortability(bundle) {
+    const frames = bundle.trim().split('\n').map((line) => JSON.parse(line));
+    const manifest = frames.find((frame) => frame['kind'] === 'manifest');
+    const closure = frames.find((frame) => frame['kind'] === 'state-closure');
+    const capsule = frames.find((frame) => frame['kind'] === 'continuation-capsule');
+    const stateHash = typeof manifest?.['head_projection_hash'] === 'string' ? manifest['head_projection_hash'] : 'not declared';
+    return {
+        verify: { status: 'sealed-at-source', detail: 'the source wrote the canonical checksum and record chain; the destination verifies the exact bytes before import' },
+        materialize: { status: 'declared', detail: `the manifest binds the expected run-head state hash ${stateHash}` },
+        rehydrate: closure
+            ? { status: 'required-at-destination', detail: 'the bundle carries a referenced-state closure; only the importing destination can establish it' }
+            : { status: 'not-carried', detail: 'this export has no referenced-state closure' },
+        continue: capsule
+            ? { status: 'requires-admission', detail: 'the bundle carries a continuation capsule; a destination executor must declare compatibility and take the execution claim' }
+            : { status: 'unavailable', detail: 'this export has no continuation capsule' },
+    };
+}
+/** Turn an import and optional compatibility check into the four honest portability levels. */
+function importedRunPortability(outcome, compatibility, continued) {
+    const rehydration = outcome.state_closure;
+    const refused = compatibility?.checks.filter((check) => check.status === 'refused').map((check) => check.message) ?? [];
+    return {
+        verify: { status: 'passed', detail: 'the bundle schemas, checksum, content hashes, causal links and record chain passed before import' },
+        materialize: outcome.head_equal
+            ? { status: 'passed', detail: 'the imported records refold to the run-head hash declared by the manifest' }
+            : { status: 'refused', detail: 'the imported records do not refold to the declared run-head hash' },
+        rehydrate: rehydration
+            ? {
+                status: rehydration.rehydrated ? 'passed' : 'refused',
+                detail: rehydration.rehydrated
+                    ? `every required member of ${rehydration.closure_ref} is present`
+                    : `${rehydration.members.filter((member) => member.required && member.status !== 'rehydrated' && member.status !== 'present-inline').length} required referenced-state member(s) remain unavailable`,
+            }
+            : { status: 'not-carried', detail: 'the bundle did not declare a referenced-state closure' },
+        continue: continued
+            ? { status: 'accepted', detail: 'the destination recorded executor identity and the exact frontier before starting the next operation' }
+            : compatibility
+                ? compatibility.compatible
+                    ? { status: 'ready', detail: 'the declared executor passed every compatibility check; add --continue to take the execution claim' }
+                    : { status: 'refused', detail: refused.join(' ') }
+                : outcome.continuation
+                    ? { status: 'not-checked', detail: 'pass --executor <declaration.json> to check the destination without spending or taking a claim' }
+                    : { status: 'unavailable', detail: 'the bundle did not carry a continuation capsule' },
+    };
+}
+/** Print the four levels in stable order so one success cannot imply another. */
+export function renderRunPortability(status) {
+    for (const level of RUN_PORTABILITY_LEVELS) {
+        console.log(neutralize(`${level}: ${status[level].status} (${status[level].detail})`));
+    }
+}
+/** Read one data-only executor declaration; no credential field exists in its schema. */
+function continuationDeclaration(args) {
+    const path = argValue(args, '--executor');
+    if (!path) {
+        if (args.includes('--executor'))
+            need(undefined, 'a declaration file after --executor');
+        if (args.includes('--continue'))
+            need(undefined, 'an executor declaration after --executor when --continue is set');
+        return null;
+    }
+    return RunContinuationDeclarationSchema.parse(JSON.parse(readFileSync(path, 'utf8')));
 }
 /** The Local Lite manifest beside an installed bundle, when there is one (DXI-027). */
 function installedRelease(serverEntry) {

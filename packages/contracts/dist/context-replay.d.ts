@@ -57,6 +57,54 @@ export declare const ContextReplayArtifactSpanSchema: z.ZodObject<{
     reason: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type ContextReplayArtifactSpan = z.infer<typeof ContextReplayArtifactSpanSchema>;
+/** One summary artifact from the recorded window and how it reads now. */
+export declare const ContextReplaySegmentSchema: z.ZodObject<{
+    manifest: z.ZodObject<{
+        schema: z.ZodLiteral<"zero-ar-context-segment/1">;
+        tenant_id: z.ZodString;
+        run_id: z.ZodString;
+        branch_id: z.ZodString;
+        frontier_ref: z.ZodString;
+        coverage: z.ZodObject<{
+            first_entry_id: z.ZodString;
+            last_entry_id: z.ZodString;
+            entry_count: z.ZodNumber;
+            source_hash: z.ZodString;
+            entries: z.ZodArray<z.ZodObject<{
+                entry_id: z.ZodString;
+                content_hash: z.ZodString;
+            }, z.core.$strict>>;
+        }, z.core.$strict>;
+        children: z.ZodArray<z.ZodString>;
+        summary_artifact_ref: z.ZodString;
+        summary_content_hash: z.ZodString;
+        classification: z.ZodEnum<{
+            public: "public";
+            internal: "internal";
+            confidential: "confidential";
+            restricted: "restricted";
+        }>;
+        evidence_grade: z.ZodLiteral<"model-generated">;
+        summarizer: z.ZodObject<{
+            binding: z.ZodEnum<{
+                "run-primary": "run-primary";
+            }>;
+            adapter_ref: z.ZodString;
+            model_ref: z.ZodString;
+            prompt_ref: z.ZodString;
+            policy_ref: z.ZodString;
+            call_id: z.ZodString;
+        }, z.core.$strict>;
+        summary_bytes: z.ZodNumber;
+        segment_ref: z.ZodString;
+    }, z.core.$strict>;
+    status: z.ZodEnum<{
+        stale: "stale";
+        resolved: "resolved";
+    }>;
+    reason: z.ZodNullable<z.ZodString>;
+}, z.core.$strict>;
+export type ContextReplaySegment = z.infer<typeof ContextReplaySegmentSchema>;
 /** The replay of one turn's window. Equal holds only when every span resolves and the refs match. */
 export declare const ContextReplaySchema: z.ZodObject<{
     run_id: z.ZodString;
@@ -101,6 +149,52 @@ export declare const ContextReplaySchema: z.ZodObject<{
             content_hash: z.ZodString;
             media_type: z.ZodString;
             fence_nonce: z.ZodString;
+        }, z.core.$strict>;
+        status: z.ZodEnum<{
+            stale: "stale";
+            resolved: "resolved";
+        }>;
+        reason: z.ZodNullable<z.ZodString>;
+    }, z.core.$strict>>;
+    segments: z.ZodArray<z.ZodObject<{
+        manifest: z.ZodObject<{
+            schema: z.ZodLiteral<"zero-ar-context-segment/1">;
+            tenant_id: z.ZodString;
+            run_id: z.ZodString;
+            branch_id: z.ZodString;
+            frontier_ref: z.ZodString;
+            coverage: z.ZodObject<{
+                first_entry_id: z.ZodString;
+                last_entry_id: z.ZodString;
+                entry_count: z.ZodNumber;
+                source_hash: z.ZodString;
+                entries: z.ZodArray<z.ZodObject<{
+                    entry_id: z.ZodString;
+                    content_hash: z.ZodString;
+                }, z.core.$strict>>;
+            }, z.core.$strict>;
+            children: z.ZodArray<z.ZodString>;
+            summary_artifact_ref: z.ZodString;
+            summary_content_hash: z.ZodString;
+            classification: z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>;
+            evidence_grade: z.ZodLiteral<"model-generated">;
+            summarizer: z.ZodObject<{
+                binding: z.ZodEnum<{
+                    "run-primary": "run-primary";
+                }>;
+                adapter_ref: z.ZodString;
+                model_ref: z.ZodString;
+                prompt_ref: z.ZodString;
+                policy_ref: z.ZodString;
+                call_id: z.ZodString;
+            }, z.core.$strict>;
+            summary_bytes: z.ZodNumber;
+            segment_ref: z.ZodString;
         }, z.core.$strict>;
         status: z.ZodEnum<{
             stale: "stale";

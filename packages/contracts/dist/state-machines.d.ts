@@ -9,10 +9,9 @@
  * How it fits: the central honesty claim is structural here. The only
  * transition a model may cause is proposing completion. Complete is reachable
  * through a verification verdict alone, so no model output can reach it
- * (QLT-031, QLT-032, C-ARCH-VERIFIED-COMPLETION-005). The browser destination
- * proposal table below is capability state, not a fifth trusted machine.
+ * (QLT-031, QLT-032, C-ARCH-VERIFIED-COMPLETION-005).
  */
-import type { BrowserDestinationProposalState, CompletionState, EffectState, LeaseState, RecordType, RunStatus } from './vocab.js';
+import type { CompletionState, EffectState, LeaseState, RecordType, RunStatus } from './vocab.js';
 /** Who may cause a transition. The model appears exactly once in these tables. */
 export type Actor = 'runtime' | 'caller' | 'model' | 'validator';
 export interface Transition<S extends string> {
@@ -32,14 +31,6 @@ export declare const MACHINES: {
     readonly effect: readonly Transition<"committed" | "prepared" | "dispatched" | "withdrawn" | "outcome_unknown" | "unreconcilable">[];
 };
 export type MachineName = keyof typeof MACHINES;
-/**
- * One browser destination proposal (BRC-012, BRC-013). A participant opens
- * it through the operator route, and one authenticated disposition settles
- * it. The model has no move here, and a refusal grants nothing. It stays
- * outside MACHINES because it moves no run, completion, lease or effect
- * state; the relay refuses the origin until an approval is recorded.
- */
-export declare const BROWSER_DESTINATION_PROPOSAL_TRANSITIONS: readonly Transition<BrowserDestinationProposalState>[];
 /** The matched transition, or null when the machine does not permit the move. */
 export declare function findTransition<S extends string>(machine: MachineName, from: S, to: S, on: string, actor: Actor): Transition<string> | null;
 /**

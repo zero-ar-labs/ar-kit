@@ -13,15 +13,25 @@
 /** Model-visible entry roles. Entries form a tree; records never reach a model. */
 export declare const ENTRY_ROLES: readonly ["system", "user", "assistant", "tool_result", "steer", "marker"];
 export type EntryRole = (typeof ENTRY_ROLES)[number];
+/** Runtime-owned control operations exposed beside publication-bound tools. */
+export declare const MODEL_CONTROL_OPERATION_KINDS: readonly ["completion_proposal", "item_result", "question"];
+export type ModelControlOperationKind = (typeof MODEL_CONTROL_OPERATION_KINDS)[number];
 /** Prefixes for sortable opaque identifiers. A prefix identifies a kind and grants no authority. */
 export declare const ID_PREFIXES: readonly ["run", "rec", "ent", "lea", "brn", "ctl", "gap", "eff", "ead", "agt", "chk", "wak", "pub", "env", "job", "obs", "src", "cap", "wsp"];
 export type IdPrefix = (typeof ID_PREFIXES)[number];
 /** Durable workspace generation states owned by the Environment Plane. */
 export declare const SANDBOX_WORKSPACE_STATUSES: readonly ["sealed", "attached", "expired", "deleted"];
 export type SandboxWorkspaceStatus = (typeof SANDBOX_WORKSPACE_STATUSES)[number];
+/** Portable workspace zones. Each has a different mutation and quota rule. */
+export declare const SANDBOX_WORKSPACE_ZONES: readonly ["sources", "scratch", "outputs"];
+export type SandboxWorkspaceZone = (typeof SANDBOX_WORKSPACE_ZONES)[number];
 /** Runtime record types. The canonical history is a hash-chained sequence of these. */
-export declare const RECORD_TYPES: readonly ["run.created", "run.started", "entry.appended", "branch.created", "branch.head.moved", "context.assembled", "model.call.started", "model.call.finished", "model.call.failed", "model.fallback.switched", "turn.completed", "control.received", "control.applied", "lease.opened", "lease.reserved", "lease.consumed", "lease.released", "subrun.opened", "subrun.finished", "tool.invoked", "tool.remote.pending", "tool.finished", "environment.prepare.requested", "environment.prepared", "environment.reused", "environment.job.submit.requested", "environment.job.submitted", "environment.job.observe.requested", "environment.job.observed", "environment.job.reconcile.requested", "environment.job.reconciled", "environment.job.cancel.requested", "environment.job.cancelled", "environment.artifact.collect.requested", "environment.artifact.collected", "artifact.committed", "environment.teardown.requested", "environment.teardown.recorded", "environment.abandon.requested", "environment.abandoned", "effect.prepared", "effect.authority.decision", "effect.authority.invalidated", "effect.dispatched", "effect.resolved", "effect.unreconcilable", "effect.answer.late", "grant.superseded", "item.attempted", "item.parked", "item.invalidated", "gap.settled", "gap.dismissed", "checkpoint.started", "checkpoint.passed", "checkpoint.rejected", "checkpoint.indeterminate", "repair.started", "completion.proposed", "verification.concluded", "run.suspended", "run.resume.blocked", "run.resumed", "run.cancelled", "run.finished", "run.forked", "reexecution.started", "subject.erasure.completed", "wake.scheduled", "wake.claimed", "memory.event.recorded", "memory.read.recorded", "external.observation.received", "external.observation.applied", "projection.rebuilt", "run.lifecycle.command.accepted", "capability.admission.requested", "capability.admission.classified", "capability.admission.decided", "capability.admission.cancelled", "closure.epoch.committed", "closure.epoch.activated", "browser.binding.pinned", "browser.destination.proposed", "browser.destination.decided", "browser.binding.superseded"];
+export declare const RECORD_TYPES: readonly ["run.created", "run.started", "entry.appended", "branch.created", "branch.head.moved", "context.assembled", "context.segment.started", "context.segment.committed", "context.segment.failed", "context.segment.expanded", "model.call.started", "model.call.finished", "model.call.failed", "model.fallback.switched", "turn.completed", "control.received", "control.applied", "lease.opened", "lease.reserved", "lease.consumed", "lease.released", "subrun.opened", "subrun.finished", "tool.invoked", "tool.remote.pending", "tool.finished", "environment.prepare.requested", "environment.prepared", "environment.reused", "environment.segment.started", "environment.segment.ending", "environment.segment.ended", "environment.job.submit.requested", "environment.job.submitted", "environment.job.observe.requested", "environment.job.observed", "environment.job.reconcile.requested", "environment.job.reconciled", "environment.job.cancel.requested", "environment.job.cancelled", "environment.artifact.collect.requested", "environment.artifact.collected", "artifact.committed", "environment.teardown.requested", "environment.teardown.recorded", "environment.abandon.requested", "environment.abandoned", "effect.prepared", "effect.authority.decision", "effect.authority.invalidated", "effect.dispatched", "effect.resolved", "effect.unreconcilable", "effect.answer.late", "grant.superseded", "item.attempted", "item.parked", "item.invalidated", "plan.recorded", "budgets.amended", "gap.settled", "gap.dismissed", "checkpoint.started", "checkpoint.passed", "checkpoint.rejected", "checkpoint.indeterminate", "repair.started", "completion.proposed", "verification.concluded", "run.suspended", "run.resume.blocked", "run.resumed", "run.cancelled", "run.finished", "run.forked", "reexecution.started", "subject.erasure.completed", "wake.scheduled", "wake.claimed", "memory.event.recorded", "memory.read.recorded", "external.observation.received", "external.observation.applied", "projection.rebuilt", "run.lifecycle.command.accepted", "capability.admission.requested", "capability.admission.classified", "capability.admission.decided", "capability.admission.cancelled", "closure.epoch.committed", "closure.epoch.activated", "state.closure.rehydrated", "executor.continuation.accepted"];
 export type RecordType = (typeof RECORD_TYPES)[number];
+export declare const RECORD_TYPE_VERSIONS: Readonly<Record<RecordType, readonly number[]>>;
+/** Claims a run bundle can establish, ordered from byte verification through admitted continuation. */
+export declare const RUN_PORTABILITY_LEVELS: readonly ["verify", "materialize", "rehydrate", "continue"];
+export type RunPortabilityLevel = (typeof RUN_PORTABILITY_LEVELS)[number];
 /** Governed amendments to the capability closure of one durable run (DCA-003). */
 export declare const CAPABILITY_ADMISSION_KINDS: readonly ["add", "replace", "remove"];
 export type CapabilityAdmissionKind = (typeof CAPABILITY_ADMISSION_KINDS)[number];
@@ -68,9 +78,18 @@ export type MemoryAvailabilityMode = (typeof MEMORY_AVAILABILITY_MODES)[number];
 /** Runtime-local memory operations a publication may expose to its model loop. */
 export declare const MEMORY_MODEL_OPERATIONS: readonly ["memory.read", "memory.propose"];
 export type MemoryModelOperation = (typeof MEMORY_MODEL_OPERATIONS)[number];
+/** The runtime-local operation an open-goal run uses to record and revise its own plan. */
+export declare const PLAN_OPERATIONS: readonly ["plan.record"];
+export type PlanOperation = (typeof PLAN_OPERATIONS)[number];
+/** Acceptance checks an agent may attach to an item of its own plan. */
+export declare const PLAN_CHECK_KINDS: readonly ["json-shape", "workspace-command"];
+export type PlanCheckKind = (typeof PLAN_CHECK_KINDS)[number];
 /** Why one exact tool schema entered a model call's bounded view. */
-export declare const TOOL_VIEW_SELECTION_REASONS: readonly ["reserved-local-catalogue", "reserved-skill", "reserved-artifact", "reserved-source", "reserved-memory", "explicit-author", "explicit-operator", "skill-allowed-tools", "prior-activation", "prior-tool-view", "task-contract", "lifecycle-phase", "objective-match", "small-closure"];
+export declare const TOOL_VIEW_SELECTION_REASONS: readonly ["reserved-local-catalogue", "reserved-skill", "reserved-artifact", "reserved-source", "reserved-memory", "reserved-plan", "reserved-context", "explicit-author", "explicit-operator", "skill-allowed-tools", "prior-activation", "prior-tool-view", "task-contract", "lifecycle-phase", "objective-match", "small-closure"];
 export type ToolViewSelectionReason = (typeof TOOL_VIEW_SELECTION_REASONS)[number];
+/** Runtime-local operations over the hierarchy pinned by one run posture. */
+export declare const CONTEXT_MODEL_OPERATIONS: readonly ["context.expand"];
+export type ContextModelOperation = (typeof CONTEXT_MODEL_OPERATIONS)[number];
 /** Run lifecycle states. One of the four trusted state machines. */
 export declare const RUN_STATUSES: readonly ["created", "running", "suspended", "cancelled", "finished"];
 export type RunStatus = (typeof RUN_STATUSES)[number];
@@ -109,7 +128,7 @@ export type LeasePool = (typeof LEASE_POOLS)[number];
 export declare const LEASE_STATES: readonly ["reserved", "settled", "charged"];
 export type LeaseState = (typeof LEASE_STATES)[number];
 /** The four control verbs. Distinct operations, not one interrupt (KRN-026). */
-export declare const CONTROL_VERBS: readonly ["steer", "redirect", "cancel", "answer"];
+export declare const CONTROL_VERBS: readonly ["steer", "redirect", "cancel", "answer", "pause"];
 export type ControlVerb = (typeof CONTROL_VERBS)[number];
 /** Why a branch exists. Repair and forks branch; history is never rewritten. */
 export declare const BRANCH_REASONS: readonly ["original", "steer", "redirect", "repair", "reexecution", "fork"];
@@ -179,6 +198,30 @@ export type ClaimLabel = (typeof CLAIM_LABELS)[number];
  * attaches only to the structured form; a contract that declares nothing gets
  * no such wording anywhere (CLM-001).
  */
+/**
+ * When a parked item reaches a person: at completion, after every other
+ * check passes, or as soon as it parks, when the attention budget can fund
+ * the review. Work that depends on a parked fact needs the second.
+ */
+export declare const ASK_TIMINGS: readonly ["at-completion", "when-parked"];
+/**
+ * What a task contract's checks may receive beyond item outputs.
+ * document-text is the text of every page the run extracted; effect-outcomes
+ * is every effect the run prepared, with its approver's decision and where
+ * it stands; workspace-output is what every workspace command the run ran
+ * printed, such as the pages a browser read; web-pages is the text of every
+ * page the run fetched with web.fetch.
+ */
+export declare const VALIDATOR_INPUT_EXTENSIONS: readonly ["document-text", "effect-outcomes", "workspace-output", "web-pages"];
+export type ValidatorInputExtension = (typeof VALIDATOR_INPUT_EXTENSIONS)[number];
+/**
+ * What a checkpoint's checks see. covered-items is the items the checkpoint
+ * judges; worked-items adds the run's other verified items as context, so a
+ * check that compares items across the run can judge each one as it lands.
+ */
+export declare const CHECKPOINT_VIEWS: readonly ["covered-items", "worked-items"];
+export type CheckpointView = (typeof CHECKPOINT_VIEWS)[number];
+export type AskTiming = (typeof ASK_TIMINGS)[number];
 export declare const CLAIM_REPRESENTATIONS: readonly ["structured-claims-with-citations"];
 export type ClaimRepresentation = (typeof CLAIM_REPRESENTATIONS)[number];
 /** Failure classes stay distinguished so repair knows what kind of wrong it got (Q-10). */
@@ -187,47 +230,6 @@ export type FailureClass = (typeof FAILURE_CLASSES)[number];
 /** Tool operation classes (EXT-003). Unknown resolves to effect-proposal, never quieter. */
 export declare const OPERATION_CLASSES: readonly ["observation", "run-internal", "effect-proposal"];
 export type OperationClass = (typeof OPERATION_CLASSES)[number];
-/** Browser engines admitted by the first-party browser contract. */
-export declare const BROWSER_ENGINES: readonly ["playwright-chromium"];
-export type BrowserEngine = (typeof BROWSER_ENGINES)[number];
-/** Where browser CPU, memory and descendant-process ceilings are enforced. */
-export declare const BROWSER_LIMIT_ENFORCEMENTS: readonly ["observed-process", "cgroup-v2"];
-export type BrowserLimitEnforcement = (typeof BROWSER_LIMIT_ENFORCEMENTS)[number];
-/** Public-only production networking and the explicit loopback fixture mode. */
-export declare const BROWSER_NETWORK_MODES: readonly ["public-only", "loopback-test-only"];
-export type BrowserNetworkMode = (typeof BROWSER_NETWORK_MODES)[number];
-/** Playwright request classes used by immutable destination policy. */
-export declare const BROWSER_RESOURCE_TYPES: readonly ["document", "stylesheet", "image", "media", "font", "script", "texttrack", "xhr", "fetch", "eventsource", "websocket", "manifest", "other"];
-export type BrowserResourceType = (typeof BROWSER_RESOURCE_TYPES)[number];
-/** HTTP methods that an exact browser destination may admit. */
-export declare const BROWSER_HTTP_METHODS: readonly ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"];
-export type BrowserHttpMethod = (typeof BROWSER_HTTP_METHODS)[number];
-/** Bounded observation forms returned by the browser host. */
-export declare const BROWSER_OBSERVATIONS: readonly ["text", "dom", "screenshot", "download"];
-export type BrowserObservation = (typeof BROWSER_OBSERVATIONS)[number];
-/** Browser-derived content never carries instruction authority. */
-export declare const BROWSER_CONTENT_LABELS: readonly ["untrusted-external-content"];
-export type BrowserContentLabel = (typeof BROWSER_CONTENT_LABELS)[number];
-export declare const BROWSER_INSTRUCTION_AUTHORITIES: readonly ["none"];
-export type BrowserInstructionAuthority = (typeof BROWSER_INSTRUCTION_AUTHORITIES)[number];
-/** Human dispositions on a requested destination expansion. */
-export declare const BROWSER_DESTINATION_DISPOSITIONS: readonly ["approved", "refused"];
-export type BrowserDestinationDisposition = (typeof BROWSER_DESTINATION_DISPOSITIONS)[number];
-/** Where one destination proposal stands: open, or settled by one disposition (BRC-012, BRC-013). */
-export declare const BROWSER_DESTINATION_PROPOSAL_STATES: readonly ["proposed", "approved", "refused"];
-export type BrowserDestinationProposalState = (typeof BROWSER_DESTINATION_PROPOSAL_STATES)[number];
-/** How a browser binding isolates its engine: a host process or a container. */
-export declare const BROWSER_ISOLATIONS: readonly ["process", "container"];
-export type BrowserIsolation = (typeof BROWSER_ISOLATIONS)[number];
-/** Consequential browser actions; an unknown interaction stays consequential. */
-export declare const BROWSER_EFFECT_ACTIONS: readonly ["click", "submit", "upload", "unknown"];
-export type BrowserEffectAction = (typeof BROWSER_EFFECT_ACTIONS)[number];
-/** The two admitted duplicate-prevention mechanisms for browser effects. */
-export declare const BROWSER_IDEMPOTENCY_STRATEGIES: readonly ["provider-key", "natural-reference"];
-export type BrowserIdempotencyStrategy = (typeof BROWSER_IDEMPOTENCY_STRATEGIES)[number];
-/** Browser profile readiness is separate from installation and enablement. */
-export declare const BROWSER_PROFILE_STATES: readonly ["disabled", "installed", "healthy", "admitted"];
-export type BrowserProfileState = (typeof BROWSER_PROFILE_STATES)[number];
 /**
  * How a tool's consumption is bounded (BUD-005). enforced reserves a
  * declared maximum before invocation; unmetered cannot, runs at lowered
@@ -240,7 +242,7 @@ export type ToolMetering = (typeof TOOL_METERING)[number];
 export declare const PROFILES: readonly ["local-lite", "full-cell", "small-production", "regulated"];
 export type Profile = (typeof PROFILES)[number];
 /** Profile capability ids used by the first-beta manifest. */
-export declare const PROFILE_CAPABILITIES: readonly ["hosted-postgresql-service", "local-lite", "transformation-volume-reference-pack", "provider-openai", "provider-anthropic", "provider-openrouter", "provider-together", "provider-fireworks", "aggregator-composio-observation", "aggregator-merge-observation", "restricted-effect-plane-attachment", "environment-process", "environment-oci", "environment-ssh", "environment-firecracker", "environment-cloudflare-sandbox", "environment-modal", "environment-daytona", "environment-vercel-sandbox", "environment-openai-agents", "environment-apptainer", "full-cell-docker-linux", "canonical-log", "quality-plane", "artifacts", "suspension", "honest-completion", "published-skills", "runtime-local-tools", "author-defined-tools", "progressive-tool-disclosure", "effect-proposal-tools", "unattended-aggregator-mutations", "dynamic-authority", "production-effect-dispatch", "research-reference-pack", "video-reference-pack", "native-packaged-self-hosting", "classification-airlocks", "regulated-workloads", "cross-run-memory", "authored-orchestration", "mcp-work-entrypoints", "mcp-imported-tools", "source-local-read-only", "document-pdf-extraction", "browser-first-party-playwright", "fair-cell-scheduling", "sequential-sampled-validation", "context-feature-cache", "content-defined-chunking", "attention-admission", "aggregator-trigger-ingress", "gateway-signed-webhook", "gateway-interactive-messaging", "workspace-binding-profiles"];
+export declare const PROFILE_CAPABILITIES: readonly ["hosted-postgresql-service", "local-lite", "transformation-volume-reference-pack", "provider-openai", "provider-anthropic", "provider-openrouter", "provider-together", "provider-fireworks", "aggregator-composio-observation", "aggregator-merge-observation", "restricted-effect-plane-attachment", "environment-process", "environment-oci", "environment-ssh", "environment-firecracker", "environment-openai-agents", "environment-apptainer", "full-cell-docker-linux", "canonical-log", "quality-plane", "artifacts", "suspension", "honest-completion", "published-skills", "runtime-local-tools", "author-defined-tools", "progressive-tool-disclosure", "effect-proposal-tools", "unattended-aggregator-mutations", "dynamic-authority", "production-effect-dispatch", "research-reference-pack", "video-reference-pack", "native-packaged-self-hosting", "classification-airlocks", "regulated-workloads", "cross-run-memory", "authored-orchestration", "mcp-work-entrypoints", "mcp-imported-tools", "source-local-read-only", "document-pdf-extraction", "fair-cell-scheduling", "sequential-sampled-validation", "context-feature-cache", "content-defined-chunking", "attention-admission", "gateway-signed-webhook", "gateway-interactive-messaging", "workspace-binding-profiles", "automatic-run-recovery", "open-goal-execution", "operator-pause-and-budget", "run-fork", "model-image-input", "workspace-exec", "browser-workspace", "hierarchical-context", "reversible-http-effect-dispatch", "web-search"];
 export type ProfileCapability = (typeof PROFILE_CAPABILITIES)[number];
 /** Capability manifest states. Every capability appears once in one state. */
 export declare const PROFILE_CAPABILITY_STATES: readonly ["supported", "conditional", "excluded"];
@@ -318,11 +320,47 @@ export type ArtifactTransferOmissionReason = (typeof ARTIFACT_TRANSFER_OMISSIONS
  * The frames a run export adds before its checksum line to carry artifacts.
  * The store's run bundle reader skips frame kinds it does not know.
  */
-export declare const RUN_BUNDLE_ARTIFACT_FRAME_KINDS: readonly ["artifact-bundle", "artifact-omissions"];
+export declare const RUN_BUNDLE_ARTIFACT_FRAME_KINDS: readonly ["artifact-bundle", "artifact-omissions", "state-transfer", "state-closure", "continuation-capsule"];
 export type RunBundleArtifactFrameKind = (typeof RUN_BUNDLE_ARTIFACT_FRAME_KINDS)[number];
+/** All extension frames the canonical log reader delegates to higher layers. */
+export declare const RUN_BUNDLE_EXTENSION_FRAME_KINDS: readonly ["artifact-bundle", "artifact-omissions", "state-transfer", "state-closure", "continuation-capsule", "integrity"];
+export type RunBundleExtensionFrameKind = (typeof RUN_BUNDLE_EXTENSION_FRAME_KINDS)[number];
+/** Runtime dependencies an executor must declare before it can continue imported work. */
+export declare const RUN_CONTINUATION_BINDING_KINDS: readonly ["agent", "closure", "publication", "model-adapter", "tool", "validator", "procedure", "workspace", "source", "memory", "environment", "domain-pack", "target-adapter", "profile"];
+export type RunContinuationBindingKind = (typeof RUN_CONTINUATION_BINDING_KINDS)[number];
+/** Independent checks in a pure continuation compatibility report. */
+export declare const RUN_CONTINUATION_CHECK_KINDS: readonly ["executor", "protocol", "state-closure", "lifecycle", "effects", "operations", "bindings", "fence"];
+export type RunContinuationCheckKind = (typeof RUN_CONTINUATION_CHECK_KINDS)[number];
+/** One compatibility check either passes or names why continuation refuses. */
+export declare const RUN_CONTINUATION_CHECK_STATUSES: readonly ["passed", "refused"];
+export type RunContinuationCheckStatus = (typeof RUN_CONTINUATION_CHECK_STATUSES)[number];
+/** Referenced state classes carried or accounted for by a continuation-grade run export. */
+export declare const RUN_STATE_CLOSURE_MEMBER_KINDS: readonly ["artifact", "publication", "workspace", "memory", "context", "integrity"];
+export type RunStateClosureMemberKind = (typeof RUN_STATE_CLOSURE_MEMBER_KINDS)[number];
+/** State classes carried only inside an authorized run transfer, never through the ordinary artifact store. */
+export declare const RUN_STATE_TRANSFER_KINDS: readonly ["publication", "workspace", "memory"];
+export type RunStateTransferKind = (typeof RUN_STATE_TRANSFER_KINDS)[number];
+/** Whether one referenced state member travelled, was intentionally left out or could not be read. */
+export declare const RUN_STATE_CLOSURE_MEMBER_STATUSES: readonly ["present", "omitted", "unavailable"];
+export type RunStateClosureMemberStatus = (typeof RUN_STATE_CLOSURE_MEMBER_STATUSES)[number];
+/** Import disposition after the destination checks one state-closure member. */
+export declare const RUN_STATE_REHYDRATION_STATUSES: readonly ["rehydrated", "present-inline", "omitted", "unavailable"];
+export type RunStateRehydrationStatus = (typeof RUN_STATE_REHYDRATION_STATUSES)[number];
 /** How one recorded span reads on replay. Erased or changed bytes are stale, never equal (CTX-012). */
 export declare const CONTEXT_REPLAY_SPAN_STATUSES: readonly ["resolved", "stale"];
 export type ContextReplaySpanStatus = (typeof CONTEXT_REPLAY_SPAN_STATUSES)[number];
+/** Context policies an immutable posture may select for one run. */
+export declare const CONTEXT_POLICY_SELECTORS: readonly ["coverage-mmr-v1", "hierarchical-context-v1"];
+export type ContextPolicySelector = (typeof CONTEXT_POLICY_SELECTORS)[number];
+/** Whether a run may fall back to ordinary context when hierarchy work is unavailable. */
+export declare const CONTEXT_POLICY_AVAILABILITIES: readonly ["optional", "required"];
+export type ContextPolicyAvailability = (typeof CONTEXT_POLICY_AVAILABILITIES)[number];
+/** The model identity source admitted for context summarization in version one. */
+export declare const CONTEXT_SUMMARIZER_BINDINGS: readonly ["run-primary"];
+export type ContextSummarizerBinding = (typeof CONTEXT_SUMMARIZER_BINDINGS)[number];
+/** Why a committed context segment cannot enter a later model window. */
+export declare const CONTEXT_SEGMENT_INELIGIBILITY_REASONS: readonly ["source-erased", "source-changed", "source-inaccessible", "branch-mismatch", "frontier-mismatch"];
+export type ContextSegmentIneligibilityReason = (typeof CONTEXT_SEGMENT_INELIGIBILITY_REASONS)[number];
 /** The two places a product may bind a committed runtime artifact. */
 export declare const RUNTIME_ARTIFACT_INTENDED_USES: readonly ["run", "intake"];
 export type RuntimeArtifactIntendedUseKind = (typeof RUNTIME_ARTIFACT_INTENDED_USES)[number];
@@ -342,7 +380,7 @@ export type ApiQueryParameterType = (typeof API_QUERY_PARAMETER_TYPES)[number];
 export declare const AUTHORIZATION_MODES: readonly ["trusted-local", "scoped"];
 export type AuthorizationMode = (typeof AUTHORIZATION_MODES)[number];
 /** Public route authorities. Every protected API route cites these names. */
-export declare const ROUTE_SCOPES: readonly ["artifact:write", "capability:cancel", "capability:decide", "capability:read", "capability:request", "credential:read", "credential:revoke", "credential:rotate", "credential:write", "environment:abandon", "environment:cancel", "environment:conformance", "environment:read", "environment:reconcile", "environment:teardown", "environment:write", "effect:approve", "effect:grant", "effect:read", "memory:erase", "memory:read", "memory:write", "operator:attention", "operator:audit", "operator:drain", "operator:erase", "operator:governance", "operator:rebuild", "operator:reconcile", "operator:restore", "observation:write", "platform:adapter-admit", "platform:authority-epoch", "provider:read", "provider:write", "publication:create", "publication:read", "registry:alias", "registry:deprecate", "registry:quarantine", "review:answer", "review:read", "run:cancel", "run:control", "run:create", "run:fork", "run:read", "run:reexecute", "run:resume", "run:start", "source:read", "source:write", "tool-source:read", "tool-source:test", "tool-source:write"];
+export declare const ROUTE_SCOPES: readonly ["artifact:write", "capability:cancel", "capability:decide", "capability:read", "capability:request", "credential:read", "credential:revoke", "credential:rotate", "credential:write", "environment:abandon", "environment:cancel", "environment:conformance", "environment:read", "environment:reconcile", "environment:teardown", "environment:write", "effect:approve", "effect:grant", "effect:read", "memory:erase", "memory:read", "memory:write", "operator:attention", "operator:audit", "operator:drain", "operator:erase", "operator:governance", "operator:rebuild", "operator:reconcile", "operator:restore", "observation:write", "platform:adapter-admit", "platform:authority-epoch", "provider:read", "provider:write", "publication:create", "publication:read", "registry:alias", "registry:deprecate", "registry:quarantine", "review:answer", "review:read", "run:budget", "run:cancel", "run:control", "run:create", "run:fork", "run:read", "run:reexecute", "run:resume", "run:start", "source:read", "source:write", "tool-source:read", "tool-source:test", "tool-source:write"];
 export type RouteScope = (typeof ROUTE_SCOPES)[number];
 /**
  * Route scopes no tenant key may hold. Each authorizes an act that reaches
@@ -375,14 +413,51 @@ export type ModelCredentialMode = (typeof MODEL_CREDENTIAL_MODES)[number];
 /** Compatibility claims do not inherit across providers that share one wire format. */
 export declare const MODEL_COMPATIBILITY_STATES: readonly ["supported", "unsupported", "unknown"];
 export type ModelCompatibilityState = (typeof MODEL_COMPATIBILITY_STATES)[number];
+/** Whether a model accepts image content. Anything but supported receives a note naming the image. */
+export declare const MODEL_IMAGE_INPUT_STATES: readonly ["supported", "unsupported"];
+export type ModelImageInput = (typeof MODEL_IMAGE_INPUT_STATES)[number];
+/** Image media types a model may see (WBR-007). Any other image type stays an artifact handle. */
+export declare const IMAGE_MEDIA_TYPES: readonly ["image/png", "image/jpeg", "image/webp", "image/gif"];
+export type ImageMediaType = (typeof IMAGE_MEDIA_TYPES)[number];
+/** Media types document.extract reads: a PDF, or one JPEG or PNG image read as a single OCR page. */
+export declare const DOCUMENT_EXTRACTION_MEDIA_TYPES: readonly ["application/pdf", "image/jpeg", "image/png"];
+export type DocumentExtractionMediaType = (typeof DOCUMENT_EXTRACTION_MEDIA_TYPES)[number];
+/** Media types of the image an OCR page keeps: a rasterized PDF page is PNG, an image document keeps its own type. */
+export declare const DOCUMENT_PAGE_IMAGE_MEDIA_TYPES: readonly ["image/jpeg", "image/png"];
+export type DocumentPageImageMediaType = (typeof DOCUMENT_PAGE_IMAGE_MEDIA_TYPES)[number];
+/** The units of a page's width and height: PDF points, or the pixels of an image document. */
+export declare const DOCUMENT_COORDINATE_SPACES: readonly ["pdf-points", "image-pixels"];
+export type DocumentCoordinateSpace = (typeof DOCUMENT_COORDINATE_SPACES)[number];
+/** Where the document extractor runs: host binaries beside the tool host, or the pinned oci-document image. */
+export declare const DOCUMENT_EXTRACTOR_BINDINGS: readonly ["host-process", "oci-document"];
+export type DocumentExtractorBinding = (typeof DOCUMENT_EXTRACTOR_BINDINGS)[number];
+/** The isolation the document extractor's commands ran under. */
+export declare const DOCUMENT_EXTRACTOR_SANDBOX_MODES: readonly ["linux-bwrap-no-network", "resource-limited-process", "oci-no-network-read-only"];
+export type DocumentExtractorSandboxMode = (typeof DOCUMENT_EXTRACTOR_SANDBOX_MODES)[number];
+/** Why an OCR page did not keep its image: over the per-page bound, or over what the extraction had left. */
+export declare const DOCUMENT_PAGE_IMAGE_OMISSIONS: readonly ["page-image-bytes", "extraction-image-bytes"];
+export type DocumentPageImageOmission = (typeof DOCUMENT_PAGE_IMAGE_OMISSIONS)[number];
+/** How one image in a window reached the model: as the image itself, or as a note naming it. */
+export declare const CONTEXT_IMAGE_DELIVERIES: readonly ["image", "note"];
+export type ContextImageDelivery = (typeof CONTEXT_IMAGE_DELIVERIES)[number];
+/** Why an image reached the model as a note instead of the image. */
+export declare const CONTEXT_IMAGE_NOTE_REASONS: readonly ["model-without-image-input", "image-too-large", "image-count-limit", "image-unavailable"];
+export type ContextImageNoteReason = (typeof CONTEXT_IMAGE_NOTE_REASONS)[number];
 /** Provider token counts may be usable, advisory, absent, or locally estimated. */
 export declare const MODEL_USAGE_MEASUREMENTS: readonly ["reported", "untrusted", "absent", "estimated"];
 export type ModelUsageMeasurement = (typeof MODEL_USAGE_MEASUREMENTS)[number];
+/**
+ * What a model call's input token bound rests on: the provider's own count
+ * of the exact request, with a margin, or the bytes of the request, which a
+ * byte-level tokenizer cannot exceed.
+ */
+export declare const INPUT_BOUND_BASES: readonly ["provider-count", "byte-bound"];
+export type InputBoundBasis = (typeof INPUT_BOUND_BASES)[number];
 /** Tool-aggregator providers supported by the first hosted beta. */
 export declare const AGGREGATOR_PROVIDERS: readonly ["composio", "merge-agent-handler", "merge-unified"];
 export type AggregatorProviderName = (typeof AGGREGATOR_PROVIDERS)[number];
 /** Purposes permitted for tenant credential bindings. */
-export declare const PROVIDER_CREDENTIAL_PURPOSES: readonly ["openai", "anthropic", "openrouter", "together", "fireworks", "openai-compatible", "composio", "merge-agent-handler", "merge-unified", "mcp", "s3-compatible-artifact-store", "memory-wrapping-key"];
+export declare const PROVIDER_CREDENTIAL_PURPOSES: readonly ["openai", "anthropic", "openrouter", "together", "fireworks", "openai-compatible", "composio", "merge-agent-handler", "merge-unified", "mcp", "s3-compatible-artifact-store", "memory-wrapping-key", "web-search"];
 export type ProviderCredentialPurpose = (typeof PROVIDER_CREDENTIAL_PURPOSES)[number];
 /**
  * Callers the hosted managed-secret broker issues a bearer to. Each bearer
@@ -526,32 +601,23 @@ export type PackClaimKind = (typeof PACK_CLAIM_KINDS)[number];
 export declare const DIAGNOSTIC_SEVERITIES: readonly ["error", "warning", "info"];
 export type DiagnosticSeverity = (typeof DIAGNOSTIC_SEVERITIES)[number];
 /**
- * Codes that name a mechanism this build does not wire. A declared route
- * answers its code after authorization. A reserved input refuses at parse
- * time: the caller receives that surface's parse refusal (intake.invalid,
- * control.invalid, or a schema error from the SDK publication compiler)
- * with this code in its message. An excluded capability entry names its
- * code. The change that wires one mechanism stops answering its code.
+ * Codes that name a mechanism this build does not wire. A reserved input
+ * refuses at parse time: the caller receives that surface's parse refusal
+ * (intake.invalid, control.invalid, or a schema error from the SDK
+ * publication compiler) with this code in its message. An excluded
+ * capability entry names its code. The change that wires one mechanism stops
+ * answering its code.
  */
-export declare const UNWIRED_DIAGNOSTIC_CODES: readonly ["wake.scheduler.unwired", "controllers.view.unwired", "scheduler.dispatch.unwired", "validator.sampled.unwired", "checkpoint.statistics.unwired", "context.cache.unwired", "source.chunking.unwired", "attention.service.unwired", "attention.admission.unwired", "artifact.sweep.unwired", "publication.transfer.unwired", "registry.rebuild.unwired", "registry.alias-history.unwired", "tool-source.drift.unwired", "tool-source.ingress.unwired", "effect.authority.unwired", "workspace.instances.unwired", "gateway.unwired"];
+export declare const UNWIRED_DIAGNOSTIC_CODES: readonly ["wake.scheduler.unwired", "controllers.view.unwired", "scheduler.dispatch.unwired", "validator.sampled.unwired", "checkpoint.statistics.unwired", "context.cache.unwired", "source.chunking.unwired", "attention.service.unwired", "attention.admission.unwired", "artifact.sweep.unwired", "publication.transfer.unwired", "registry.rebuild.unwired", "registry.alias-history.unwired", "tool-source.drift.unwired", "effect.authority.unwired", "workspace.instances.unwired", "gateway.unwired"];
 export type UnwiredDiagnosticCode = (typeof UNWIRED_DIAGNOSTIC_CODES)[number];
-/**
- * Codes that name a condition this deployment lacks. The wired mechanism
- * keeps answering them wherever the condition is absent: no browser port on
- * the cell, no dynamic effect authority, or no legacy provider fields to
- * import. A build that does not wire the mechanism lacks the condition too,
- * so its declared route or reserved input answers the same code now.
- */
-export declare const CONDITIONAL_REFUSAL_CODES: readonly ["browser.capability.unavailable", "effect.grant.reissue.unavailable", "model.legacy.unconfigured"];
-export type ConditionalRefusalCode = (typeof CONDITIONAL_REFUSAL_CODES)[number];
 /**
  * Refusals a wired mechanism answers when its check fails. The capability
  * inventory already answers capability-profile.unimplemented. The attention
- * preflight, browser health, storage writer fence and artifact export
- * ceiling answer theirs once their packages land. Each code is named once
- * here so every composition and client reads the same code.
+ * preflight, storage writer fence and artifact export ceiling answer theirs
+ * once their packages land. Each code is named once here so every
+ * composition and client reads the same code.
  */
-export declare const MECHANISM_REFUSAL_CODES: readonly ["attention.preflight.refused", "attention.snapshot.invalid", "attention.batch.flat-without-evidence", "browser.capability.stale", "browser.capability.unhealthy", "storage.writer.stale", "storage.writer.unavailable", "artifact.bundle-too-large", "capability-profile.unimplemented"];
+export declare const MECHANISM_REFUSAL_CODES: readonly ["attention.preflight.refused", "attention.snapshot.invalid", "attention.batch.flat-without-evidence", "storage.writer.stale", "storage.writer.unavailable", "artifact.bundle-too-large", "capability-profile.unimplemented"];
 export type MechanismRefusalCode = (typeof MECHANISM_REFUSAL_CODES)[number];
 /**
  * The complete durable observation vocabulary from ERD 9.3. The runtime
@@ -577,7 +643,7 @@ export type RunLifecycleCommand = (typeof RUN_LIFECYCLE_COMMANDS)[number];
 export declare const TRUST_TIERS: readonly ["none", "process", "container", "remote"];
 export type TrustTier = (typeof TRUST_TIERS)[number];
 /** Provider families behind the versioned environment lifecycle. */
-export declare const ENVIRONMENT_BACKENDS: readonly ["process", "oci", "ssh", "firecracker", "cloudflare-sandbox", "modal", "daytona", "vercel-sandbox", "openai-agents", "apptainer"];
+export declare const ENVIRONMENT_BACKENDS: readonly ["process", "oci", "ssh", "firecracker", "openai-agents", "apptainer"];
 export type EnvironmentBackend = (typeof ENVIRONMENT_BACKENDS)[number];
 /** The exact boundary an environment profile claims. */
 export declare const ENVIRONMENT_ISOLATIONS: readonly ["none", "process", "container", "remote-host", "microvm", "hosted-sandbox"];
@@ -585,12 +651,6 @@ export type EnvironmentIsolation = (typeof ENVIRONMENT_ISOLATIONS)[number];
 /** Remote schedulers the SSH environment adapter can declare and pin. */
 export declare const ENVIRONMENT_SSH_SCHEDULERS: readonly ["direct", "slurm"];
 export type EnvironmentSshScheduler = (typeof ENVIRONMENT_SSH_SCHEDULERS)[number];
-/** How Zero-AR reaches one Cloudflare Sandbox deployment. */
-export declare const ENVIRONMENT_CLOUDFLARE_CONNECTION_MODES: readonly ["worker-binding", "authenticated-bridge"];
-export type EnvironmentCloudflareConnectionMode = (typeof ENVIRONMENT_CLOUDFLARE_CONNECTION_MODES)[number];
-/** The Sandbox SDK transport pinned inside the Worker deployment. */
-export declare const ENVIRONMENT_CLOUDFLARE_TRANSPORT_MODES: readonly ["rpc"];
-export type EnvironmentCloudflareTransportMode = (typeof ENVIRONMENT_CLOUDFLARE_TRANSPORT_MODES)[number];
 /** Separately reported timing and transfer dimensions for environment work. */
 export declare const ENVIRONMENT_MEASUREMENT_PHASES: readonly ["server-cold-start", "adapter-coordinator-overhead", "environment-cold-start", "environment-warm-start", "submit-to-running", "observation", "reconciliation", "cancellation", "teardown", "artifact-upload-throughput", "artifact-download-throughput"];
 export type EnvironmentMeasurementPhase = (typeof ENVIRONMENT_MEASUREMENT_PHASES)[number];
@@ -613,6 +673,11 @@ export declare const PRODUCT_SOURCE_API_VERSIONS: readonly ["ramsden/v1", "zero-
 export type ProductSourceApiVersion = (typeof PRODUCT_SOURCE_API_VERSIONS)[number];
 export declare const PRODUCT_RUN_BUNDLE_FORMATS: readonly ["ramsden-run-bundle", "zero-ar-run-bundle"];
 export type ProductRunBundleFormat = (typeof PRODUCT_RUN_BUNDLE_FORMATS)[number];
+/** Canonical byte and projection profiles carried by portable run bundles. */
+export declare const RUN_BUNDLE_CANONICALIZATIONS: readonly ["canonical-json-1"];
+export type RunBundleCanonicalization = (typeof RUN_BUNDLE_CANONICALIZATIONS)[number];
+export declare const RUN_HEAD_FOLD_PROFILES: readonly ["run-head-v9"];
+export type RunHeadFoldProfile = (typeof RUN_HEAD_FOLD_PROFILES)[number];
 export declare const PRODUCT_SBOM_FORMATS: readonly ["ramsden-sbom-2", "zero-ar-sbom-1"];
 export type ProductSbomFormat = (typeof PRODUCT_SBOM_FORMATS)[number];
 /** Developer-facing files that must ship as release artifacts during identity migration. */
@@ -624,7 +689,7 @@ export type ProductReleaseSigningArtifactKind = (typeof PRODUCT_RELEASE_SIGNING_
 /** Why release signing material is admitted during the identity migration. */
 export declare const PRODUCT_RELEASE_SIGNING_PURPOSES: readonly ["successor-release", "legacy-history"];
 export type ProductReleaseSigningPurpose = (typeof PRODUCT_RELEASE_SIGNING_PURPOSES)[number];
-export declare const PRODUCT_EGRESS_REVIEW_PURPOSES: readonly ["model-provider", "artifact-store", "artifact-health", "tool-provider", "effect-target", "oauth-redirect", "webhook-callback"];
+export declare const PRODUCT_EGRESS_REVIEW_PURPOSES: readonly ["model-provider", "artifact-store", "artifact-health", "tool-provider", "effect-target", "oauth-redirect", "webhook-callback", "workspace", "web-search"];
 export type ProductEgressReviewPurpose = (typeof PRODUCT_EGRESS_REVIEW_PURPOSES)[number];
 /** How a package participates in the Zero-AR package graph during migration. */
 export declare const PRODUCT_PACKAGE_IMPLEMENTATION_IDENTITIES: readonly ["legacy", "successor", "legacy-wrapper"];
@@ -653,6 +718,18 @@ export type EnvironmentProfileState = (typeof ENVIRONMENT_PROFILE_STATES)[number
 /** Declared workload network posture. */
 export declare const ENVIRONMENT_NETWORK_MODES: readonly ["deny", "allowlist", "unrestricted"];
 export type EnvironmentNetworkMode = (typeof ENVIRONMENT_NETWORK_MODES)[number];
+/** Whether a browser in an environment image keeps its own sandbox (browser workspace appendix, C3). */
+export declare const BROWSER_SANDBOX_MODES: readonly ["enabled", "disabled-by-declaration"];
+export type BrowserSandboxMode = (typeof BROWSER_SANDBOX_MODES)[number];
+/** Whether each command gets a fresh container or a run keeps one live container segment (C1). */
+export declare const CONTAINER_LIFETIMES: readonly ["per-command", "per-run"];
+export type ContainerLifetime = (typeof CONTAINER_LIFETIMES)[number];
+/** What a segment container runs between commands: a sleeping shell, or the image's own entrypoint, such as a browser daemon. */
+export declare const SEGMENT_PROCESSES: readonly ["keepalive", "image"];
+export type SegmentProcess = (typeof SEGMENT_PROCESSES)[number];
+/** Why a container segment ended (C1, C5). Every end is recorded with one. */
+export declare const SEGMENT_END_REASONS: readonly ["idle", "suspended", "ended", "lifetime", "capacity", "cancelled", "crashed", "stranded", "unfreezable", "quota"];
+export type SegmentEndReason = (typeof SEGMENT_END_REASONS)[number];
 /** Mount mutability in one admitted profile. */
 export declare const ENVIRONMENT_MOUNT_MODES: readonly ["read-only", "read-write"];
 export type EnvironmentMountMode = (typeof ENVIRONMENT_MOUNT_MODES)[number];

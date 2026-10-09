@@ -12,10 +12,14 @@
  */
 /** Model-visible entry roles. Entries form a tree; records never reach a model. */
 export const ENTRY_ROLES = ['system', 'user', 'assistant', 'tool_result', 'steer', 'marker'];
+/** Runtime-owned control operations exposed beside publication-bound tools. */
+export const MODEL_CONTROL_OPERATION_KINDS = ['completion_proposal', 'item_result', 'question'];
 /** Prefixes for sortable opaque identifiers. A prefix identifies a kind and grants no authority. */
 export const ID_PREFIXES = ['run', 'rec', 'ent', 'lea', 'brn', 'ctl', 'gap', 'eff', 'ead', 'agt', 'chk', 'wak', 'pub', 'env', 'job', 'obs', 'src', 'cap', 'wsp'];
 /** Durable workspace generation states owned by the Environment Plane. */
 export const SANDBOX_WORKSPACE_STATUSES = ['sealed', 'attached', 'expired', 'deleted'];
+/** Portable workspace zones. Each has a different mutation and quota rule. */
+export const SANDBOX_WORKSPACE_ZONES = ['sources', 'scratch', 'outputs'];
 /** Runtime record types. The canonical history is a hash-chained sequence of these. */
 export const RECORD_TYPES = [
     'run.created',
@@ -24,6 +28,10 @@ export const RECORD_TYPES = [
     'branch.created',
     'branch.head.moved',
     'context.assembled',
+    'context.segment.started',
+    'context.segment.committed',
+    'context.segment.failed',
+    'context.segment.expanded',
     'model.call.started',
     'model.call.finished',
     'model.call.failed',
@@ -43,6 +51,9 @@ export const RECORD_TYPES = [
     'environment.prepare.requested',
     'environment.prepared',
     'environment.reused',
+    'environment.segment.started',
+    'environment.segment.ending',
+    'environment.segment.ended',
     'environment.job.submit.requested',
     'environment.job.submitted',
     'environment.job.observe.requested',
@@ -69,6 +80,8 @@ export const RECORD_TYPES = [
     'item.attempted',
     'item.parked',
     'item.invalidated',
+    'plan.recorded',
+    'budgets.amended',
     'gap.settled',
     'gap.dismissed',
     'checkpoint.started',
@@ -100,11 +113,20 @@ export const RECORD_TYPES = [
     'capability.admission.cancelled',
     'closure.epoch.committed',
     'closure.epoch.activated',
-    'browser.binding.pinned',
-    'browser.destination.proposed',
-    'browser.destination.decided',
-    'browser.binding.superseded',
+    'state.closure.rehydrated',
+    'executor.continuation.accepted',
 ];
+/** Payload versions implemented for each canonical record type. */
+const recordTypeVersions = RECORD_TYPES.reduce((versions, type) => {
+    versions[type] = Object.freeze([1]);
+    return versions;
+}, {});
+recordTypeVersions['state.closure.rehydrated'] = Object.freeze([1, 2]);
+recordTypeVersions['executor.continuation.accepted'] = Object.freeze([1, 2]);
+recordTypeVersions['model.call.started'] = Object.freeze([1, 2]);
+export const RECORD_TYPE_VERSIONS = Object.freeze(recordTypeVersions);
+/** Claims a run bundle can establish, ordered from byte verification through admitted continuation. */
+export const RUN_PORTABILITY_LEVELS = ['verify', 'materialize', 'rehydrate', 'continue'];
 /** Governed amendments to the capability closure of one durable run (DCA-003). */
 export const CAPABILITY_ADMISSION_KINDS = ['add', 'replace', 'remove'];
 /** Immutable publication roots supported by the first admission slice. */
@@ -172,6 +194,10 @@ export const MEMORY_WRITE_MODES = ['none', 'propose-after-verification', 'human-
 export const MEMORY_AVAILABILITY_MODES = ['optional', 'required'];
 /** Runtime-local memory operations a publication may expose to its model loop. */
 export const MEMORY_MODEL_OPERATIONS = ['memory.read', 'memory.propose'];
+/** The runtime-local operation an open-goal run uses to record and revise its own plan. */
+export const PLAN_OPERATIONS = ['plan.record'];
+/** Acceptance checks an agent may attach to an item of its own plan. */
+export const PLAN_CHECK_KINDS = ['json-shape', 'workspace-command'];
 /** Why one exact tool schema entered a model call's bounded view. */
 export const TOOL_VIEW_SELECTION_REASONS = [
     'reserved-local-catalogue',
@@ -179,6 +205,8 @@ export const TOOL_VIEW_SELECTION_REASONS = [
     'reserved-artifact',
     'reserved-source',
     'reserved-memory',
+    'reserved-plan',
+    'reserved-context',
     'explicit-author',
     'explicit-operator',
     'skill-allowed-tools',
@@ -189,6 +217,8 @@ export const TOOL_VIEW_SELECTION_REASONS = [
     'objective-match',
     'small-closure',
 ];
+/** Runtime-local operations over the hierarchy pinned by one run posture. */
+export const CONTEXT_MODEL_OPERATIONS = ['context.expand'];
 /** Run lifecycle states. One of the four trusted state machines. */
 export const RUN_STATUSES = ['created', 'running', 'suspended', 'cancelled', 'finished'];
 /** Completion states. The machine that makes finished a verdict, not a declaration. */
@@ -225,7 +255,7 @@ export const LEASE_POOLS = ['work', 'verification', 'repair'];
 /** Per-lease lifecycle. Reserve before spend; settle with actuals; charge on loss. */
 export const LEASE_STATES = ['reserved', 'settled', 'charged'];
 /** The four control verbs. Distinct operations, not one interrupt (KRN-026). */
-export const CONTROL_VERBS = ['steer', 'redirect', 'cancel', 'answer'];
+export const CONTROL_VERBS = ['steer', 'redirect', 'cancel', 'answer', 'pause'];
 /** Why a branch exists. Repair and forks branch; history is never rewritten. */
 export const BRANCH_REASONS = ['original', 'steer', 'redirect', 'repair', 'reexecution', 'fork'];
 /** How a model stream ended. Provider failures are in-band; adapter defects raise (X-3). */
@@ -313,52 +343,32 @@ export const CLAIM_LABELS = ['guarantee', 'assumption', 'heuristic', 'open'];
  * attaches only to the structured form; a contract that declares nothing gets
  * no such wording anywhere (CLM-001).
  */
+/**
+ * When a parked item reaches a person: at completion, after every other
+ * check passes, or as soon as it parks, when the attention budget can fund
+ * the review. Work that depends on a parked fact needs the second.
+ */
+export const ASK_TIMINGS = ['at-completion', 'when-parked'];
+/**
+ * What a task contract's checks may receive beyond item outputs.
+ * document-text is the text of every page the run extracted; effect-outcomes
+ * is every effect the run prepared, with its approver's decision and where
+ * it stands; workspace-output is what every workspace command the run ran
+ * printed, such as the pages a browser read; web-pages is the text of every
+ * page the run fetched with web.fetch.
+ */
+export const VALIDATOR_INPUT_EXTENSIONS = ['document-text', 'effect-outcomes', 'workspace-output', 'web-pages'];
+/**
+ * What a checkpoint's checks see. covered-items is the items the checkpoint
+ * judges; worked-items adds the run's other verified items as context, so a
+ * check that compares items across the run can judge each one as it lands.
+ */
+export const CHECKPOINT_VIEWS = ['covered-items', 'worked-items'];
 export const CLAIM_REPRESENTATIONS = ['structured-claims-with-citations'];
 /** Failure classes stay distinguished so repair knows what kind of wrong it got (Q-10). */
 export const FAILURE_CLASSES = ['shape', 'domain', 'grounding', 'infrastructure'];
 /** Tool operation classes (EXT-003). Unknown resolves to effect-proposal, never quieter. */
 export const OPERATION_CLASSES = ['observation', 'run-internal', 'effect-proposal'];
-/** Browser engines admitted by the first-party browser contract. */
-export const BROWSER_ENGINES = ['playwright-chromium'];
-/** Where browser CPU, memory and descendant-process ceilings are enforced. */
-export const BROWSER_LIMIT_ENFORCEMENTS = ['observed-process', 'cgroup-v2'];
-/** Public-only production networking and the explicit loopback fixture mode. */
-export const BROWSER_NETWORK_MODES = ['public-only', 'loopback-test-only'];
-/** Playwright request classes used by immutable destination policy. */
-export const BROWSER_RESOURCE_TYPES = [
-    'document',
-    'stylesheet',
-    'image',
-    'media',
-    'font',
-    'script',
-    'texttrack',
-    'xhr',
-    'fetch',
-    'eventsource',
-    'websocket',
-    'manifest',
-    'other',
-];
-/** HTTP methods that an exact browser destination may admit. */
-export const BROWSER_HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'];
-/** Bounded observation forms returned by the browser host. */
-export const BROWSER_OBSERVATIONS = ['text', 'dom', 'screenshot', 'download'];
-/** Browser-derived content never carries instruction authority. */
-export const BROWSER_CONTENT_LABELS = ['untrusted-external-content'];
-export const BROWSER_INSTRUCTION_AUTHORITIES = ['none'];
-/** Human dispositions on a requested destination expansion. */
-export const BROWSER_DESTINATION_DISPOSITIONS = ['approved', 'refused'];
-/** Where one destination proposal stands: open, or settled by one disposition (BRC-012, BRC-013). */
-export const BROWSER_DESTINATION_PROPOSAL_STATES = ['proposed', 'approved', 'refused'];
-/** How a browser binding isolates its engine: a host process or a container. */
-export const BROWSER_ISOLATIONS = ['process', 'container'];
-/** Consequential browser actions; an unknown interaction stays consequential. */
-export const BROWSER_EFFECT_ACTIONS = ['click', 'submit', 'upload', 'unknown'];
-/** The two admitted duplicate-prevention mechanisms for browser effects. */
-export const BROWSER_IDEMPOTENCY_STRATEGIES = ['provider-key', 'natural-reference'];
-/** Browser profile readiness is separate from installation and enablement. */
-export const BROWSER_PROFILE_STATES = ['disabled', 'installed', 'healthy', 'admitted'];
 /**
  * How a tool's consumption is bounded (BUD-005). enforced reserves a
  * declared maximum before invocation; unmetered cannot, runs at lowered
@@ -385,10 +395,6 @@ export const PROFILE_CAPABILITIES = [
     'environment-oci',
     'environment-ssh',
     'environment-firecracker',
-    'environment-cloudflare-sandbox',
-    'environment-modal',
-    'environment-daytona',
-    'environment-vercel-sandbox',
     'environment-openai-agents',
     'environment-apptainer',
     'full-cell-docker-linux',
@@ -416,16 +422,24 @@ export const PROFILE_CAPABILITIES = [
     'mcp-imported-tools',
     'source-local-read-only',
     'document-pdf-extraction',
-    'browser-first-party-playwright',
     'fair-cell-scheduling',
     'sequential-sampled-validation',
     'context-feature-cache',
     'content-defined-chunking',
     'attention-admission',
-    'aggregator-trigger-ingress',
     'gateway-signed-webhook',
     'gateway-interactive-messaging',
     'workspace-binding-profiles',
+    'automatic-run-recovery',
+    'open-goal-execution',
+    'operator-pause-and-budget',
+    'run-fork',
+    'model-image-input',
+    'workspace-exec',
+    'browser-workspace',
+    'hierarchical-context',
+    'reversible-http-effect-dispatch',
+    'web-search',
 ];
 /** Capability manifest states. Every capability appears once in one state. */
 export const PROFILE_CAPABILITY_STATES = ['supported', 'conditional', 'excluded'];
@@ -492,9 +506,54 @@ export const ARTIFACT_TRANSFER_OMISSIONS = ['tenant-mismatch', 'backend-mismatch
  * The frames a run export adds before its checksum line to carry artifacts.
  * The store's run bundle reader skips frame kinds it does not know.
  */
-export const RUN_BUNDLE_ARTIFACT_FRAME_KINDS = ['artifact-bundle', 'artifact-omissions'];
+export const RUN_BUNDLE_ARTIFACT_FRAME_KINDS = ['artifact-bundle', 'artifact-omissions', 'state-transfer', 'state-closure', 'continuation-capsule'];
+/** All extension frames the canonical log reader delegates to higher layers. */
+export const RUN_BUNDLE_EXTENSION_FRAME_KINDS = [...RUN_BUNDLE_ARTIFACT_FRAME_KINDS, 'integrity'];
+/** Runtime dependencies an executor must declare before it can continue imported work. */
+export const RUN_CONTINUATION_BINDING_KINDS = [
+    'agent',
+    'closure',
+    'publication',
+    'model-adapter',
+    'tool',
+    'validator',
+    'procedure',
+    'workspace',
+    'source',
+    'memory',
+    'environment',
+    'domain-pack',
+    'target-adapter',
+    'profile',
+];
+/** Independent checks in a pure continuation compatibility report. */
+export const RUN_CONTINUATION_CHECK_KINDS = ['executor', 'protocol', 'state-closure', 'lifecycle', 'effects', 'operations', 'bindings', 'fence'];
+/** One compatibility check either passes or names why continuation refuses. */
+export const RUN_CONTINUATION_CHECK_STATUSES = ['passed', 'refused'];
+/** Referenced state classes carried or accounted for by a continuation-grade run export. */
+export const RUN_STATE_CLOSURE_MEMBER_KINDS = ['artifact', 'publication', 'workspace', 'memory', 'context', 'integrity'];
+/** State classes carried only inside an authorized run transfer, never through the ordinary artifact store. */
+export const RUN_STATE_TRANSFER_KINDS = ['publication', 'workspace', 'memory'];
+/** Whether one referenced state member travelled, was intentionally left out or could not be read. */
+export const RUN_STATE_CLOSURE_MEMBER_STATUSES = ['present', 'omitted', 'unavailable'];
+/** Import disposition after the destination checks one state-closure member. */
+export const RUN_STATE_REHYDRATION_STATUSES = ['rehydrated', 'present-inline', 'omitted', 'unavailable'];
 /** How one recorded span reads on replay. Erased or changed bytes are stale, never equal (CTX-012). */
 export const CONTEXT_REPLAY_SPAN_STATUSES = ['resolved', 'stale'];
+/** Context policies an immutable posture may select for one run. */
+export const CONTEXT_POLICY_SELECTORS = ['coverage-mmr-v1', 'hierarchical-context-v1'];
+/** Whether a run may fall back to ordinary context when hierarchy work is unavailable. */
+export const CONTEXT_POLICY_AVAILABILITIES = ['optional', 'required'];
+/** The model identity source admitted for context summarization in version one. */
+export const CONTEXT_SUMMARIZER_BINDINGS = ['run-primary'];
+/** Why a committed context segment cannot enter a later model window. */
+export const CONTEXT_SEGMENT_INELIGIBILITY_REASONS = [
+    'source-erased',
+    'source-changed',
+    'source-inaccessible',
+    'branch-mismatch',
+    'frontier-mismatch',
+];
 /** The two places a product may bind a committed runtime artifact. */
 export const RUNTIME_ARTIFACT_INTENDED_USES = ['run', 'intake'];
 /** Effect plane modes named by capability manifests. */
@@ -551,6 +610,7 @@ export const ROUTE_SCOPES = [
     'registry:quarantine',
     'review:answer',
     'review:read',
+    'run:budget',
     'run:cancel',
     'run:control',
     'run:create',
@@ -587,12 +647,43 @@ export const MODEL_CATALOGUE_SOURCES = ['declared', 'provider-api', 'openai-comp
 export const MODEL_CREDENTIAL_MODES = ['binding', 'none'];
 /** Compatibility claims do not inherit across providers that share one wire format. */
 export const MODEL_COMPATIBILITY_STATES = ['supported', 'unsupported', 'unknown'];
+/** Whether a model accepts image content. Anything but supported receives a note naming the image. */
+export const MODEL_IMAGE_INPUT_STATES = ['supported', 'unsupported'];
+/** Image media types a model may see (WBR-007). Any other image type stays an artifact handle. */
+export const IMAGE_MEDIA_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+/** Media types document.extract reads: a PDF, or one JPEG or PNG image read as a single OCR page. */
+export const DOCUMENT_EXTRACTION_MEDIA_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
+/** Media types of the image an OCR page keeps: a rasterized PDF page is PNG, an image document keeps its own type. */
+export const DOCUMENT_PAGE_IMAGE_MEDIA_TYPES = ['image/jpeg', 'image/png'];
+/** The units of a page's width and height: PDF points, or the pixels of an image document. */
+export const DOCUMENT_COORDINATE_SPACES = ['pdf-points', 'image-pixels'];
+/** Where the document extractor runs: host binaries beside the tool host, or the pinned oci-document image. */
+export const DOCUMENT_EXTRACTOR_BINDINGS = ['host-process', 'oci-document'];
+/** The isolation the document extractor's commands ran under. */
+export const DOCUMENT_EXTRACTOR_SANDBOX_MODES = ['linux-bwrap-no-network', 'resource-limited-process', 'oci-no-network-read-only'];
+/** Why an OCR page did not keep its image: over the per-page bound, or over what the extraction had left. */
+export const DOCUMENT_PAGE_IMAGE_OMISSIONS = ['page-image-bytes', 'extraction-image-bytes'];
+/** How one image in a window reached the model: as the image itself, or as a note naming it. */
+export const CONTEXT_IMAGE_DELIVERIES = ['image', 'note'];
+/** Why an image reached the model as a note instead of the image. */
+export const CONTEXT_IMAGE_NOTE_REASONS = [
+    'model-without-image-input',
+    'image-too-large',
+    'image-count-limit',
+    'image-unavailable',
+];
 /** Provider token counts may be usable, advisory, absent, or locally estimated. */
 export const MODEL_USAGE_MEASUREMENTS = ['reported', 'untrusted', 'absent', 'estimated'];
+/**
+ * What a model call's input token bound rests on: the provider's own count
+ * of the exact request, with a margin, or the bytes of the request, which a
+ * byte-level tokenizer cannot exceed.
+ */
+export const INPUT_BOUND_BASES = ['provider-count', 'byte-bound'];
 /** Tool-aggregator providers supported by the first hosted beta. */
 export const AGGREGATOR_PROVIDERS = ['composio', 'merge-agent-handler', 'merge-unified'];
 /** Purposes permitted for tenant credential bindings. */
-export const PROVIDER_CREDENTIAL_PURPOSES = ['openai', 'anthropic', 'openrouter', 'together', 'fireworks', 'openai-compatible', 'composio', 'merge-agent-handler', 'merge-unified', 'mcp', 's3-compatible-artifact-store', 'memory-wrapping-key'];
+export const PROVIDER_CREDENTIAL_PURPOSES = ['openai', 'anthropic', 'openrouter', 'together', 'fireworks', 'openai-compatible', 'composio', 'merge-agent-handler', 'merge-unified', 'mcp', 's3-compatible-artifact-store', 'memory-wrapping-key', 'web-search'];
 /**
  * Callers the hosted managed-secret broker issues a bearer to. Each bearer
  * is bound to one principal, and the broker takes the tenant from that
@@ -711,12 +802,12 @@ export const PACK_CLAIM_KINDS = ['capability', 'coverage', 'limitation', 'requir
 /** Diagnostic severities. Severity depends on what happens next, not on drama. */
 export const DIAGNOSTIC_SEVERITIES = ['error', 'warning', 'info'];
 /**
- * Codes that name a mechanism this build does not wire. A declared route
- * answers its code after authorization. A reserved input refuses at parse
- * time: the caller receives that surface's parse refusal (intake.invalid,
- * control.invalid, or a schema error from the SDK publication compiler)
- * with this code in its message. An excluded capability entry names its
- * code. The change that wires one mechanism stops answering its code.
+ * Codes that name a mechanism this build does not wire. A reserved input
+ * refuses at parse time: the caller receives that surface's parse refusal
+ * (intake.invalid, control.invalid, or a schema error from the SDK
+ * publication compiler) with this code in its message. An excluded
+ * capability entry names its code. The change that wires one mechanism stops
+ * answering its code.
  */
 export const UNWIRED_DIAGNOSTIC_CODES = [
     'wake.scheduler.unwired',
@@ -733,36 +824,21 @@ export const UNWIRED_DIAGNOSTIC_CODES = [
     'registry.rebuild.unwired',
     'registry.alias-history.unwired',
     'tool-source.drift.unwired',
-    'tool-source.ingress.unwired',
     'effect.authority.unwired',
     'workspace.instances.unwired',
     'gateway.unwired',
 ];
 /**
- * Codes that name a condition this deployment lacks. The wired mechanism
- * keeps answering them wherever the condition is absent: no browser port on
- * the cell, no dynamic effect authority, or no legacy provider fields to
- * import. A build that does not wire the mechanism lacks the condition too,
- * so its declared route or reserved input answers the same code now.
- */
-export const CONDITIONAL_REFUSAL_CODES = [
-    'browser.capability.unavailable',
-    'effect.grant.reissue.unavailable',
-    'model.legacy.unconfigured',
-];
-/**
  * Refusals a wired mechanism answers when its check fails. The capability
  * inventory already answers capability-profile.unimplemented. The attention
- * preflight, browser health, storage writer fence and artifact export
- * ceiling answer theirs once their packages land. Each code is named once
- * here so every composition and client reads the same code.
+ * preflight, storage writer fence and artifact export ceiling answer theirs
+ * once their packages land. Each code is named once here so every
+ * composition and client reads the same code.
  */
 export const MECHANISM_REFUSAL_CODES = [
     'attention.preflight.refused',
     'attention.snapshot.invalid',
     'attention.batch.flat-without-evidence',
-    'browser.capability.stale',
-    'browser.capability.unhealthy',
     'storage.writer.stale',
     'storage.writer.unavailable',
     'artifact.bundle-too-large',
@@ -846,10 +922,6 @@ export const ENVIRONMENT_BACKENDS = [
     'oci',
     'ssh',
     'firecracker',
-    'cloudflare-sandbox',
-    'modal',
-    'daytona',
-    'vercel-sandbox',
     'openai-agents',
     'apptainer',
 ];
@@ -857,10 +929,6 @@ export const ENVIRONMENT_BACKENDS = [
 export const ENVIRONMENT_ISOLATIONS = ['none', 'process', 'container', 'remote-host', 'microvm', 'hosted-sandbox'];
 /** Remote schedulers the SSH environment adapter can declare and pin. */
 export const ENVIRONMENT_SSH_SCHEDULERS = ['direct', 'slurm'];
-/** How Zero-AR reaches one Cloudflare Sandbox deployment. */
-export const ENVIRONMENT_CLOUDFLARE_CONNECTION_MODES = ['worker-binding', 'authenticated-bridge'];
-/** The Sandbox SDK transport pinned inside the Worker deployment. */
-export const ENVIRONMENT_CLOUDFLARE_TRANSPORT_MODES = ['rpc'];
 /** Separately reported timing and transfer dimensions for environment work. */
 export const ENVIRONMENT_MEASUREMENT_PHASES = [
     'server-cold-start',
@@ -914,6 +982,9 @@ export const PRODUCT_RUN_BUNDLE_FORMATS = [
     'ramsden-run-bundle',
     'zero-ar-run-bundle',
 ];
+/** Canonical byte and projection profiles carried by portable run bundles. */
+export const RUN_BUNDLE_CANONICALIZATIONS = ['canonical-json-1'];
+export const RUN_HEAD_FOLD_PROFILES = ['run-head-v9'];
 export const PRODUCT_SBOM_FORMATS = [
     'ramsden-sbom-2',
     'zero-ar-sbom-1',
@@ -932,6 +1003,8 @@ export const PRODUCT_EGRESS_REVIEW_PURPOSES = [
     'effect-target',
     'oauth-redirect',
     'webhook-callback',
+    'workspace',
+    'web-search',
 ];
 /** How a package participates in the Zero-AR package graph during migration. */
 export const PRODUCT_PACKAGE_IMPLEMENTATION_IDENTITIES = ['legacy', 'successor', 'legacy-wrapper'];
@@ -951,6 +1024,14 @@ export const PRODUCT_IDENTITY_PHYSICAL_RENAME_STAGES = ['record-event', 'pause-w
 export const ENVIRONMENT_PROFILE_STATES = ['registered', 'enabled', 'disabled', 'draining'];
 /** Declared workload network posture. */
 export const ENVIRONMENT_NETWORK_MODES = ['deny', 'allowlist', 'unrestricted'];
+/** Whether a browser in an environment image keeps its own sandbox (browser workspace appendix, C3). */
+export const BROWSER_SANDBOX_MODES = ['enabled', 'disabled-by-declaration'];
+/** Whether each command gets a fresh container or a run keeps one live container segment (C1). */
+export const CONTAINER_LIFETIMES = ['per-command', 'per-run'];
+/** What a segment container runs between commands: a sleeping shell, or the image's own entrypoint, such as a browser daemon. */
+export const SEGMENT_PROCESSES = ['keepalive', 'image'];
+/** Why a container segment ended (C1, C5). Every end is recorded with one. */
+export const SEGMENT_END_REASONS = ['idle', 'suspended', 'ended', 'lifetime', 'capacity', 'cancelled', 'crashed', 'stranded', 'unfreezable', 'quota'];
 /** Mount mutability in one admitted profile. */
 export const ENVIRONMENT_MOUNT_MODES = ['read-only', 'read-write'];
 /** Whether an environment resource belongs to one tenant or the deployment. */

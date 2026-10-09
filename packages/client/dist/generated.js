@@ -80,6 +80,9 @@ export class GeneratedRoutes {
     resume(run_id, body) {
         return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/resume`, body);
     }
+    amendBudgets(run_id, body) {
+        return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/budget-amendments`, body);
+    }
     resumeDeferred(run_id, body) {
         return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/resume-deferred`, body);
     }
@@ -97,6 +100,12 @@ export class GeneratedRoutes {
     }
     eraseSubject(run_id, body) {
         return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/erasures`, body);
+    }
+    checkRunContinuation(run_id, body) {
+        return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/continuation-checks`, body);
+    }
+    continueImportedRun(run_id, body) {
+        return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/continuations`, body);
     }
     createPublicationSession(body) {
         return this.transport.json('POST', `/v1/publication-sessions`, body);
@@ -335,12 +344,6 @@ export class GeneratedRoutes {
     attentionDashboard() {
         return this.transport.json('GET', `/v1/attention/dashboard`);
     }
-    proposeBrowserDestination(run_id, body) {
-        return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/browser-destination-proposals`, body);
-    }
-    decideBrowserDestination(run_id, proposal_ref, body, participant_token) {
-        return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/browser-destination-proposals/${encodeURIComponent(proposal_ref)}/decisions`, body, { "X-Zero-AR-Participant-Token": participant_token });
-    }
     sweepArtifacts(body) {
         return this.transport.json('POST', `/v1/artifact-sweeps`, body);
     }
@@ -350,34 +353,10 @@ export class GeneratedRoutes {
     registryAliasHistory(alias) {
         return this.transport.json('GET', `/v1/registry/aliases/${encodeURIComponent(alias)}/history`);
     }
-    importLegacyModelPool(body) {
-        return this.transport.json('POST', `/v1/model-pool/legacy-imports`, body);
-    }
     toolSourceDrift(source_ref) {
         return this.transport.json('GET', `/v1/tool-sources/${encodeURIComponent(source_ref)}/drift`);
     }
-    toolSourceIngress(tenant, source_ref, body, webhook_id = undefined, webhook_timestamp = undefined, webhook_signature = undefined, merge_webhook_signature = undefined) {
-        return this.transport.json('POST', `/v1/tool-source-ingress/${encodeURIComponent(tenant)}/${encodeURIComponent(source_ref)}`, body, { ...(webhook_id !== undefined ? { "webhook-id": webhook_id } : {}), ...(webhook_timestamp !== undefined ? { "webhook-timestamp": webhook_timestamp } : {}), ...(webhook_signature !== undefined ? { "webhook-signature": webhook_signature } : {}), ...(merge_webhook_signature !== undefined ? { "X-Merge-Webhook-Signature": merge_webhook_signature } : {}) });
-    }
-    reissueEffectGrant(run_id, body, participant_token) {
-        return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/effect-grants/reissuances`, body, { "X-Zero-AR-Participant-Token": participant_token });
-    }
-    revokeEffectGrant(grant_ref, body) {
-        return this.transport.json('POST', `/v1/effect-grants/${encodeURIComponent(grant_ref)}/revocations`, body);
-    }
-    advanceEffectAuthorityEpoch(body) {
-        return this.transport.json('POST', `/v1/effect-authority/epoch-advances`, body);
-    }
     listEffectTargets() {
         return this.transport.json('GET', `/v1/effect-targets`);
-    }
-    registerWorkspaceInstance(body) {
-        return this.transport.json('POST', `/v1/workspace-instances`, body);
-    }
-    listWorkspaceInstances() {
-        return this.transport.json('GET', `/v1/workspace-instances`);
-    }
-    inspectWorkspaceInstance(instance_ref) {
-        return this.transport.json('GET', `/v1/workspace-instances/${encodeURIComponent(instance_ref)}`);
     }
 }

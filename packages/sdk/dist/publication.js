@@ -27,7 +27,7 @@ import { pathToFileURL } from 'node:url';
 import { BindingProfileSchema, DomainPackSchema, MACHINE_PREDICATE, MemoryBindingSchema, OPERATION_CLASSES, PostureSchema, TRUST_TIERS, TaskContractSchema, VALIDATOR_CLASSES, VALIDATOR_OUTCOMES, canonicalJson, contentHash, productSourceApiVersionReadable, refuse, spanHash, } from '@zero-ar/contracts';
 import { ProcedureManifestSchema, PublicationBundleManifestSchema } from '@zero-ar/contracts';
 import { admitCatalogueEntry, catalogueDefaults, compileVerificationPlan, defineCatalogueEntry, verificationCheckpointInputForContract } from '@zero-ar/validator-kit';
-const COMPILER = { name: '@zero-ar/sdk', version: '0.2.1', canonicalization: 'canonical-json-1' };
+const COMPILER = { name: '@zero-ar/sdk', version: '0.4.1', canonicalization: 'canonical-json-1' };
 /**
  * The YAML parser is an SDK authoring dependency, loaded only when a YAML
  * source actually compiles. Runtime workers consume compiled artifacts,
@@ -356,7 +356,7 @@ async function executableBinding(root, declarationPath, spec, addAsset, expected
     }
     const actual = implementation.manifest;
     for (const [field, wanted] of Object.entries({ name: expected.name, version: expected.version, ...expected.fields })) {
-        if (canonicalJson(actual[field]) !== canonicalJson(wanted)) {
+        if (canonicalJson(requiredAsSet(actual[field])) !== canonicalJson(requiredAsSet(wanted))) {
             refuse({
                 code: `publish.${expected.kind}.implementation-mismatch`,
                 message: `${expected.kind} ${expected.name} declares ${field} as ${canonicalJson(wanted)}, but ${binding['entry']} exports ${canonicalJson(actual[field])}. Keep the declaration and implementation on one contract.`,
@@ -461,6 +461,21 @@ function compiledValidatorCatalogue(spec, identity, binding) {
         },
         limitations: limitations,
     });
+}
+/**
+ * A schema with every required list in one order, so a declaration and its
+ * implementation agree whatever order each lists required fields in. The
+ * declaration's own order is what publishes, and what the model sees.
+ */
+function requiredAsSet(value) {
+    if (Array.isArray(value))
+        return value.map(requiredAsSet);
+    if (value === null || typeof value !== 'object')
+        return value;
+    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [
+        key,
+        key === 'required' && Array.isArray(entry) && entry.every((name) => typeof name === 'string') ? [...entry].sort() : requiredAsSet(entry),
+    ]));
 }
 /** Normalize one tool contract and its optional executable binding. */
 async function compiledTool(root, path, doc, addAsset) {

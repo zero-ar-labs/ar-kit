@@ -116,9 +116,9 @@ export function defineValidator(definition) {
         class: definition.class,
         catalogue_entry: catalogueEntry,
         examined: (input) => examinedManifest(input),
-        evaluate: async (input) => {
+        evaluate: async (input, context) => {
             const population = givenItems(input);
-            const finding = await definition.evaluate(input);
+            const finding = await definition.evaluate(input, context);
             refuseMalformedFinding(definition.name, finding, population);
             return finding;
         },

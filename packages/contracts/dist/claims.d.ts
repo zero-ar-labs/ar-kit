@@ -11,7 +11,8 @@
  * How it fits: item outputs and sub-run findings carry claim sets as JSON.
  * The quality plane's grounding check resolves each citation against the
  * application's span store; parseClaimSet is the border where unstructured
- * text is told apart from a claim set, with the reason.
+ * text is told apart from a claim set, with the reason. Entries name the
+ * images they show here too, by digest and never by bytes.
  */
 import { z } from 'zod';
 /** The per-run artifact fence nonce: 128 random bits, minted at intake and outside identity. */
@@ -68,6 +69,67 @@ export declare const EntryEvidenceSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type EntryEvidence = z.infer<typeof EntryEvidenceSchema>;
+/**
+ * One image an entry shows, by reference and never by bytes (WBR-007). The
+ * entry's content hash covers the reference, and each window loads the
+ * bytes from the artifact store and checks them against content_hash. The
+ * image keeps its artifact's classification.
+ */
+export declare const EntryImageSchema: z.ZodObject<{
+    artifact_ref: z.ZodString;
+    content_hash: z.ZodString;
+    media_type: z.ZodEnum<{
+        "image/png": "image/png";
+        "image/jpeg": "image/jpeg";
+        "image/webp": "image/webp";
+        "image/gif": "image/gif";
+    }>;
+    bytes: z.ZodNumber;
+    classification: z.ZodEnum<{
+        public: "public";
+        internal: "internal";
+        confidential: "confidential";
+        restricted: "restricted";
+    }>;
+}, z.core.$strict>;
+export type EntryImage = z.infer<typeof EntryImageSchema>;
+/** The most image references one entry carries. The deployment's per-turn limit still applies per window. */
+export declare const ENTRY_IMAGE_MAX = 64;
+/**
+ * One image a window carried, as context.assembled records it: by digest,
+ * media type, size and classification, never by bytes. A note names why
+ * the model received a line naming the image instead of the image.
+ */
+export declare const ContextImageRecordSchema: z.ZodObject<{
+    artifact_ref: z.ZodString;
+    content_hash: z.ZodString;
+    media_type: z.ZodEnum<{
+        "image/png": "image/png";
+        "image/jpeg": "image/jpeg";
+        "image/webp": "image/webp";
+        "image/gif": "image/gif";
+    }>;
+    bytes: z.ZodNumber;
+    classification: z.ZodEnum<{
+        public: "public";
+        internal: "internal";
+        confidential: "confidential";
+        restricted: "restricted";
+    }>;
+    entry_id: z.ZodString;
+    delivery: z.ZodEnum<{
+        image: "image";
+        note: "note";
+    }>;
+    tokens: z.ZodNumber;
+    reason: z.ZodOptional<z.ZodEnum<{
+        "model-without-image-input": "model-without-image-input";
+        "image-too-large": "image-too-large";
+        "image-count-limit": "image-count-limit";
+        "image-unavailable": "image-unavailable";
+    }>>;
+}, z.core.$strict>;
+export type ContextImageRecord = z.infer<typeof ContextImageRecordSchema>;
 /** One artifact range placed in a context window behind the run's fence nonce (CTX-007). */
 export declare const ArtifactContextSpanSchema: z.ZodObject<{
     entry_id: z.ZodString;

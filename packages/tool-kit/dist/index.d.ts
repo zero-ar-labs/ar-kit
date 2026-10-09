@@ -27,10 +27,48 @@ export declare function number(options?: {
 export declare function boolean(options?: {
     description?: string;
 }): Schema<boolean>;
+export declare function integer(options?: {
+    description?: string;
+    minimum?: number;
+    maximum?: number;
+}): Schema<number>;
+/** One of a fixed list of strings, numbers or booleans. */
+export declare function enumOf<const V extends readonly (string | number | boolean)[]>(values: V, options?: {
+    description?: string;
+}): Schema<V[number]>;
+export declare function array<T>(items: Schema<T>, options?: {
+    description?: string;
+    minItems?: number;
+    maxItems?: number;
+}): Schema<T[]>;
+/** The value, or null. A primitive keeps one type list; anything else becomes a choice with null. */
+export declare function nullable<T>(schema: Schema<T>): Schema<T | null>;
+/** A field an object may leave out. It is not required, and a value given is checked as the schema says. */
+export interface OptionalSchema<T> extends Schema<T> {
+    readonly optional: true;
+}
+export declare function optional<T>(schema: Schema<T>): OptionalSchema<T>;
 type Shape = Record<string, Schema<unknown>>;
+type RequiredKeys<S extends Shape> = {
+    [K in keyof S]: S[K] extends {
+        optional: true;
+    } ? never : K;
+}[keyof S];
+type OptionalKeys<S extends Shape> = {
+    [K in keyof S]: S[K] extends {
+        optional: true;
+    } ? K : never;
+}[keyof S];
 type Infer<S extends Shape> = {
-    [K in keyof S]: S[K] extends Schema<infer T> ? T : never;
+    [K in RequiredKeys<S>]: S[K] extends Schema<infer T> ? T : never;
+} & {
+    [K in OptionalKeys<S>]?: S[K] extends Schema<infer T> ? T : never;
 };
+/**
+ * An object with exactly these fields. The required list keeps the order the
+ * fields are written in, which is the order a model sees and fills them, and
+ * leaves out each optional field.
+ */
 export declare function object<S extends Shape>(shape: S, options?: {
     description?: string;
 }): Schema<Infer<S>>;

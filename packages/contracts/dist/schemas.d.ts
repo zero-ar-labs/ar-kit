@@ -47,8 +47,16 @@ export declare const BudgetsSchema: z.ZodObject<{
     verification_reserve_fraction: z.ZodNumber;
     max_turns: z.ZodNumber;
 }, z.core.$strict>;
+/**
+ * The turn ceiling a caller derives when it sets none. Spend bounds the run:
+ * one turn per two thousand work tokens, never fewer than the item count
+ * needs and never past the schema limit, so a larger budget buys a longer
+ * unattended run instead of meeting a fixed default.
+ */
+export declare function turnCeilingForBudget(model_tokens: number, items?: number): number;
 /** One input artifact the caller asks the run to depend on. */
 export declare const InputArtifactBindingSchema: z.ZodObject<{
+    alias: z.ZodOptional<z.ZodString>;
     artifact_ref: z.ZodString;
     content_hash: z.ZodString;
     bytes: z.ZodNumber;
@@ -69,6 +77,7 @@ export declare const InputArtifactBindingSchema: z.ZodObject<{
 export type InputArtifactBinding = z.infer<typeof InputArtifactBindingSchema>;
 /** The verified input artifact descriptor pinned into the run manifest. */
 export declare const ResolvedInputArtifactSchema: z.ZodObject<{
+    alias: z.ZodOptional<z.ZodString>;
     artifact_ref: z.ZodString;
     manifest_ref: z.ZodString;
     tenant: z.ZodString;
@@ -94,6 +103,7 @@ export type ResolvedInputArtifact = z.infer<typeof ResolvedInputArtifactSchema>;
 export declare const RemoteToolTaskHandleSchema: z.ZodObject<{
     protocol: z.ZodLiteral<"mcp">;
     invoke_id: z.ZodString;
+    model_tool_call_id: z.ZodOptional<z.ZodString>;
     tool: z.ZodString;
     original_call_ref: z.ZodString;
     peer_binding_ref: z.ZodString;
@@ -137,6 +147,7 @@ export declare const IntakeRequestSchema: z.ZodObject<{
     inputs: z.ZodOptional<z.ZodObject<{
         items: z.ZodOptional<z.ZodArray<z.ZodString>>;
         artifacts: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            alias: z.ZodOptional<z.ZodString>;
             artifact_ref: z.ZodString;
             content_hash: z.ZodString;
             bytes: z.ZodNumber;
@@ -160,9 +171,6 @@ export declare const IntakeRequestSchema: z.ZodObject<{
             required_for_completion: z.ZodDefault<z.ZodBoolean>;
         }, z.core.$strict>>>;
         memory_subjects: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
-        browser: z.ZodOptional<z.ZodObject<{
-            template: z.ZodString;
-        }, z.core.$strict>>;
         workspace: z.ZodOptional<z.ZodArray<z.ZodObject<{
             mount: z.ZodString;
             instance_ref: z.ZodString;
@@ -211,10 +219,6 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
             "environment-oci": "environment-oci";
             "environment-ssh": "environment-ssh";
             "environment-firecracker": "environment-firecracker";
-            "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-            "environment-modal": "environment-modal";
-            "environment-daytona": "environment-daytona";
-            "environment-vercel-sandbox": "environment-vercel-sandbox";
             "environment-openai-agents": "environment-openai-agents";
             "environment-apptainer": "environment-apptainer";
             "full-cell-docker-linux": "full-cell-docker-linux";
@@ -242,16 +246,24 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
             "mcp-imported-tools": "mcp-imported-tools";
             "source-local-read-only": "source-local-read-only";
             "document-pdf-extraction": "document-pdf-extraction";
-            "browser-first-party-playwright": "browser-first-party-playwright";
             "fair-cell-scheduling": "fair-cell-scheduling";
             "sequential-sampled-validation": "sequential-sampled-validation";
             "context-feature-cache": "context-feature-cache";
             "content-defined-chunking": "content-defined-chunking";
             "attention-admission": "attention-admission";
-            "aggregator-trigger-ingress": "aggregator-trigger-ingress";
             "gateway-signed-webhook": "gateway-signed-webhook";
             "gateway-interactive-messaging": "gateway-interactive-messaging";
             "workspace-binding-profiles": "workspace-binding-profiles";
+            "automatic-run-recovery": "automatic-run-recovery";
+            "open-goal-execution": "open-goal-execution";
+            "operator-pause-and-budget": "operator-pause-and-budget";
+            "run-fork": "run-fork";
+            "model-image-input": "model-image-input";
+            "workspace-exec": "workspace-exec";
+            "browser-workspace": "browser-workspace";
+            "hierarchical-context": "hierarchical-context";
+            "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+            "web-search": "web-search";
         }>>;
         conditional: z.ZodArray<z.ZodObject<{
             capability: z.ZodEnum<{
@@ -270,10 +282,6 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "environment-oci": "environment-oci";
                 "environment-ssh": "environment-ssh";
                 "environment-firecracker": "environment-firecracker";
-                "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                "environment-modal": "environment-modal";
-                "environment-daytona": "environment-daytona";
-                "environment-vercel-sandbox": "environment-vercel-sandbox";
                 "environment-openai-agents": "environment-openai-agents";
                 "environment-apptainer": "environment-apptainer";
                 "full-cell-docker-linux": "full-cell-docker-linux";
@@ -301,16 +309,24 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "mcp-imported-tools": "mcp-imported-tools";
                 "source-local-read-only": "source-local-read-only";
                 "document-pdf-extraction": "document-pdf-extraction";
-                "browser-first-party-playwright": "browser-first-party-playwright";
                 "fair-cell-scheduling": "fair-cell-scheduling";
                 "sequential-sampled-validation": "sequential-sampled-validation";
                 "context-feature-cache": "context-feature-cache";
                 "content-defined-chunking": "content-defined-chunking";
                 "attention-admission": "attention-admission";
-                "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                 "gateway-signed-webhook": "gateway-signed-webhook";
                 "gateway-interactive-messaging": "gateway-interactive-messaging";
                 "workspace-binding-profiles": "workspace-binding-profiles";
+                "automatic-run-recovery": "automatic-run-recovery";
+                "open-goal-execution": "open-goal-execution";
+                "operator-pause-and-budget": "operator-pause-and-budget";
+                "run-fork": "run-fork";
+                "model-image-input": "model-image-input";
+                "workspace-exec": "workspace-exec";
+                "browser-workspace": "browser-workspace";
+                "hierarchical-context": "hierarchical-context";
+                "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                "web-search": "web-search";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -340,10 +356,6 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "environment-oci": "environment-oci";
                 "environment-ssh": "environment-ssh";
                 "environment-firecracker": "environment-firecracker";
-                "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                "environment-modal": "environment-modal";
-                "environment-daytona": "environment-daytona";
-                "environment-vercel-sandbox": "environment-vercel-sandbox";
                 "environment-openai-agents": "environment-openai-agents";
                 "environment-apptainer": "environment-apptainer";
                 "full-cell-docker-linux": "full-cell-docker-linux";
@@ -371,16 +383,24 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "mcp-imported-tools": "mcp-imported-tools";
                 "source-local-read-only": "source-local-read-only";
                 "document-pdf-extraction": "document-pdf-extraction";
-                "browser-first-party-playwright": "browser-first-party-playwright";
                 "fair-cell-scheduling": "fair-cell-scheduling";
                 "sequential-sampled-validation": "sequential-sampled-validation";
                 "context-feature-cache": "context-feature-cache";
                 "content-defined-chunking": "content-defined-chunking";
                 "attention-admission": "attention-admission";
-                "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                 "gateway-signed-webhook": "gateway-signed-webhook";
                 "gateway-interactive-messaging": "gateway-interactive-messaging";
                 "workspace-binding-profiles": "workspace-binding-profiles";
+                "automatic-run-recovery": "automatic-run-recovery";
+                "open-goal-execution": "open-goal-execution";
+                "operator-pause-and-budget": "operator-pause-and-budget";
+                "run-fork": "run-fork";
+                "model-image-input": "model-image-input";
+                "workspace-exec": "workspace-exec";
+                "browser-workspace": "browser-workspace";
+                "hierarchical-context": "hierarchical-context";
+                "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                "web-search": "web-search";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -489,23 +509,23 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
         }>>>;
         compatibility: z.ZodOptional<z.ZodNullable<z.ZodObject<{
             streaming: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             tools: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             cancellation: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             context_limits: z.ZodEnum<{
-                unknown: "unknown";
                 supported: "supported";
+                unknown: "unknown";
                 unsupported: "unsupported";
             }>;
             usage: z.ZodEnum<{
@@ -515,6 +535,20 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
             }>;
             upstream_attestation_ref: z.ZodNullable<z.ZodString>;
             notes: z.ZodArray<z.ZodString>;
+            image_input: z.ZodOptional<z.ZodEnum<{
+                supported: "supported";
+                unsupported: "unsupported";
+            }>>;
+            tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                supported: "supported";
+                unknown: "unknown";
+                unsupported: "unsupported";
+            }>>;
+            strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                supported: "supported";
+                unknown: "unknown";
+                unsupported: "unsupported";
+            }>>;
         }, z.core.$strict>>>;
         compatibility_ref: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         credential_mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
@@ -570,23 +604,23 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
             }>;
             compatibility: z.ZodObject<{
                 streaming: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 tools: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 cancellation: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 context_limits: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 usage: z.ZodEnum<{
@@ -596,6 +630,20 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 }>;
                 upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                 notes: z.ZodArray<z.ZodString>;
+                image_input: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unsupported: "unsupported";
+                }>>;
+                tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
+                strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
             }, z.core.$strict>;
             compatibility_ref: z.ZodString;
             credential_mode: z.ZodEnum<{
@@ -650,23 +698,23 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
             }>;
             compatibility: z.ZodObject<{
                 streaming: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 tools: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 cancellation: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 context_limits: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 usage: z.ZodEnum<{
@@ -676,6 +724,20 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 }>;
                 upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                 notes: z.ZodArray<z.ZodString>;
+                image_input: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unsupported: "unsupported";
+                }>>;
+                tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
+                strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
             }, z.core.$strict>;
             compatibility_ref: z.ZodString;
             credential_mode: z.ZodEnum<{
@@ -694,6 +756,7 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
         resolution_policy_ref: z.ZodString;
     }, z.core.$strict>>>;
     input_artifacts: z.ZodDefault<z.ZodArray<z.ZodObject<{
+        alias: z.ZodOptional<z.ZodString>;
         artifact_ref: z.ZodString;
         manifest_ref: z.ZodString;
         tenant: z.ZodString;
@@ -763,7 +826,25 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
         total_bytes: z.ZodNumber;
         manifest_artifact_ref: z.ZodString;
         manifest_ref: z.ZodString;
-        extractor: z.ZodObject<{
+        extractor: z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+            version: z.ZodString;
+            poppler_version: z.ZodString;
+            tesseract_version: z.ZodNullable<z.ZodString>;
+            languages: z.ZodArray<z.ZodString>;
+            dpi: z.ZodNumber;
+            sandbox_mode: z.ZodEnum<{
+                "linux-bwrap-no-network": "linux-bwrap-no-network";
+                "resource-limited-process": "resource-limited-process";
+                "oci-no-network-read-only": "oci-no-network-read-only";
+            }>;
+            binding: z.ZodEnum<{
+                "host-process": "host-process";
+                "oci-document": "oci-document";
+            }>;
+            image_digest: z.ZodNullable<z.ZodString>;
+            code_hash: z.ZodOptional<z.ZodString>;
+        }, z.core.$strict>, z.ZodObject<{
             name: z.ZodLiteral<"zero-ar.pdf-extractor">;
             version: z.ZodString;
             poppler_version: z.ZodString;
@@ -774,7 +855,7 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "linux-bwrap-no-network": "linux-bwrap-no-network";
                 "resource-limited-process": "resource-limited-process";
             }>;
-        }, z.core.$strict>;
+        }, z.core.$strict>]>;
         required_for_completion: z.ZodBoolean;
     }, z.core.$strict>>>;
     memory_bindings: z.ZodDefault<z.ZodArray<z.ZodObject<{
@@ -852,10 +933,6 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
     }, z.core.$strict>>;
     target_adapters: z.ZodArray<z.ZodString>;
     execution_environments: z.ZodArray<z.ZodString>;
-    browser: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        template: z.ZodString;
-        template_ref: z.ZodString;
-    }, z.core.$strict>>>;
     environment_profiles: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     workspace_instances: z.ZodOptional<z.ZodArray<z.ZodObject<{
         mount: z.ZodString;
@@ -895,8 +972,29 @@ export declare const TaskContractSchema: z.ZodObject<{
         "declared-dependencies": "declared-dependencies";
     }>;
     repair_budget_attempts: z.ZodNumber;
+    item_output_schemas: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        item_kind: z.ZodString;
+        item_id: z.ZodOptional<z.ZodString>;
+        item_id_prefix: z.ZodOptional<z.ZodString>;
+        output_schema: z.ZodType<import("./item-output.js").ItemOutputJson, unknown, z.core.$ZodTypeInternals<import("./item-output.js").ItemOutputJson, unknown>>;
+    }, z.core.$strict>>>;
     claim_representation: z.ZodOptional<z.ZodEnum<{
         "structured-claims-with-citations": "structured-claims-with-citations";
+    }>>;
+    ask_when: z.ZodOptional<z.ZodEnum<{
+        "at-completion": "at-completion";
+        "when-parked": "when-parked";
+    }>>;
+    max_agent_questions: z.ZodOptional<z.ZodNumber>;
+    validator_inputs: z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        "document-text": "document-text";
+        "effect-outcomes": "effect-outcomes";
+        "workspace-output": "workspace-output";
+        "web-pages": "web-pages";
+    }>>>;
+    checkpoint_view: z.ZodOptional<z.ZodEnum<{
+        "covered-items": "covered-items";
+        "worked-items": "worked-items";
     }>>;
     answer_windows: z.ZodOptional<z.ZodArray<z.ZodObject<{
         named_human_class: z.ZodString;
@@ -914,6 +1012,7 @@ export declare const TaskContractSchema: z.ZodObject<{
         covers: z.ZodArray<z.ZodString>;
         sufficient_for: z.ZodArray<z.ZodString>;
         cost_wall_ms: z.ZodNumber;
+        timeout_ms: z.ZodOptional<z.ZodNumber>;
     }, z.core.$strict>>;
     validator_concurrency_groups: z.ZodOptional<z.ZodArray<z.ZodObject<{
         name: z.ZodString;
@@ -921,6 +1020,64 @@ export declare const TaskContractSchema: z.ZodObject<{
     }, z.core.$strict>>>;
 }, z.core.$strict>;
 export type TaskContract = z.infer<typeof TaskContractSchema>;
+export declare const PlanCheckSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+    kind: z.ZodLiteral<"json-shape">;
+    properties: z.ZodRecord<z.ZodString, z.ZodEnum<{
+        string: "string";
+        number: "number";
+        boolean: "boolean";
+        integer: "integer";
+    }>>;
+    required: z.ZodArray<z.ZodString>;
+}, z.core.$strict>, z.ZodObject<{
+    kind: z.ZodLiteral<"workspace-command">;
+    command: z.ZodString;
+    timeout_ms: z.ZodOptional<z.ZodNumber>;
+}, z.core.$strict>], "kind">;
+export type PlanCheck = z.infer<typeof PlanCheckSchema>;
+/** One work item of an agent's plan, with the checks fixed before the work they judge. */
+export declare const PlanItemSchema: z.ZodObject<{
+    item_id: z.ZodString;
+    objective: z.ZodString;
+    checks: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+        kind: z.ZodLiteral<"json-shape">;
+        properties: z.ZodRecord<z.ZodString, z.ZodEnum<{
+            string: "string";
+            number: "number";
+            boolean: "boolean";
+            integer: "integer";
+        }>>;
+        required: z.ZodArray<z.ZodString>;
+    }, z.core.$strict>, z.ZodObject<{
+        kind: z.ZodLiteral<"workspace-command">;
+        command: z.ZodString;
+        timeout_ms: z.ZodOptional<z.ZodNumber>;
+    }, z.core.$strict>], "kind">>;
+}, z.core.$strict>;
+export type PlanItem = z.infer<typeof PlanItemSchema>;
+/** What the model sends through plan.record: items to add, or existing items to revise. */
+export declare const PlanRecordRequestSchema: z.ZodObject<{
+    items: z.ZodArray<z.ZodObject<{
+        item_id: z.ZodString;
+        objective: z.ZodString;
+        checks: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+            kind: z.ZodLiteral<"json-shape">;
+            properties: z.ZodRecord<z.ZodString, z.ZodEnum<{
+                string: "string";
+                number: "number";
+                boolean: "boolean";
+                integer: "integer";
+            }>>;
+            required: z.ZodArray<z.ZodString>;
+        }, z.core.$strict>, z.ZodObject<{
+            kind: z.ZodLiteral<"workspace-command">;
+            command: z.ZodString;
+            timeout_ms: z.ZodOptional<z.ZodNumber>;
+        }, z.core.$strict>], "kind">>;
+    }, z.core.$strict>>;
+    reason: z.ZodString;
+}, z.core.$strict>;
+export type PlanRecordRequest = z.infer<typeof PlanRecordRequestSchema>;
 export declare const ValidatorCatalogueEntryBodySchema: z.ZodObject<{
     schema: z.ZodLiteral<"validator-catalogue-entry/1">;
     kind: z.ZodEnum<{
@@ -1323,8 +1480,29 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             "declared-dependencies": "declared-dependencies";
         }>;
         repair_budget_attempts: z.ZodNumber;
+        item_output_schemas: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            item_kind: z.ZodString;
+            item_id: z.ZodOptional<z.ZodString>;
+            item_id_prefix: z.ZodOptional<z.ZodString>;
+            output_schema: z.ZodType<import("./item-output.js").ItemOutputJson, unknown, z.core.$ZodTypeInternals<import("./item-output.js").ItemOutputJson, unknown>>;
+        }, z.core.$strict>>>;
         claim_representation: z.ZodOptional<z.ZodEnum<{
             "structured-claims-with-citations": "structured-claims-with-citations";
+        }>>;
+        ask_when: z.ZodOptional<z.ZodEnum<{
+            "at-completion": "at-completion";
+            "when-parked": "when-parked";
+        }>>;
+        max_agent_questions: z.ZodOptional<z.ZodNumber>;
+        validator_inputs: z.ZodOptional<z.ZodArray<z.ZodEnum<{
+            "document-text": "document-text";
+            "effect-outcomes": "effect-outcomes";
+            "workspace-output": "workspace-output";
+            "web-pages": "web-pages";
+        }>>>;
+        checkpoint_view: z.ZodOptional<z.ZodEnum<{
+            "covered-items": "covered-items";
+            "worked-items": "worked-items";
         }>>;
         answer_windows: z.ZodOptional<z.ZodArray<z.ZodObject<{
             named_human_class: z.ZodString;
@@ -1342,6 +1520,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             covers: z.ZodArray<z.ZodString>;
             sufficient_for: z.ZodArray<z.ZodString>;
             cost_wall_ms: z.ZodNumber;
+            timeout_ms: z.ZodOptional<z.ZodNumber>;
         }, z.core.$strict>>;
         validator_concurrency_groups: z.ZodOptional<z.ZodArray<z.ZodObject<{
             name: z.ZodString;
@@ -1383,10 +1562,6 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "environment-oci": "environment-oci";
                 "environment-ssh": "environment-ssh";
                 "environment-firecracker": "environment-firecracker";
-                "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                "environment-modal": "environment-modal";
-                "environment-daytona": "environment-daytona";
-                "environment-vercel-sandbox": "environment-vercel-sandbox";
                 "environment-openai-agents": "environment-openai-agents";
                 "environment-apptainer": "environment-apptainer";
                 "full-cell-docker-linux": "full-cell-docker-linux";
@@ -1414,16 +1589,24 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "mcp-imported-tools": "mcp-imported-tools";
                 "source-local-read-only": "source-local-read-only";
                 "document-pdf-extraction": "document-pdf-extraction";
-                "browser-first-party-playwright": "browser-first-party-playwright";
                 "fair-cell-scheduling": "fair-cell-scheduling";
                 "sequential-sampled-validation": "sequential-sampled-validation";
                 "context-feature-cache": "context-feature-cache";
                 "content-defined-chunking": "content-defined-chunking";
                 "attention-admission": "attention-admission";
-                "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                 "gateway-signed-webhook": "gateway-signed-webhook";
                 "gateway-interactive-messaging": "gateway-interactive-messaging";
                 "workspace-binding-profiles": "workspace-binding-profiles";
+                "automatic-run-recovery": "automatic-run-recovery";
+                "open-goal-execution": "open-goal-execution";
+                "operator-pause-and-budget": "operator-pause-and-budget";
+                "run-fork": "run-fork";
+                "model-image-input": "model-image-input";
+                "workspace-exec": "workspace-exec";
+                "browser-workspace": "browser-workspace";
+                "hierarchical-context": "hierarchical-context";
+                "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                "web-search": "web-search";
             }>>;
             conditional: z.ZodArray<z.ZodObject<{
                 capability: z.ZodEnum<{
@@ -1442,10 +1625,6 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     "environment-oci": "environment-oci";
                     "environment-ssh": "environment-ssh";
                     "environment-firecracker": "environment-firecracker";
-                    "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                    "environment-modal": "environment-modal";
-                    "environment-daytona": "environment-daytona";
-                    "environment-vercel-sandbox": "environment-vercel-sandbox";
                     "environment-openai-agents": "environment-openai-agents";
                     "environment-apptainer": "environment-apptainer";
                     "full-cell-docker-linux": "full-cell-docker-linux";
@@ -1473,16 +1652,24 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     "mcp-imported-tools": "mcp-imported-tools";
                     "source-local-read-only": "source-local-read-only";
                     "document-pdf-extraction": "document-pdf-extraction";
-                    "browser-first-party-playwright": "browser-first-party-playwright";
                     "fair-cell-scheduling": "fair-cell-scheduling";
                     "sequential-sampled-validation": "sequential-sampled-validation";
                     "context-feature-cache": "context-feature-cache";
                     "content-defined-chunking": "content-defined-chunking";
                     "attention-admission": "attention-admission";
-                    "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                     "gateway-signed-webhook": "gateway-signed-webhook";
                     "gateway-interactive-messaging": "gateway-interactive-messaging";
                     "workspace-binding-profiles": "workspace-binding-profiles";
+                    "automatic-run-recovery": "automatic-run-recovery";
+                    "open-goal-execution": "open-goal-execution";
+                    "operator-pause-and-budget": "operator-pause-and-budget";
+                    "run-fork": "run-fork";
+                    "model-image-input": "model-image-input";
+                    "workspace-exec": "workspace-exec";
+                    "browser-workspace": "browser-workspace";
+                    "hierarchical-context": "hierarchical-context";
+                    "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                    "web-search": "web-search";
                 }>;
                 refusal_point: z.ZodEnum<{
                     "profile-compilation": "profile-compilation";
@@ -1512,10 +1699,6 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     "environment-oci": "environment-oci";
                     "environment-ssh": "environment-ssh";
                     "environment-firecracker": "environment-firecracker";
-                    "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                    "environment-modal": "environment-modal";
-                    "environment-daytona": "environment-daytona";
-                    "environment-vercel-sandbox": "environment-vercel-sandbox";
                     "environment-openai-agents": "environment-openai-agents";
                     "environment-apptainer": "environment-apptainer";
                     "full-cell-docker-linux": "full-cell-docker-linux";
@@ -1543,16 +1726,24 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     "mcp-imported-tools": "mcp-imported-tools";
                     "source-local-read-only": "source-local-read-only";
                     "document-pdf-extraction": "document-pdf-extraction";
-                    "browser-first-party-playwright": "browser-first-party-playwright";
                     "fair-cell-scheduling": "fair-cell-scheduling";
                     "sequential-sampled-validation": "sequential-sampled-validation";
                     "context-feature-cache": "context-feature-cache";
                     "content-defined-chunking": "content-defined-chunking";
                     "attention-admission": "attention-admission";
-                    "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                     "gateway-signed-webhook": "gateway-signed-webhook";
                     "gateway-interactive-messaging": "gateway-interactive-messaging";
                     "workspace-binding-profiles": "workspace-binding-profiles";
+                    "automatic-run-recovery": "automatic-run-recovery";
+                    "open-goal-execution": "open-goal-execution";
+                    "operator-pause-and-budget": "operator-pause-and-budget";
+                    "run-fork": "run-fork";
+                    "model-image-input": "model-image-input";
+                    "workspace-exec": "workspace-exec";
+                    "browser-workspace": "browser-workspace";
+                    "hierarchical-context": "hierarchical-context";
+                    "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                    "web-search": "web-search";
                 }>;
                 refusal_point: z.ZodEnum<{
                     "profile-compilation": "profile-compilation";
@@ -1661,23 +1852,23 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             }>>>;
             compatibility: z.ZodOptional<z.ZodNullable<z.ZodObject<{
                 streaming: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 tools: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 cancellation: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 context_limits: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 usage: z.ZodEnum<{
@@ -1687,6 +1878,20 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 }>;
                 upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                 notes: z.ZodArray<z.ZodString>;
+                image_input: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unsupported: "unsupported";
+                }>>;
+                tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
+                strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
             }, z.core.$strict>>>;
             compatibility_ref: z.ZodOptional<z.ZodNullable<z.ZodString>>;
             credential_mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
@@ -1742,23 +1947,23 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 }>;
                 compatibility: z.ZodObject<{
                     streaming: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     tools: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     cancellation: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     context_limits: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     usage: z.ZodEnum<{
@@ -1768,6 +1973,20 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     }>;
                     upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                     notes: z.ZodArray<z.ZodString>;
+                    image_input: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unsupported: "unsupported";
+                    }>>;
+                    tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
+                    strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
                 }, z.core.$strict>;
                 compatibility_ref: z.ZodString;
                 credential_mode: z.ZodEnum<{
@@ -1822,23 +2041,23 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 }>;
                 compatibility: z.ZodObject<{
                     streaming: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     tools: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     cancellation: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     context_limits: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     usage: z.ZodEnum<{
@@ -1848,6 +2067,20 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     }>;
                     upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                     notes: z.ZodArray<z.ZodString>;
+                    image_input: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unsupported: "unsupported";
+                    }>>;
+                    tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
+                    strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
                 }, z.core.$strict>;
                 compatibility_ref: z.ZodString;
                 credential_mode: z.ZodEnum<{
@@ -1866,6 +2099,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             resolution_policy_ref: z.ZodString;
         }, z.core.$strict>>>;
         input_artifacts: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            alias: z.ZodOptional<z.ZodString>;
             artifact_ref: z.ZodString;
             manifest_ref: z.ZodString;
             tenant: z.ZodString;
@@ -1935,7 +2169,25 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             total_bytes: z.ZodNumber;
             manifest_artifact_ref: z.ZodString;
             manifest_ref: z.ZodString;
-            extractor: z.ZodObject<{
+            extractor: z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+                version: z.ZodString;
+                poppler_version: z.ZodString;
+                tesseract_version: z.ZodNullable<z.ZodString>;
+                languages: z.ZodArray<z.ZodString>;
+                dpi: z.ZodNumber;
+                sandbox_mode: z.ZodEnum<{
+                    "linux-bwrap-no-network": "linux-bwrap-no-network";
+                    "resource-limited-process": "resource-limited-process";
+                    "oci-no-network-read-only": "oci-no-network-read-only";
+                }>;
+                binding: z.ZodEnum<{
+                    "host-process": "host-process";
+                    "oci-document": "oci-document";
+                }>;
+                image_digest: z.ZodNullable<z.ZodString>;
+                code_hash: z.ZodOptional<z.ZodString>;
+            }, z.core.$strict>, z.ZodObject<{
                 name: z.ZodLiteral<"zero-ar.pdf-extractor">;
                 version: z.ZodString;
                 poppler_version: z.ZodString;
@@ -1946,7 +2198,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     "linux-bwrap-no-network": "linux-bwrap-no-network";
                     "resource-limited-process": "resource-limited-process";
                 }>;
-            }, z.core.$strict>;
+            }, z.core.$strict>]>;
             required_for_completion: z.ZodBoolean;
         }, z.core.$strict>>>;
         memory_bindings: z.ZodDefault<z.ZodArray<z.ZodObject<{
@@ -2024,10 +2276,6 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
         }, z.core.$strict>>;
         target_adapters: z.ZodArray<z.ZodString>;
         execution_environments: z.ZodArray<z.ZodString>;
-        browser: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            template: z.ZodString;
-            template_ref: z.ZodString;
-        }, z.core.$strict>>>;
         environment_profiles: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
         workspace_instances: z.ZodOptional<z.ZodArray<z.ZodObject<{
             mount: z.ZodString;
@@ -2190,7 +2438,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                         minimum_exposure: z.ZodNumber;
                     }, z.core.$strict>>;
                 }, z.core.$strict>>;
-                context: z.ZodOptional<z.ZodObject<{
+                context: z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
                     selector: z.ZodLiteral<"coverage-mmr-v1">;
                     mode: z.ZodEnum<{
                         off: "off";
@@ -2202,7 +2450,32 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     redundancy_weight_ppm: z.ZodNumber;
                     candidate_cutoff: z.ZodNumber;
                     arithmetic: z.ZodLiteral<"integer-score-v1">;
-                }, z.core.$strict>>;
+                }, z.core.$strict>, z.ZodObject<{
+                    selector: z.ZodLiteral<"hierarchical-context-v1">;
+                    mode: z.ZodEnum<{
+                        off: "off";
+                        observe: "observe";
+                        enforce: "enforce";
+                    }>;
+                    availability: z.ZodEnum<{
+                        optional: "optional";
+                        required: "required";
+                    }>;
+                    recent_original_tokens: z.ZodNumber;
+                    historical_summary_tokens: z.ZodNumber;
+                    maximum_expansions_per_turn: z.ZodNumber;
+                    summarizer: z.ZodObject<{
+                        binding: z.ZodEnum<{
+                            "run-primary": "run-primary";
+                        }>;
+                        maximum_source_tokens: z.ZodNumber;
+                        maximum_output_tokens: z.ZodNumber;
+                    }, z.core.$strict>;
+                    budgets: z.ZodObject<{
+                        maximum_summary_calls_per_run: z.ZodNumber;
+                        maximum_summary_tokens_per_run: z.ZodNumber;
+                    }, z.core.$strict>;
+                }, z.core.$strict>]>>;
                 attention: z.ZodOptional<z.ZodObject<{
                     selector: z.ZodLiteral<"attention-littles-v1">;
                     mode: z.ZodEnum<{
@@ -2333,10 +2606,6 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             "environment-oci": "environment-oci";
             "environment-ssh": "environment-ssh";
             "environment-firecracker": "environment-firecracker";
-            "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-            "environment-modal": "environment-modal";
-            "environment-daytona": "environment-daytona";
-            "environment-vercel-sandbox": "environment-vercel-sandbox";
             "environment-openai-agents": "environment-openai-agents";
             "environment-apptainer": "environment-apptainer";
             "full-cell-docker-linux": "full-cell-docker-linux";
@@ -2364,16 +2633,24 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             "mcp-imported-tools": "mcp-imported-tools";
             "source-local-read-only": "source-local-read-only";
             "document-pdf-extraction": "document-pdf-extraction";
-            "browser-first-party-playwright": "browser-first-party-playwright";
             "fair-cell-scheduling": "fair-cell-scheduling";
             "sequential-sampled-validation": "sequential-sampled-validation";
             "context-feature-cache": "context-feature-cache";
             "content-defined-chunking": "content-defined-chunking";
             "attention-admission": "attention-admission";
-            "aggregator-trigger-ingress": "aggregator-trigger-ingress";
             "gateway-signed-webhook": "gateway-signed-webhook";
             "gateway-interactive-messaging": "gateway-interactive-messaging";
             "workspace-binding-profiles": "workspace-binding-profiles";
+            "automatic-run-recovery": "automatic-run-recovery";
+            "open-goal-execution": "open-goal-execution";
+            "operator-pause-and-budget": "operator-pause-and-budget";
+            "run-fork": "run-fork";
+            "model-image-input": "model-image-input";
+            "workspace-exec": "workspace-exec";
+            "browser-workspace": "browser-workspace";
+            "hierarchical-context": "hierarchical-context";
+            "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+            "web-search": "web-search";
         }>>;
         conditional: z.ZodArray<z.ZodObject<{
             capability: z.ZodEnum<{
@@ -2392,10 +2669,6 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "environment-oci": "environment-oci";
                 "environment-ssh": "environment-ssh";
                 "environment-firecracker": "environment-firecracker";
-                "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                "environment-modal": "environment-modal";
-                "environment-daytona": "environment-daytona";
-                "environment-vercel-sandbox": "environment-vercel-sandbox";
                 "environment-openai-agents": "environment-openai-agents";
                 "environment-apptainer": "environment-apptainer";
                 "full-cell-docker-linux": "full-cell-docker-linux";
@@ -2423,16 +2696,24 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "mcp-imported-tools": "mcp-imported-tools";
                 "source-local-read-only": "source-local-read-only";
                 "document-pdf-extraction": "document-pdf-extraction";
-                "browser-first-party-playwright": "browser-first-party-playwright";
                 "fair-cell-scheduling": "fair-cell-scheduling";
                 "sequential-sampled-validation": "sequential-sampled-validation";
                 "context-feature-cache": "context-feature-cache";
                 "content-defined-chunking": "content-defined-chunking";
                 "attention-admission": "attention-admission";
-                "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                 "gateway-signed-webhook": "gateway-signed-webhook";
                 "gateway-interactive-messaging": "gateway-interactive-messaging";
                 "workspace-binding-profiles": "workspace-binding-profiles";
+                "automatic-run-recovery": "automatic-run-recovery";
+                "open-goal-execution": "open-goal-execution";
+                "operator-pause-and-budget": "operator-pause-and-budget";
+                "run-fork": "run-fork";
+                "model-image-input": "model-image-input";
+                "workspace-exec": "workspace-exec";
+                "browser-workspace": "browser-workspace";
+                "hierarchical-context": "hierarchical-context";
+                "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                "web-search": "web-search";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -2462,10 +2743,6 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "environment-oci": "environment-oci";
                 "environment-ssh": "environment-ssh";
                 "environment-firecracker": "environment-firecracker";
-                "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                "environment-modal": "environment-modal";
-                "environment-daytona": "environment-daytona";
-                "environment-vercel-sandbox": "environment-vercel-sandbox";
                 "environment-openai-agents": "environment-openai-agents";
                 "environment-apptainer": "environment-apptainer";
                 "full-cell-docker-linux": "full-cell-docker-linux";
@@ -2493,16 +2770,24 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "mcp-imported-tools": "mcp-imported-tools";
                 "source-local-read-only": "source-local-read-only";
                 "document-pdf-extraction": "document-pdf-extraction";
-                "browser-first-party-playwright": "browser-first-party-playwright";
                 "fair-cell-scheduling": "fair-cell-scheduling";
                 "sequential-sampled-validation": "sequential-sampled-validation";
                 "context-feature-cache": "context-feature-cache";
                 "content-defined-chunking": "content-defined-chunking";
                 "attention-admission": "attention-admission";
-                "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                 "gateway-signed-webhook": "gateway-signed-webhook";
                 "gateway-interactive-messaging": "gateway-interactive-messaging";
                 "workspace-binding-profiles": "workspace-binding-profiles";
+                "automatic-run-recovery": "automatic-run-recovery";
+                "open-goal-execution": "open-goal-execution";
+                "operator-pause-and-budget": "operator-pause-and-budget";
+                "run-fork": "run-fork";
+                "model-image-input": "model-image-input";
+                "workspace-exec": "workspace-exec";
+                "browser-workspace": "browser-workspace";
+                "hierarchical-context": "hierarchical-context";
+                "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                "web-search": "web-search";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -2953,6 +3238,21 @@ export declare const VerificationPlanSchema: z.ZodObject<{
     plan_ref: z.ZodString;
 }, z.core.$strict>;
 export type VerificationPlan = z.infer<typeof VerificationPlanSchema>;
+/**
+ * The longest answer a person may settle a parked item with. The settling
+ * record keeps the answer whole, and checks read it from there, so a longer
+ * answer is refused rather than cut.
+ */
+export declare const GAP_ANSWER_MAX_CHARS = 4096;
+/** An agent's question as its item records it and the review inbox shows it (GAP-010). */
+export declare const AgentQuestionRecordSchema: z.ZodObject<{
+    asked_by: z.ZodLiteral<"agent">;
+    text: z.ZodString;
+    why: z.ZodString;
+    choices: z.ZodNullable<z.ZodArray<z.ZodString>>;
+    allow_other: z.ZodBoolean;
+}, z.core.$strict>;
+export type AgentQuestionRecord = z.infer<typeof AgentQuestionRecordSchema>;
 /** A control addressed to a run. The id locates; principal and scope authorize (K-19). */
 export declare const ControlRequestSchema: z.ZodObject<{
     verb: z.ZodEnum<{
@@ -2960,9 +3260,11 @@ export declare const ControlRequestSchema: z.ZodObject<{
         cancel: "cancel";
         redirect: "redirect";
         answer: "answer";
+        pause: "pause";
     }>;
     control_id: z.ZodString;
     text: z.ZodOptional<z.ZodString>;
+    choice: z.ZodOptional<z.ZodString>;
     handle: z.ZodOptional<z.ZodString>;
     reason: z.ZodOptional<z.ZodString>;
     active_handling_ms: z.ZodOptional<z.ZodNumber>;
@@ -2974,6 +3276,33 @@ export declare const RunLifecycleCommandRequestSchema: z.ZodObject<{
     reason: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type RunLifecycleCommandRequest = z.infer<typeof RunLifecycleCommandRequestSchema>;
+/**
+ * What one budget amendment adds (BUD-012). It only adds: no field lowers a
+ * budget, and the verification reserve fraction stays as the run declared it.
+ */
+export declare const BudgetAdditionSchema: z.ZodObject<{
+    model_tokens: z.ZodOptional<z.ZodNumber>;
+    tool_calls: z.ZodOptional<z.ZodNumber>;
+    bytes: z.ZodOptional<z.ZodNumber>;
+    compute_ms: z.ZodOptional<z.ZodNumber>;
+    attention: z.ZodOptional<z.ZodNumber>;
+    max_turns: z.ZodOptional<z.ZodNumber>;
+}, z.core.$strict>;
+export type BudgetAddition = z.infer<typeof BudgetAdditionSchema>;
+/** One retryable request to add budget to a run that has not ended. */
+export declare const BudgetAmendmentRequestSchema: z.ZodObject<{
+    idempotency_key: z.ZodString;
+    add: z.ZodObject<{
+        model_tokens: z.ZodOptional<z.ZodNumber>;
+        tool_calls: z.ZodOptional<z.ZodNumber>;
+        bytes: z.ZodOptional<z.ZodNumber>;
+        compute_ms: z.ZodOptional<z.ZodNumber>;
+        attention: z.ZodOptional<z.ZodNumber>;
+        max_turns: z.ZodOptional<z.ZodNumber>;
+    }, z.core.$strict>;
+    reason: z.ZodOptional<z.ZodString>;
+}, z.core.$strict>;
+export type BudgetAmendmentRequest = z.infer<typeof BudgetAmendmentRequestSchema>;
 /**
  * A deferred resume. Only this command may name not_before, the earliest
  * time its timer wake may launch the run (B-2, MTH-TW-003). The scheduler
@@ -3059,6 +3388,32 @@ export declare const EntrySchema: z.ZodObject<{
                 span_hash: z.ZodOptional<z.ZodString>;
             }, z.core.$strict>>;
         }, z.core.$strict>>;
+        images: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            artifact_ref: z.ZodString;
+            content_hash: z.ZodString;
+            media_type: z.ZodEnum<{
+                "image/png": "image/png";
+                "image/jpeg": "image/jpeg";
+                "image/webp": "image/webp";
+                "image/gif": "image/gif";
+            }>;
+            bytes: z.ZodNumber;
+            classification: z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>;
+        }, z.core.$strict>>>;
+        tool_calls: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            call_id: z.ZodString;
+            name: z.ZodString;
+            input: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+        }, z.core.$strict>>>;
+        tool_result: z.ZodOptional<z.ZodObject<{
+            call_id: z.ZodString;
+            name: z.ZodString;
+        }, z.core.$strict>>;
     }, z.core.$strict>;
     content_hash: z.ZodString;
 }, z.core.$strict>;
@@ -3077,6 +3432,10 @@ export declare const RecordEnvelopeSchema: z.ZodObject<{
         "branch.created": "branch.created";
         "branch.head.moved": "branch.head.moved";
         "context.assembled": "context.assembled";
+        "context.segment.started": "context.segment.started";
+        "context.segment.committed": "context.segment.committed";
+        "context.segment.failed": "context.segment.failed";
+        "context.segment.expanded": "context.segment.expanded";
         "model.call.started": "model.call.started";
         "model.call.finished": "model.call.finished";
         "model.call.failed": "model.call.failed";
@@ -3096,6 +3455,9 @@ export declare const RecordEnvelopeSchema: z.ZodObject<{
         "environment.prepare.requested": "environment.prepare.requested";
         "environment.prepared": "environment.prepared";
         "environment.reused": "environment.reused";
+        "environment.segment.started": "environment.segment.started";
+        "environment.segment.ending": "environment.segment.ending";
+        "environment.segment.ended": "environment.segment.ended";
         "environment.job.submit.requested": "environment.job.submit.requested";
         "environment.job.submitted": "environment.job.submitted";
         "environment.job.observe.requested": "environment.job.observe.requested";
@@ -3122,6 +3484,8 @@ export declare const RecordEnvelopeSchema: z.ZodObject<{
         "item.attempted": "item.attempted";
         "item.parked": "item.parked";
         "item.invalidated": "item.invalidated";
+        "plan.recorded": "plan.recorded";
+        "budgets.amended": "budgets.amended";
         "gap.settled": "gap.settled";
         "gap.dismissed": "gap.dismissed";
         "checkpoint.started": "checkpoint.started";
@@ -3153,10 +3517,8 @@ export declare const RecordEnvelopeSchema: z.ZodObject<{
         "capability.admission.cancelled": "capability.admission.cancelled";
         "closure.epoch.committed": "closure.epoch.committed";
         "closure.epoch.activated": "closure.epoch.activated";
-        "browser.binding.pinned": "browser.binding.pinned";
-        "browser.destination.proposed": "browser.destination.proposed";
-        "browser.destination.decided": "browser.destination.decided";
-        "browser.binding.superseded": "browser.binding.superseded";
+        "state.closure.rehydrated": "state.closure.rehydrated";
+        "executor.continuation.accepted": "executor.continuation.accepted";
     }>;
     type_version: z.ZodNumber;
     at: z.ZodString;
@@ -3164,6 +3526,204 @@ export declare const RecordEnvelopeSchema: z.ZodObject<{
     chain_hash: z.ZodString;
 }, z.core.$strict>;
 export type RecordEnvelope = z.infer<typeof RecordEnvelopeSchema>;
+/** A canonical record in a portable bundle. Storage assigns `seq` on import. */
+export declare const PortableRecordEnvelopeSchema: z.ZodObject<{
+    type: z.ZodEnum<{
+        "run.created": "run.created";
+        "run.started": "run.started";
+        "entry.appended": "entry.appended";
+        "branch.created": "branch.created";
+        "branch.head.moved": "branch.head.moved";
+        "context.assembled": "context.assembled";
+        "context.segment.started": "context.segment.started";
+        "context.segment.committed": "context.segment.committed";
+        "context.segment.failed": "context.segment.failed";
+        "context.segment.expanded": "context.segment.expanded";
+        "model.call.started": "model.call.started";
+        "model.call.finished": "model.call.finished";
+        "model.call.failed": "model.call.failed";
+        "model.fallback.switched": "model.fallback.switched";
+        "turn.completed": "turn.completed";
+        "control.received": "control.received";
+        "control.applied": "control.applied";
+        "lease.opened": "lease.opened";
+        "lease.reserved": "lease.reserved";
+        "lease.consumed": "lease.consumed";
+        "lease.released": "lease.released";
+        "subrun.opened": "subrun.opened";
+        "subrun.finished": "subrun.finished";
+        "tool.invoked": "tool.invoked";
+        "tool.remote.pending": "tool.remote.pending";
+        "tool.finished": "tool.finished";
+        "environment.prepare.requested": "environment.prepare.requested";
+        "environment.prepared": "environment.prepared";
+        "environment.reused": "environment.reused";
+        "environment.segment.started": "environment.segment.started";
+        "environment.segment.ending": "environment.segment.ending";
+        "environment.segment.ended": "environment.segment.ended";
+        "environment.job.submit.requested": "environment.job.submit.requested";
+        "environment.job.submitted": "environment.job.submitted";
+        "environment.job.observe.requested": "environment.job.observe.requested";
+        "environment.job.observed": "environment.job.observed";
+        "environment.job.reconcile.requested": "environment.job.reconcile.requested";
+        "environment.job.reconciled": "environment.job.reconciled";
+        "environment.job.cancel.requested": "environment.job.cancel.requested";
+        "environment.job.cancelled": "environment.job.cancelled";
+        "environment.artifact.collect.requested": "environment.artifact.collect.requested";
+        "environment.artifact.collected": "environment.artifact.collected";
+        "artifact.committed": "artifact.committed";
+        "environment.teardown.requested": "environment.teardown.requested";
+        "environment.teardown.recorded": "environment.teardown.recorded";
+        "environment.abandon.requested": "environment.abandon.requested";
+        "environment.abandoned": "environment.abandoned";
+        "effect.prepared": "effect.prepared";
+        "effect.authority.decision": "effect.authority.decision";
+        "effect.authority.invalidated": "effect.authority.invalidated";
+        "effect.dispatched": "effect.dispatched";
+        "effect.resolved": "effect.resolved";
+        "effect.unreconcilable": "effect.unreconcilable";
+        "effect.answer.late": "effect.answer.late";
+        "grant.superseded": "grant.superseded";
+        "item.attempted": "item.attempted";
+        "item.parked": "item.parked";
+        "item.invalidated": "item.invalidated";
+        "plan.recorded": "plan.recorded";
+        "budgets.amended": "budgets.amended";
+        "gap.settled": "gap.settled";
+        "gap.dismissed": "gap.dismissed";
+        "checkpoint.started": "checkpoint.started";
+        "checkpoint.passed": "checkpoint.passed";
+        "checkpoint.rejected": "checkpoint.rejected";
+        "checkpoint.indeterminate": "checkpoint.indeterminate";
+        "repair.started": "repair.started";
+        "completion.proposed": "completion.proposed";
+        "verification.concluded": "verification.concluded";
+        "run.suspended": "run.suspended";
+        "run.resume.blocked": "run.resume.blocked";
+        "run.resumed": "run.resumed";
+        "run.cancelled": "run.cancelled";
+        "run.finished": "run.finished";
+        "run.forked": "run.forked";
+        "reexecution.started": "reexecution.started";
+        "subject.erasure.completed": "subject.erasure.completed";
+        "wake.scheduled": "wake.scheduled";
+        "wake.claimed": "wake.claimed";
+        "memory.event.recorded": "memory.event.recorded";
+        "memory.read.recorded": "memory.read.recorded";
+        "external.observation.received": "external.observation.received";
+        "external.observation.applied": "external.observation.applied";
+        "projection.rebuilt": "projection.rebuilt";
+        "run.lifecycle.command.accepted": "run.lifecycle.command.accepted";
+        "capability.admission.requested": "capability.admission.requested";
+        "capability.admission.classified": "capability.admission.classified";
+        "capability.admission.decided": "capability.admission.decided";
+        "capability.admission.cancelled": "capability.admission.cancelled";
+        "closure.epoch.committed": "closure.epoch.committed";
+        "closure.epoch.activated": "closure.epoch.activated";
+        "state.closure.rehydrated": "state.closure.rehydrated";
+        "executor.continuation.accepted": "executor.continuation.accepted";
+    }>;
+    at: z.ZodString;
+    run_id: z.ZodString;
+    logical_clock: z.ZodNumber;
+    record_id: z.ZodString;
+    payload: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+    causal_parent: z.ZodNullable<z.ZodString>;
+    type_version: z.ZodNumber;
+    chain_hash: z.ZodString;
+}, z.core.$strict>;
+export type PortableRecordEnvelope = z.infer<typeof PortableRecordEnvelopeSchema>;
+/** The historical Zero-AR bundle manifest remains readable after version two. */
+export declare const RunBundleManifestV1Schema: z.ZodObject<{
+    run_id: z.ZodString;
+    entry_count: z.ZodNumber;
+    record_count: z.ZodNumber;
+    chain_head: z.ZodNullable<z.ZodString>;
+    head_projection_hash: z.ZodString;
+    format: z.ZodEnum<{
+        "ramsden-run-bundle": "ramsden-run-bundle";
+        "zero-ar-run-bundle": "zero-ar-run-bundle";
+    }>;
+    format_version: z.ZodLiteral<1>;
+}, z.core.$strict>;
+/** Version two binds the public schema catalogue and projection semantics. */
+export declare const RunBundleManifestV2Schema: z.ZodObject<{
+    run_id: z.ZodString;
+    entry_count: z.ZodNumber;
+    record_count: z.ZodNumber;
+    chain_head: z.ZodNullable<z.ZodString>;
+    head_projection_hash: z.ZodString;
+    format: z.ZodEnum<{
+        "ramsden-run-bundle": "ramsden-run-bundle";
+        "zero-ar-run-bundle": "zero-ar-run-bundle";
+    }>;
+    format_version: z.ZodLiteral<2>;
+    canonicalization: z.ZodEnum<{
+        "canonical-json-1": "canonical-json-1";
+    }>;
+    record_catalogue_ref: z.ZodString;
+    projection_kind: z.ZodLiteral<"run-head">;
+    fold_profile: z.ZodEnum<{
+        "run-head-v9": "run-head-v9";
+    }>;
+}, z.core.$strict>;
+export declare const RunBundleManifestSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+    run_id: z.ZodString;
+    entry_count: z.ZodNumber;
+    record_count: z.ZodNumber;
+    chain_head: z.ZodNullable<z.ZodString>;
+    head_projection_hash: z.ZodString;
+    format: z.ZodEnum<{
+        "ramsden-run-bundle": "ramsden-run-bundle";
+        "zero-ar-run-bundle": "zero-ar-run-bundle";
+    }>;
+    format_version: z.ZodLiteral<1>;
+}, z.core.$strict>, z.ZodObject<{
+    run_id: z.ZodString;
+    entry_count: z.ZodNumber;
+    record_count: z.ZodNumber;
+    chain_head: z.ZodNullable<z.ZodString>;
+    head_projection_hash: z.ZodString;
+    format: z.ZodEnum<{
+        "ramsden-run-bundle": "ramsden-run-bundle";
+        "zero-ar-run-bundle": "zero-ar-run-bundle";
+    }>;
+    format_version: z.ZodLiteral<2>;
+    canonicalization: z.ZodEnum<{
+        "canonical-json-1": "canonical-json-1";
+    }>;
+    record_catalogue_ref: z.ZodString;
+    projection_kind: z.ZodLiteral<"run-head">;
+    fold_profile: z.ZodEnum<{
+        "run-head-v9": "run-head-v9";
+    }>;
+}, z.core.$strict>], "format_version">;
+export type RunBundleManifest = z.infer<typeof RunBundleManifestSchema>;
+/** A verified, stateless materialization of one portable run bundle. */
+export declare const RunMaterializationSchema: z.ZodObject<{
+    schema: z.ZodLiteral<"zero-ar-run-materialization/1">;
+    level: z.ZodLiteral<"materialize">;
+    run_id: z.ZodString;
+    format_version: z.ZodUnion<readonly [z.ZodLiteral<1>, z.ZodLiteral<2>]>;
+    canonicalization: z.ZodEnum<{
+        "canonical-json-1": "canonical-json-1";
+    }>;
+    record_catalogue_ref: z.ZodString;
+    projection_kind: z.ZodLiteral<"run-head">;
+    fold_profile: z.ZodEnum<{
+        "run-head-v9": "run-head-v9";
+    }>;
+    frontier: z.ZodObject<{
+        record_count: z.ZodNumber;
+        logical_clock: z.ZodNumber;
+        record_id: z.ZodNullable<z.ZodString>;
+        chain_head: z.ZodNullable<z.ZodString>;
+    }, z.core.$strict>;
+    state_hash: z.ZodString;
+    projection: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+    diagnostics: z.ZodArray<z.ZodNever>;
+}, z.core.$strict>;
+export type RunMaterialization = z.infer<typeof RunMaterializationSchema>;
 /**
  * What a sequential sampled-oracle check examined and why it stopped: the
  * pinned oracle and frame, each examined item's oracle answer, the boundary
@@ -3202,8 +3762,27 @@ export declare const AttentionEstimateRecordSchema: z.ZodObject<{
     amortized_per_item_ms: z.ZodNumber;
 }, z.core.$strict>;
 export type AttentionEstimateRecord = z.infer<typeof AttentionEstimateRecordSchema>;
-/** Payload schemas per record type. Strict: an unknown field is a defect, not data. */
 export declare const RECORD_PAYLOADS: Record<(typeof RECORD_TYPES)[number], z.ZodType>;
+/** Resolve the payload semantics named by one portable record envelope. */
+export declare function recordPayloadSchema(type: string, version: number): z.ZodType | null;
+/** The newest payload version written for one canonical record type. */
+export declare function latestRecordPayloadVersion(type: (typeof RECORD_TYPES)[number]): number;
+export interface RecordVersionCatalogue {
+    schema: 'zero-ar-record-version-catalogue/1';
+    records: Record<string, {
+        versions: readonly number[];
+    }>;
+}
+/** A runtime-independent list of record payload versions this release reads. */
+export declare function recordVersionCatalogue(): RecordVersionCatalogue;
+export interface RecordSchemaCatalogue {
+    schema: 'zero-ar-record-schema-catalogue/1';
+    records: Record<string, {
+        versions: Record<string, unknown>;
+    }>;
+}
+/** Language-neutral JSON Schemas for every record type and supported version. */
+export declare function recordSchemaCatalogue(): RecordSchemaCatalogue;
 /** The run head snapshot: a synchronization checkpoint, never the canonical source (X-2). */
 export declare const RunSnapshotSchema: z.ZodObject<{
     run_id: z.ZodString;
@@ -3297,6 +3876,8 @@ export declare const RunSnapshotSchema: z.ZodObject<{
                 "reserved-artifact": "reserved-artifact";
                 "reserved-source": "reserved-source";
                 "reserved-memory": "reserved-memory";
+                "reserved-plan": "reserved-plan";
+                "reserved-context": "reserved-context";
                 "explicit-author": "explicit-author";
                 "explicit-operator": "explicit-operator";
                 "skill-allowed-tools": "skill-allowed-tools";
@@ -4037,6 +4618,7 @@ export declare const RunResultSchema: z.ZodObject<{
         withdrawn: z.ZodNumber;
         outcome_unknown: z.ZodNumber;
         unreconcilable: z.ZodNumber;
+        refused: z.ZodOptional<z.ZodNumber>;
     }, z.core.$strict>;
     blocking_operational_outcomes: z.ZodArray<z.ZodObject<{
         kind: z.ZodEnum<{
@@ -4148,11 +4730,11 @@ export declare const ObservationEventSchema: z.ZodObject<{
         work: "work";
         artifact: "artifact";
         effect: "effect";
+        environment: "environment";
         review: "review";
         quality: "quality";
         terminal: "terminal";
         consumption: "consumption";
-        environment: "environment";
         maintenance: "maintenance";
     }>;
     run_id: z.ZodString;
@@ -4216,10 +4798,6 @@ export declare const HealthResponseSchema: z.ZodObject<{
             "environment-oci": "environment-oci";
             "environment-ssh": "environment-ssh";
             "environment-firecracker": "environment-firecracker";
-            "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-            "environment-modal": "environment-modal";
-            "environment-daytona": "environment-daytona";
-            "environment-vercel-sandbox": "environment-vercel-sandbox";
             "environment-openai-agents": "environment-openai-agents";
             "environment-apptainer": "environment-apptainer";
             "full-cell-docker-linux": "full-cell-docker-linux";
@@ -4247,16 +4825,24 @@ export declare const HealthResponseSchema: z.ZodObject<{
             "mcp-imported-tools": "mcp-imported-tools";
             "source-local-read-only": "source-local-read-only";
             "document-pdf-extraction": "document-pdf-extraction";
-            "browser-first-party-playwright": "browser-first-party-playwright";
             "fair-cell-scheduling": "fair-cell-scheduling";
             "sequential-sampled-validation": "sequential-sampled-validation";
             "context-feature-cache": "context-feature-cache";
             "content-defined-chunking": "content-defined-chunking";
             "attention-admission": "attention-admission";
-            "aggregator-trigger-ingress": "aggregator-trigger-ingress";
             "gateway-signed-webhook": "gateway-signed-webhook";
             "gateway-interactive-messaging": "gateway-interactive-messaging";
             "workspace-binding-profiles": "workspace-binding-profiles";
+            "automatic-run-recovery": "automatic-run-recovery";
+            "open-goal-execution": "open-goal-execution";
+            "operator-pause-and-budget": "operator-pause-and-budget";
+            "run-fork": "run-fork";
+            "model-image-input": "model-image-input";
+            "workspace-exec": "workspace-exec";
+            "browser-workspace": "browser-workspace";
+            "hierarchical-context": "hierarchical-context";
+            "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+            "web-search": "web-search";
         }>>;
         conditional: z.ZodArray<z.ZodObject<{
             capability: z.ZodEnum<{
@@ -4275,10 +4861,6 @@ export declare const HealthResponseSchema: z.ZodObject<{
                 "environment-oci": "environment-oci";
                 "environment-ssh": "environment-ssh";
                 "environment-firecracker": "environment-firecracker";
-                "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                "environment-modal": "environment-modal";
-                "environment-daytona": "environment-daytona";
-                "environment-vercel-sandbox": "environment-vercel-sandbox";
                 "environment-openai-agents": "environment-openai-agents";
                 "environment-apptainer": "environment-apptainer";
                 "full-cell-docker-linux": "full-cell-docker-linux";
@@ -4306,16 +4888,24 @@ export declare const HealthResponseSchema: z.ZodObject<{
                 "mcp-imported-tools": "mcp-imported-tools";
                 "source-local-read-only": "source-local-read-only";
                 "document-pdf-extraction": "document-pdf-extraction";
-                "browser-first-party-playwright": "browser-first-party-playwright";
                 "fair-cell-scheduling": "fair-cell-scheduling";
                 "sequential-sampled-validation": "sequential-sampled-validation";
                 "context-feature-cache": "context-feature-cache";
                 "content-defined-chunking": "content-defined-chunking";
                 "attention-admission": "attention-admission";
-                "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                 "gateway-signed-webhook": "gateway-signed-webhook";
                 "gateway-interactive-messaging": "gateway-interactive-messaging";
                 "workspace-binding-profiles": "workspace-binding-profiles";
+                "automatic-run-recovery": "automatic-run-recovery";
+                "open-goal-execution": "open-goal-execution";
+                "operator-pause-and-budget": "operator-pause-and-budget";
+                "run-fork": "run-fork";
+                "model-image-input": "model-image-input";
+                "workspace-exec": "workspace-exec";
+                "browser-workspace": "browser-workspace";
+                "hierarchical-context": "hierarchical-context";
+                "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                "web-search": "web-search";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -4345,10 +4935,6 @@ export declare const HealthResponseSchema: z.ZodObject<{
                 "environment-oci": "environment-oci";
                 "environment-ssh": "environment-ssh";
                 "environment-firecracker": "environment-firecracker";
-                "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                "environment-modal": "environment-modal";
-                "environment-daytona": "environment-daytona";
-                "environment-vercel-sandbox": "environment-vercel-sandbox";
                 "environment-openai-agents": "environment-openai-agents";
                 "environment-apptainer": "environment-apptainer";
                 "full-cell-docker-linux": "full-cell-docker-linux";
@@ -4376,16 +4962,24 @@ export declare const HealthResponseSchema: z.ZodObject<{
                 "mcp-imported-tools": "mcp-imported-tools";
                 "source-local-read-only": "source-local-read-only";
                 "document-pdf-extraction": "document-pdf-extraction";
-                "browser-first-party-playwright": "browser-first-party-playwright";
                 "fair-cell-scheduling": "fair-cell-scheduling";
                 "sequential-sampled-validation": "sequential-sampled-validation";
                 "context-feature-cache": "context-feature-cache";
                 "content-defined-chunking": "content-defined-chunking";
                 "attention-admission": "attention-admission";
-                "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                 "gateway-signed-webhook": "gateway-signed-webhook";
                 "gateway-interactive-messaging": "gateway-interactive-messaging";
                 "workspace-binding-profiles": "workspace-binding-profiles";
+                "automatic-run-recovery": "automatic-run-recovery";
+                "open-goal-execution": "open-goal-execution";
+                "operator-pause-and-budget": "operator-pause-and-budget";
+                "run-fork": "run-fork";
+                "model-image-input": "model-image-input";
+                "workspace-exec": "workspace-exec";
+                "browser-workspace": "browser-workspace";
+                "hierarchical-context": "hierarchical-context";
+                "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                "web-search": "web-search";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -4745,6 +5339,8 @@ export declare const CreatedRunSchema: z.ZodObject<{
                     "reserved-artifact": "reserved-artifact";
                     "reserved-source": "reserved-source";
                     "reserved-memory": "reserved-memory";
+                    "reserved-plan": "reserved-plan";
+                    "reserved-context": "reserved-context";
                     "explicit-author": "explicit-author";
                     "explicit-operator": "explicit-operator";
                     "skill-allowed-tools": "skill-allowed-tools";
@@ -4785,6 +5381,25 @@ export declare const StartAcceptedSchema: z.ZodObject<{
     accepted_seq: z.ZodNumber;
 }, z.core.$strict>;
 export type StartAccepted = z.infer<typeof StartAcceptedSchema>;
+/** The answer to a budget amendment: the whole budget after it, and whether it repeats an earlier acceptance. */
+export declare const BudgetAmendmentAcceptedSchema: z.ZodObject<{
+    run_id: z.ZodString;
+    accepted: z.ZodLiteral<true>;
+    repeated: z.ZodBoolean;
+    accepted_seq: z.ZodNumber;
+    budgets: z.ZodObject<{
+        consumption: z.ZodObject<{
+            model_tokens: z.ZodNumber;
+            tool_calls: z.ZodOptional<z.ZodNumber>;
+            bytes: z.ZodOptional<z.ZodNumber>;
+            compute_ms: z.ZodOptional<z.ZodNumber>;
+        }, z.core.$strict>;
+        attention: z.ZodNumber;
+        verification_reserve_fraction: z.ZodNumber;
+        max_turns: z.ZodNumber;
+    }, z.core.$strict>;
+}, z.core.$strict>;
+export type BudgetAmendmentAccepted = z.infer<typeof BudgetAmendmentAcceptedSchema>;
 export declare const RebuildOutcomeSchema: z.ZodObject<{
     equal: z.ZodBoolean;
     healed: z.ZodBoolean;
@@ -4808,6 +5423,133 @@ export declare const ImportOutcomeSchema: z.ZodObject<{
             }>;
         }, z.core.$strict>>;
     }, z.core.$strict>>;
+    state_closure: z.ZodOptional<z.ZodObject<{
+        level: z.ZodLiteral<"rehydrate">;
+        closure_ref: z.ZodString;
+        rehydrated: z.ZodBoolean;
+        members: z.ZodArray<z.ZodObject<{
+            kind: z.ZodEnum<{
+                publication: "publication";
+                artifact: "artifact";
+                memory: "memory";
+                integrity: "integrity";
+                workspace: "workspace";
+                context: "context";
+            }>;
+            locator: z.ZodString;
+            required: z.ZodBoolean;
+            status: z.ZodEnum<{
+                omitted: "omitted";
+                unavailable: "unavailable";
+                rehydrated: "rehydrated";
+                "present-inline": "present-inline";
+            }>;
+            reason: z.ZodOptional<z.ZodString>;
+        }, z.core.$strict>>;
+    }, z.core.$strict>>;
+    continuation: z.ZodOptional<z.ZodObject<{
+        schema: z.ZodLiteral<"zero-ar-run-continuation/1">;
+        run_id: z.ZodString;
+        frontier: z.ZodObject<{
+            record_count: z.ZodNumber;
+            logical_clock: z.ZodNumber;
+            record_id: z.ZodString;
+            chain_head: z.ZodString;
+            head_projection_hash: z.ZodString;
+        }, z.core.$strict>;
+        protocol: z.ZodObject<{
+            bundle_format_version: z.ZodLiteral<2>;
+            canonicalization: z.ZodEnum<{
+                "canonical-json-1": "canonical-json-1";
+            }>;
+            record_catalogue_ref: z.ZodString;
+            fold_profile: z.ZodEnum<{
+                "run-head-v9": "run-head-v9";
+            }>;
+        }, z.core.$strict>;
+        continuation_authority_ref: z.ZodDefault<z.ZodNullable<z.ZodString>>;
+        state_closure_ref: z.ZodString;
+        lifecycle: z.ZodObject<{
+            status: z.ZodEnum<{
+                cancelled: "cancelled";
+                created: "created";
+                running: "running";
+                suspended: "suspended";
+                finished: "finished";
+            }>;
+            completion_state: z.ZodEnum<{
+                working: "working";
+                checkpoint_verifying: "checkpoint_verifying";
+                completion_proposed: "completion_proposed";
+                verifying: "verifying";
+                gap_open: "gap_open";
+                repair: "repair";
+                complete: "complete";
+                unverified_artifact: "unverified_artifact";
+            }>;
+            turn: z.ZodNumber;
+            pending_review_items: z.ZodArray<z.ZodString>;
+        }, z.core.$strict>;
+        open_leases: z.ZodArray<z.ZodObject<{
+            lease_id: z.ZodString;
+            pool: z.ZodEnum<{
+                repair: "repair";
+                work: "work";
+                verification: "verification";
+            }>;
+            denomination: z.ZodEnum<{
+                model_tokens: "model_tokens";
+                tool_calls: "tool_calls";
+                bytes: "bytes";
+                compute_ms: "compute_ms";
+                attention: "attention";
+            }>;
+            amount: z.ZodNumber;
+        }, z.core.$strict>>;
+        nonterminal_effects: z.ZodArray<z.ZodObject<{
+            effect_id: z.ZodString;
+            state: z.ZodEnum<{
+                committed: "committed";
+                prepared: "prepared";
+                dispatched: "dispatched";
+                withdrawn: "withdrawn";
+                outcome_unknown: "outcome_unknown";
+                unreconcilable: "unreconcilable";
+            }>;
+            target: z.ZodString;
+            operation: z.ZodString;
+        }, z.core.$strict>>;
+        pending_controls: z.ZodArray<z.ZodObject<{
+            control_id: z.ZodString;
+            verb: z.ZodString;
+        }, z.core.$strict>>;
+        pending_wakes: z.ZodArray<z.ZodObject<{
+            wake_id: z.ZodString;
+            due_at: z.ZodString;
+            condition: z.ZodString;
+        }, z.core.$strict>>;
+        inflight_operations: z.ZodArray<z.ZodString>;
+        required_bindings: z.ZodArray<z.ZodObject<{
+            kind: z.ZodEnum<{
+                procedure: "procedure";
+                tool: "tool";
+                publication: "publication";
+                memory: "memory";
+                agent: "agent";
+                closure: "closure";
+                "model-adapter": "model-adapter";
+                validator: "validator";
+                workspace: "workspace";
+                source: "source";
+                environment: "environment";
+                "domain-pack": "domain-pack";
+                "target-adapter": "target-adapter";
+                profile: "profile";
+            }>;
+            ref: z.ZodString;
+        }, z.core.$strict>>;
+        capsule_ref: z.ZodString;
+    }, z.core.$strict>>;
 }, z.core.$strict>;
 export type ImportOutcome = z.infer<typeof ImportOutcomeSchema>;
 export declare const RecordsPageSchema: z.ZodObject<{
@@ -4824,6 +5566,10 @@ export declare const RecordsPageSchema: z.ZodObject<{
             "branch.created": "branch.created";
             "branch.head.moved": "branch.head.moved";
             "context.assembled": "context.assembled";
+            "context.segment.started": "context.segment.started";
+            "context.segment.committed": "context.segment.committed";
+            "context.segment.failed": "context.segment.failed";
+            "context.segment.expanded": "context.segment.expanded";
             "model.call.started": "model.call.started";
             "model.call.finished": "model.call.finished";
             "model.call.failed": "model.call.failed";
@@ -4843,6 +5589,9 @@ export declare const RecordsPageSchema: z.ZodObject<{
             "environment.prepare.requested": "environment.prepare.requested";
             "environment.prepared": "environment.prepared";
             "environment.reused": "environment.reused";
+            "environment.segment.started": "environment.segment.started";
+            "environment.segment.ending": "environment.segment.ending";
+            "environment.segment.ended": "environment.segment.ended";
             "environment.job.submit.requested": "environment.job.submit.requested";
             "environment.job.submitted": "environment.job.submitted";
             "environment.job.observe.requested": "environment.job.observe.requested";
@@ -4869,6 +5618,8 @@ export declare const RecordsPageSchema: z.ZodObject<{
             "item.attempted": "item.attempted";
             "item.parked": "item.parked";
             "item.invalidated": "item.invalidated";
+            "plan.recorded": "plan.recorded";
+            "budgets.amended": "budgets.amended";
             "gap.settled": "gap.settled";
             "gap.dismissed": "gap.dismissed";
             "checkpoint.started": "checkpoint.started";
@@ -4900,10 +5651,8 @@ export declare const RecordsPageSchema: z.ZodObject<{
             "capability.admission.cancelled": "capability.admission.cancelled";
             "closure.epoch.committed": "closure.epoch.committed";
             "closure.epoch.activated": "closure.epoch.activated";
-            "browser.binding.pinned": "browser.binding.pinned";
-            "browser.destination.proposed": "browser.destination.proposed";
-            "browser.destination.decided": "browser.destination.decided";
-            "browser.binding.superseded": "browser.binding.superseded";
+            "state.closure.rehydrated": "state.closure.rehydrated";
+            "executor.continuation.accepted": "executor.continuation.accepted";
         }>;
         type_version: z.ZodNumber;
         at: z.ZodString;
@@ -4929,6 +5678,13 @@ export declare const ReviewItemSchema: z.ZodObject<{
     reason: z.ZodString;
     checkpoint_id: z.ZodString;
     due_at: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    question: z.ZodOptional<z.ZodObject<{
+        asked_by: z.ZodLiteral<"agent">;
+        text: z.ZodString;
+        why: z.ZodString;
+        choices: z.ZodNullable<z.ZodArray<z.ZodString>>;
+        allow_other: z.ZodBoolean;
+    }, z.core.$strict>>;
 }, z.core.$strict>;
 export type ReviewItem = z.infer<typeof ReviewItemSchema>;
 export declare const ReviewInboxSchema: z.ZodObject<{
@@ -4948,6 +5704,13 @@ export declare const ReviewInboxSchema: z.ZodObject<{
         reason: z.ZodString;
         checkpoint_id: z.ZodString;
         due_at: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        question: z.ZodOptional<z.ZodObject<{
+            asked_by: z.ZodLiteral<"agent">;
+            text: z.ZodString;
+            why: z.ZodString;
+            choices: z.ZodNullable<z.ZodArray<z.ZodString>>;
+            allow_other: z.ZodBoolean;
+        }, z.core.$strict>>;
     }, z.core.$strict>>;
     truncated: z.ZodBoolean;
 }, z.core.$strict>;
@@ -5008,7 +5771,7 @@ export declare const PostureSchema: z.ZodObject<{
                 minimum_exposure: z.ZodNumber;
             }, z.core.$strict>>;
         }, z.core.$strict>>;
-        context: z.ZodOptional<z.ZodObject<{
+        context: z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             selector: z.ZodLiteral<"coverage-mmr-v1">;
             mode: z.ZodEnum<{
                 off: "off";
@@ -5020,7 +5783,32 @@ export declare const PostureSchema: z.ZodObject<{
             redundancy_weight_ppm: z.ZodNumber;
             candidate_cutoff: z.ZodNumber;
             arithmetic: z.ZodLiteral<"integer-score-v1">;
-        }, z.core.$strict>>;
+        }, z.core.$strict>, z.ZodObject<{
+            selector: z.ZodLiteral<"hierarchical-context-v1">;
+            mode: z.ZodEnum<{
+                off: "off";
+                observe: "observe";
+                enforce: "enforce";
+            }>;
+            availability: z.ZodEnum<{
+                optional: "optional";
+                required: "required";
+            }>;
+            recent_original_tokens: z.ZodNumber;
+            historical_summary_tokens: z.ZodNumber;
+            maximum_expansions_per_turn: z.ZodNumber;
+            summarizer: z.ZodObject<{
+                binding: z.ZodEnum<{
+                    "run-primary": "run-primary";
+                }>;
+                maximum_source_tokens: z.ZodNumber;
+                maximum_output_tokens: z.ZodNumber;
+            }, z.core.$strict>;
+            budgets: z.ZodObject<{
+                maximum_summary_calls_per_run: z.ZodNumber;
+                maximum_summary_tokens_per_run: z.ZodNumber;
+            }, z.core.$strict>;
+        }, z.core.$strict>]>>;
         attention: z.ZodOptional<z.ZodObject<{
             selector: z.ZodLiteral<"attention-littles-v1">;
             mode: z.ZodEnum<{
@@ -5077,8 +5865,29 @@ export declare const DomainPackSchema: z.ZodObject<{
             "declared-dependencies": "declared-dependencies";
         }>;
         repair_budget_attempts: z.ZodNumber;
+        item_output_schemas: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            item_kind: z.ZodString;
+            item_id: z.ZodOptional<z.ZodString>;
+            item_id_prefix: z.ZodOptional<z.ZodString>;
+            output_schema: z.ZodType<import("./item-output.js").ItemOutputJson, unknown, z.core.$ZodTypeInternals<import("./item-output.js").ItemOutputJson, unknown>>;
+        }, z.core.$strict>>>;
         claim_representation: z.ZodOptional<z.ZodEnum<{
             "structured-claims-with-citations": "structured-claims-with-citations";
+        }>>;
+        ask_when: z.ZodOptional<z.ZodEnum<{
+            "at-completion": "at-completion";
+            "when-parked": "when-parked";
+        }>>;
+        max_agent_questions: z.ZodOptional<z.ZodNumber>;
+        validator_inputs: z.ZodOptional<z.ZodArray<z.ZodEnum<{
+            "document-text": "document-text";
+            "effect-outcomes": "effect-outcomes";
+            "workspace-output": "workspace-output";
+            "web-pages": "web-pages";
+        }>>>;
+        checkpoint_view: z.ZodOptional<z.ZodEnum<{
+            "covered-items": "covered-items";
+            "worked-items": "worked-items";
         }>>;
         answer_windows: z.ZodOptional<z.ZodArray<z.ZodObject<{
             named_human_class: z.ZodString;
@@ -5096,6 +5905,7 @@ export declare const DomainPackSchema: z.ZodObject<{
             covers: z.ZodArray<z.ZodString>;
             sufficient_for: z.ZodArray<z.ZodString>;
             cost_wall_ms: z.ZodNumber;
+            timeout_ms: z.ZodOptional<z.ZodNumber>;
         }, z.core.$strict>>;
         validator_concurrency_groups: z.ZodOptional<z.ZodArray<z.ZodObject<{
             name: z.ZodString;
@@ -5381,6 +6191,7 @@ export declare const SCHEMA_REGISTRY: {
                     "registry:quarantine": "registry:quarantine";
                     "review:answer": "review:answer";
                     "review:read": "review:read";
+                    "run:budget": "run:budget";
                     "run:cancel": "run:cancel";
                     "run:control": "run:control";
                     "run:create": "run:create";
@@ -5476,6 +6287,7 @@ export declare const SCHEMA_REGISTRY: {
                 "registry:quarantine": "registry:quarantine";
                 "review:answer": "review:answer";
                 "review:read": "review:read";
+                "run:budget": "run:budget";
                 "run:cancel": "run:cancel";
                 "run:control": "run:control";
                 "run:create": "run:create";
@@ -5564,6 +6376,7 @@ export declare const SCHEMA_REGISTRY: {
                     "registry:quarantine": "registry:quarantine";
                     "review:answer": "review:answer";
                     "review:read": "review:read";
+                    "run:budget": "run:budget";
                     "run:cancel": "run:cancel";
                     "run:control": "run:control";
                     "run:create": "run:create";
@@ -5735,6 +6548,7 @@ export declare const SCHEMA_REGISTRY: {
                         "registry:quarantine": "registry:quarantine";
                         "review:answer": "review:answer";
                         "review:read": "review:read";
+                        "run:budget": "run:budget";
                         "run:cancel": "run:cancel";
                         "run:control": "run:control";
                         "run:create": "run:create";
@@ -5838,6 +6652,7 @@ export declare const SCHEMA_REGISTRY: {
                     "registry:quarantine": "registry:quarantine";
                     "review:answer": "review:answer";
                     "review:read": "review:read";
+                    "run:budget": "run:budget";
                     "run:cancel": "run:cancel";
                     "run:control": "run:control";
                     "run:create": "run:create";
@@ -5939,6 +6754,7 @@ export declare const SCHEMA_REGISTRY: {
                         "registry:quarantine": "registry:quarantine";
                         "review:answer": "review:answer";
                         "review:read": "review:read";
+                        "run:budget": "run:budget";
                         "run:cancel": "run:cancel";
                         "run:control": "run:control";
                         "run:create": "run:create";
@@ -6110,6 +6926,7 @@ export declare const SCHEMA_REGISTRY: {
                             "registry:quarantine": "registry:quarantine";
                             "review:answer": "review:answer";
                             "review:read": "review:read";
+                            "run:budget": "run:budget";
                             "run:cancel": "run:cancel";
                             "run:control": "run:control";
                             "run:create": "run:create";
@@ -6213,6 +7030,7 @@ export declare const SCHEMA_REGISTRY: {
                         "registry:quarantine": "registry:quarantine";
                         "review:answer": "review:answer";
                         "review:read": "review:read";
+                        "run:budget": "run:budget";
                         "run:cancel": "run:cancel";
                         "run:control": "run:control";
                         "run:create": "run:create";
@@ -6307,6 +7125,7 @@ export declare const SCHEMA_REGISTRY: {
                         "registry:quarantine": "registry:quarantine";
                         "review:answer": "review:answer";
                         "review:read": "review:read";
+                        "run:budget": "run:budget";
                         "run:cancel": "run:cancel";
                         "run:control": "run:control";
                         "run:create": "run:create";
@@ -6478,6 +7297,7 @@ export declare const SCHEMA_REGISTRY: {
                             "registry:quarantine": "registry:quarantine";
                             "review:answer": "review:answer";
                             "review:read": "review:read";
+                            "run:budget": "run:budget";
                             "run:cancel": "run:cancel";
                             "run:control": "run:control";
                             "run:create": "run:create";
@@ -6581,6 +7401,7 @@ export declare const SCHEMA_REGISTRY: {
                         "registry:quarantine": "registry:quarantine";
                         "review:answer": "review:answer";
                         "review:read": "review:read";
+                        "run:budget": "run:budget";
                         "run:cancel": "run:cancel";
                         "run:control": "run:control";
                         "run:create": "run:create";
@@ -6601,619 +7422,6 @@ export declare const SCHEMA_REGISTRY: {
         }, z.core.$strict>;
         readonly placement: "observation";
         readonly owner: "runtime-core";
-    };
-    readonly BrowserLimitsSchema: {
-        readonly schema: z.ZodObject<{
-            max_processes: z.ZodNumber;
-            max_contexts_per_process: z.ZodNumber;
-            max_pages_per_context: z.ZodLiteral<1>;
-            max_active_sessions: z.ZodNumber;
-            max_queued_sessions: z.ZodNumber;
-            max_navigations_per_session: z.ZodNumber;
-            max_requests_per_session: z.ZodNumber;
-            max_redirects: z.ZodNumber;
-            max_response_bytes: z.ZodNumber;
-            max_network_bytes: z.ZodNumber;
-            max_artifact_bytes: z.ZodNumber;
-            max_downloads_per_session: z.ZodNumber;
-            max_observation_retries: z.ZodNumber;
-            navigation_timeout_ms: z.ZodNumber;
-            idle_timeout_ms: z.ZodNumber;
-            wall_time_ms: z.ZodNumber;
-            cpu_time_ms: z.ZodNumber;
-            memory_mib: z.ZodNumber;
-            process_count: z.ZodNumber;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserDestinationSchema: {
-        readonly schema: z.ZodObject<{
-            origin: z.ZodString;
-            methods: z.ZodArray<z.ZodEnum<{
-                GET: "GET";
-                HEAD: "HEAD";
-                POST: "POST";
-                PUT: "PUT";
-                PATCH: "PATCH";
-                DELETE: "DELETE";
-            }>>;
-            resource_types: z.ZodArray<z.ZodEnum<{
-                document: "document";
-                stylesheet: "stylesheet";
-                image: "image";
-                media: "media";
-                font: "font";
-                script: "script";
-                texttrack: "texttrack";
-                xhr: "xhr";
-                fetch: "fetch";
-                eventsource: "eventsource";
-                websocket: "websocket";
-                manifest: "manifest";
-                other: "other";
-            }>>;
-            path_prefixes: z.ZodArray<z.ZodString>;
-            resolved_addresses: z.ZodArray<z.ZodString>;
-            credential_scope: z.ZodNullable<z.ZodString>;
-            sensitive_query_fields: z.ZodArray<z.ZodString>;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserCredentialBindingSchema: {
-        readonly schema: z.ZodObject<{
-            credential_ref: z.ZodString;
-            epoch: z.ZodNumber;
-            scope: z.ZodString;
-            origins: z.ZodArray<z.ZodString>;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserEffectPolicySchema: {
-        readonly schema: z.ZodObject<{
-            operation: z.ZodString;
-            origin: z.ZodString;
-            action: z.ZodEnum<{
-                click: "click";
-                submit: "submit";
-                upload: "upload";
-                unknown: "unknown";
-            }>;
-            selectors: z.ZodArray<z.ZodString>;
-            idempotency_strategy: z.ZodEnum<{
-                "provider-key": "provider-key";
-                "natural-reference": "natural-reference";
-            }>;
-            reconciliation_url_template: z.ZodString;
-            found_selector: z.ZodString;
-            absent_selector: z.ZodString;
-            receipt_selector: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserAdapterDescriptorSchema: {
-        readonly schema: z.ZodObject<{
-            name: z.ZodLiteral<"zero-ar.playwright-chromium">;
-            version: z.ZodString;
-            engine: z.ZodEnum<{
-                "playwright-chromium": "playwright-chromium";
-            }>;
-            playwright_version: z.ZodString;
-            chromium_revision: z.ZodString;
-            executable_ref: z.ZodString;
-            conformance_refs: z.ZodArray<z.ZodString>;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserBindingSchema: {
-        readonly schema: z.ZodObject<{
-            contract: z.ZodLiteral<"zero-ar-browser-binding/1">;
-            binding_ref: z.ZodString;
-            run_id: z.ZodString;
-            tenant: z.ZodString;
-            profile_ref: z.ZodString;
-            adapter: z.ZodObject<{
-                name: z.ZodLiteral<"zero-ar.playwright-chromium">;
-                version: z.ZodString;
-                engine: z.ZodEnum<{
-                    "playwright-chromium": "playwright-chromium";
-                }>;
-                playwright_version: z.ZodString;
-                chromium_revision: z.ZodString;
-                executable_ref: z.ZodString;
-                conformance_refs: z.ZodArray<z.ZodString>;
-            }, z.core.$strict>;
-            isolation: z.ZodEnum<{
-                process: "process";
-                container: "container";
-            }>;
-            limit_enforcement: z.ZodEnum<{
-                "observed-process": "observed-process";
-                "cgroup-v2": "cgroup-v2";
-            }>;
-            network_mode: z.ZodEnum<{
-                "public-only": "public-only";
-                "loopback-test-only": "loopback-test-only";
-            }>;
-            destinations: z.ZodArray<z.ZodObject<{
-                origin: z.ZodString;
-                methods: z.ZodArray<z.ZodEnum<{
-                    GET: "GET";
-                    HEAD: "HEAD";
-                    POST: "POST";
-                    PUT: "PUT";
-                    PATCH: "PATCH";
-                    DELETE: "DELETE";
-                }>>;
-                resource_types: z.ZodArray<z.ZodEnum<{
-                    document: "document";
-                    stylesheet: "stylesheet";
-                    image: "image";
-                    media: "media";
-                    font: "font";
-                    script: "script";
-                    texttrack: "texttrack";
-                    xhr: "xhr";
-                    fetch: "fetch";
-                    eventsource: "eventsource";
-                    websocket: "websocket";
-                    manifest: "manifest";
-                    other: "other";
-                }>>;
-                path_prefixes: z.ZodArray<z.ZodString>;
-                resolved_addresses: z.ZodArray<z.ZodString>;
-                credential_scope: z.ZodNullable<z.ZodString>;
-                sensitive_query_fields: z.ZodArray<z.ZodString>;
-            }, z.core.$strict>>;
-            credentials: z.ZodArray<z.ZodObject<{
-                credential_ref: z.ZodString;
-                epoch: z.ZodNumber;
-                scope: z.ZodString;
-                origins: z.ZodArray<z.ZodString>;
-            }, z.core.$strict>>;
-            effect_policies: z.ZodArray<z.ZodObject<{
-                operation: z.ZodString;
-                origin: z.ZodString;
-                action: z.ZodEnum<{
-                    click: "click";
-                    submit: "submit";
-                    upload: "upload";
-                    unknown: "unknown";
-                }>;
-                selectors: z.ZodArray<z.ZodString>;
-                idempotency_strategy: z.ZodEnum<{
-                    "provider-key": "provider-key";
-                    "natural-reference": "natural-reference";
-                }>;
-                reconciliation_url_template: z.ZodString;
-                found_selector: z.ZodString;
-                absent_selector: z.ZodString;
-                receipt_selector: z.ZodString;
-            }, z.core.$strict>>;
-            limits: z.ZodObject<{
-                max_processes: z.ZodNumber;
-                max_contexts_per_process: z.ZodNumber;
-                max_pages_per_context: z.ZodLiteral<1>;
-                max_active_sessions: z.ZodNumber;
-                max_queued_sessions: z.ZodNumber;
-                max_navigations_per_session: z.ZodNumber;
-                max_requests_per_session: z.ZodNumber;
-                max_redirects: z.ZodNumber;
-                max_response_bytes: z.ZodNumber;
-                max_network_bytes: z.ZodNumber;
-                max_artifact_bytes: z.ZodNumber;
-                max_downloads_per_session: z.ZodNumber;
-                max_observation_retries: z.ZodNumber;
-                navigation_timeout_ms: z.ZodNumber;
-                idle_timeout_ms: z.ZodNumber;
-                wall_time_ms: z.ZodNumber;
-                cpu_time_ms: z.ZodNumber;
-                memory_mib: z.ZodNumber;
-                process_count: z.ZodNumber;
-            }, z.core.$strict>;
-            supersedes_binding_ref: z.ZodNullable<z.ZodString>;
-            destination_decision_ref: z.ZodNullable<z.ZodString>;
-            created_by: z.ZodString;
-            reviewed_by: z.ZodString;
-            created_at: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserDestinationProposalSchema: {
-        readonly schema: z.ZodObject<{
-            proposal_ref: z.ZodString;
-            run_id: z.ZodString;
-            tenant: z.ZodString;
-            participant: z.ZodString;
-            current_binding_ref: z.ZodString;
-            requested_destination: z.ZodObject<{
-                origin: z.ZodString;
-                methods: z.ZodArray<z.ZodEnum<{
-                    GET: "GET";
-                    HEAD: "HEAD";
-                    POST: "POST";
-                    PUT: "PUT";
-                    PATCH: "PATCH";
-                    DELETE: "DELETE";
-                }>>;
-                resource_types: z.ZodArray<z.ZodEnum<{
-                    document: "document";
-                    stylesheet: "stylesheet";
-                    image: "image";
-                    media: "media";
-                    font: "font";
-                    script: "script";
-                    texttrack: "texttrack";
-                    xhr: "xhr";
-                    fetch: "fetch";
-                    eventsource: "eventsource";
-                    websocket: "websocket";
-                    manifest: "manifest";
-                    other: "other";
-                }>>;
-                path_prefixes: z.ZodArray<z.ZodString>;
-                resolved_addresses: z.ZodArray<z.ZodString>;
-                credential_scope: z.ZodNullable<z.ZodString>;
-                sensitive_query_fields: z.ZodArray<z.ZodString>;
-            }, z.core.$strict>;
-            reason: z.ZodString;
-            proposed_at: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserDestinationDecisionSchema: {
-        readonly schema: z.ZodObject<{
-            decision_ref: z.ZodString;
-            proposal_ref: z.ZodString;
-            run_id: z.ZodString;
-            current_binding_ref: z.ZodString;
-            disposition: z.ZodEnum<{
-                approved: "approved";
-                refused: "refused";
-            }>;
-            approver: z.ZodString;
-            authentication_ref: z.ZodString;
-            authority_epoch: z.ZodNumber;
-            reason: z.ZodString;
-            decided_at: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserRequestProvenanceSchema: {
-        readonly schema: z.ZodObject<{
-            url: z.ZodString;
-            redacted_url: z.ZodString;
-            method: z.ZodString;
-            resource_type: z.ZodEnum<{
-                document: "document";
-                stylesheet: "stylesheet";
-                image: "image";
-                media: "media";
-                font: "font";
-                script: "script";
-                texttrack: "texttrack";
-                xhr: "xhr";
-                fetch: "fetch";
-                eventsource: "eventsource";
-                websocket: "websocket";
-                manifest: "manifest";
-                other: "other";
-            }>;
-            resolved_address: z.ZodNullable<z.ZodString>;
-            decision: z.ZodEnum<{
-                refused: "refused";
-                allowed: "allowed";
-            }>;
-            response_status: z.ZodNullable<z.ZodNumber>;
-            response_bytes: z.ZodNumber;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserProvenanceSchema: {
-        readonly schema: z.ZodObject<{
-            schema: z.ZodLiteral<"zero-ar-browser-provenance/1">;
-            run_id: z.ZodString;
-            invoke_id: z.ZodString;
-            binding_ref: z.ZodString;
-            profile_ref: z.ZodString;
-            observation: z.ZodEnum<{
-                text: "text";
-                dom: "dom";
-                screenshot: "screenshot";
-                download: "download";
-            }>;
-            requested_url: z.ZodString;
-            final_url: z.ZodString;
-            redirects: z.ZodArray<z.ZodString>;
-            requests: z.ZodArray<z.ZodObject<{
-                url: z.ZodString;
-                redacted_url: z.ZodString;
-                method: z.ZodString;
-                resource_type: z.ZodEnum<{
-                    document: "document";
-                    stylesheet: "stylesheet";
-                    image: "image";
-                    media: "media";
-                    font: "font";
-                    script: "script";
-                    texttrack: "texttrack";
-                    xhr: "xhr";
-                    fetch: "fetch";
-                    eventsource: "eventsource";
-                    websocket: "websocket";
-                    manifest: "manifest";
-                    other: "other";
-                }>;
-                resolved_address: z.ZodNullable<z.ZodString>;
-                decision: z.ZodEnum<{
-                    refused: "refused";
-                    allowed: "allowed";
-                }>;
-                response_status: z.ZodNullable<z.ZodNumber>;
-                response_bytes: z.ZodNumber;
-            }, z.core.$strict>>;
-            content_hash: z.ZodString;
-            artifact_ref: z.ZodNullable<z.ZodString>;
-            artifact_manifest_ref: z.ZodNullable<z.ZodString>;
-            source_binding_ref: z.ZodNullable<z.ZodString>;
-            browser_engine: z.ZodEnum<{
-                "playwright-chromium": "playwright-chromium";
-            }>;
-            browser_revision: z.ZodString;
-            captured_at: z.ZodString;
-            content_label: z.ZodEnum<{
-                "untrusted-external-content": "untrusted-external-content";
-            }>;
-            instruction_authority: z.ZodEnum<{
-                none: "none";
-            }>;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserObservationResultSchema: {
-        readonly schema: z.ZodObject<{
-            observation: z.ZodEnum<{
-                text: "text";
-                dom: "dom";
-                screenshot: "screenshot";
-                download: "download";
-            }>;
-            text: z.ZodNullable<z.ZodString>;
-            truncated: z.ZodBoolean;
-            bytes: z.ZodNumber;
-            artifact_ref: z.ZodNullable<z.ZodString>;
-            source_binding_ref: z.ZodNullable<z.ZodString>;
-            content_label: z.ZodEnum<{
-                "untrusted-external-content": "untrusted-external-content";
-            }>;
-            instruction_authority: z.ZodEnum<{
-                none: "none";
-            }>;
-            provenance: z.ZodObject<{
-                schema: z.ZodLiteral<"zero-ar-browser-provenance/1">;
-                run_id: z.ZodString;
-                invoke_id: z.ZodString;
-                binding_ref: z.ZodString;
-                profile_ref: z.ZodString;
-                observation: z.ZodEnum<{
-                    text: "text";
-                    dom: "dom";
-                    screenshot: "screenshot";
-                    download: "download";
-                }>;
-                requested_url: z.ZodString;
-                final_url: z.ZodString;
-                redirects: z.ZodArray<z.ZodString>;
-                requests: z.ZodArray<z.ZodObject<{
-                    url: z.ZodString;
-                    redacted_url: z.ZodString;
-                    method: z.ZodString;
-                    resource_type: z.ZodEnum<{
-                        document: "document";
-                        stylesheet: "stylesheet";
-                        image: "image";
-                        media: "media";
-                        font: "font";
-                        script: "script";
-                        texttrack: "texttrack";
-                        xhr: "xhr";
-                        fetch: "fetch";
-                        eventsource: "eventsource";
-                        websocket: "websocket";
-                        manifest: "manifest";
-                        other: "other";
-                    }>;
-                    resolved_address: z.ZodNullable<z.ZodString>;
-                    decision: z.ZodEnum<{
-                        refused: "refused";
-                        allowed: "allowed";
-                    }>;
-                    response_status: z.ZodNullable<z.ZodNumber>;
-                    response_bytes: z.ZodNumber;
-                }, z.core.$strict>>;
-                content_hash: z.ZodString;
-                artifact_ref: z.ZodNullable<z.ZodString>;
-                artifact_manifest_ref: z.ZodNullable<z.ZodString>;
-                source_binding_ref: z.ZodNullable<z.ZodString>;
-                browser_engine: z.ZodEnum<{
-                    "playwright-chromium": "playwright-chromium";
-                }>;
-                browser_revision: z.ZodString;
-                captured_at: z.ZodString;
-                content_label: z.ZodEnum<{
-                    "untrusted-external-content": "untrusted-external-content";
-                }>;
-                instruction_authority: z.ZodEnum<{
-                    none: "none";
-                }>;
-            }, z.core.$strict>;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserEffectParametersSchema: {
-        readonly schema: z.ZodObject<{
-            binding_ref: z.ZodString;
-            action: z.ZodEnum<{
-                click: "click";
-                submit: "submit";
-                upload: "upload";
-                unknown: "unknown";
-            }>;
-            url: z.ZodString;
-            selector: z.ZodString;
-            fields: z.ZodRecord<z.ZodString, z.ZodString>;
-            artifact_ref: z.ZodNullable<z.ZodString>;
-            artifact_hash: z.ZodNullable<z.ZodString>;
-            idempotency_strategy: z.ZodEnum<{
-                "provider-key": "provider-key";
-                "natural-reference": "natural-reference";
-            }>;
-            natural_reference: z.ZodNullable<z.ZodString>;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserProfileHealthSchema: {
-        readonly schema: z.ZodObject<{
-            profile_ref: z.ZodString;
-            state: z.ZodEnum<{
-                disabled: "disabled";
-                installed: "installed";
-                healthy: "healthy";
-                admitted: "admitted";
-            }>;
-            engine_revision: z.ZodString;
-            executable_ref: z.ZodString;
-            proxy_ready: z.ZodBoolean;
-            limit_enforcement: z.ZodEnum<{
-                "observed-process": "observed-process";
-                "cgroup-v2": "cgroup-v2";
-            }>;
-            checked_at: z.ZodString;
-            reason: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserLatencySummarySchema: {
-        readonly schema: z.ZodObject<{
-            samples: z.ZodNumber;
-            min_ms: z.ZodNumber;
-            p50_ms: z.ZodNumber;
-            p95_ms: z.ZodNumber;
-            max_ms: z.ZodNumber;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserMeasurementReportSchema: {
-        readonly schema: z.ZodObject<{
-            format: z.ZodLiteral<"zero-ar-browser-measurement/1">;
-            source_commit: z.ZodString;
-            generated_at: z.ZodString;
-            platform: z.ZodString;
-            architecture: z.ZodString;
-            node_version: z.ZodString;
-            playwright_version: z.ZodString;
-            chromium_revision: z.ZodString;
-            executable_ref: z.ZodString;
-            topology_ref: z.ZodString;
-            fixture_ref: z.ZodString;
-            samples: z.ZodNumber;
-            concurrency: z.ZodNumber;
-            limits: z.ZodObject<{
-                max_processes: z.ZodNumber;
-                max_contexts_per_process: z.ZodNumber;
-                max_pages_per_context: z.ZodLiteral<1>;
-                max_active_sessions: z.ZodNumber;
-                max_queued_sessions: z.ZodNumber;
-                max_navigations_per_session: z.ZodNumber;
-                max_requests_per_session: z.ZodNumber;
-                max_redirects: z.ZodNumber;
-                max_response_bytes: z.ZodNumber;
-                max_network_bytes: z.ZodNumber;
-                max_artifact_bytes: z.ZodNumber;
-                max_downloads_per_session: z.ZodNumber;
-                max_observation_retries: z.ZodNumber;
-                navigation_timeout_ms: z.ZodNumber;
-                idle_timeout_ms: z.ZodNumber;
-                wall_time_ms: z.ZodNumber;
-                cpu_time_ms: z.ZodNumber;
-                memory_mib: z.ZodNumber;
-                process_count: z.ZodNumber;
-            }, z.core.$strict>;
-            latency: z.ZodObject<{
-                cold_process_context: z.ZodObject<{
-                    samples: z.ZodNumber;
-                    min_ms: z.ZodNumber;
-                    p50_ms: z.ZodNumber;
-                    p95_ms: z.ZodNumber;
-                    max_ms: z.ZodNumber;
-                }, z.core.$strict>;
-                warm_context: z.ZodObject<{
-                    samples: z.ZodNumber;
-                    min_ms: z.ZodNumber;
-                    p50_ms: z.ZodNumber;
-                    p95_ms: z.ZodNumber;
-                    max_ms: z.ZodNumber;
-                }, z.core.$strict>;
-                navigation: z.ZodObject<{
-                    samples: z.ZodNumber;
-                    min_ms: z.ZodNumber;
-                    p50_ms: z.ZodNumber;
-                    p95_ms: z.ZodNumber;
-                    max_ms: z.ZodNumber;
-                }, z.core.$strict>;
-                text_extraction: z.ZodObject<{
-                    samples: z.ZodNumber;
-                    min_ms: z.ZodNumber;
-                    p50_ms: z.ZodNumber;
-                    p95_ms: z.ZodNumber;
-                    max_ms: z.ZodNumber;
-                }, z.core.$strict>;
-                screenshot_artifact_commit: z.ZodObject<{
-                    samples: z.ZodNumber;
-                    min_ms: z.ZodNumber;
-                    p50_ms: z.ZodNumber;
-                    p95_ms: z.ZodNumber;
-                    max_ms: z.ZodNumber;
-                }, z.core.$strict>;
-                cancellation_teardown: z.ZodObject<{
-                    samples: z.ZodNumber;
-                    min_ms: z.ZodNumber;
-                    p50_ms: z.ZodNumber;
-                    p95_ms: z.ZodNumber;
-                    max_ms: z.ZodNumber;
-                }, z.core.$strict>;
-                context_teardown: z.ZodObject<{
-                    samples: z.ZodNumber;
-                    min_ms: z.ZodNumber;
-                    p50_ms: z.ZodNumber;
-                    p95_ms: z.ZodNumber;
-                    max_ms: z.ZodNumber;
-                }, z.core.$strict>;
-            }, z.core.$strict>;
-            peak_process_tree: z.ZodObject<{
-                memory_mib: z.ZodNumber;
-                process_count: z.ZodNumber;
-                cpu_time_ms: z.ZodNumber;
-            }, z.core.$strict>;
-            errors: z.ZodArray<z.ZodString>;
-            publishable: z.ZodLiteral<true>;
-            unavailable_reason: z.ZodNull;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
     };
     readonly PrincipalsSchema: {
         readonly schema: z.ZodObject<{
@@ -7251,6 +7459,7 @@ export declare const SCHEMA_REGISTRY: {
     };
     readonly InputArtifactBindingSchema: {
         readonly schema: z.ZodObject<{
+            alias: z.ZodOptional<z.ZodString>;
             artifact_ref: z.ZodString;
             content_hash: z.ZodString;
             bytes: z.ZodNumber;
@@ -7273,6 +7482,7 @@ export declare const SCHEMA_REGISTRY: {
     };
     readonly ResolvedInputArtifactSchema: {
         readonly schema: z.ZodObject<{
+            alias: z.ZodOptional<z.ZodString>;
             artifact_ref: z.ZodString;
             manifest_ref: z.ZodString;
             tenant: z.ZodString;
@@ -7400,12 +7610,19 @@ export declare const SCHEMA_REGISTRY: {
             version: z.ZodString;
             poppler_version: z.ZodString;
             tesseract_version: z.ZodNullable<z.ZodString>;
-            language: z.ZodLiteral<"eng">;
+            languages: z.ZodArray<z.ZodString>;
             dpi: z.ZodNumber;
             sandbox_mode: z.ZodEnum<{
                 "linux-bwrap-no-network": "linux-bwrap-no-network";
                 "resource-limited-process": "resource-limited-process";
+                "oci-no-network-read-only": "oci-no-network-read-only";
             }>;
+            binding: z.ZodEnum<{
+                "host-process": "host-process";
+                "oci-document": "oci-document";
+            }>;
+            image_digest: z.ZodNullable<z.ZodString>;
+            code_hash: z.ZodOptional<z.ZodString>;
         }, z.core.$strict>;
         readonly placement: "runtime-identity";
         readonly owner: "source-access";
@@ -7593,7 +7810,25 @@ export declare const SCHEMA_REGISTRY: {
             total_bytes: z.ZodNumber;
             manifest_artifact_ref: z.ZodString;
             manifest_ref: z.ZodString;
-            extractor: z.ZodObject<{
+            extractor: z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+                version: z.ZodString;
+                poppler_version: z.ZodString;
+                tesseract_version: z.ZodNullable<z.ZodString>;
+                languages: z.ZodArray<z.ZodString>;
+                dpi: z.ZodNumber;
+                sandbox_mode: z.ZodEnum<{
+                    "linux-bwrap-no-network": "linux-bwrap-no-network";
+                    "resource-limited-process": "resource-limited-process";
+                    "oci-no-network-read-only": "oci-no-network-read-only";
+                }>;
+                binding: z.ZodEnum<{
+                    "host-process": "host-process";
+                    "oci-document": "oci-document";
+                }>;
+                image_digest: z.ZodNullable<z.ZodString>;
+                code_hash: z.ZodOptional<z.ZodString>;
+            }, z.core.$strict>, z.ZodObject<{
                 name: z.ZodLiteral<"zero-ar.pdf-extractor">;
                 version: z.ZodString;
                 poppler_version: z.ZodString;
@@ -7604,7 +7839,7 @@ export declare const SCHEMA_REGISTRY: {
                     "linux-bwrap-no-network": "linux-bwrap-no-network";
                     "resource-limited-process": "resource-limited-process";
                 }>;
-            }, z.core.$strict>;
+            }, z.core.$strict>]>;
             required_for_completion: z.ZodBoolean;
         }, z.core.$strict>;
         readonly placement: "runtime-identity";
@@ -7663,12 +7898,19 @@ export declare const SCHEMA_REGISTRY: {
                 version: z.ZodString;
                 poppler_version: z.ZodString;
                 tesseract_version: z.ZodNullable<z.ZodString>;
-                language: z.ZodLiteral<"eng">;
+                languages: z.ZodArray<z.ZodString>;
                 dpi: z.ZodNumber;
                 sandbox_mode: z.ZodEnum<{
                     "linux-bwrap-no-network": "linux-bwrap-no-network";
                     "resource-limited-process": "resource-limited-process";
+                    "oci-no-network-read-only": "oci-no-network-read-only";
                 }>;
+                binding: z.ZodEnum<{
+                    "host-process": "host-process";
+                    "oci-document": "oci-document";
+                }>;
+                image_digest: z.ZodNullable<z.ZodString>;
+                code_hash: z.ZodOptional<z.ZodString>;
             }, z.core.$strict>>;
             budget_requirements: z.ZodObject<{
                 tool_calls_per_operation: z.ZodLiteral<1>;
@@ -7682,6 +7924,10 @@ export declare const SCHEMA_REGISTRY: {
                 max_text_bytes: z.ZodNumber;
                 max_command_output_bytes: z.ZodNumber;
                 command_timeout_ms: z.ZodNumber;
+                max_image_edge_pixels: z.ZodNumber;
+                max_image_pixels: z.ZodNumber;
+                max_page_image_bytes: z.ZodNumber;
+                max_extraction_image_bytes: z.ZodNumber;
             }, z.core.$strict>;
             validator_coverage: z.ZodArray<z.ZodString>;
             completion_reachability: z.ZodLiteral<"run-contract-dependent">;
@@ -7721,6 +7967,7 @@ export declare const SCHEMA_REGISTRY: {
             operation: z.ZodLiteral<"document.extract">;
             locator: z.ZodString;
             max_pages: z.ZodOptional<z.ZodNumber>;
+            languages: z.ZodOptional<z.ZodArray<z.ZodString>>;
         }, z.core.$strict>], "operation">;
         readonly placement: "run-management";
         readonly owner: "source-access";
@@ -7749,7 +7996,10 @@ export declare const SCHEMA_REGISTRY: {
             page: z.ZodNumber;
             width: z.ZodNullable<z.ZodNumber>;
             height: z.ZodNullable<z.ZodNumber>;
-            coordinate_space: z.ZodLiteral<"pdf-points">;
+            coordinate_space: z.ZodEnum<{
+                "pdf-points": "pdf-points";
+                "image-pixels": "image-pixels";
+            }>;
             text_artifact_ref: z.ZodString;
             text_content_hash: z.ZodString;
             text_bytes: z.ZodNumber;
@@ -7758,6 +8008,29 @@ export declare const SCHEMA_REGISTRY: {
                 "tesseract-ocr": "tesseract-ocr";
             }>;
             confidence: z.ZodNullable<z.ZodNumber>;
+            text: z.ZodOptional<z.ZodString>;
+            image: z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
+                kept: z.ZodLiteral<true>;
+                artifact_ref: z.ZodString;
+                content_hash: z.ZodString;
+                media_type: z.ZodEnum<{
+                    "image/png": "image/png";
+                    "image/jpeg": "image/jpeg";
+                }>;
+                bytes: z.ZodNumber;
+            }, z.core.$strict>, z.ZodObject<{
+                kept: z.ZodLiteral<false>;
+                media_type: z.ZodEnum<{
+                    "image/png": "image/png";
+                    "image/jpeg": "image/jpeg";
+                }>;
+                bytes: z.ZodNumber;
+                reason: z.ZodEnum<{
+                    "page-image-bytes": "page-image-bytes";
+                    "extraction-image-bytes": "extraction-image-bytes";
+                }>;
+                max_bytes: z.ZodNumber;
+            }, z.core.$strict>], "kept">>;
         }, z.core.$strict>;
         readonly placement: "observation";
         readonly owner: "source-access";
@@ -7768,24 +8041,38 @@ export declare const SCHEMA_REGISTRY: {
             member_ref: z.ZodString;
             original_artifact_ref: z.ZodString;
             original_content_hash: z.ZodString;
-            media_type: z.ZodLiteral<"application/pdf">;
+            media_type: z.ZodEnum<{
+                "image/png": "image/png";
+                "image/jpeg": "image/jpeg";
+                "application/pdf": "application/pdf";
+            }>;
             extractor: z.ZodObject<{
                 name: z.ZodLiteral<"zero-ar.pdf-extractor">;
                 version: z.ZodString;
                 poppler_version: z.ZodString;
                 tesseract_version: z.ZodNullable<z.ZodString>;
-                language: z.ZodLiteral<"eng">;
+                languages: z.ZodArray<z.ZodString>;
                 dpi: z.ZodNumber;
                 sandbox_mode: z.ZodEnum<{
                     "linux-bwrap-no-network": "linux-bwrap-no-network";
                     "resource-limited-process": "resource-limited-process";
+                    "oci-no-network-read-only": "oci-no-network-read-only";
                 }>;
+                binding: z.ZodEnum<{
+                    "host-process": "host-process";
+                    "oci-document": "oci-document";
+                }>;
+                image_digest: z.ZodNullable<z.ZodString>;
+                code_hash: z.ZodOptional<z.ZodString>;
             }, z.core.$strict>;
             pages: z.ZodArray<z.ZodObject<{
                 page: z.ZodNumber;
                 width: z.ZodNullable<z.ZodNumber>;
                 height: z.ZodNullable<z.ZodNumber>;
-                coordinate_space: z.ZodLiteral<"pdf-points">;
+                coordinate_space: z.ZodEnum<{
+                    "pdf-points": "pdf-points";
+                    "image-pixels": "image-pixels";
+                }>;
                 text_artifact_ref: z.ZodString;
                 text_content_hash: z.ZodString;
                 text_bytes: z.ZodNumber;
@@ -7794,6 +8081,29 @@ export declare const SCHEMA_REGISTRY: {
                     "tesseract-ocr": "tesseract-ocr";
                 }>;
                 confidence: z.ZodNullable<z.ZodNumber>;
+                text: z.ZodOptional<z.ZodString>;
+                image: z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
+                    kept: z.ZodLiteral<true>;
+                    artifact_ref: z.ZodString;
+                    content_hash: z.ZodString;
+                    media_type: z.ZodEnum<{
+                        "image/png": "image/png";
+                        "image/jpeg": "image/jpeg";
+                    }>;
+                    bytes: z.ZodNumber;
+                }, z.core.$strict>, z.ZodObject<{
+                    kept: z.ZodLiteral<false>;
+                    media_type: z.ZodEnum<{
+                        "image/png": "image/png";
+                        "image/jpeg": "image/jpeg";
+                    }>;
+                    bytes: z.ZodNumber;
+                    reason: z.ZodEnum<{
+                        "page-image-bytes": "page-image-bytes";
+                        "extraction-image-bytes": "extraction-image-bytes";
+                    }>;
+                    max_bytes: z.ZodNumber;
+                }, z.core.$strict>], "kept">>;
             }, z.core.$strict>>;
             page_count: z.ZodNumber;
             total_text_bytes: z.ZodNumber;
@@ -8083,13 +8393,13 @@ export declare const SCHEMA_REGISTRY: {
             source: z.ZodObject<{
                 channel: z.ZodEnum<{
                     system: "system";
-                    other: "other";
                     web: "web";
                     mobile: "mobile";
                     voice: "voice";
                     sms: "sms";
                     email: "email";
                     chat: "chat";
+                    other: "other";
                 }>;
                 event_id: z.ZodString;
             }, z.core.$strict>;
@@ -8139,13 +8449,13 @@ export declare const SCHEMA_REGISTRY: {
             source: z.ZodObject<{
                 channel: z.ZodEnum<{
                     system: "system";
-                    other: "other";
                     web: "web";
                     mobile: "mobile";
                     voice: "voice";
                     sms: "sms";
                     email: "email";
                     chat: "chat";
+                    other: "other";
                 }>;
                 event_id: z.ZodString;
             }, z.core.$strict>;
@@ -8161,6 +8471,13 @@ export declare const SCHEMA_REGISTRY: {
             artifacts: z.ZodArray<z.ZodObject<{
                 artifact_ref: z.ZodString;
                 content_hash: z.ZodString;
+                media_type: z.ZodOptional<z.ZodEnum<{
+                    "image/png": "image/png";
+                    "image/jpeg": "image/jpeg";
+                    "image/webp": "image/webp";
+                    "image/gif": "image/gif";
+                }>>;
+                bytes: z.ZodOptional<z.ZodNumber>;
             }, z.core.$strict>>;
             classification: z.ZodEnum<{
                 public: "public";
@@ -8335,10 +8652,13 @@ export declare const SCHEMA_REGISTRY: {
     readonly EffectAuthorityDecisionCommandSchema: {
         readonly schema: z.ZodObject<{
             reason: z.ZodString;
-            scope: z.ZodLiteral<"effect:approve">;
-            operation: z.ZodString;
+            target: z.ZodString;
             run_id: z.ZodString;
             tenant: z.ZodString;
+            effect_id: z.ZodString;
+            operation: z.ZodString;
+            param_hash: z.ZodString;
+            magnitude: z.ZodNullable<z.ZodNumber>;
             idempotency_key: z.ZodString;
             approver: z.ZodObject<{
                 subject: z.ZodString;
@@ -8347,18 +8667,15 @@ export declare const SCHEMA_REGISTRY: {
                 claims_ref: z.ZodString;
                 credential_id: z.ZodNullable<z.ZodString>;
             }, z.core.$strict>;
+            expires_at: z.ZodString;
+            request_fingerprint: z.ZodString;
+            application_principal: z.ZodString;
             decision: z.ZodEnum<{
                 approve: "approve";
                 refuse: "refuse";
             }>;
-            target: z.ZodString;
-            effect_id: z.ZodString;
-            param_hash: z.ZodString;
-            magnitude: z.ZodNullable<z.ZodNumber>;
-            expires_at: z.ZodString;
             grant_ref: z.ZodString;
-            request_fingerprint: z.ZodString;
-            application_principal: z.ZodString;
+            scope: z.ZodLiteral<"effect:approve">;
             scope_epoch: z.ZodNumber;
         }, z.core.$strict>;
         readonly placement: "effect-dispatch";
@@ -8377,6 +8694,7 @@ export declare const SCHEMA_REGISTRY: {
         readonly schema: z.ZodObject<{
             protocol: z.ZodLiteral<"mcp">;
             invoke_id: z.ZodString;
+            model_tool_call_id: z.ZodOptional<z.ZodString>;
             tool: z.ZodString;
             original_call_ref: z.ZodString;
             peer_binding_ref: z.ZodString;
@@ -8422,6 +8740,7 @@ export declare const SCHEMA_REGISTRY: {
             inputs: z.ZodOptional<z.ZodObject<{
                 items: z.ZodOptional<z.ZodArray<z.ZodString>>;
                 artifacts: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    alias: z.ZodOptional<z.ZodString>;
                     artifact_ref: z.ZodString;
                     content_hash: z.ZodString;
                     bytes: z.ZodNumber;
@@ -8445,9 +8764,6 @@ export declare const SCHEMA_REGISTRY: {
                     required_for_completion: z.ZodDefault<z.ZodBoolean>;
                 }, z.core.$strict>>>;
                 memory_subjects: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
-                browser: z.ZodOptional<z.ZodObject<{
-                    template: z.ZodString;
-                }, z.core.$strict>>;
                 workspace: z.ZodOptional<z.ZodArray<z.ZodObject<{
                     mount: z.ZodString;
                     instance_ref: z.ZodString;
@@ -8494,10 +8810,6 @@ export declare const SCHEMA_REGISTRY: {
                     "environment-oci": "environment-oci";
                     "environment-ssh": "environment-ssh";
                     "environment-firecracker": "environment-firecracker";
-                    "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                    "environment-modal": "environment-modal";
-                    "environment-daytona": "environment-daytona";
-                    "environment-vercel-sandbox": "environment-vercel-sandbox";
                     "environment-openai-agents": "environment-openai-agents";
                     "environment-apptainer": "environment-apptainer";
                     "full-cell-docker-linux": "full-cell-docker-linux";
@@ -8525,16 +8837,24 @@ export declare const SCHEMA_REGISTRY: {
                     "mcp-imported-tools": "mcp-imported-tools";
                     "source-local-read-only": "source-local-read-only";
                     "document-pdf-extraction": "document-pdf-extraction";
-                    "browser-first-party-playwright": "browser-first-party-playwright";
                     "fair-cell-scheduling": "fair-cell-scheduling";
                     "sequential-sampled-validation": "sequential-sampled-validation";
                     "context-feature-cache": "context-feature-cache";
                     "content-defined-chunking": "content-defined-chunking";
                     "attention-admission": "attention-admission";
-                    "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                     "gateway-signed-webhook": "gateway-signed-webhook";
                     "gateway-interactive-messaging": "gateway-interactive-messaging";
                     "workspace-binding-profiles": "workspace-binding-profiles";
+                    "automatic-run-recovery": "automatic-run-recovery";
+                    "open-goal-execution": "open-goal-execution";
+                    "operator-pause-and-budget": "operator-pause-and-budget";
+                    "run-fork": "run-fork";
+                    "model-image-input": "model-image-input";
+                    "workspace-exec": "workspace-exec";
+                    "browser-workspace": "browser-workspace";
+                    "hierarchical-context": "hierarchical-context";
+                    "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                    "web-search": "web-search";
                 }>>;
                 conditional: z.ZodArray<z.ZodObject<{
                     capability: z.ZodEnum<{
@@ -8553,10 +8873,6 @@ export declare const SCHEMA_REGISTRY: {
                         "environment-oci": "environment-oci";
                         "environment-ssh": "environment-ssh";
                         "environment-firecracker": "environment-firecracker";
-                        "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                        "environment-modal": "environment-modal";
-                        "environment-daytona": "environment-daytona";
-                        "environment-vercel-sandbox": "environment-vercel-sandbox";
                         "environment-openai-agents": "environment-openai-agents";
                         "environment-apptainer": "environment-apptainer";
                         "full-cell-docker-linux": "full-cell-docker-linux";
@@ -8584,16 +8900,24 @@ export declare const SCHEMA_REGISTRY: {
                         "mcp-imported-tools": "mcp-imported-tools";
                         "source-local-read-only": "source-local-read-only";
                         "document-pdf-extraction": "document-pdf-extraction";
-                        "browser-first-party-playwright": "browser-first-party-playwright";
                         "fair-cell-scheduling": "fair-cell-scheduling";
                         "sequential-sampled-validation": "sequential-sampled-validation";
                         "context-feature-cache": "context-feature-cache";
                         "content-defined-chunking": "content-defined-chunking";
                         "attention-admission": "attention-admission";
-                        "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                         "gateway-signed-webhook": "gateway-signed-webhook";
                         "gateway-interactive-messaging": "gateway-interactive-messaging";
                         "workspace-binding-profiles": "workspace-binding-profiles";
+                        "automatic-run-recovery": "automatic-run-recovery";
+                        "open-goal-execution": "open-goal-execution";
+                        "operator-pause-and-budget": "operator-pause-and-budget";
+                        "run-fork": "run-fork";
+                        "model-image-input": "model-image-input";
+                        "workspace-exec": "workspace-exec";
+                        "browser-workspace": "browser-workspace";
+                        "hierarchical-context": "hierarchical-context";
+                        "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                        "web-search": "web-search";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -8623,10 +8947,6 @@ export declare const SCHEMA_REGISTRY: {
                         "environment-oci": "environment-oci";
                         "environment-ssh": "environment-ssh";
                         "environment-firecracker": "environment-firecracker";
-                        "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                        "environment-modal": "environment-modal";
-                        "environment-daytona": "environment-daytona";
-                        "environment-vercel-sandbox": "environment-vercel-sandbox";
                         "environment-openai-agents": "environment-openai-agents";
                         "environment-apptainer": "environment-apptainer";
                         "full-cell-docker-linux": "full-cell-docker-linux";
@@ -8654,16 +8974,24 @@ export declare const SCHEMA_REGISTRY: {
                         "mcp-imported-tools": "mcp-imported-tools";
                         "source-local-read-only": "source-local-read-only";
                         "document-pdf-extraction": "document-pdf-extraction";
-                        "browser-first-party-playwright": "browser-first-party-playwright";
                         "fair-cell-scheduling": "fair-cell-scheduling";
                         "sequential-sampled-validation": "sequential-sampled-validation";
                         "context-feature-cache": "context-feature-cache";
                         "content-defined-chunking": "content-defined-chunking";
                         "attention-admission": "attention-admission";
-                        "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                         "gateway-signed-webhook": "gateway-signed-webhook";
                         "gateway-interactive-messaging": "gateway-interactive-messaging";
                         "workspace-binding-profiles": "workspace-binding-profiles";
+                        "automatic-run-recovery": "automatic-run-recovery";
+                        "open-goal-execution": "open-goal-execution";
+                        "operator-pause-and-budget": "operator-pause-and-budget";
+                        "run-fork": "run-fork";
+                        "model-image-input": "model-image-input";
+                        "workspace-exec": "workspace-exec";
+                        "browser-workspace": "browser-workspace";
+                        "hierarchical-context": "hierarchical-context";
+                        "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                        "web-search": "web-search";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -8772,23 +9100,23 @@ export declare const SCHEMA_REGISTRY: {
                 }>>>;
                 compatibility: z.ZodOptional<z.ZodNullable<z.ZodObject<{
                     streaming: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     tools: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     cancellation: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     context_limits: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     usage: z.ZodEnum<{
@@ -8798,6 +9126,20 @@ export declare const SCHEMA_REGISTRY: {
                     }>;
                     upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                     notes: z.ZodArray<z.ZodString>;
+                    image_input: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unsupported: "unsupported";
+                    }>>;
+                    tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
+                    strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
                 }, z.core.$strict>>>;
                 compatibility_ref: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 credential_mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
@@ -8853,23 +9195,23 @@ export declare const SCHEMA_REGISTRY: {
                     }>;
                     compatibility: z.ZodObject<{
                         streaming: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         tools: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         cancellation: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         context_limits: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         usage: z.ZodEnum<{
@@ -8879,6 +9221,20 @@ export declare const SCHEMA_REGISTRY: {
                         }>;
                         upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                         notes: z.ZodArray<z.ZodString>;
+                        image_input: z.ZodOptional<z.ZodEnum<{
+                            supported: "supported";
+                            unsupported: "unsupported";
+                        }>>;
+                        tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                            supported: "supported";
+                            unknown: "unknown";
+                            unsupported: "unsupported";
+                        }>>;
+                        strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                            supported: "supported";
+                            unknown: "unknown";
+                            unsupported: "unsupported";
+                        }>>;
                     }, z.core.$strict>;
                     compatibility_ref: z.ZodString;
                     credential_mode: z.ZodEnum<{
@@ -8933,23 +9289,23 @@ export declare const SCHEMA_REGISTRY: {
                     }>;
                     compatibility: z.ZodObject<{
                         streaming: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         tools: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         cancellation: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         context_limits: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         usage: z.ZodEnum<{
@@ -8959,6 +9315,20 @@ export declare const SCHEMA_REGISTRY: {
                         }>;
                         upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                         notes: z.ZodArray<z.ZodString>;
+                        image_input: z.ZodOptional<z.ZodEnum<{
+                            supported: "supported";
+                            unsupported: "unsupported";
+                        }>>;
+                        tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                            supported: "supported";
+                            unknown: "unknown";
+                            unsupported: "unsupported";
+                        }>>;
+                        strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                            supported: "supported";
+                            unknown: "unknown";
+                            unsupported: "unsupported";
+                        }>>;
                     }, z.core.$strict>;
                     compatibility_ref: z.ZodString;
                     credential_mode: z.ZodEnum<{
@@ -8977,6 +9347,7 @@ export declare const SCHEMA_REGISTRY: {
                 resolution_policy_ref: z.ZodString;
             }, z.core.$strict>>>;
             input_artifacts: z.ZodDefault<z.ZodArray<z.ZodObject<{
+                alias: z.ZodOptional<z.ZodString>;
                 artifact_ref: z.ZodString;
                 manifest_ref: z.ZodString;
                 tenant: z.ZodString;
@@ -9046,7 +9417,25 @@ export declare const SCHEMA_REGISTRY: {
                 total_bytes: z.ZodNumber;
                 manifest_artifact_ref: z.ZodString;
                 manifest_ref: z.ZodString;
-                extractor: z.ZodObject<{
+                extractor: z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+                    version: z.ZodString;
+                    poppler_version: z.ZodString;
+                    tesseract_version: z.ZodNullable<z.ZodString>;
+                    languages: z.ZodArray<z.ZodString>;
+                    dpi: z.ZodNumber;
+                    sandbox_mode: z.ZodEnum<{
+                        "linux-bwrap-no-network": "linux-bwrap-no-network";
+                        "resource-limited-process": "resource-limited-process";
+                        "oci-no-network-read-only": "oci-no-network-read-only";
+                    }>;
+                    binding: z.ZodEnum<{
+                        "host-process": "host-process";
+                        "oci-document": "oci-document";
+                    }>;
+                    image_digest: z.ZodNullable<z.ZodString>;
+                    code_hash: z.ZodOptional<z.ZodString>;
+                }, z.core.$strict>, z.ZodObject<{
                     name: z.ZodLiteral<"zero-ar.pdf-extractor">;
                     version: z.ZodString;
                     poppler_version: z.ZodString;
@@ -9057,7 +9446,7 @@ export declare const SCHEMA_REGISTRY: {
                         "linux-bwrap-no-network": "linux-bwrap-no-network";
                         "resource-limited-process": "resource-limited-process";
                     }>;
-                }, z.core.$strict>;
+                }, z.core.$strict>]>;
                 required_for_completion: z.ZodBoolean;
             }, z.core.$strict>>>;
             memory_bindings: z.ZodDefault<z.ZodArray<z.ZodObject<{
@@ -9135,10 +9524,6 @@ export declare const SCHEMA_REGISTRY: {
             }, z.core.$strict>>;
             target_adapters: z.ZodArray<z.ZodString>;
             execution_environments: z.ZodArray<z.ZodString>;
-            browser: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                template: z.ZodString;
-                template_ref: z.ZodString;
-            }, z.core.$strict>>>;
             environment_profiles: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
             workspace_instances: z.ZodOptional<z.ZodArray<z.ZodObject<{
                 mount: z.ZodString;
@@ -9175,10 +9560,6 @@ export declare const SCHEMA_REGISTRY: {
                 "environment-oci": "environment-oci";
                 "environment-ssh": "environment-ssh";
                 "environment-firecracker": "environment-firecracker";
-                "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                "environment-modal": "environment-modal";
-                "environment-daytona": "environment-daytona";
-                "environment-vercel-sandbox": "environment-vercel-sandbox";
                 "environment-openai-agents": "environment-openai-agents";
                 "environment-apptainer": "environment-apptainer";
                 "full-cell-docker-linux": "full-cell-docker-linux";
@@ -9206,16 +9587,24 @@ export declare const SCHEMA_REGISTRY: {
                 "mcp-imported-tools": "mcp-imported-tools";
                 "source-local-read-only": "source-local-read-only";
                 "document-pdf-extraction": "document-pdf-extraction";
-                "browser-first-party-playwright": "browser-first-party-playwright";
                 "fair-cell-scheduling": "fair-cell-scheduling";
                 "sequential-sampled-validation": "sequential-sampled-validation";
                 "context-feature-cache": "context-feature-cache";
                 "content-defined-chunking": "content-defined-chunking";
                 "attention-admission": "attention-admission";
-                "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                 "gateway-signed-webhook": "gateway-signed-webhook";
                 "gateway-interactive-messaging": "gateway-interactive-messaging";
                 "workspace-binding-profiles": "workspace-binding-profiles";
+                "automatic-run-recovery": "automatic-run-recovery";
+                "open-goal-execution": "open-goal-execution";
+                "operator-pause-and-budget": "operator-pause-and-budget";
+                "run-fork": "run-fork";
+                "model-image-input": "model-image-input";
+                "workspace-exec": "workspace-exec";
+                "browser-workspace": "browser-workspace";
+                "hierarchical-context": "hierarchical-context";
+                "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                "web-search": "web-search";
             }>;
             state: z.ZodEnum<{
                 supported: "supported";
@@ -9266,16 +9655,12 @@ export declare const SCHEMA_REGISTRY: {
                 "merge-unified": "merge-unified";
             }>>;
             environment_backends: z.ZodArray<z.ZodEnum<{
-                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
                 "openai-agents": "openai-agents";
+                process: "process";
                 oci: "oci";
-                "cloudflare-sandbox": "cloudflare-sandbox";
-                modal: "modal";
-                daytona: "daytona";
-                "vercel-sandbox": "vercel-sandbox";
             }>>;
             artifact_backends: z.ZodArray<z.ZodEnum<{
                 filesystem: "filesystem";
@@ -9343,10 +9728,6 @@ export declare const SCHEMA_REGISTRY: {
                     "environment-oci": "environment-oci";
                     "environment-ssh": "environment-ssh";
                     "environment-firecracker": "environment-firecracker";
-                    "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                    "environment-modal": "environment-modal";
-                    "environment-daytona": "environment-daytona";
-                    "environment-vercel-sandbox": "environment-vercel-sandbox";
                     "environment-openai-agents": "environment-openai-agents";
                     "environment-apptainer": "environment-apptainer";
                     "full-cell-docker-linux": "full-cell-docker-linux";
@@ -9374,16 +9755,24 @@ export declare const SCHEMA_REGISTRY: {
                     "mcp-imported-tools": "mcp-imported-tools";
                     "source-local-read-only": "source-local-read-only";
                     "document-pdf-extraction": "document-pdf-extraction";
-                    "browser-first-party-playwright": "browser-first-party-playwright";
                     "fair-cell-scheduling": "fair-cell-scheduling";
                     "sequential-sampled-validation": "sequential-sampled-validation";
                     "context-feature-cache": "context-feature-cache";
                     "content-defined-chunking": "content-defined-chunking";
                     "attention-admission": "attention-admission";
-                    "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                     "gateway-signed-webhook": "gateway-signed-webhook";
                     "gateway-interactive-messaging": "gateway-interactive-messaging";
                     "workspace-binding-profiles": "workspace-binding-profiles";
+                    "automatic-run-recovery": "automatic-run-recovery";
+                    "open-goal-execution": "open-goal-execution";
+                    "operator-pause-and-budget": "operator-pause-and-budget";
+                    "run-fork": "run-fork";
+                    "model-image-input": "model-image-input";
+                    "workspace-exec": "workspace-exec";
+                    "browser-workspace": "browser-workspace";
+                    "hierarchical-context": "hierarchical-context";
+                    "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                    "web-search": "web-search";
                 }>;
                 state: z.ZodEnum<{
                     supported: "supported";
@@ -9434,10 +9823,6 @@ export declare const SCHEMA_REGISTRY: {
                 "environment-oci": "environment-oci";
                 "environment-ssh": "environment-ssh";
                 "environment-firecracker": "environment-firecracker";
-                "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                "environment-modal": "environment-modal";
-                "environment-daytona": "environment-daytona";
-                "environment-vercel-sandbox": "environment-vercel-sandbox";
                 "environment-openai-agents": "environment-openai-agents";
                 "environment-apptainer": "environment-apptainer";
                 "full-cell-docker-linux": "full-cell-docker-linux";
@@ -9465,16 +9850,24 @@ export declare const SCHEMA_REGISTRY: {
                 "mcp-imported-tools": "mcp-imported-tools";
                 "source-local-read-only": "source-local-read-only";
                 "document-pdf-extraction": "document-pdf-extraction";
-                "browser-first-party-playwright": "browser-first-party-playwright";
                 "fair-cell-scheduling": "fair-cell-scheduling";
                 "sequential-sampled-validation": "sequential-sampled-validation";
                 "context-feature-cache": "context-feature-cache";
                 "content-defined-chunking": "content-defined-chunking";
                 "attention-admission": "attention-admission";
-                "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                 "gateway-signed-webhook": "gateway-signed-webhook";
                 "gateway-interactive-messaging": "gateway-interactive-messaging";
                 "workspace-binding-profiles": "workspace-binding-profiles";
+                "automatic-run-recovery": "automatic-run-recovery";
+                "open-goal-execution": "open-goal-execution";
+                "operator-pause-and-budget": "operator-pause-and-budget";
+                "run-fork": "run-fork";
+                "model-image-input": "model-image-input";
+                "workspace-exec": "workspace-exec";
+                "browser-workspace": "browser-workspace";
+                "hierarchical-context": "hierarchical-context";
+                "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                "web-search": "web-search";
             }>>;
             conditional: z.ZodArray<z.ZodObject<{
                 capability: z.ZodEnum<{
@@ -9493,10 +9886,6 @@ export declare const SCHEMA_REGISTRY: {
                     "environment-oci": "environment-oci";
                     "environment-ssh": "environment-ssh";
                     "environment-firecracker": "environment-firecracker";
-                    "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                    "environment-modal": "environment-modal";
-                    "environment-daytona": "environment-daytona";
-                    "environment-vercel-sandbox": "environment-vercel-sandbox";
                     "environment-openai-agents": "environment-openai-agents";
                     "environment-apptainer": "environment-apptainer";
                     "full-cell-docker-linux": "full-cell-docker-linux";
@@ -9524,16 +9913,24 @@ export declare const SCHEMA_REGISTRY: {
                     "mcp-imported-tools": "mcp-imported-tools";
                     "source-local-read-only": "source-local-read-only";
                     "document-pdf-extraction": "document-pdf-extraction";
-                    "browser-first-party-playwright": "browser-first-party-playwright";
                     "fair-cell-scheduling": "fair-cell-scheduling";
                     "sequential-sampled-validation": "sequential-sampled-validation";
                     "context-feature-cache": "context-feature-cache";
                     "content-defined-chunking": "content-defined-chunking";
                     "attention-admission": "attention-admission";
-                    "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                     "gateway-signed-webhook": "gateway-signed-webhook";
                     "gateway-interactive-messaging": "gateway-interactive-messaging";
                     "workspace-binding-profiles": "workspace-binding-profiles";
+                    "automatic-run-recovery": "automatic-run-recovery";
+                    "open-goal-execution": "open-goal-execution";
+                    "operator-pause-and-budget": "operator-pause-and-budget";
+                    "run-fork": "run-fork";
+                    "model-image-input": "model-image-input";
+                    "workspace-exec": "workspace-exec";
+                    "browser-workspace": "browser-workspace";
+                    "hierarchical-context": "hierarchical-context";
+                    "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                    "web-search": "web-search";
                 }>;
                 refusal_point: z.ZodEnum<{
                     "profile-compilation": "profile-compilation";
@@ -9563,10 +9960,6 @@ export declare const SCHEMA_REGISTRY: {
                     "environment-oci": "environment-oci";
                     "environment-ssh": "environment-ssh";
                     "environment-firecracker": "environment-firecracker";
-                    "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                    "environment-modal": "environment-modal";
-                    "environment-daytona": "environment-daytona";
-                    "environment-vercel-sandbox": "environment-vercel-sandbox";
                     "environment-openai-agents": "environment-openai-agents";
                     "environment-apptainer": "environment-apptainer";
                     "full-cell-docker-linux": "full-cell-docker-linux";
@@ -9594,16 +9987,24 @@ export declare const SCHEMA_REGISTRY: {
                     "mcp-imported-tools": "mcp-imported-tools";
                     "source-local-read-only": "source-local-read-only";
                     "document-pdf-extraction": "document-pdf-extraction";
-                    "browser-first-party-playwright": "browser-first-party-playwright";
                     "fair-cell-scheduling": "fair-cell-scheduling";
                     "sequential-sampled-validation": "sequential-sampled-validation";
                     "context-feature-cache": "context-feature-cache";
                     "content-defined-chunking": "content-defined-chunking";
                     "attention-admission": "attention-admission";
-                    "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                     "gateway-signed-webhook": "gateway-signed-webhook";
                     "gateway-interactive-messaging": "gateway-interactive-messaging";
                     "workspace-binding-profiles": "workspace-binding-profiles";
+                    "automatic-run-recovery": "automatic-run-recovery";
+                    "open-goal-execution": "open-goal-execution";
+                    "operator-pause-and-budget": "operator-pause-and-budget";
+                    "run-fork": "run-fork";
+                    "model-image-input": "model-image-input";
+                    "workspace-exec": "workspace-exec";
+                    "browser-workspace": "browser-workspace";
+                    "hierarchical-context": "hierarchical-context";
+                    "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                    "web-search": "web-search";
                 }>;
                 refusal_point: z.ZodEnum<{
                     "profile-compilation": "profile-compilation";
@@ -9713,8 +10114,8 @@ export declare const SCHEMA_REGISTRY: {
             }>;
             remote_consequence_posture: z.ZodEnum<{
                 none: "none";
-                unknown: "unknown";
                 "declared-external": "declared-external";
+                unknown: "unknown";
             }>;
             timeouts: z.ZodObject<{
                 connect_ms: z.ZodNumber;
@@ -9779,8 +10180,8 @@ export declare const SCHEMA_REGISTRY: {
             }>;
             remote_consequence_posture: z.ZodEnum<{
                 none: "none";
-                unknown: "unknown";
                 "declared-external": "declared-external";
+                unknown: "unknown";
             }>;
             timeouts: z.ZodObject<{
                 connect_ms: z.ZodNumber;
@@ -10098,10 +10499,10 @@ export declare const SCHEMA_REGISTRY: {
                 server: "server";
             }>;
             state: z.ZodEnum<{
-                healthy: "healthy";
-                admitted: "admitted";
                 implemented: "implemented";
                 configured: "configured";
+                healthy: "healthy";
+                admitted: "admitted";
                 selectable: "selectable";
             }>;
             configured: z.ZodBoolean;
@@ -10121,9 +10522,11 @@ export declare const SCHEMA_REGISTRY: {
                 cancel: "cancel";
                 redirect: "redirect";
                 answer: "answer";
+                pause: "pause";
             }>;
             control_id: z.ZodString;
             text: z.ZodOptional<z.ZodString>;
+            choice: z.ZodOptional<z.ZodString>;
             handle: z.ZodOptional<z.ZodString>;
             reason: z.ZodOptional<z.ZodString>;
             active_handling_ms: z.ZodOptional<z.ZodNumber>;
@@ -10190,8 +10593,29 @@ export declare const SCHEMA_REGISTRY: {
                 "declared-dependencies": "declared-dependencies";
             }>;
             repair_budget_attempts: z.ZodNumber;
+            item_output_schemas: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                item_kind: z.ZodString;
+                item_id: z.ZodOptional<z.ZodString>;
+                item_id_prefix: z.ZodOptional<z.ZodString>;
+                output_schema: z.ZodType<import("./item-output.js").ItemOutputJson, unknown, z.core.$ZodTypeInternals<import("./item-output.js").ItemOutputJson, unknown>>;
+            }, z.core.$strict>>>;
             claim_representation: z.ZodOptional<z.ZodEnum<{
                 "structured-claims-with-citations": "structured-claims-with-citations";
+            }>>;
+            ask_when: z.ZodOptional<z.ZodEnum<{
+                "at-completion": "at-completion";
+                "when-parked": "when-parked";
+            }>>;
+            max_agent_questions: z.ZodOptional<z.ZodNumber>;
+            validator_inputs: z.ZodOptional<z.ZodArray<z.ZodEnum<{
+                "document-text": "document-text";
+                "effect-outcomes": "effect-outcomes";
+                "workspace-output": "workspace-output";
+                "web-pages": "web-pages";
+            }>>>;
+            checkpoint_view: z.ZodOptional<z.ZodEnum<{
+                "covered-items": "covered-items";
+                "worked-items": "worked-items";
             }>>;
             answer_windows: z.ZodOptional<z.ZodArray<z.ZodObject<{
                 named_human_class: z.ZodString;
@@ -10209,6 +10633,7 @@ export declare const SCHEMA_REGISTRY: {
                 covers: z.ZodArray<z.ZodString>;
                 sufficient_for: z.ZodArray<z.ZodString>;
                 cost_wall_ms: z.ZodNumber;
+                timeout_ms: z.ZodOptional<z.ZodNumber>;
             }, z.core.$strict>>;
             validator_concurrency_groups: z.ZodOptional<z.ZodArray<z.ZodObject<{
                 name: z.ZodString;
@@ -10594,8 +11019,29 @@ export declare const SCHEMA_REGISTRY: {
                     "declared-dependencies": "declared-dependencies";
                 }>;
                 repair_budget_attempts: z.ZodNumber;
+                item_output_schemas: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    item_kind: z.ZodString;
+                    item_id: z.ZodOptional<z.ZodString>;
+                    item_id_prefix: z.ZodOptional<z.ZodString>;
+                    output_schema: z.ZodType<import("./item-output.js").ItemOutputJson, unknown, z.core.$ZodTypeInternals<import("./item-output.js").ItemOutputJson, unknown>>;
+                }, z.core.$strict>>>;
                 claim_representation: z.ZodOptional<z.ZodEnum<{
                     "structured-claims-with-citations": "structured-claims-with-citations";
+                }>>;
+                ask_when: z.ZodOptional<z.ZodEnum<{
+                    "at-completion": "at-completion";
+                    "when-parked": "when-parked";
+                }>>;
+                max_agent_questions: z.ZodOptional<z.ZodNumber>;
+                validator_inputs: z.ZodOptional<z.ZodArray<z.ZodEnum<{
+                    "document-text": "document-text";
+                    "effect-outcomes": "effect-outcomes";
+                    "workspace-output": "workspace-output";
+                    "web-pages": "web-pages";
+                }>>>;
+                checkpoint_view: z.ZodOptional<z.ZodEnum<{
+                    "covered-items": "covered-items";
+                    "worked-items": "worked-items";
                 }>>;
                 answer_windows: z.ZodOptional<z.ZodArray<z.ZodObject<{
                     named_human_class: z.ZodString;
@@ -10613,6 +11059,7 @@ export declare const SCHEMA_REGISTRY: {
                     covers: z.ZodArray<z.ZodString>;
                     sufficient_for: z.ZodArray<z.ZodString>;
                     cost_wall_ms: z.ZodNumber;
+                    timeout_ms: z.ZodOptional<z.ZodNumber>;
                 }, z.core.$strict>>;
                 validator_concurrency_groups: z.ZodOptional<z.ZodArray<z.ZodObject<{
                     name: z.ZodString;
@@ -10654,10 +11101,6 @@ export declare const SCHEMA_REGISTRY: {
                         "environment-oci": "environment-oci";
                         "environment-ssh": "environment-ssh";
                         "environment-firecracker": "environment-firecracker";
-                        "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                        "environment-modal": "environment-modal";
-                        "environment-daytona": "environment-daytona";
-                        "environment-vercel-sandbox": "environment-vercel-sandbox";
                         "environment-openai-agents": "environment-openai-agents";
                         "environment-apptainer": "environment-apptainer";
                         "full-cell-docker-linux": "full-cell-docker-linux";
@@ -10685,16 +11128,24 @@ export declare const SCHEMA_REGISTRY: {
                         "mcp-imported-tools": "mcp-imported-tools";
                         "source-local-read-only": "source-local-read-only";
                         "document-pdf-extraction": "document-pdf-extraction";
-                        "browser-first-party-playwright": "browser-first-party-playwright";
                         "fair-cell-scheduling": "fair-cell-scheduling";
                         "sequential-sampled-validation": "sequential-sampled-validation";
                         "context-feature-cache": "context-feature-cache";
                         "content-defined-chunking": "content-defined-chunking";
                         "attention-admission": "attention-admission";
-                        "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                         "gateway-signed-webhook": "gateway-signed-webhook";
                         "gateway-interactive-messaging": "gateway-interactive-messaging";
                         "workspace-binding-profiles": "workspace-binding-profiles";
+                        "automatic-run-recovery": "automatic-run-recovery";
+                        "open-goal-execution": "open-goal-execution";
+                        "operator-pause-and-budget": "operator-pause-and-budget";
+                        "run-fork": "run-fork";
+                        "model-image-input": "model-image-input";
+                        "workspace-exec": "workspace-exec";
+                        "browser-workspace": "browser-workspace";
+                        "hierarchical-context": "hierarchical-context";
+                        "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                        "web-search": "web-search";
                     }>>;
                     conditional: z.ZodArray<z.ZodObject<{
                         capability: z.ZodEnum<{
@@ -10713,10 +11164,6 @@ export declare const SCHEMA_REGISTRY: {
                             "environment-oci": "environment-oci";
                             "environment-ssh": "environment-ssh";
                             "environment-firecracker": "environment-firecracker";
-                            "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                            "environment-modal": "environment-modal";
-                            "environment-daytona": "environment-daytona";
-                            "environment-vercel-sandbox": "environment-vercel-sandbox";
                             "environment-openai-agents": "environment-openai-agents";
                             "environment-apptainer": "environment-apptainer";
                             "full-cell-docker-linux": "full-cell-docker-linux";
@@ -10744,16 +11191,24 @@ export declare const SCHEMA_REGISTRY: {
                             "mcp-imported-tools": "mcp-imported-tools";
                             "source-local-read-only": "source-local-read-only";
                             "document-pdf-extraction": "document-pdf-extraction";
-                            "browser-first-party-playwright": "browser-first-party-playwright";
                             "fair-cell-scheduling": "fair-cell-scheduling";
                             "sequential-sampled-validation": "sequential-sampled-validation";
                             "context-feature-cache": "context-feature-cache";
                             "content-defined-chunking": "content-defined-chunking";
                             "attention-admission": "attention-admission";
-                            "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                             "gateway-signed-webhook": "gateway-signed-webhook";
                             "gateway-interactive-messaging": "gateway-interactive-messaging";
                             "workspace-binding-profiles": "workspace-binding-profiles";
+                            "automatic-run-recovery": "automatic-run-recovery";
+                            "open-goal-execution": "open-goal-execution";
+                            "operator-pause-and-budget": "operator-pause-and-budget";
+                            "run-fork": "run-fork";
+                            "model-image-input": "model-image-input";
+                            "workspace-exec": "workspace-exec";
+                            "browser-workspace": "browser-workspace";
+                            "hierarchical-context": "hierarchical-context";
+                            "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                            "web-search": "web-search";
                         }>;
                         refusal_point: z.ZodEnum<{
                             "profile-compilation": "profile-compilation";
@@ -10783,10 +11238,6 @@ export declare const SCHEMA_REGISTRY: {
                             "environment-oci": "environment-oci";
                             "environment-ssh": "environment-ssh";
                             "environment-firecracker": "environment-firecracker";
-                            "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                            "environment-modal": "environment-modal";
-                            "environment-daytona": "environment-daytona";
-                            "environment-vercel-sandbox": "environment-vercel-sandbox";
                             "environment-openai-agents": "environment-openai-agents";
                             "environment-apptainer": "environment-apptainer";
                             "full-cell-docker-linux": "full-cell-docker-linux";
@@ -10814,16 +11265,24 @@ export declare const SCHEMA_REGISTRY: {
                             "mcp-imported-tools": "mcp-imported-tools";
                             "source-local-read-only": "source-local-read-only";
                             "document-pdf-extraction": "document-pdf-extraction";
-                            "browser-first-party-playwright": "browser-first-party-playwright";
                             "fair-cell-scheduling": "fair-cell-scheduling";
                             "sequential-sampled-validation": "sequential-sampled-validation";
                             "context-feature-cache": "context-feature-cache";
                             "content-defined-chunking": "content-defined-chunking";
                             "attention-admission": "attention-admission";
-                            "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                             "gateway-signed-webhook": "gateway-signed-webhook";
                             "gateway-interactive-messaging": "gateway-interactive-messaging";
                             "workspace-binding-profiles": "workspace-binding-profiles";
+                            "automatic-run-recovery": "automatic-run-recovery";
+                            "open-goal-execution": "open-goal-execution";
+                            "operator-pause-and-budget": "operator-pause-and-budget";
+                            "run-fork": "run-fork";
+                            "model-image-input": "model-image-input";
+                            "workspace-exec": "workspace-exec";
+                            "browser-workspace": "browser-workspace";
+                            "hierarchical-context": "hierarchical-context";
+                            "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                            "web-search": "web-search";
                         }>;
                         refusal_point: z.ZodEnum<{
                             "profile-compilation": "profile-compilation";
@@ -10932,23 +11391,23 @@ export declare const SCHEMA_REGISTRY: {
                     }>>>;
                     compatibility: z.ZodOptional<z.ZodNullable<z.ZodObject<{
                         streaming: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         tools: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         cancellation: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         context_limits: z.ZodEnum<{
-                            unknown: "unknown";
                             supported: "supported";
+                            unknown: "unknown";
                             unsupported: "unsupported";
                         }>;
                         usage: z.ZodEnum<{
@@ -10958,6 +11417,20 @@ export declare const SCHEMA_REGISTRY: {
                         }>;
                         upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                         notes: z.ZodArray<z.ZodString>;
+                        image_input: z.ZodOptional<z.ZodEnum<{
+                            supported: "supported";
+                            unsupported: "unsupported";
+                        }>>;
+                        tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                            supported: "supported";
+                            unknown: "unknown";
+                            unsupported: "unsupported";
+                        }>>;
+                        strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                            supported: "supported";
+                            unknown: "unknown";
+                            unsupported: "unsupported";
+                        }>>;
                     }, z.core.$strict>>>;
                     compatibility_ref: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     credential_mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
@@ -11013,23 +11486,23 @@ export declare const SCHEMA_REGISTRY: {
                         }>;
                         compatibility: z.ZodObject<{
                             streaming: z.ZodEnum<{
-                                unknown: "unknown";
                                 supported: "supported";
+                                unknown: "unknown";
                                 unsupported: "unsupported";
                             }>;
                             tools: z.ZodEnum<{
-                                unknown: "unknown";
                                 supported: "supported";
+                                unknown: "unknown";
                                 unsupported: "unsupported";
                             }>;
                             cancellation: z.ZodEnum<{
-                                unknown: "unknown";
                                 supported: "supported";
+                                unknown: "unknown";
                                 unsupported: "unsupported";
                             }>;
                             context_limits: z.ZodEnum<{
-                                unknown: "unknown";
                                 supported: "supported";
+                                unknown: "unknown";
                                 unsupported: "unsupported";
                             }>;
                             usage: z.ZodEnum<{
@@ -11039,6 +11512,20 @@ export declare const SCHEMA_REGISTRY: {
                             }>;
                             upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                             notes: z.ZodArray<z.ZodString>;
+                            image_input: z.ZodOptional<z.ZodEnum<{
+                                supported: "supported";
+                                unsupported: "unsupported";
+                            }>>;
+                            tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                                supported: "supported";
+                                unknown: "unknown";
+                                unsupported: "unsupported";
+                            }>>;
+                            strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                                supported: "supported";
+                                unknown: "unknown";
+                                unsupported: "unsupported";
+                            }>>;
                         }, z.core.$strict>;
                         compatibility_ref: z.ZodString;
                         credential_mode: z.ZodEnum<{
@@ -11093,23 +11580,23 @@ export declare const SCHEMA_REGISTRY: {
                         }>;
                         compatibility: z.ZodObject<{
                             streaming: z.ZodEnum<{
-                                unknown: "unknown";
                                 supported: "supported";
+                                unknown: "unknown";
                                 unsupported: "unsupported";
                             }>;
                             tools: z.ZodEnum<{
-                                unknown: "unknown";
                                 supported: "supported";
+                                unknown: "unknown";
                                 unsupported: "unsupported";
                             }>;
                             cancellation: z.ZodEnum<{
-                                unknown: "unknown";
                                 supported: "supported";
+                                unknown: "unknown";
                                 unsupported: "unsupported";
                             }>;
                             context_limits: z.ZodEnum<{
-                                unknown: "unknown";
                                 supported: "supported";
+                                unknown: "unknown";
                                 unsupported: "unsupported";
                             }>;
                             usage: z.ZodEnum<{
@@ -11119,6 +11606,20 @@ export declare const SCHEMA_REGISTRY: {
                             }>;
                             upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                             notes: z.ZodArray<z.ZodString>;
+                            image_input: z.ZodOptional<z.ZodEnum<{
+                                supported: "supported";
+                                unsupported: "unsupported";
+                            }>>;
+                            tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                                supported: "supported";
+                                unknown: "unknown";
+                                unsupported: "unsupported";
+                            }>>;
+                            strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                                supported: "supported";
+                                unknown: "unknown";
+                                unsupported: "unsupported";
+                            }>>;
                         }, z.core.$strict>;
                         compatibility_ref: z.ZodString;
                         credential_mode: z.ZodEnum<{
@@ -11137,6 +11638,7 @@ export declare const SCHEMA_REGISTRY: {
                     resolution_policy_ref: z.ZodString;
                 }, z.core.$strict>>>;
                 input_artifacts: z.ZodDefault<z.ZodArray<z.ZodObject<{
+                    alias: z.ZodOptional<z.ZodString>;
                     artifact_ref: z.ZodString;
                     manifest_ref: z.ZodString;
                     tenant: z.ZodString;
@@ -11206,7 +11708,25 @@ export declare const SCHEMA_REGISTRY: {
                     total_bytes: z.ZodNumber;
                     manifest_artifact_ref: z.ZodString;
                     manifest_ref: z.ZodString;
-                    extractor: z.ZodObject<{
+                    extractor: z.ZodUnion<readonly [z.ZodObject<{
+                        name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+                        version: z.ZodString;
+                        poppler_version: z.ZodString;
+                        tesseract_version: z.ZodNullable<z.ZodString>;
+                        languages: z.ZodArray<z.ZodString>;
+                        dpi: z.ZodNumber;
+                        sandbox_mode: z.ZodEnum<{
+                            "linux-bwrap-no-network": "linux-bwrap-no-network";
+                            "resource-limited-process": "resource-limited-process";
+                            "oci-no-network-read-only": "oci-no-network-read-only";
+                        }>;
+                        binding: z.ZodEnum<{
+                            "host-process": "host-process";
+                            "oci-document": "oci-document";
+                        }>;
+                        image_digest: z.ZodNullable<z.ZodString>;
+                        code_hash: z.ZodOptional<z.ZodString>;
+                    }, z.core.$strict>, z.ZodObject<{
                         name: z.ZodLiteral<"zero-ar.pdf-extractor">;
                         version: z.ZodString;
                         poppler_version: z.ZodString;
@@ -11217,7 +11737,7 @@ export declare const SCHEMA_REGISTRY: {
                             "linux-bwrap-no-network": "linux-bwrap-no-network";
                             "resource-limited-process": "resource-limited-process";
                         }>;
-                    }, z.core.$strict>;
+                    }, z.core.$strict>]>;
                     required_for_completion: z.ZodBoolean;
                 }, z.core.$strict>>>;
                 memory_bindings: z.ZodDefault<z.ZodArray<z.ZodObject<{
@@ -11295,10 +11815,6 @@ export declare const SCHEMA_REGISTRY: {
                 }, z.core.$strict>>;
                 target_adapters: z.ZodArray<z.ZodString>;
                 execution_environments: z.ZodArray<z.ZodString>;
-                browser: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                    template: z.ZodString;
-                    template_ref: z.ZodString;
-                }, z.core.$strict>>>;
                 environment_profiles: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
                 workspace_instances: z.ZodOptional<z.ZodArray<z.ZodObject<{
                     mount: z.ZodString;
@@ -11461,7 +11977,7 @@ export declare const SCHEMA_REGISTRY: {
                                 minimum_exposure: z.ZodNumber;
                             }, z.core.$strict>>;
                         }, z.core.$strict>>;
-                        context: z.ZodOptional<z.ZodObject<{
+                        context: z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
                             selector: z.ZodLiteral<"coverage-mmr-v1">;
                             mode: z.ZodEnum<{
                                 off: "off";
@@ -11473,7 +11989,32 @@ export declare const SCHEMA_REGISTRY: {
                             redundancy_weight_ppm: z.ZodNumber;
                             candidate_cutoff: z.ZodNumber;
                             arithmetic: z.ZodLiteral<"integer-score-v1">;
-                        }, z.core.$strict>>;
+                        }, z.core.$strict>, z.ZodObject<{
+                            selector: z.ZodLiteral<"hierarchical-context-v1">;
+                            mode: z.ZodEnum<{
+                                off: "off";
+                                observe: "observe";
+                                enforce: "enforce";
+                            }>;
+                            availability: z.ZodEnum<{
+                                optional: "optional";
+                                required: "required";
+                            }>;
+                            recent_original_tokens: z.ZodNumber;
+                            historical_summary_tokens: z.ZodNumber;
+                            maximum_expansions_per_turn: z.ZodNumber;
+                            summarizer: z.ZodObject<{
+                                binding: z.ZodEnum<{
+                                    "run-primary": "run-primary";
+                                }>;
+                                maximum_source_tokens: z.ZodNumber;
+                                maximum_output_tokens: z.ZodNumber;
+                            }, z.core.$strict>;
+                            budgets: z.ZodObject<{
+                                maximum_summary_calls_per_run: z.ZodNumber;
+                                maximum_summary_tokens_per_run: z.ZodNumber;
+                            }, z.core.$strict>;
+                        }, z.core.$strict>]>>;
                         attention: z.ZodOptional<z.ZodObject<{
                             selector: z.ZodLiteral<"attention-littles-v1">;
                             mode: z.ZodEnum<{
@@ -11604,10 +12145,6 @@ export declare const SCHEMA_REGISTRY: {
                     "environment-oci": "environment-oci";
                     "environment-ssh": "environment-ssh";
                     "environment-firecracker": "environment-firecracker";
-                    "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                    "environment-modal": "environment-modal";
-                    "environment-daytona": "environment-daytona";
-                    "environment-vercel-sandbox": "environment-vercel-sandbox";
                     "environment-openai-agents": "environment-openai-agents";
                     "environment-apptainer": "environment-apptainer";
                     "full-cell-docker-linux": "full-cell-docker-linux";
@@ -11635,16 +12172,24 @@ export declare const SCHEMA_REGISTRY: {
                     "mcp-imported-tools": "mcp-imported-tools";
                     "source-local-read-only": "source-local-read-only";
                     "document-pdf-extraction": "document-pdf-extraction";
-                    "browser-first-party-playwright": "browser-first-party-playwright";
                     "fair-cell-scheduling": "fair-cell-scheduling";
                     "sequential-sampled-validation": "sequential-sampled-validation";
                     "context-feature-cache": "context-feature-cache";
                     "content-defined-chunking": "content-defined-chunking";
                     "attention-admission": "attention-admission";
-                    "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                     "gateway-signed-webhook": "gateway-signed-webhook";
                     "gateway-interactive-messaging": "gateway-interactive-messaging";
                     "workspace-binding-profiles": "workspace-binding-profiles";
+                    "automatic-run-recovery": "automatic-run-recovery";
+                    "open-goal-execution": "open-goal-execution";
+                    "operator-pause-and-budget": "operator-pause-and-budget";
+                    "run-fork": "run-fork";
+                    "model-image-input": "model-image-input";
+                    "workspace-exec": "workspace-exec";
+                    "browser-workspace": "browser-workspace";
+                    "hierarchical-context": "hierarchical-context";
+                    "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                    "web-search": "web-search";
                 }>>;
                 conditional: z.ZodArray<z.ZodObject<{
                     capability: z.ZodEnum<{
@@ -11663,10 +12208,6 @@ export declare const SCHEMA_REGISTRY: {
                         "environment-oci": "environment-oci";
                         "environment-ssh": "environment-ssh";
                         "environment-firecracker": "environment-firecracker";
-                        "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                        "environment-modal": "environment-modal";
-                        "environment-daytona": "environment-daytona";
-                        "environment-vercel-sandbox": "environment-vercel-sandbox";
                         "environment-openai-agents": "environment-openai-agents";
                         "environment-apptainer": "environment-apptainer";
                         "full-cell-docker-linux": "full-cell-docker-linux";
@@ -11694,16 +12235,24 @@ export declare const SCHEMA_REGISTRY: {
                         "mcp-imported-tools": "mcp-imported-tools";
                         "source-local-read-only": "source-local-read-only";
                         "document-pdf-extraction": "document-pdf-extraction";
-                        "browser-first-party-playwright": "browser-first-party-playwright";
                         "fair-cell-scheduling": "fair-cell-scheduling";
                         "sequential-sampled-validation": "sequential-sampled-validation";
                         "context-feature-cache": "context-feature-cache";
                         "content-defined-chunking": "content-defined-chunking";
                         "attention-admission": "attention-admission";
-                        "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                         "gateway-signed-webhook": "gateway-signed-webhook";
                         "gateway-interactive-messaging": "gateway-interactive-messaging";
                         "workspace-binding-profiles": "workspace-binding-profiles";
+                        "automatic-run-recovery": "automatic-run-recovery";
+                        "open-goal-execution": "open-goal-execution";
+                        "operator-pause-and-budget": "operator-pause-and-budget";
+                        "run-fork": "run-fork";
+                        "model-image-input": "model-image-input";
+                        "workspace-exec": "workspace-exec";
+                        "browser-workspace": "browser-workspace";
+                        "hierarchical-context": "hierarchical-context";
+                        "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                        "web-search": "web-search";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -11733,10 +12282,6 @@ export declare const SCHEMA_REGISTRY: {
                         "environment-oci": "environment-oci";
                         "environment-ssh": "environment-ssh";
                         "environment-firecracker": "environment-firecracker";
-                        "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                        "environment-modal": "environment-modal";
-                        "environment-daytona": "environment-daytona";
-                        "environment-vercel-sandbox": "environment-vercel-sandbox";
                         "environment-openai-agents": "environment-openai-agents";
                         "environment-apptainer": "environment-apptainer";
                         "full-cell-docker-linux": "full-cell-docker-linux";
@@ -11764,16 +12309,24 @@ export declare const SCHEMA_REGISTRY: {
                         "mcp-imported-tools": "mcp-imported-tools";
                         "source-local-read-only": "source-local-read-only";
                         "document-pdf-extraction": "document-pdf-extraction";
-                        "browser-first-party-playwright": "browser-first-party-playwright";
                         "fair-cell-scheduling": "fair-cell-scheduling";
                         "sequential-sampled-validation": "sequential-sampled-validation";
                         "context-feature-cache": "context-feature-cache";
                         "content-defined-chunking": "content-defined-chunking";
                         "attention-admission": "attention-admission";
-                        "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                         "gateway-signed-webhook": "gateway-signed-webhook";
                         "gateway-interactive-messaging": "gateway-interactive-messaging";
                         "workspace-binding-profiles": "workspace-binding-profiles";
+                        "automatic-run-recovery": "automatic-run-recovery";
+                        "open-goal-execution": "open-goal-execution";
+                        "operator-pause-and-budget": "operator-pause-and-budget";
+                        "run-fork": "run-fork";
+                        "model-image-input": "model-image-input";
+                        "workspace-exec": "workspace-exec";
+                        "browser-workspace": "browser-workspace";
+                        "hierarchical-context": "hierarchical-context";
+                        "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                        "web-search": "web-search";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -12341,24 +12894,20 @@ export declare const SCHEMA_REGISTRY: {
             version: z.ZodString;
             adapter_digest: z.ZodString;
             backend: z.ZodEnum<{
-                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
                 "openai-agents": "openai-agents";
+                process: "process";
                 oci: "oci";
-                "cloudflare-sandbox": "cloudflare-sandbox";
-                modal: "modal";
-                daytona: "daytona";
-                "vercel-sandbox": "vercel-sandbox";
             }>;
             operations: z.ZodArray<z.ZodEnum<{
                 cancel: "cancel";
-                submit: "submit";
                 observe: "observe";
                 teardown: "teardown";
                 descriptor: "descriptor";
                 prepare: "prepare";
+                submit: "submit";
                 reconcile: "reconcile";
                 collect: "collect";
                 abandon: "abandon";
@@ -12418,24 +12967,20 @@ export declare const SCHEMA_REGISTRY: {
                 version: z.ZodString;
                 adapter_digest: z.ZodString;
                 backend: z.ZodEnum<{
-                    process: "process";
                     ssh: "ssh";
                     firecracker: "firecracker";
                     apptainer: "apptainer";
                     "openai-agents": "openai-agents";
+                    process: "process";
                     oci: "oci";
-                    "cloudflare-sandbox": "cloudflare-sandbox";
-                    modal: "modal";
-                    daytona: "daytona";
-                    "vercel-sandbox": "vercel-sandbox";
                 }>;
                 operations: z.ZodArray<z.ZodEnum<{
                     cancel: "cancel";
-                    submit: "submit";
                     observe: "observe";
                     teardown: "teardown";
                     descriptor: "descriptor";
                     prepare: "prepare";
+                    submit: "submit";
                     reconcile: "reconcile";
                     collect: "collect";
                     abandon: "abandon";
@@ -12499,24 +13044,20 @@ export declare const SCHEMA_REGISTRY: {
                 version: z.ZodString;
                 adapter_digest: z.ZodString;
                 backend: z.ZodEnum<{
-                    process: "process";
                     ssh: "ssh";
                     firecracker: "firecracker";
                     apptainer: "apptainer";
                     "openai-agents": "openai-agents";
+                    process: "process";
                     oci: "oci";
-                    "cloudflare-sandbox": "cloudflare-sandbox";
-                    modal: "modal";
-                    daytona: "daytona";
-                    "vercel-sandbox": "vercel-sandbox";
                 }>;
                 operations: z.ZodArray<z.ZodEnum<{
                     cancel: "cancel";
-                    submit: "submit";
                     observe: "observe";
                     teardown: "teardown";
                     descriptor: "descriptor";
                     prepare: "prepare";
+                    submit: "submit";
                     reconcile: "reconcile";
                     collect: "collect";
                     abandon: "abandon";
@@ -12620,16 +13161,12 @@ export declare const SCHEMA_REGISTRY: {
             vector_id: z.ZodString;
             source_commit: z.ZodString;
             backend: z.ZodEnum<{
-                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
                 "openai-agents": "openai-agents";
+                process: "process";
                 oci: "oci";
-                "cloudflare-sandbox": "cloudflare-sandbox";
-                modal: "modal";
-                daytona: "daytona";
-                "vercel-sandbox": "vercel-sandbox";
             }>;
             adapter: z.ZodObject<{
                 contract: z.ZodLiteral<"environment-adapter/1">;
@@ -12637,24 +13174,20 @@ export declare const SCHEMA_REGISTRY: {
                 version: z.ZodString;
                 adapter_digest: z.ZodString;
                 backend: z.ZodEnum<{
-                    process: "process";
                     ssh: "ssh";
                     firecracker: "firecracker";
                     apptainer: "apptainer";
                     "openai-agents": "openai-agents";
+                    process: "process";
                     oci: "oci";
-                    "cloudflare-sandbox": "cloudflare-sandbox";
-                    modal: "modal";
-                    daytona: "daytona";
-                    "vercel-sandbox": "vercel-sandbox";
                 }>;
                 operations: z.ZodArray<z.ZodEnum<{
                     cancel: "cancel";
-                    submit: "submit";
                     observe: "observe";
                     teardown: "teardown";
                     descriptor: "descriptor";
                     prepare: "prepare";
+                    submit: "submit";
                     reconcile: "reconcile";
                     collect: "collect";
                     abandon: "abandon";
@@ -12727,16 +13260,12 @@ export declare const SCHEMA_REGISTRY: {
             vector_id: z.ZodString;
             source_commit: z.ZodString;
             backend: z.ZodEnum<{
-                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
                 "openai-agents": "openai-agents";
+                process: "process";
                 oci: "oci";
-                "cloudflare-sandbox": "cloudflare-sandbox";
-                modal: "modal";
-                daytona: "daytona";
-                "vercel-sandbox": "vercel-sandbox";
             }>;
             adapter: z.ZodObject<{
                 contract: z.ZodLiteral<"environment-adapter/1">;
@@ -12744,24 +13273,20 @@ export declare const SCHEMA_REGISTRY: {
                 version: z.ZodString;
                 adapter_digest: z.ZodString;
                 backend: z.ZodEnum<{
-                    process: "process";
                     ssh: "ssh";
                     firecracker: "firecracker";
                     apptainer: "apptainer";
                     "openai-agents": "openai-agents";
+                    process: "process";
                     oci: "oci";
-                    "cloudflare-sandbox": "cloudflare-sandbox";
-                    modal: "modal";
-                    daytona: "daytona";
-                    "vercel-sandbox": "vercel-sandbox";
                 }>;
                 operations: z.ZodArray<z.ZodEnum<{
                     cancel: "cancel";
-                    submit: "submit";
                     observe: "observe";
                     teardown: "teardown";
                     descriptor: "descriptor";
                     prepare: "prepare";
+                    submit: "submit";
                     reconcile: "reconcile";
                     collect: "collect";
                     abandon: "abandon";
@@ -12832,16 +13357,12 @@ export declare const SCHEMA_REGISTRY: {
     readonly EnvironmentDeploymentCapabilitySchema: {
         readonly schema: z.ZodObject<{
             backend: z.ZodEnum<{
-                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
                 "openai-agents": "openai-agents";
+                process: "process";
                 oci: "oci";
-                "cloudflare-sandbox": "cloudflare-sandbox";
-                modal: "modal";
-                daytona: "daytona";
-                "vercel-sandbox": "vercel-sandbox";
             }>;
             package: z.ZodString;
             adapter_name: z.ZodNullable<z.ZodString>;
@@ -12878,16 +13399,12 @@ export declare const SCHEMA_REGISTRY: {
         readonly schema: z.ZodObject<{
             capabilities: z.ZodArray<z.ZodObject<{
                 backend: z.ZodEnum<{
-                    process: "process";
                     ssh: "ssh";
                     firecracker: "firecracker";
                     apptainer: "apptainer";
                     "openai-agents": "openai-agents";
+                    process: "process";
                     oci: "oci";
-                    "cloudflare-sandbox": "cloudflare-sandbox";
-                    modal: "modal";
-                    daytona: "daytona";
-                    "vercel-sandbox": "vercel-sandbox";
                 }>;
                 package: z.ZodString;
                 adapter_name: z.ZodNullable<z.ZodString>;
@@ -12945,6 +13462,15 @@ export declare const SCHEMA_REGISTRY: {
             output: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
             error: z.ZodOptional<z.ZodString>;
             used: z.ZodOptional<z.ZodNumber>;
+            artifacts: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                artifact_ref: z.ZodString;
+                source_path: z.ZodString;
+                content_hash: z.ZodString;
+                bytes: z.ZodNumber;
+                media_type: z.ZodString;
+                classification: z.ZodString;
+            }, z.core.$strict>>>;
+            artifact_refusals: z.ZodOptional<z.ZodArray<z.ZodString>>;
         }, z.core.$strict>;
         readonly placement: "environment";
         readonly owner: "runtime-core";
@@ -12977,24 +13503,20 @@ export declare const SCHEMA_REGISTRY: {
                 version: z.ZodString;
                 adapter_digest: z.ZodString;
                 backend: z.ZodEnum<{
-                    process: "process";
                     ssh: "ssh";
                     firecracker: "firecracker";
                     apptainer: "apptainer";
                     "openai-agents": "openai-agents";
+                    process: "process";
                     oci: "oci";
-                    "cloudflare-sandbox": "cloudflare-sandbox";
-                    modal: "modal";
-                    daytona: "daytona";
-                    "vercel-sandbox": "vercel-sandbox";
                 }>;
                 operations: z.ZodArray<z.ZodEnum<{
                     cancel: "cancel";
-                    submit: "submit";
                     observe: "observe";
                     teardown: "teardown";
                     descriptor: "descriptor";
                     prepare: "prepare";
+                    submit: "submit";
                     reconcile: "reconcile";
                     collect: "collect";
                     abandon: "abandon";
@@ -13084,6 +13606,30 @@ export declare const SCHEMA_REGISTRY: {
             cost_dimensions: z.ZodArray<z.ZodString>;
             created_by: z.ZodString;
             reviewed_by: z.ZodString;
+            runtime: z.ZodOptional<z.ZodObject<{
+                shm_mib: z.ZodOptional<z.ZodNumber>;
+                tmpfs: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    target: z.ZodString;
+                    size_mib: z.ZodNumber;
+                }, z.core.$strict>>>;
+                init: z.ZodOptional<z.ZodBoolean>;
+                syscall_profile_ref: z.ZodOptional<z.ZodString>;
+                browser_sandbox: z.ZodOptional<z.ZodEnum<{
+                    enabled: "enabled";
+                    "disabled-by-declaration": "disabled-by-declaration";
+                }>>;
+                container_lifetime: z.ZodOptional<z.ZodEnum<{
+                    "per-command": "per-command";
+                    "per-run": "per-run";
+                }>>;
+                segment_process: z.ZodOptional<z.ZodEnum<{
+                    image: "image";
+                    keepalive: "keepalive";
+                }>>;
+                idle_ms: z.ZodOptional<z.ZodNumber>;
+                max_segment_ms: z.ZodOptional<z.ZodNumber>;
+                keep_previous_generation: z.ZodOptional<z.ZodBoolean>;
+            }, z.core.$strict>>;
         }, z.core.$strict>;
         readonly placement: "environment";
         readonly owner: "runtime-core";
@@ -13100,24 +13646,20 @@ export declare const SCHEMA_REGISTRY: {
                     version: z.ZodString;
                     adapter_digest: z.ZodString;
                     backend: z.ZodEnum<{
-                        process: "process";
                         ssh: "ssh";
                         firecracker: "firecracker";
                         apptainer: "apptainer";
                         "openai-agents": "openai-agents";
+                        process: "process";
                         oci: "oci";
-                        "cloudflare-sandbox": "cloudflare-sandbox";
-                        modal: "modal";
-                        daytona: "daytona";
-                        "vercel-sandbox": "vercel-sandbox";
                     }>;
                     operations: z.ZodArray<z.ZodEnum<{
                         cancel: "cancel";
-                        submit: "submit";
                         observe: "observe";
                         teardown: "teardown";
                         descriptor: "descriptor";
                         prepare: "prepare";
+                        submit: "submit";
                         reconcile: "reconcile";
                         collect: "collect";
                         abandon: "abandon";
@@ -13207,6 +13749,30 @@ export declare const SCHEMA_REGISTRY: {
                 cost_dimensions: z.ZodArray<z.ZodString>;
                 created_by: z.ZodString;
                 reviewed_by: z.ZodString;
+                runtime: z.ZodOptional<z.ZodObject<{
+                    shm_mib: z.ZodOptional<z.ZodNumber>;
+                    tmpfs: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                        target: z.ZodString;
+                        size_mib: z.ZodNumber;
+                    }, z.core.$strict>>>;
+                    init: z.ZodOptional<z.ZodBoolean>;
+                    syscall_profile_ref: z.ZodOptional<z.ZodString>;
+                    browser_sandbox: z.ZodOptional<z.ZodEnum<{
+                        enabled: "enabled";
+                        "disabled-by-declaration": "disabled-by-declaration";
+                    }>>;
+                    container_lifetime: z.ZodOptional<z.ZodEnum<{
+                        "per-command": "per-command";
+                        "per-run": "per-run";
+                    }>>;
+                    segment_process: z.ZodOptional<z.ZodEnum<{
+                        image: "image";
+                        keepalive: "keepalive";
+                    }>>;
+                    idle_ms: z.ZodOptional<z.ZodNumber>;
+                    max_segment_ms: z.ZodOptional<z.ZodNumber>;
+                    keep_previous_generation: z.ZodOptional<z.ZodBoolean>;
+                }, z.core.$strict>>;
             }, z.core.$strict>;
             state: z.ZodEnum<{
                 disabled: "disabled";
@@ -13232,24 +13798,20 @@ export declare const SCHEMA_REGISTRY: {
                     version: z.ZodString;
                     adapter_digest: z.ZodString;
                     backend: z.ZodEnum<{
-                        process: "process";
                         ssh: "ssh";
                         firecracker: "firecracker";
                         apptainer: "apptainer";
                         "openai-agents": "openai-agents";
+                        process: "process";
                         oci: "oci";
-                        "cloudflare-sandbox": "cloudflare-sandbox";
-                        modal: "modal";
-                        daytona: "daytona";
-                        "vercel-sandbox": "vercel-sandbox";
                     }>;
                     operations: z.ZodArray<z.ZodEnum<{
                         cancel: "cancel";
-                        submit: "submit";
                         observe: "observe";
                         teardown: "teardown";
                         descriptor: "descriptor";
                         prepare: "prepare";
+                        submit: "submit";
                         reconcile: "reconcile";
                         collect: "collect";
                         abandon: "abandon";
@@ -13339,6 +13901,30 @@ export declare const SCHEMA_REGISTRY: {
                 cost_dimensions: z.ZodArray<z.ZodString>;
                 created_by: z.ZodString;
                 reviewed_by: z.ZodString;
+                runtime: z.ZodOptional<z.ZodObject<{
+                    shm_mib: z.ZodOptional<z.ZodNumber>;
+                    tmpfs: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                        target: z.ZodString;
+                        size_mib: z.ZodNumber;
+                    }, z.core.$strict>>>;
+                    init: z.ZodOptional<z.ZodBoolean>;
+                    syscall_profile_ref: z.ZodOptional<z.ZodString>;
+                    browser_sandbox: z.ZodOptional<z.ZodEnum<{
+                        enabled: "enabled";
+                        "disabled-by-declaration": "disabled-by-declaration";
+                    }>>;
+                    container_lifetime: z.ZodOptional<z.ZodEnum<{
+                        "per-command": "per-command";
+                        "per-run": "per-run";
+                    }>>;
+                    segment_process: z.ZodOptional<z.ZodEnum<{
+                        image: "image";
+                        keepalive: "keepalive";
+                    }>>;
+                    idle_ms: z.ZodOptional<z.ZodNumber>;
+                    max_segment_ms: z.ZodOptional<z.ZodNumber>;
+                    keep_previous_generation: z.ZodOptional<z.ZodBoolean>;
+                }, z.core.$strict>>;
             }, z.core.$strict>;
             secret_issuance_epoch: z.ZodNumber;
         }, z.core.$strict>;
@@ -13386,24 +13972,20 @@ export declare const SCHEMA_REGISTRY: {
                         version: z.ZodString;
                         adapter_digest: z.ZodString;
                         backend: z.ZodEnum<{
-                            process: "process";
                             ssh: "ssh";
                             firecracker: "firecracker";
                             apptainer: "apptainer";
                             "openai-agents": "openai-agents";
+                            process: "process";
                             oci: "oci";
-                            "cloudflare-sandbox": "cloudflare-sandbox";
-                            modal: "modal";
-                            daytona: "daytona";
-                            "vercel-sandbox": "vercel-sandbox";
                         }>;
                         operations: z.ZodArray<z.ZodEnum<{
                             cancel: "cancel";
-                            submit: "submit";
                             observe: "observe";
                             teardown: "teardown";
                             descriptor: "descriptor";
                             prepare: "prepare";
+                            submit: "submit";
                             reconcile: "reconcile";
                             collect: "collect";
                             abandon: "abandon";
@@ -13493,6 +14075,30 @@ export declare const SCHEMA_REGISTRY: {
                     cost_dimensions: z.ZodArray<z.ZodString>;
                     created_by: z.ZodString;
                     reviewed_by: z.ZodString;
+                    runtime: z.ZodOptional<z.ZodObject<{
+                        shm_mib: z.ZodOptional<z.ZodNumber>;
+                        tmpfs: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                            target: z.ZodString;
+                            size_mib: z.ZodNumber;
+                        }, z.core.$strict>>>;
+                        init: z.ZodOptional<z.ZodBoolean>;
+                        syscall_profile_ref: z.ZodOptional<z.ZodString>;
+                        browser_sandbox: z.ZodOptional<z.ZodEnum<{
+                            enabled: "enabled";
+                            "disabled-by-declaration": "disabled-by-declaration";
+                        }>>;
+                        container_lifetime: z.ZodOptional<z.ZodEnum<{
+                            "per-command": "per-command";
+                            "per-run": "per-run";
+                        }>>;
+                        segment_process: z.ZodOptional<z.ZodEnum<{
+                            image: "image";
+                            keepalive: "keepalive";
+                        }>>;
+                        idle_ms: z.ZodOptional<z.ZodNumber>;
+                        max_segment_ms: z.ZodOptional<z.ZodNumber>;
+                        keep_previous_generation: z.ZodOptional<z.ZodBoolean>;
+                    }, z.core.$strict>>;
                 }, z.core.$strict>;
                 state: z.ZodEnum<{
                     disabled: "disabled";
@@ -13524,24 +14130,20 @@ export declare const SCHEMA_REGISTRY: {
                 version: z.ZodString;
                 adapter_digest: z.ZodString;
                 backend: z.ZodEnum<{
-                    process: "process";
                     ssh: "ssh";
                     firecracker: "firecracker";
                     apptainer: "apptainer";
                     "openai-agents": "openai-agents";
+                    process: "process";
                     oci: "oci";
-                    "cloudflare-sandbox": "cloudflare-sandbox";
-                    modal: "modal";
-                    daytona: "daytona";
-                    "vercel-sandbox": "vercel-sandbox";
                 }>;
                 operations: z.ZodArray<z.ZodEnum<{
                     cancel: "cancel";
-                    submit: "submit";
                     observe: "observe";
                     teardown: "teardown";
                     descriptor: "descriptor";
                     prepare: "prepare";
+                    submit: "submit";
                     reconcile: "reconcile";
                     collect: "collect";
                     abandon: "abandon";
@@ -13832,16 +14434,12 @@ export declare const SCHEMA_REGISTRY: {
                 "effect-proposal": "effect-proposal";
             }> & z.ZodType<"observation" | "run-internal", "observation" | "run-internal" | "effect-proposal", z.core.$ZodTypeInternals<"observation" | "run-internal", "observation" | "run-internal" | "effect-proposal">>;
             acceptable_backends: z.ZodArray<z.ZodEnum<{
-                process: "process";
                 ssh: "ssh";
                 firecracker: "firecracker";
                 apptainer: "apptainer";
                 "openai-agents": "openai-agents";
+                process: "process";
                 oci: "oci";
-                "cloudflare-sandbox": "cloudflare-sandbox";
-                modal: "modal";
-                daytona: "daytona";
-                "vercel-sandbox": "vercel-sandbox";
             }>>;
             acceptable_isolations: z.ZodArray<z.ZodEnum<{
                 none: "none";
@@ -13881,24 +14479,20 @@ export declare const SCHEMA_REGISTRY: {
                     version: z.ZodString;
                     adapter_digest: z.ZodString;
                     backend: z.ZodEnum<{
-                        process: "process";
                         ssh: "ssh";
                         firecracker: "firecracker";
                         apptainer: "apptainer";
                         "openai-agents": "openai-agents";
+                        process: "process";
                         oci: "oci";
-                        "cloudflare-sandbox": "cloudflare-sandbox";
-                        modal: "modal";
-                        daytona: "daytona";
-                        "vercel-sandbox": "vercel-sandbox";
                     }>;
                     operations: z.ZodArray<z.ZodEnum<{
                         cancel: "cancel";
-                        submit: "submit";
                         observe: "observe";
                         teardown: "teardown";
                         descriptor: "descriptor";
                         prepare: "prepare";
+                        submit: "submit";
                         reconcile: "reconcile";
                         collect: "collect";
                         abandon: "abandon";
@@ -13988,6 +14582,30 @@ export declare const SCHEMA_REGISTRY: {
                 cost_dimensions: z.ZodArray<z.ZodString>;
                 created_by: z.ZodString;
                 reviewed_by: z.ZodString;
+                runtime: z.ZodOptional<z.ZodObject<{
+                    shm_mib: z.ZodOptional<z.ZodNumber>;
+                    tmpfs: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                        target: z.ZodString;
+                        size_mib: z.ZodNumber;
+                    }, z.core.$strict>>>;
+                    init: z.ZodOptional<z.ZodBoolean>;
+                    syscall_profile_ref: z.ZodOptional<z.ZodString>;
+                    browser_sandbox: z.ZodOptional<z.ZodEnum<{
+                        enabled: "enabled";
+                        "disabled-by-declaration": "disabled-by-declaration";
+                    }>>;
+                    container_lifetime: z.ZodOptional<z.ZodEnum<{
+                        "per-command": "per-command";
+                        "per-run": "per-run";
+                    }>>;
+                    segment_process: z.ZodOptional<z.ZodEnum<{
+                        image: "image";
+                        keepalive: "keepalive";
+                    }>>;
+                    idle_ms: z.ZodOptional<z.ZodNumber>;
+                    max_segment_ms: z.ZodOptional<z.ZodNumber>;
+                    keep_previous_generation: z.ZodOptional<z.ZodBoolean>;
+                }, z.core.$strict>>;
             }, z.core.$strict>;
             considered_profile_refs: z.ZodArray<z.ZodString>;
         }, z.core.$strict>;
@@ -14351,6 +14969,91 @@ export declare const SCHEMA_REGISTRY: {
         readonly placement: "environment";
         readonly owner: "runtime-environments";
     };
+    readonly SandboxWorkspacePolicySchema: {
+        readonly schema: z.ZodObject<{
+            contract: z.ZodLiteral<"sandbox-workspace-policy/1">;
+            source_max_bytes: z.ZodNumber;
+            scratch_max_bytes: z.ZodNumber;
+            outputs: z.ZodArray<z.ZodObject<{
+                path: z.ZodString;
+                max_bytes: z.ZodNumber;
+            }, z.core.$strict>>;
+            retention_ms: z.ZodNumber;
+        }, z.core.$strict>;
+        readonly placement: "environment";
+        readonly owner: "runtime-environments";
+    };
+    readonly SandboxWorkspaceTransferEntrySchema: {
+        readonly schema: z.ZodObject<{
+            zone: z.ZodEnum<{
+                sources: "sources";
+                scratch: "scratch";
+                outputs: "outputs";
+            }>;
+            path: z.ZodString;
+            content_hash: z.ZodString;
+            bytes: z.ZodNumber;
+            mode: z.ZodNumber;
+            content_base64: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "environment";
+        readonly owner: "runtime-environments";
+    };
+    readonly SandboxWorkspaceTransferBundleSchema: {
+        readonly schema: z.ZodObject<{
+            schema: z.ZodLiteral<"zero-ar-sandbox-workspace-transfer/1">;
+            source_handle: z.ZodObject<{
+                contract: z.ZodLiteral<"sandbox-workspace/1">;
+                workspace_handle: z.ZodString;
+                generation: z.ZodNumber;
+                binding: z.ZodObject<{
+                    tenant: z.ZodString;
+                    run_id: z.ZodString;
+                    profile_ref: z.ZodString;
+                }, z.core.$strict>;
+                host_ref: z.ZodString;
+                content_policy_ref: z.ZodString;
+                encryption_key_ref: z.ZodString;
+                quota_bytes: z.ZodNumber;
+                status: z.ZodEnum<{
+                    sealed: "sealed";
+                    attached: "attached";
+                    expired: "expired";
+                    deleted: "deleted";
+                }>;
+                created_at: z.ZodString;
+                expires_at: z.ZodString;
+                identity_ref: z.ZodString;
+            }, z.core.$strict>;
+            policy: z.ZodObject<{
+                contract: z.ZodLiteral<"sandbox-workspace-policy/1">;
+                source_max_bytes: z.ZodNumber;
+                scratch_max_bytes: z.ZodNumber;
+                outputs: z.ZodArray<z.ZodObject<{
+                    path: z.ZodString;
+                    max_bytes: z.ZodNumber;
+                }, z.core.$strict>>;
+                retention_ms: z.ZodNumber;
+            }, z.core.$strict>;
+            entries: z.ZodArray<z.ZodObject<{
+                zone: z.ZodEnum<{
+                    sources: "sources";
+                    scratch: "scratch";
+                    outputs: "outputs";
+                }>;
+                path: z.ZodString;
+                content_hash: z.ZodString;
+                bytes: z.ZodNumber;
+                mode: z.ZodNumber;
+                content_base64: z.ZodString;
+            }, z.core.$strict>>;
+            logical_bytes: z.ZodNumber;
+            sealed_at: z.ZodString;
+            content_ref: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "environment";
+        readonly owner: "runtime-environments";
+    };
     readonly EnvironmentJobHandleSchema: {
         readonly schema: z.ZodObject<{
             job_id: z.ZodString;
@@ -14429,24 +15132,20 @@ export declare const SCHEMA_REGISTRY: {
                     version: z.ZodString;
                     adapter_digest: z.ZodString;
                     backend: z.ZodEnum<{
-                        process: "process";
                         ssh: "ssh";
                         firecracker: "firecracker";
                         apptainer: "apptainer";
                         "openai-agents": "openai-agents";
+                        process: "process";
                         oci: "oci";
-                        "cloudflare-sandbox": "cloudflare-sandbox";
-                        modal: "modal";
-                        daytona: "daytona";
-                        "vercel-sandbox": "vercel-sandbox";
                     }>;
                     operations: z.ZodArray<z.ZodEnum<{
                         cancel: "cancel";
-                        submit: "submit";
                         observe: "observe";
                         teardown: "teardown";
                         descriptor: "descriptor";
                         prepare: "prepare";
+                        submit: "submit";
                         reconcile: "reconcile";
                         collect: "collect";
                         abandon: "abandon";
@@ -14536,6 +15235,30 @@ export declare const SCHEMA_REGISTRY: {
                 cost_dimensions: z.ZodArray<z.ZodString>;
                 created_by: z.ZodString;
                 reviewed_by: z.ZodString;
+                runtime: z.ZodOptional<z.ZodObject<{
+                    shm_mib: z.ZodOptional<z.ZodNumber>;
+                    tmpfs: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                        target: z.ZodString;
+                        size_mib: z.ZodNumber;
+                    }, z.core.$strict>>>;
+                    init: z.ZodOptional<z.ZodBoolean>;
+                    syscall_profile_ref: z.ZodOptional<z.ZodString>;
+                    browser_sandbox: z.ZodOptional<z.ZodEnum<{
+                        enabled: "enabled";
+                        "disabled-by-declaration": "disabled-by-declaration";
+                    }>>;
+                    container_lifetime: z.ZodOptional<z.ZodEnum<{
+                        "per-command": "per-command";
+                        "per-run": "per-run";
+                    }>>;
+                    segment_process: z.ZodOptional<z.ZodEnum<{
+                        image: "image";
+                        keepalive: "keepalive";
+                    }>>;
+                    idle_ms: z.ZodOptional<z.ZodNumber>;
+                    max_segment_ms: z.ZodOptional<z.ZodNumber>;
+                    keep_previous_generation: z.ZodOptional<z.ZodBoolean>;
+                }, z.core.$strict>>;
             }, z.core.$strict>;
             request_id: z.ZodString;
             binding: z.ZodObject<{
@@ -14980,6 +15703,7 @@ export declare const SCHEMA_REGISTRY: {
             stderr_bytes: z.ZodNumber;
             inline_output_json: z.ZodNullable<z.ZodString>;
             known_cost: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodNumber>>;
+            outputs_ready: z.ZodOptional<z.ZodArray<z.ZodString>>;
             request_id: z.ZodString;
             status: z.ZodEnum<{
                 cancelled: "cancelled";
@@ -15582,6 +16306,7 @@ export declare const SCHEMA_REGISTRY: {
                 source_job_id: z.ZodString;
                 adapter_digest: z.ZodString;
                 destination_ref: z.ZodString;
+                media_type: z.ZodOptional<z.ZodString>;
             }, z.core.$strict>>;
             request_id: z.ZodString;
             status: z.ZodEnum<{
@@ -15617,6 +16342,7 @@ export declare const SCHEMA_REGISTRY: {
             source_job_id: z.ZodString;
             adapter_digest: z.ZodString;
             destination_ref: z.ZodString;
+            media_type: z.ZodOptional<z.ZodString>;
         }, z.core.$strict>;
         readonly placement: "environment";
         readonly owner: "runtime-core";
@@ -16048,6 +16774,32 @@ export declare const SCHEMA_REGISTRY: {
                         span_hash: z.ZodOptional<z.ZodString>;
                     }, z.core.$strict>>;
                 }, z.core.$strict>>;
+                images: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    artifact_ref: z.ZodString;
+                    content_hash: z.ZodString;
+                    media_type: z.ZodEnum<{
+                        "image/png": "image/png";
+                        "image/jpeg": "image/jpeg";
+                        "image/webp": "image/webp";
+                        "image/gif": "image/gif";
+                    }>;
+                    bytes: z.ZodNumber;
+                    classification: z.ZodEnum<{
+                        public: "public";
+                        internal: "internal";
+                        confidential: "confidential";
+                        restricted: "restricted";
+                    }>;
+                }, z.core.$strict>>>;
+                tool_calls: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    call_id: z.ZodString;
+                    name: z.ZodString;
+                    input: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                }, z.core.$strict>>>;
+                tool_result: z.ZodOptional<z.ZodObject<{
+                    call_id: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strict>>;
             }, z.core.$strict>;
             content_hash: z.ZodString;
         }, z.core.$strict>;
@@ -16068,6 +16820,10 @@ export declare const SCHEMA_REGISTRY: {
                 "branch.created": "branch.created";
                 "branch.head.moved": "branch.head.moved";
                 "context.assembled": "context.assembled";
+                "context.segment.started": "context.segment.started";
+                "context.segment.committed": "context.segment.committed";
+                "context.segment.failed": "context.segment.failed";
+                "context.segment.expanded": "context.segment.expanded";
                 "model.call.started": "model.call.started";
                 "model.call.finished": "model.call.finished";
                 "model.call.failed": "model.call.failed";
@@ -16087,6 +16843,9 @@ export declare const SCHEMA_REGISTRY: {
                 "environment.prepare.requested": "environment.prepare.requested";
                 "environment.prepared": "environment.prepared";
                 "environment.reused": "environment.reused";
+                "environment.segment.started": "environment.segment.started";
+                "environment.segment.ending": "environment.segment.ending";
+                "environment.segment.ended": "environment.segment.ended";
                 "environment.job.submit.requested": "environment.job.submit.requested";
                 "environment.job.submitted": "environment.job.submitted";
                 "environment.job.observe.requested": "environment.job.observe.requested";
@@ -16113,6 +16872,8 @@ export declare const SCHEMA_REGISTRY: {
                 "item.attempted": "item.attempted";
                 "item.parked": "item.parked";
                 "item.invalidated": "item.invalidated";
+                "plan.recorded": "plan.recorded";
+                "budgets.amended": "budgets.amended";
                 "gap.settled": "gap.settled";
                 "gap.dismissed": "gap.dismissed";
                 "checkpoint.started": "checkpoint.started";
@@ -16144,15 +16905,224 @@ export declare const SCHEMA_REGISTRY: {
                 "capability.admission.cancelled": "capability.admission.cancelled";
                 "closure.epoch.committed": "closure.epoch.committed";
                 "closure.epoch.activated": "closure.epoch.activated";
-                "browser.binding.pinned": "browser.binding.pinned";
-                "browser.destination.proposed": "browser.destination.proposed";
-                "browser.destination.decided": "browser.destination.decided";
-                "browser.binding.superseded": "browser.binding.superseded";
+                "state.closure.rehydrated": "state.closure.rehydrated";
+                "executor.continuation.accepted": "executor.continuation.accepted";
             }>;
             type_version: z.ZodNumber;
             at: z.ZodString;
             payload: z.ZodRecord<z.ZodString, z.ZodUnknown>;
             chain_hash: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "observation";
+        readonly owner: "runtime-core";
+    };
+    readonly PortableRecordEnvelopeSchema: {
+        readonly schema: z.ZodObject<{
+            type: z.ZodEnum<{
+                "run.created": "run.created";
+                "run.started": "run.started";
+                "entry.appended": "entry.appended";
+                "branch.created": "branch.created";
+                "branch.head.moved": "branch.head.moved";
+                "context.assembled": "context.assembled";
+                "context.segment.started": "context.segment.started";
+                "context.segment.committed": "context.segment.committed";
+                "context.segment.failed": "context.segment.failed";
+                "context.segment.expanded": "context.segment.expanded";
+                "model.call.started": "model.call.started";
+                "model.call.finished": "model.call.finished";
+                "model.call.failed": "model.call.failed";
+                "model.fallback.switched": "model.fallback.switched";
+                "turn.completed": "turn.completed";
+                "control.received": "control.received";
+                "control.applied": "control.applied";
+                "lease.opened": "lease.opened";
+                "lease.reserved": "lease.reserved";
+                "lease.consumed": "lease.consumed";
+                "lease.released": "lease.released";
+                "subrun.opened": "subrun.opened";
+                "subrun.finished": "subrun.finished";
+                "tool.invoked": "tool.invoked";
+                "tool.remote.pending": "tool.remote.pending";
+                "tool.finished": "tool.finished";
+                "environment.prepare.requested": "environment.prepare.requested";
+                "environment.prepared": "environment.prepared";
+                "environment.reused": "environment.reused";
+                "environment.segment.started": "environment.segment.started";
+                "environment.segment.ending": "environment.segment.ending";
+                "environment.segment.ended": "environment.segment.ended";
+                "environment.job.submit.requested": "environment.job.submit.requested";
+                "environment.job.submitted": "environment.job.submitted";
+                "environment.job.observe.requested": "environment.job.observe.requested";
+                "environment.job.observed": "environment.job.observed";
+                "environment.job.reconcile.requested": "environment.job.reconcile.requested";
+                "environment.job.reconciled": "environment.job.reconciled";
+                "environment.job.cancel.requested": "environment.job.cancel.requested";
+                "environment.job.cancelled": "environment.job.cancelled";
+                "environment.artifact.collect.requested": "environment.artifact.collect.requested";
+                "environment.artifact.collected": "environment.artifact.collected";
+                "artifact.committed": "artifact.committed";
+                "environment.teardown.requested": "environment.teardown.requested";
+                "environment.teardown.recorded": "environment.teardown.recorded";
+                "environment.abandon.requested": "environment.abandon.requested";
+                "environment.abandoned": "environment.abandoned";
+                "effect.prepared": "effect.prepared";
+                "effect.authority.decision": "effect.authority.decision";
+                "effect.authority.invalidated": "effect.authority.invalidated";
+                "effect.dispatched": "effect.dispatched";
+                "effect.resolved": "effect.resolved";
+                "effect.unreconcilable": "effect.unreconcilable";
+                "effect.answer.late": "effect.answer.late";
+                "grant.superseded": "grant.superseded";
+                "item.attempted": "item.attempted";
+                "item.parked": "item.parked";
+                "item.invalidated": "item.invalidated";
+                "plan.recorded": "plan.recorded";
+                "budgets.amended": "budgets.amended";
+                "gap.settled": "gap.settled";
+                "gap.dismissed": "gap.dismissed";
+                "checkpoint.started": "checkpoint.started";
+                "checkpoint.passed": "checkpoint.passed";
+                "checkpoint.rejected": "checkpoint.rejected";
+                "checkpoint.indeterminate": "checkpoint.indeterminate";
+                "repair.started": "repair.started";
+                "completion.proposed": "completion.proposed";
+                "verification.concluded": "verification.concluded";
+                "run.suspended": "run.suspended";
+                "run.resume.blocked": "run.resume.blocked";
+                "run.resumed": "run.resumed";
+                "run.cancelled": "run.cancelled";
+                "run.finished": "run.finished";
+                "run.forked": "run.forked";
+                "reexecution.started": "reexecution.started";
+                "subject.erasure.completed": "subject.erasure.completed";
+                "wake.scheduled": "wake.scheduled";
+                "wake.claimed": "wake.claimed";
+                "memory.event.recorded": "memory.event.recorded";
+                "memory.read.recorded": "memory.read.recorded";
+                "external.observation.received": "external.observation.received";
+                "external.observation.applied": "external.observation.applied";
+                "projection.rebuilt": "projection.rebuilt";
+                "run.lifecycle.command.accepted": "run.lifecycle.command.accepted";
+                "capability.admission.requested": "capability.admission.requested";
+                "capability.admission.classified": "capability.admission.classified";
+                "capability.admission.decided": "capability.admission.decided";
+                "capability.admission.cancelled": "capability.admission.cancelled";
+                "closure.epoch.committed": "closure.epoch.committed";
+                "closure.epoch.activated": "closure.epoch.activated";
+                "state.closure.rehydrated": "state.closure.rehydrated";
+                "executor.continuation.accepted": "executor.continuation.accepted";
+            }>;
+            at: z.ZodString;
+            run_id: z.ZodString;
+            logical_clock: z.ZodNumber;
+            record_id: z.ZodString;
+            payload: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+            causal_parent: z.ZodNullable<z.ZodString>;
+            type_version: z.ZodNumber;
+            chain_hash: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "observation";
+        readonly owner: "runtime-core";
+    };
+    readonly RunBundleManifestV1Schema: {
+        readonly schema: z.ZodObject<{
+            run_id: z.ZodString;
+            entry_count: z.ZodNumber;
+            record_count: z.ZodNumber;
+            chain_head: z.ZodNullable<z.ZodString>;
+            head_projection_hash: z.ZodString;
+            format: z.ZodEnum<{
+                "ramsden-run-bundle": "ramsden-run-bundle";
+                "zero-ar-run-bundle": "zero-ar-run-bundle";
+            }>;
+            format_version: z.ZodLiteral<1>;
+        }, z.core.$strict>;
+        readonly placement: "observation";
+        readonly owner: "runtime-core";
+    };
+    readonly RunBundleManifestV2Schema: {
+        readonly schema: z.ZodObject<{
+            run_id: z.ZodString;
+            entry_count: z.ZodNumber;
+            record_count: z.ZodNumber;
+            chain_head: z.ZodNullable<z.ZodString>;
+            head_projection_hash: z.ZodString;
+            format: z.ZodEnum<{
+                "ramsden-run-bundle": "ramsden-run-bundle";
+                "zero-ar-run-bundle": "zero-ar-run-bundle";
+            }>;
+            format_version: z.ZodLiteral<2>;
+            canonicalization: z.ZodEnum<{
+                "canonical-json-1": "canonical-json-1";
+            }>;
+            record_catalogue_ref: z.ZodString;
+            projection_kind: z.ZodLiteral<"run-head">;
+            fold_profile: z.ZodEnum<{
+                "run-head-v9": "run-head-v9";
+            }>;
+        }, z.core.$strict>;
+        readonly placement: "observation";
+        readonly owner: "runtime-core";
+    };
+    readonly RunBundleManifestSchema: {
+        readonly schema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+            run_id: z.ZodString;
+            entry_count: z.ZodNumber;
+            record_count: z.ZodNumber;
+            chain_head: z.ZodNullable<z.ZodString>;
+            head_projection_hash: z.ZodString;
+            format: z.ZodEnum<{
+                "ramsden-run-bundle": "ramsden-run-bundle";
+                "zero-ar-run-bundle": "zero-ar-run-bundle";
+            }>;
+            format_version: z.ZodLiteral<1>;
+        }, z.core.$strict>, z.ZodObject<{
+            run_id: z.ZodString;
+            entry_count: z.ZodNumber;
+            record_count: z.ZodNumber;
+            chain_head: z.ZodNullable<z.ZodString>;
+            head_projection_hash: z.ZodString;
+            format: z.ZodEnum<{
+                "ramsden-run-bundle": "ramsden-run-bundle";
+                "zero-ar-run-bundle": "zero-ar-run-bundle";
+            }>;
+            format_version: z.ZodLiteral<2>;
+            canonicalization: z.ZodEnum<{
+                "canonical-json-1": "canonical-json-1";
+            }>;
+            record_catalogue_ref: z.ZodString;
+            projection_kind: z.ZodLiteral<"run-head">;
+            fold_profile: z.ZodEnum<{
+                "run-head-v9": "run-head-v9";
+            }>;
+        }, z.core.$strict>], "format_version">;
+        readonly placement: "observation";
+        readonly owner: "runtime-core";
+    };
+    readonly RunMaterializationSchema: {
+        readonly schema: z.ZodObject<{
+            schema: z.ZodLiteral<"zero-ar-run-materialization/1">;
+            level: z.ZodLiteral<"materialize">;
+            run_id: z.ZodString;
+            format_version: z.ZodUnion<readonly [z.ZodLiteral<1>, z.ZodLiteral<2>]>;
+            canonicalization: z.ZodEnum<{
+                "canonical-json-1": "canonical-json-1";
+            }>;
+            record_catalogue_ref: z.ZodString;
+            projection_kind: z.ZodLiteral<"run-head">;
+            fold_profile: z.ZodEnum<{
+                "run-head-v9": "run-head-v9";
+            }>;
+            frontier: z.ZodObject<{
+                record_count: z.ZodNumber;
+                logical_clock: z.ZodNumber;
+                record_id: z.ZodNullable<z.ZodString>;
+                chain_head: z.ZodNullable<z.ZodString>;
+            }, z.core.$strict>;
+            state_hash: z.ZodString;
+            projection: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+            diagnostics: z.ZodArray<z.ZodNever>;
         }, z.core.$strict>;
         readonly placement: "observation";
         readonly owner: "runtime-core";
@@ -16250,6 +17220,8 @@ export declare const SCHEMA_REGISTRY: {
                         "reserved-artifact": "reserved-artifact";
                         "reserved-source": "reserved-source";
                         "reserved-memory": "reserved-memory";
+                        "reserved-plan": "reserved-plan";
+                        "reserved-context": "reserved-context";
                         "explicit-author": "explicit-author";
                         "explicit-operator": "explicit-operator";
                         "skill-allowed-tools": "skill-allowed-tools";
@@ -17029,6 +18001,7 @@ export declare const SCHEMA_REGISTRY: {
                 withdrawn: z.ZodNumber;
                 outcome_unknown: z.ZodNumber;
                 unreconcilable: z.ZodNumber;
+                refused: z.ZodOptional<z.ZodNumber>;
             }, z.core.$strict>;
             blocking_operational_outcomes: z.ZodArray<z.ZodObject<{
                 kind: z.ZodEnum<{
@@ -17146,11 +18119,11 @@ export declare const SCHEMA_REGISTRY: {
                 work: "work";
                 artifact: "artifact";
                 effect: "effect";
+                environment: "environment";
                 review: "review";
                 quality: "quality";
                 terminal: "terminal";
                 consumption: "consumption";
-                environment: "environment";
                 maintenance: "maintenance";
             }>;
             run_id: z.ZodString;
@@ -17219,10 +18192,6 @@ export declare const SCHEMA_REGISTRY: {
                     "environment-oci": "environment-oci";
                     "environment-ssh": "environment-ssh";
                     "environment-firecracker": "environment-firecracker";
-                    "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                    "environment-modal": "environment-modal";
-                    "environment-daytona": "environment-daytona";
-                    "environment-vercel-sandbox": "environment-vercel-sandbox";
                     "environment-openai-agents": "environment-openai-agents";
                     "environment-apptainer": "environment-apptainer";
                     "full-cell-docker-linux": "full-cell-docker-linux";
@@ -17250,16 +18219,24 @@ export declare const SCHEMA_REGISTRY: {
                     "mcp-imported-tools": "mcp-imported-tools";
                     "source-local-read-only": "source-local-read-only";
                     "document-pdf-extraction": "document-pdf-extraction";
-                    "browser-first-party-playwright": "browser-first-party-playwright";
                     "fair-cell-scheduling": "fair-cell-scheduling";
                     "sequential-sampled-validation": "sequential-sampled-validation";
                     "context-feature-cache": "context-feature-cache";
                     "content-defined-chunking": "content-defined-chunking";
                     "attention-admission": "attention-admission";
-                    "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                     "gateway-signed-webhook": "gateway-signed-webhook";
                     "gateway-interactive-messaging": "gateway-interactive-messaging";
                     "workspace-binding-profiles": "workspace-binding-profiles";
+                    "automatic-run-recovery": "automatic-run-recovery";
+                    "open-goal-execution": "open-goal-execution";
+                    "operator-pause-and-budget": "operator-pause-and-budget";
+                    "run-fork": "run-fork";
+                    "model-image-input": "model-image-input";
+                    "workspace-exec": "workspace-exec";
+                    "browser-workspace": "browser-workspace";
+                    "hierarchical-context": "hierarchical-context";
+                    "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                    "web-search": "web-search";
                 }>>;
                 conditional: z.ZodArray<z.ZodObject<{
                     capability: z.ZodEnum<{
@@ -17278,10 +18255,6 @@ export declare const SCHEMA_REGISTRY: {
                         "environment-oci": "environment-oci";
                         "environment-ssh": "environment-ssh";
                         "environment-firecracker": "environment-firecracker";
-                        "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                        "environment-modal": "environment-modal";
-                        "environment-daytona": "environment-daytona";
-                        "environment-vercel-sandbox": "environment-vercel-sandbox";
                         "environment-openai-agents": "environment-openai-agents";
                         "environment-apptainer": "environment-apptainer";
                         "full-cell-docker-linux": "full-cell-docker-linux";
@@ -17309,16 +18282,24 @@ export declare const SCHEMA_REGISTRY: {
                         "mcp-imported-tools": "mcp-imported-tools";
                         "source-local-read-only": "source-local-read-only";
                         "document-pdf-extraction": "document-pdf-extraction";
-                        "browser-first-party-playwright": "browser-first-party-playwright";
                         "fair-cell-scheduling": "fair-cell-scheduling";
                         "sequential-sampled-validation": "sequential-sampled-validation";
                         "context-feature-cache": "context-feature-cache";
                         "content-defined-chunking": "content-defined-chunking";
                         "attention-admission": "attention-admission";
-                        "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                         "gateway-signed-webhook": "gateway-signed-webhook";
                         "gateway-interactive-messaging": "gateway-interactive-messaging";
                         "workspace-binding-profiles": "workspace-binding-profiles";
+                        "automatic-run-recovery": "automatic-run-recovery";
+                        "open-goal-execution": "open-goal-execution";
+                        "operator-pause-and-budget": "operator-pause-and-budget";
+                        "run-fork": "run-fork";
+                        "model-image-input": "model-image-input";
+                        "workspace-exec": "workspace-exec";
+                        "browser-workspace": "browser-workspace";
+                        "hierarchical-context": "hierarchical-context";
+                        "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                        "web-search": "web-search";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -17348,10 +18329,6 @@ export declare const SCHEMA_REGISTRY: {
                         "environment-oci": "environment-oci";
                         "environment-ssh": "environment-ssh";
                         "environment-firecracker": "environment-firecracker";
-                        "environment-cloudflare-sandbox": "environment-cloudflare-sandbox";
-                        "environment-modal": "environment-modal";
-                        "environment-daytona": "environment-daytona";
-                        "environment-vercel-sandbox": "environment-vercel-sandbox";
                         "environment-openai-agents": "environment-openai-agents";
                         "environment-apptainer": "environment-apptainer";
                         "full-cell-docker-linux": "full-cell-docker-linux";
@@ -17379,16 +18356,24 @@ export declare const SCHEMA_REGISTRY: {
                         "mcp-imported-tools": "mcp-imported-tools";
                         "source-local-read-only": "source-local-read-only";
                         "document-pdf-extraction": "document-pdf-extraction";
-                        "browser-first-party-playwright": "browser-first-party-playwright";
                         "fair-cell-scheduling": "fair-cell-scheduling";
                         "sequential-sampled-validation": "sequential-sampled-validation";
                         "context-feature-cache": "context-feature-cache";
                         "content-defined-chunking": "content-defined-chunking";
                         "attention-admission": "attention-admission";
-                        "aggregator-trigger-ingress": "aggregator-trigger-ingress";
                         "gateway-signed-webhook": "gateway-signed-webhook";
                         "gateway-interactive-messaging": "gateway-interactive-messaging";
                         "workspace-binding-profiles": "workspace-binding-profiles";
+                        "automatic-run-recovery": "automatic-run-recovery";
+                        "open-goal-execution": "open-goal-execution";
+                        "operator-pause-and-budget": "operator-pause-and-budget";
+                        "run-fork": "run-fork";
+                        "model-image-input": "model-image-input";
+                        "workspace-exec": "workspace-exec";
+                        "browser-workspace": "browser-workspace";
+                        "hierarchical-context": "hierarchical-context";
+                        "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
+                        "web-search": "web-search";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -17769,6 +18754,8 @@ export declare const SCHEMA_REGISTRY: {
                             "reserved-artifact": "reserved-artifact";
                             "reserved-source": "reserved-source";
                             "reserved-memory": "reserved-memory";
+                            "reserved-plan": "reserved-plan";
+                            "reserved-context": "reserved-context";
                             "explicit-author": "explicit-author";
                             "explicit-operator": "explicit-operator";
                             "skill-allowed-tools": "skill-allowed-tools";
@@ -17807,6 +18794,43 @@ export declare const SCHEMA_REGISTRY: {
         readonly schema: z.ZodObject<{
             idempotency_key: z.ZodString;
             reason: z.ZodOptional<z.ZodString>;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly BudgetAmendmentRequestSchema: {
+        readonly schema: z.ZodObject<{
+            idempotency_key: z.ZodString;
+            add: z.ZodObject<{
+                model_tokens: z.ZodOptional<z.ZodNumber>;
+                tool_calls: z.ZodOptional<z.ZodNumber>;
+                bytes: z.ZodOptional<z.ZodNumber>;
+                compute_ms: z.ZodOptional<z.ZodNumber>;
+                attention: z.ZodOptional<z.ZodNumber>;
+                max_turns: z.ZodOptional<z.ZodNumber>;
+            }, z.core.$strict>;
+            reason: z.ZodOptional<z.ZodString>;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly BudgetAmendmentAcceptedSchema: {
+        readonly schema: z.ZodObject<{
+            run_id: z.ZodString;
+            accepted: z.ZodLiteral<true>;
+            repeated: z.ZodBoolean;
+            accepted_seq: z.ZodNumber;
+            budgets: z.ZodObject<{
+                consumption: z.ZodObject<{
+                    model_tokens: z.ZodNumber;
+                    tool_calls: z.ZodOptional<z.ZodNumber>;
+                    bytes: z.ZodOptional<z.ZodNumber>;
+                    compute_ms: z.ZodOptional<z.ZodNumber>;
+                }, z.core.$strict>;
+                attention: z.ZodNumber;
+                verification_reserve_fraction: z.ZodNumber;
+                max_turns: z.ZodNumber;
+            }, z.core.$strict>;
         }, z.core.$strict>;
         readonly placement: "run-management";
         readonly owner: "runtime-core";
@@ -17855,6 +18879,523 @@ export declare const SCHEMA_REGISTRY: {
                     }>;
                 }, z.core.$strict>>;
             }, z.core.$strict>>;
+            state_closure: z.ZodOptional<z.ZodObject<{
+                level: z.ZodLiteral<"rehydrate">;
+                closure_ref: z.ZodString;
+                rehydrated: z.ZodBoolean;
+                members: z.ZodArray<z.ZodObject<{
+                    kind: z.ZodEnum<{
+                        publication: "publication";
+                        artifact: "artifact";
+                        memory: "memory";
+                        integrity: "integrity";
+                        workspace: "workspace";
+                        context: "context";
+                    }>;
+                    locator: z.ZodString;
+                    required: z.ZodBoolean;
+                    status: z.ZodEnum<{
+                        omitted: "omitted";
+                        unavailable: "unavailable";
+                        rehydrated: "rehydrated";
+                        "present-inline": "present-inline";
+                    }>;
+                    reason: z.ZodOptional<z.ZodString>;
+                }, z.core.$strict>>;
+            }, z.core.$strict>>;
+            continuation: z.ZodOptional<z.ZodObject<{
+                schema: z.ZodLiteral<"zero-ar-run-continuation/1">;
+                run_id: z.ZodString;
+                frontier: z.ZodObject<{
+                    record_count: z.ZodNumber;
+                    logical_clock: z.ZodNumber;
+                    record_id: z.ZodString;
+                    chain_head: z.ZodString;
+                    head_projection_hash: z.ZodString;
+                }, z.core.$strict>;
+                protocol: z.ZodObject<{
+                    bundle_format_version: z.ZodLiteral<2>;
+                    canonicalization: z.ZodEnum<{
+                        "canonical-json-1": "canonical-json-1";
+                    }>;
+                    record_catalogue_ref: z.ZodString;
+                    fold_profile: z.ZodEnum<{
+                        "run-head-v9": "run-head-v9";
+                    }>;
+                }, z.core.$strict>;
+                continuation_authority_ref: z.ZodDefault<z.ZodNullable<z.ZodString>>;
+                state_closure_ref: z.ZodString;
+                lifecycle: z.ZodObject<{
+                    status: z.ZodEnum<{
+                        cancelled: "cancelled";
+                        created: "created";
+                        running: "running";
+                        suspended: "suspended";
+                        finished: "finished";
+                    }>;
+                    completion_state: z.ZodEnum<{
+                        working: "working";
+                        checkpoint_verifying: "checkpoint_verifying";
+                        completion_proposed: "completion_proposed";
+                        verifying: "verifying";
+                        gap_open: "gap_open";
+                        repair: "repair";
+                        complete: "complete";
+                        unverified_artifact: "unverified_artifact";
+                    }>;
+                    turn: z.ZodNumber;
+                    pending_review_items: z.ZodArray<z.ZodString>;
+                }, z.core.$strict>;
+                open_leases: z.ZodArray<z.ZodObject<{
+                    lease_id: z.ZodString;
+                    pool: z.ZodEnum<{
+                        repair: "repair";
+                        work: "work";
+                        verification: "verification";
+                    }>;
+                    denomination: z.ZodEnum<{
+                        model_tokens: "model_tokens";
+                        tool_calls: "tool_calls";
+                        bytes: "bytes";
+                        compute_ms: "compute_ms";
+                        attention: "attention";
+                    }>;
+                    amount: z.ZodNumber;
+                }, z.core.$strict>>;
+                nonterminal_effects: z.ZodArray<z.ZodObject<{
+                    effect_id: z.ZodString;
+                    state: z.ZodEnum<{
+                        committed: "committed";
+                        prepared: "prepared";
+                        dispatched: "dispatched";
+                        withdrawn: "withdrawn";
+                        outcome_unknown: "outcome_unknown";
+                        unreconcilable: "unreconcilable";
+                    }>;
+                    target: z.ZodString;
+                    operation: z.ZodString;
+                }, z.core.$strict>>;
+                pending_controls: z.ZodArray<z.ZodObject<{
+                    control_id: z.ZodString;
+                    verb: z.ZodString;
+                }, z.core.$strict>>;
+                pending_wakes: z.ZodArray<z.ZodObject<{
+                    wake_id: z.ZodString;
+                    due_at: z.ZodString;
+                    condition: z.ZodString;
+                }, z.core.$strict>>;
+                inflight_operations: z.ZodArray<z.ZodString>;
+                required_bindings: z.ZodArray<z.ZodObject<{
+                    kind: z.ZodEnum<{
+                        procedure: "procedure";
+                        tool: "tool";
+                        publication: "publication";
+                        memory: "memory";
+                        agent: "agent";
+                        closure: "closure";
+                        "model-adapter": "model-adapter";
+                        validator: "validator";
+                        workspace: "workspace";
+                        source: "source";
+                        environment: "environment";
+                        "domain-pack": "domain-pack";
+                        "target-adapter": "target-adapter";
+                        profile: "profile";
+                    }>;
+                    ref: z.ZodString;
+                }, z.core.$strict>>;
+                capsule_ref: z.ZodString;
+            }, z.core.$strict>>;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunContinuationCapsuleSchema: {
+        readonly schema: z.ZodObject<{
+            schema: z.ZodLiteral<"zero-ar-run-continuation/1">;
+            run_id: z.ZodString;
+            frontier: z.ZodObject<{
+                record_count: z.ZodNumber;
+                logical_clock: z.ZodNumber;
+                record_id: z.ZodString;
+                chain_head: z.ZodString;
+                head_projection_hash: z.ZodString;
+            }, z.core.$strict>;
+            protocol: z.ZodObject<{
+                bundle_format_version: z.ZodLiteral<2>;
+                canonicalization: z.ZodEnum<{
+                    "canonical-json-1": "canonical-json-1";
+                }>;
+                record_catalogue_ref: z.ZodString;
+                fold_profile: z.ZodEnum<{
+                    "run-head-v9": "run-head-v9";
+                }>;
+            }, z.core.$strict>;
+            continuation_authority_ref: z.ZodDefault<z.ZodNullable<z.ZodString>>;
+            state_closure_ref: z.ZodString;
+            lifecycle: z.ZodObject<{
+                status: z.ZodEnum<{
+                    cancelled: "cancelled";
+                    created: "created";
+                    running: "running";
+                    suspended: "suspended";
+                    finished: "finished";
+                }>;
+                completion_state: z.ZodEnum<{
+                    working: "working";
+                    checkpoint_verifying: "checkpoint_verifying";
+                    completion_proposed: "completion_proposed";
+                    verifying: "verifying";
+                    gap_open: "gap_open";
+                    repair: "repair";
+                    complete: "complete";
+                    unverified_artifact: "unverified_artifact";
+                }>;
+                turn: z.ZodNumber;
+                pending_review_items: z.ZodArray<z.ZodString>;
+            }, z.core.$strict>;
+            open_leases: z.ZodArray<z.ZodObject<{
+                lease_id: z.ZodString;
+                pool: z.ZodEnum<{
+                    repair: "repair";
+                    work: "work";
+                    verification: "verification";
+                }>;
+                denomination: z.ZodEnum<{
+                    model_tokens: "model_tokens";
+                    tool_calls: "tool_calls";
+                    bytes: "bytes";
+                    compute_ms: "compute_ms";
+                    attention: "attention";
+                }>;
+                amount: z.ZodNumber;
+            }, z.core.$strict>>;
+            nonterminal_effects: z.ZodArray<z.ZodObject<{
+                effect_id: z.ZodString;
+                state: z.ZodEnum<{
+                    committed: "committed";
+                    prepared: "prepared";
+                    dispatched: "dispatched";
+                    withdrawn: "withdrawn";
+                    outcome_unknown: "outcome_unknown";
+                    unreconcilable: "unreconcilable";
+                }>;
+                target: z.ZodString;
+                operation: z.ZodString;
+            }, z.core.$strict>>;
+            pending_controls: z.ZodArray<z.ZodObject<{
+                control_id: z.ZodString;
+                verb: z.ZodString;
+            }, z.core.$strict>>;
+            pending_wakes: z.ZodArray<z.ZodObject<{
+                wake_id: z.ZodString;
+                due_at: z.ZodString;
+                condition: z.ZodString;
+            }, z.core.$strict>>;
+            inflight_operations: z.ZodArray<z.ZodString>;
+            required_bindings: z.ZodArray<z.ZodObject<{
+                kind: z.ZodEnum<{
+                    procedure: "procedure";
+                    tool: "tool";
+                    publication: "publication";
+                    memory: "memory";
+                    agent: "agent";
+                    closure: "closure";
+                    "model-adapter": "model-adapter";
+                    validator: "validator";
+                    workspace: "workspace";
+                    source: "source";
+                    environment: "environment";
+                    "domain-pack": "domain-pack";
+                    "target-adapter": "target-adapter";
+                    profile: "profile";
+                }>;
+                ref: z.ZodString;
+            }, z.core.$strict>>;
+            capsule_ref: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunContinuationExecutorSchema: {
+        readonly schema: z.ZodObject<{
+            executor_ref: z.ZodString;
+            name: z.ZodString;
+            version: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunContinuationDeclarationSchema: {
+        readonly schema: z.ZodObject<{
+            executor: z.ZodObject<{
+                executor_ref: z.ZodString;
+                name: z.ZodString;
+                version: z.ZodString;
+            }, z.core.$strict>;
+            supported_fold_profiles: z.ZodArray<z.ZodEnum<{
+                "run-head-v9": "run-head-v9";
+            }>>;
+            supported_record_catalogues: z.ZodArray<z.ZodString>;
+            available_bindings: z.ZodArray<z.ZodObject<{
+                kind: z.ZodEnum<{
+                    procedure: "procedure";
+                    tool: "tool";
+                    publication: "publication";
+                    memory: "memory";
+                    agent: "agent";
+                    closure: "closure";
+                    "model-adapter": "model-adapter";
+                    validator: "validator";
+                    workspace: "workspace";
+                    source: "source";
+                    environment: "environment";
+                    "domain-pack": "domain-pack";
+                    "target-adapter": "target-adapter";
+                    profile: "profile";
+                }>;
+                ref: z.ZodString;
+            }, z.core.$strict>>;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunContinuationAdmissionRequestSchema: {
+        readonly schema: z.ZodObject<{
+            idempotency_key: z.ZodString;
+            declaration: z.ZodObject<{
+                executor: z.ZodObject<{
+                    executor_ref: z.ZodString;
+                    name: z.ZodString;
+                    version: z.ZodString;
+                }, z.core.$strict>;
+                supported_fold_profiles: z.ZodArray<z.ZodEnum<{
+                    "run-head-v9": "run-head-v9";
+                }>>;
+                supported_record_catalogues: z.ZodArray<z.ZodString>;
+                available_bindings: z.ZodArray<z.ZodObject<{
+                    kind: z.ZodEnum<{
+                        procedure: "procedure";
+                        tool: "tool";
+                        publication: "publication";
+                        memory: "memory";
+                        agent: "agent";
+                        closure: "closure";
+                        "model-adapter": "model-adapter";
+                        validator: "validator";
+                        workspace: "workspace";
+                        source: "source";
+                        environment: "environment";
+                        "domain-pack": "domain-pack";
+                        "target-adapter": "target-adapter";
+                        profile: "profile";
+                    }>;
+                    ref: z.ZodString;
+                }, z.core.$strict>>;
+            }, z.core.$strict>;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunContinuationCompatibilityReportSchema: {
+        readonly schema: z.ZodObject<{
+            schema: z.ZodLiteral<"zero-ar-run-continuation-compatibility/1">;
+            run_id: z.ZodString;
+            capsule_ref: z.ZodString;
+            executor_ref: z.ZodString;
+            compatible: z.ZodBoolean;
+            checks: z.ZodArray<z.ZodObject<{
+                kind: z.ZodEnum<{
+                    "state-closure": "state-closure";
+                    executor: "executor";
+                    protocol: "protocol";
+                    lifecycle: "lifecycle";
+                    effects: "effects";
+                    operations: "operations";
+                    bindings: "bindings";
+                    fence: "fence";
+                }>;
+                status: z.ZodEnum<{
+                    refused: "refused";
+                    passed: "passed";
+                }>;
+                message: z.ZodString;
+            }, z.core.$strict>>;
+            missing_bindings: z.ZodArray<z.ZodObject<{
+                kind: z.ZodEnum<{
+                    procedure: "procedure";
+                    tool: "tool";
+                    publication: "publication";
+                    memory: "memory";
+                    agent: "agent";
+                    closure: "closure";
+                    "model-adapter": "model-adapter";
+                    validator: "validator";
+                    workspace: "workspace";
+                    source: "source";
+                    environment: "environment";
+                    "domain-pack": "domain-pack";
+                    "target-adapter": "target-adapter";
+                    profile: "profile";
+                }>;
+                ref: z.ZodString;
+            }, z.core.$strict>>;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunContinuationAcceptedSchema: {
+        readonly schema: z.ZodObject<{
+            run_id: z.ZodString;
+            accepted: z.ZodLiteral<true>;
+            repeated: z.ZodBoolean;
+            accepted_seq: z.ZodNumber;
+            capsule: z.ZodObject<{
+                schema: z.ZodLiteral<"zero-ar-run-continuation/1">;
+                run_id: z.ZodString;
+                frontier: z.ZodObject<{
+                    record_count: z.ZodNumber;
+                    logical_clock: z.ZodNumber;
+                    record_id: z.ZodString;
+                    chain_head: z.ZodString;
+                    head_projection_hash: z.ZodString;
+                }, z.core.$strict>;
+                protocol: z.ZodObject<{
+                    bundle_format_version: z.ZodLiteral<2>;
+                    canonicalization: z.ZodEnum<{
+                        "canonical-json-1": "canonical-json-1";
+                    }>;
+                    record_catalogue_ref: z.ZodString;
+                    fold_profile: z.ZodEnum<{
+                        "run-head-v9": "run-head-v9";
+                    }>;
+                }, z.core.$strict>;
+                continuation_authority_ref: z.ZodDefault<z.ZodNullable<z.ZodString>>;
+                state_closure_ref: z.ZodString;
+                lifecycle: z.ZodObject<{
+                    status: z.ZodEnum<{
+                        cancelled: "cancelled";
+                        created: "created";
+                        running: "running";
+                        suspended: "suspended";
+                        finished: "finished";
+                    }>;
+                    completion_state: z.ZodEnum<{
+                        working: "working";
+                        checkpoint_verifying: "checkpoint_verifying";
+                        completion_proposed: "completion_proposed";
+                        verifying: "verifying";
+                        gap_open: "gap_open";
+                        repair: "repair";
+                        complete: "complete";
+                        unverified_artifact: "unverified_artifact";
+                    }>;
+                    turn: z.ZodNumber;
+                    pending_review_items: z.ZodArray<z.ZodString>;
+                }, z.core.$strict>;
+                open_leases: z.ZodArray<z.ZodObject<{
+                    lease_id: z.ZodString;
+                    pool: z.ZodEnum<{
+                        repair: "repair";
+                        work: "work";
+                        verification: "verification";
+                    }>;
+                    denomination: z.ZodEnum<{
+                        model_tokens: "model_tokens";
+                        tool_calls: "tool_calls";
+                        bytes: "bytes";
+                        compute_ms: "compute_ms";
+                        attention: "attention";
+                    }>;
+                    amount: z.ZodNumber;
+                }, z.core.$strict>>;
+                nonterminal_effects: z.ZodArray<z.ZodObject<{
+                    effect_id: z.ZodString;
+                    state: z.ZodEnum<{
+                        committed: "committed";
+                        prepared: "prepared";
+                        dispatched: "dispatched";
+                        withdrawn: "withdrawn";
+                        outcome_unknown: "outcome_unknown";
+                        unreconcilable: "unreconcilable";
+                    }>;
+                    target: z.ZodString;
+                    operation: z.ZodString;
+                }, z.core.$strict>>;
+                pending_controls: z.ZodArray<z.ZodObject<{
+                    control_id: z.ZodString;
+                    verb: z.ZodString;
+                }, z.core.$strict>>;
+                pending_wakes: z.ZodArray<z.ZodObject<{
+                    wake_id: z.ZodString;
+                    due_at: z.ZodString;
+                    condition: z.ZodString;
+                }, z.core.$strict>>;
+                inflight_operations: z.ZodArray<z.ZodString>;
+                required_bindings: z.ZodArray<z.ZodObject<{
+                    kind: z.ZodEnum<{
+                        procedure: "procedure";
+                        tool: "tool";
+                        publication: "publication";
+                        memory: "memory";
+                        agent: "agent";
+                        closure: "closure";
+                        "model-adapter": "model-adapter";
+                        validator: "validator";
+                        workspace: "workspace";
+                        source: "source";
+                        environment: "environment";
+                        "domain-pack": "domain-pack";
+                        "target-adapter": "target-adapter";
+                        profile: "profile";
+                    }>;
+                    ref: z.ZodString;
+                }, z.core.$strict>>;
+                capsule_ref: z.ZodString;
+            }, z.core.$strict>;
+            compatibility: z.ZodObject<{
+                schema: z.ZodLiteral<"zero-ar-run-continuation-compatibility/1">;
+                run_id: z.ZodString;
+                capsule_ref: z.ZodString;
+                executor_ref: z.ZodString;
+                compatible: z.ZodBoolean;
+                checks: z.ZodArray<z.ZodObject<{
+                    kind: z.ZodEnum<{
+                        "state-closure": "state-closure";
+                        executor: "executor";
+                        protocol: "protocol";
+                        lifecycle: "lifecycle";
+                        effects: "effects";
+                        operations: "operations";
+                        bindings: "bindings";
+                        fence: "fence";
+                    }>;
+                    status: z.ZodEnum<{
+                        refused: "refused";
+                        passed: "passed";
+                    }>;
+                    message: z.ZodString;
+                }, z.core.$strict>>;
+                missing_bindings: z.ZodArray<z.ZodObject<{
+                    kind: z.ZodEnum<{
+                        procedure: "procedure";
+                        tool: "tool";
+                        publication: "publication";
+                        memory: "memory";
+                        agent: "agent";
+                        closure: "closure";
+                        "model-adapter": "model-adapter";
+                        validator: "validator";
+                        workspace: "workspace";
+                        source: "source";
+                        environment: "environment";
+                        "domain-pack": "domain-pack";
+                        "target-adapter": "target-adapter";
+                        profile: "profile";
+                    }>;
+                    ref: z.ZodString;
+                }, z.core.$strict>>;
+            }, z.core.$strict>;
         }, z.core.$strict>;
         readonly placement: "run-management";
         readonly owner: "runtime-core";
@@ -17874,6 +19415,10 @@ export declare const SCHEMA_REGISTRY: {
                     "branch.created": "branch.created";
                     "branch.head.moved": "branch.head.moved";
                     "context.assembled": "context.assembled";
+                    "context.segment.started": "context.segment.started";
+                    "context.segment.committed": "context.segment.committed";
+                    "context.segment.failed": "context.segment.failed";
+                    "context.segment.expanded": "context.segment.expanded";
                     "model.call.started": "model.call.started";
                     "model.call.finished": "model.call.finished";
                     "model.call.failed": "model.call.failed";
@@ -17893,6 +19438,9 @@ export declare const SCHEMA_REGISTRY: {
                     "environment.prepare.requested": "environment.prepare.requested";
                     "environment.prepared": "environment.prepared";
                     "environment.reused": "environment.reused";
+                    "environment.segment.started": "environment.segment.started";
+                    "environment.segment.ending": "environment.segment.ending";
+                    "environment.segment.ended": "environment.segment.ended";
                     "environment.job.submit.requested": "environment.job.submit.requested";
                     "environment.job.submitted": "environment.job.submitted";
                     "environment.job.observe.requested": "environment.job.observe.requested";
@@ -17919,6 +19467,8 @@ export declare const SCHEMA_REGISTRY: {
                     "item.attempted": "item.attempted";
                     "item.parked": "item.parked";
                     "item.invalidated": "item.invalidated";
+                    "plan.recorded": "plan.recorded";
+                    "budgets.amended": "budgets.amended";
                     "gap.settled": "gap.settled";
                     "gap.dismissed": "gap.dismissed";
                     "checkpoint.started": "checkpoint.started";
@@ -17950,10 +19500,8 @@ export declare const SCHEMA_REGISTRY: {
                     "capability.admission.cancelled": "capability.admission.cancelled";
                     "closure.epoch.committed": "closure.epoch.committed";
                     "closure.epoch.activated": "closure.epoch.activated";
-                    "browser.binding.pinned": "browser.binding.pinned";
-                    "browser.destination.proposed": "browser.destination.proposed";
-                    "browser.destination.decided": "browser.destination.decided";
-                    "browser.binding.superseded": "browser.binding.superseded";
+                    "state.closure.rehydrated": "state.closure.rehydrated";
+                    "executor.continuation.accepted": "executor.continuation.accepted";
                 }>;
                 type_version: z.ZodNumber;
                 at: z.ZodString;
@@ -17981,6 +19529,13 @@ export declare const SCHEMA_REGISTRY: {
             reason: z.ZodString;
             checkpoint_id: z.ZodString;
             due_at: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            question: z.ZodOptional<z.ZodObject<{
+                asked_by: z.ZodLiteral<"agent">;
+                text: z.ZodString;
+                why: z.ZodString;
+                choices: z.ZodNullable<z.ZodArray<z.ZodString>>;
+                allow_other: z.ZodBoolean;
+            }, z.core.$strict>>;
         }, z.core.$strict>;
         readonly placement: "observation";
         readonly owner: "quality-plane";
@@ -18003,6 +19558,13 @@ export declare const SCHEMA_REGISTRY: {
                 reason: z.ZodString;
                 checkpoint_id: z.ZodString;
                 due_at: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                question: z.ZodOptional<z.ZodObject<{
+                    asked_by: z.ZodLiteral<"agent">;
+                    text: z.ZodString;
+                    why: z.ZodString;
+                    choices: z.ZodNullable<z.ZodArray<z.ZodString>>;
+                    allow_other: z.ZodBoolean;
+                }, z.core.$strict>>;
             }, z.core.$strict>>;
             truncated: z.ZodBoolean;
         }, z.core.$strict>;
@@ -18048,8 +19610,29 @@ export declare const SCHEMA_REGISTRY: {
                     "declared-dependencies": "declared-dependencies";
                 }>;
                 repair_budget_attempts: z.ZodNumber;
+                item_output_schemas: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    item_kind: z.ZodString;
+                    item_id: z.ZodOptional<z.ZodString>;
+                    item_id_prefix: z.ZodOptional<z.ZodString>;
+                    output_schema: z.ZodType<import("./item-output.js").ItemOutputJson, unknown, z.core.$ZodTypeInternals<import("./item-output.js").ItemOutputJson, unknown>>;
+                }, z.core.$strict>>>;
                 claim_representation: z.ZodOptional<z.ZodEnum<{
                     "structured-claims-with-citations": "structured-claims-with-citations";
+                }>>;
+                ask_when: z.ZodOptional<z.ZodEnum<{
+                    "at-completion": "at-completion";
+                    "when-parked": "when-parked";
+                }>>;
+                max_agent_questions: z.ZodOptional<z.ZodNumber>;
+                validator_inputs: z.ZodOptional<z.ZodArray<z.ZodEnum<{
+                    "document-text": "document-text";
+                    "effect-outcomes": "effect-outcomes";
+                    "workspace-output": "workspace-output";
+                    "web-pages": "web-pages";
+                }>>>;
+                checkpoint_view: z.ZodOptional<z.ZodEnum<{
+                    "covered-items": "covered-items";
+                    "worked-items": "worked-items";
                 }>>;
                 answer_windows: z.ZodOptional<z.ZodArray<z.ZodObject<{
                     named_human_class: z.ZodString;
@@ -18067,6 +19650,7 @@ export declare const SCHEMA_REGISTRY: {
                     covers: z.ZodArray<z.ZodString>;
                     sufficient_for: z.ZodArray<z.ZodString>;
                     cost_wall_ms: z.ZodNumber;
+                    timeout_ms: z.ZodOptional<z.ZodNumber>;
                 }, z.core.$strict>>;
                 validator_concurrency_groups: z.ZodOptional<z.ZodArray<z.ZodObject<{
                     name: z.ZodString;
@@ -18130,9 +19714,9 @@ export declare const SCHEMA_REGISTRY: {
                 "task-contract": "task-contract";
                 agent: "agent";
                 validator: "validator";
+                "domain-pack": "domain-pack";
                 posture: "posture";
                 semantic: "semantic";
-                "domain-pack": "domain-pack";
                 "binding-profile": "binding-profile";
             }>;
             root_ref: z.ZodString;
@@ -18143,9 +19727,9 @@ export declare const SCHEMA_REGISTRY: {
                     "task-contract": "task-contract";
                     agent: "agent";
                     validator: "validator";
+                    "domain-pack": "domain-pack";
                     posture: "posture";
                     semantic: "semantic";
-                    "domain-pack": "domain-pack";
                     "binding-profile": "binding-profile";
                 }>;
                 name: z.ZodString;
@@ -18206,9 +19790,9 @@ export declare const SCHEMA_REGISTRY: {
                 "task-contract": "task-contract";
                 agent: "agent";
                 validator: "validator";
+                "domain-pack": "domain-pack";
                 posture: "posture";
                 semantic: "semantic";
-                "domain-pack": "domain-pack";
                 "binding-profile": "binding-profile";
             }>;
             name: z.ZodString;
@@ -18279,9 +19863,9 @@ export declare const SCHEMA_REGISTRY: {
                 "task-contract": "task-contract";
                 agent: "agent";
                 validator: "validator";
+                "domain-pack": "domain-pack";
                 posture: "posture";
                 semantic: "semantic";
-                "domain-pack": "domain-pack";
                 "binding-profile": "binding-profile";
             }>;
             root_ref: z.ZodString;
@@ -18322,9 +19906,9 @@ export declare const SCHEMA_REGISTRY: {
                     "task-contract": "task-contract";
                     agent: "agent";
                     validator: "validator";
+                    "domain-pack": "domain-pack";
                     posture: "posture";
                     semantic: "semantic";
-                    "domain-pack": "domain-pack";
                     "binding-profile": "binding-profile";
                 }>;
                 root_ref: z.ZodString;
@@ -18335,9 +19919,9 @@ export declare const SCHEMA_REGISTRY: {
                         "task-contract": "task-contract";
                         agent: "agent";
                         validator: "validator";
+                        "domain-pack": "domain-pack";
                         posture: "posture";
                         semantic: "semantic";
-                        "domain-pack": "domain-pack";
                         "binding-profile": "binding-profile";
                     }>;
                     name: z.ZodString;
@@ -18448,9 +20032,9 @@ export declare const SCHEMA_REGISTRY: {
                     "task-contract": "task-contract";
                     agent: "agent";
                     validator: "validator";
+                    "domain-pack": "domain-pack";
                     posture: "posture";
                     semantic: "semantic";
-                    "domain-pack": "domain-pack";
                     "binding-profile": "binding-profile";
                 }>;
                 root_ref: z.ZodString;
@@ -18635,7 +20219,7 @@ export declare const SCHEMA_REGISTRY: {
                         minimum_exposure: z.ZodNumber;
                     }, z.core.$strict>>;
                 }, z.core.$strict>>;
-                context: z.ZodOptional<z.ZodObject<{
+                context: z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
                     selector: z.ZodLiteral<"coverage-mmr-v1">;
                     mode: z.ZodEnum<{
                         off: "off";
@@ -18647,7 +20231,32 @@ export declare const SCHEMA_REGISTRY: {
                     redundancy_weight_ppm: z.ZodNumber;
                     candidate_cutoff: z.ZodNumber;
                     arithmetic: z.ZodLiteral<"integer-score-v1">;
-                }, z.core.$strict>>;
+                }, z.core.$strict>, z.ZodObject<{
+                    selector: z.ZodLiteral<"hierarchical-context-v1">;
+                    mode: z.ZodEnum<{
+                        off: "off";
+                        observe: "observe";
+                        enforce: "enforce";
+                    }>;
+                    availability: z.ZodEnum<{
+                        optional: "optional";
+                        required: "required";
+                    }>;
+                    recent_original_tokens: z.ZodNumber;
+                    historical_summary_tokens: z.ZodNumber;
+                    maximum_expansions_per_turn: z.ZodNumber;
+                    summarizer: z.ZodObject<{
+                        binding: z.ZodEnum<{
+                            "run-primary": "run-primary";
+                        }>;
+                        maximum_source_tokens: z.ZodNumber;
+                        maximum_output_tokens: z.ZodNumber;
+                    }, z.core.$strict>;
+                    budgets: z.ZodObject<{
+                        maximum_summary_calls_per_run: z.ZodNumber;
+                        maximum_summary_tokens_per_run: z.ZodNumber;
+                    }, z.core.$strict>;
+                }, z.core.$strict>]>>;
                 attention: z.ZodOptional<z.ZodObject<{
                     selector: z.ZodLiteral<"attention-littles-v1">;
                     mode: z.ZodEnum<{
@@ -18861,23 +20470,23 @@ export declare const SCHEMA_REGISTRY: {
                 }>;
                 compatibility: z.ZodObject<{
                     streaming: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     tools: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     cancellation: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     context_limits: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     usage: z.ZodEnum<{
@@ -18887,6 +20496,20 @@ export declare const SCHEMA_REGISTRY: {
                     }>;
                     upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                     notes: z.ZodArray<z.ZodString>;
+                    image_input: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unsupported: "unsupported";
+                    }>>;
+                    tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
+                    strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
                 }, z.core.$strict>;
                 compatibility_ref: z.ZodString;
                 credential_mode: z.ZodEnum<{
@@ -18941,23 +20564,23 @@ export declare const SCHEMA_REGISTRY: {
                 }>;
                 compatibility: z.ZodObject<{
                     streaming: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     tools: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     cancellation: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     context_limits: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     usage: z.ZodEnum<{
@@ -18967,6 +20590,20 @@ export declare const SCHEMA_REGISTRY: {
                     }>;
                     upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                     notes: z.ZodArray<z.ZodString>;
+                    image_input: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unsupported: "unsupported";
+                    }>>;
+                    tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
+                    strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
                 }, z.core.$strict>;
                 compatibility_ref: z.ZodString;
                 credential_mode: z.ZodEnum<{
@@ -19110,6 +20747,7 @@ export declare const SCHEMA_REGISTRY: {
             tenant: z.ZodString;
             owner: z.ZodString;
             purpose: z.ZodEnum<{
+                "web-search": "web-search";
                 mcp: "mcp";
                 openai: "openai";
                 anthropic: "anthropic";
@@ -19136,6 +20774,7 @@ export declare const SCHEMA_REGISTRY: {
         readonly schema: z.ZodObject<{
             name: z.ZodString;
             purpose: z.ZodEnum<{
+                "web-search": "web-search";
                 mcp: "mcp";
                 openai: "openai";
                 anthropic: "anthropic";
@@ -19158,6 +20797,7 @@ export declare const SCHEMA_REGISTRY: {
         readonly schema: z.ZodObject<{
             name: z.ZodString;
             purpose: z.ZodEnum<{
+                "web-search": "web-search";
                 mcp: "mcp";
                 openai: "openai";
                 anthropic: "anthropic";
@@ -19229,23 +20869,23 @@ export declare const SCHEMA_REGISTRY: {
             }>;
             compatibility: z.ZodObject<{
                 streaming: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 tools: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 cancellation: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 context_limits: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 usage: z.ZodEnum<{
@@ -19255,6 +20895,20 @@ export declare const SCHEMA_REGISTRY: {
                 }>;
                 upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                 notes: z.ZodArray<z.ZodString>;
+                image_input: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unsupported: "unsupported";
+                }>>;
+                tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
+                strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
             }, z.core.$strict>;
             credential_mode: z.ZodEnum<{
                 none: "none";
@@ -19297,23 +20951,23 @@ export declare const SCHEMA_REGISTRY: {
             }>;
             compatibility: z.ZodObject<{
                 streaming: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 tools: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 cancellation: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 context_limits: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 usage: z.ZodEnum<{
@@ -19323,6 +20977,20 @@ export declare const SCHEMA_REGISTRY: {
                 }>;
                 upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                 notes: z.ZodArray<z.ZodString>;
+                image_input: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unsupported: "unsupported";
+                }>>;
+                tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
+                strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
             }, z.core.$strict>;
             credential_mode: z.ZodEnum<{
                 none: "none";
@@ -19383,23 +21051,23 @@ export declare const SCHEMA_REGISTRY: {
                 }>;
                 compatibility: z.ZodObject<{
                     streaming: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     tools: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     cancellation: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     context_limits: z.ZodEnum<{
-                        unknown: "unknown";
                         supported: "supported";
+                        unknown: "unknown";
                         unsupported: "unsupported";
                     }>;
                     usage: z.ZodEnum<{
@@ -19409,6 +21077,20 @@ export declare const SCHEMA_REGISTRY: {
                     }>;
                     upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                     notes: z.ZodArray<z.ZodString>;
+                    image_input: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unsupported: "unsupported";
+                    }>>;
+                    tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
+                    strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                        supported: "supported";
+                        unknown: "unknown";
+                        unsupported: "unsupported";
+                    }>>;
                 }, z.core.$strict>;
                 credential_mode: z.ZodEnum<{
                     none: "none";
@@ -19544,23 +21226,23 @@ export declare const SCHEMA_REGISTRY: {
             }>;
             compatibility: z.ZodObject<{
                 streaming: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 tools: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 cancellation: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 context_limits: z.ZodEnum<{
-                    unknown: "unknown";
                     supported: "supported";
+                    unknown: "unknown";
                     unsupported: "unsupported";
                 }>;
                 usage: z.ZodEnum<{
@@ -19570,6 +21252,20 @@ export declare const SCHEMA_REGISTRY: {
                 }>;
                 upstream_attestation_ref: z.ZodNullable<z.ZodString>;
                 notes: z.ZodArray<z.ZodString>;
+                image_input: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unsupported: "unsupported";
+                }>>;
+                tool_call_correlation: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
+                strict_function_schemas: z.ZodOptional<z.ZodEnum<{
+                    supported: "supported";
+                    unknown: "unknown";
+                    unsupported: "unsupported";
+                }>>;
             }, z.core.$strict>;
             compatibility_ref: z.ZodString;
             credential_mode: z.ZodEnum<{
@@ -20595,6 +22291,52 @@ export declare const SCHEMA_REGISTRY: {
                 }>;
                 reason: z.ZodNullable<z.ZodString>;
             }, z.core.$strict>>;
+            segments: z.ZodArray<z.ZodObject<{
+                manifest: z.ZodObject<{
+                    schema: z.ZodLiteral<"zero-ar-context-segment/1">;
+                    tenant_id: z.ZodString;
+                    run_id: z.ZodString;
+                    branch_id: z.ZodString;
+                    frontier_ref: z.ZodString;
+                    coverage: z.ZodObject<{
+                        first_entry_id: z.ZodString;
+                        last_entry_id: z.ZodString;
+                        entry_count: z.ZodNumber;
+                        source_hash: z.ZodString;
+                        entries: z.ZodArray<z.ZodObject<{
+                            entry_id: z.ZodString;
+                            content_hash: z.ZodString;
+                        }, z.core.$strict>>;
+                    }, z.core.$strict>;
+                    children: z.ZodArray<z.ZodString>;
+                    summary_artifact_ref: z.ZodString;
+                    summary_content_hash: z.ZodString;
+                    classification: z.ZodEnum<{
+                        public: "public";
+                        internal: "internal";
+                        confidential: "confidential";
+                        restricted: "restricted";
+                    }>;
+                    evidence_grade: z.ZodLiteral<"model-generated">;
+                    summarizer: z.ZodObject<{
+                        binding: z.ZodEnum<{
+                            "run-primary": "run-primary";
+                        }>;
+                        adapter_ref: z.ZodString;
+                        model_ref: z.ZodString;
+                        prompt_ref: z.ZodString;
+                        policy_ref: z.ZodString;
+                        call_id: z.ZodString;
+                    }, z.core.$strict>;
+                    summary_bytes: z.ZodNumber;
+                    segment_ref: z.ZodString;
+                }, z.core.$strict>;
+                status: z.ZodEnum<{
+                    stale: "stale";
+                    resolved: "resolved";
+                }>;
+                reason: z.ZodNullable<z.ZodString>;
+            }, z.core.$strict>>;
             fence_nonce: z.ZodNullable<z.ZodString>;
             evidence_blockers: z.ZodArray<z.ZodObject<{
                 entry_id: z.ZodString;
@@ -20612,6 +22354,144 @@ export declare const SCHEMA_REGISTRY: {
                 }>;
                 blocks_verified_completion: z.ZodBoolean;
             }, z.core.$strict>>;
+        }, z.core.$strict>;
+        readonly placement: "observation";
+        readonly owner: "runtime-core";
+    };
+    readonly HierarchicalContextPolicySchema: {
+        readonly schema: z.ZodObject<{
+            selector: z.ZodLiteral<"hierarchical-context-v1">;
+            mode: z.ZodEnum<{
+                off: "off";
+                observe: "observe";
+                enforce: "enforce";
+            }>;
+            availability: z.ZodEnum<{
+                optional: "optional";
+                required: "required";
+            }>;
+            recent_original_tokens: z.ZodNumber;
+            historical_summary_tokens: z.ZodNumber;
+            maximum_expansions_per_turn: z.ZodNumber;
+            summarizer: z.ZodObject<{
+                binding: z.ZodEnum<{
+                    "run-primary": "run-primary";
+                }>;
+                maximum_source_tokens: z.ZodNumber;
+                maximum_output_tokens: z.ZodNumber;
+            }, z.core.$strict>;
+            budgets: z.ZodObject<{
+                maximum_summary_calls_per_run: z.ZodNumber;
+                maximum_summary_tokens_per_run: z.ZodNumber;
+            }, z.core.$strict>;
+        }, z.core.$strict>;
+        readonly placement: "runtime-identity";
+        readonly owner: "runtime-core";
+    };
+    readonly ContextSegmentCoverageSchema: {
+        readonly schema: z.ZodObject<{
+            first_entry_id: z.ZodString;
+            last_entry_id: z.ZodString;
+            entry_count: z.ZodNumber;
+            source_hash: z.ZodString;
+            entries: z.ZodArray<z.ZodObject<{
+                entry_id: z.ZodString;
+                content_hash: z.ZodString;
+            }, z.core.$strict>>;
+        }, z.core.$strict>;
+        readonly placement: "runtime-identity";
+        readonly owner: "runtime-core";
+    };
+    readonly ContextSegmentSummarizerSchema: {
+        readonly schema: z.ZodObject<{
+            binding: z.ZodEnum<{
+                "run-primary": "run-primary";
+            }>;
+            adapter_ref: z.ZodString;
+            model_ref: z.ZodString;
+            prompt_ref: z.ZodString;
+            policy_ref: z.ZodString;
+            call_id: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "runtime-identity";
+        readonly owner: "runtime-core";
+    };
+    readonly ContextSegmentManifestSchema: {
+        readonly schema: z.ZodObject<{
+            schema: z.ZodLiteral<"zero-ar-context-segment/1">;
+            tenant_id: z.ZodString;
+            run_id: z.ZodString;
+            branch_id: z.ZodString;
+            frontier_ref: z.ZodString;
+            coverage: z.ZodObject<{
+                first_entry_id: z.ZodString;
+                last_entry_id: z.ZodString;
+                entry_count: z.ZodNumber;
+                source_hash: z.ZodString;
+                entries: z.ZodArray<z.ZodObject<{
+                    entry_id: z.ZodString;
+                    content_hash: z.ZodString;
+                }, z.core.$strict>>;
+            }, z.core.$strict>;
+            children: z.ZodArray<z.ZodString>;
+            summary_artifact_ref: z.ZodString;
+            summary_content_hash: z.ZodString;
+            classification: z.ZodEnum<{
+                public: "public";
+                internal: "internal";
+                confidential: "confidential";
+                restricted: "restricted";
+            }>;
+            evidence_grade: z.ZodLiteral<"model-generated">;
+            summarizer: z.ZodObject<{
+                binding: z.ZodEnum<{
+                    "run-primary": "run-primary";
+                }>;
+                adapter_ref: z.ZodString;
+                model_ref: z.ZodString;
+                prompt_ref: z.ZodString;
+                policy_ref: z.ZodString;
+                call_id: z.ZodString;
+            }, z.core.$strict>;
+            summary_bytes: z.ZodNumber;
+            segment_ref: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "observation";
+        readonly owner: "runtime-core";
+    };
+    readonly ContextExpandRequestSchema: {
+        readonly schema: z.ZodObject<{
+            segment_ref: z.ZodString;
+            depth: z.ZodDefault<z.ZodNumber>;
+            maximum_tokens: z.ZodNumber;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly ContextExpansionResultSchema: {
+        readonly schema: z.ZodObject<{
+            schema: z.ZodLiteral<"zero-ar-context-expansion/1">;
+            segment_ref: z.ZodString;
+            depth: z.ZodNumber;
+            returned_segments: z.ZodArray<z.ZodString>;
+            returned_entries: z.ZodArray<z.ZodString>;
+            returned_spans: z.ZodDefault<z.ZodArray<z.ZodObject<{
+                entry_id: z.ZodString;
+                start: z.ZodNumber;
+                end: z.ZodNumber;
+                span_hash: z.ZodString;
+                classification: z.ZodString;
+                evidence_grade: z.ZodEnum<{
+                    original: "original";
+                    derived: "derived";
+                    "model-generated": "model-generated";
+                }>;
+            }, z.core.$strict>>>;
+            omitted: z.ZodArray<z.ZodObject<{
+                reference: z.ZodString;
+                reason: z.ZodString;
+            }, z.core.$strict>>;
+            token_estimate: z.ZodNumber;
         }, z.core.$strict>;
         readonly placement: "observation";
         readonly owner: "runtime-core";
@@ -21059,181 +22939,6 @@ export declare const SCHEMA_REGISTRY: {
         readonly placement: "operator-management";
         readonly owner: "quality-plane";
     };
-    readonly BrowserBindingTemplateSchema: {
-        readonly schema: z.ZodObject<{
-            contract: z.ZodLiteral<"zero-ar-browser-binding-template/1">;
-            name: z.ZodString;
-            version: z.ZodString;
-            profile_ref: z.ZodString;
-            adapter: z.ZodObject<{
-                name: z.ZodLiteral<"zero-ar.playwright-chromium">;
-                version: z.ZodString;
-                engine: z.ZodEnum<{
-                    "playwright-chromium": "playwright-chromium";
-                }>;
-                playwright_version: z.ZodString;
-                chromium_revision: z.ZodString;
-                executable_ref: z.ZodString;
-                conformance_refs: z.ZodArray<z.ZodString>;
-            }, z.core.$strict>;
-            isolation: z.ZodEnum<{
-                process: "process";
-                container: "container";
-            }>;
-            limit_enforcement: z.ZodEnum<{
-                "observed-process": "observed-process";
-                "cgroup-v2": "cgroup-v2";
-            }>;
-            network_mode: z.ZodEnum<{
-                "public-only": "public-only";
-                "loopback-test-only": "loopback-test-only";
-            }>;
-            destinations: z.ZodArray<z.ZodObject<{
-                origin: z.ZodString;
-                methods: z.ZodArray<z.ZodEnum<{
-                    GET: "GET";
-                    HEAD: "HEAD";
-                    POST: "POST";
-                    PUT: "PUT";
-                    PATCH: "PATCH";
-                    DELETE: "DELETE";
-                }>>;
-                resource_types: z.ZodArray<z.ZodEnum<{
-                    document: "document";
-                    stylesheet: "stylesheet";
-                    image: "image";
-                    media: "media";
-                    font: "font";
-                    script: "script";
-                    texttrack: "texttrack";
-                    xhr: "xhr";
-                    fetch: "fetch";
-                    eventsource: "eventsource";
-                    websocket: "websocket";
-                    manifest: "manifest";
-                    other: "other";
-                }>>;
-                path_prefixes: z.ZodArray<z.ZodString>;
-                resolved_addresses: z.ZodArray<z.ZodString>;
-                credential_scope: z.ZodNullable<z.ZodString>;
-                sensitive_query_fields: z.ZodArray<z.ZodString>;
-            }, z.core.$strict>>;
-            credentials: z.ZodArray<z.ZodObject<{
-                credential_ref: z.ZodString;
-                epoch: z.ZodNumber;
-                scope: z.ZodString;
-                origins: z.ZodArray<z.ZodString>;
-            }, z.core.$strict>>;
-            effect_policies: z.ZodArray<z.ZodObject<{
-                operation: z.ZodString;
-                origin: z.ZodString;
-                action: z.ZodEnum<{
-                    click: "click";
-                    submit: "submit";
-                    upload: "upload";
-                    unknown: "unknown";
-                }>;
-                selectors: z.ZodArray<z.ZodString>;
-                idempotency_strategy: z.ZodEnum<{
-                    "provider-key": "provider-key";
-                    "natural-reference": "natural-reference";
-                }>;
-                reconciliation_url_template: z.ZodString;
-                found_selector: z.ZodString;
-                absent_selector: z.ZodString;
-                receipt_selector: z.ZodString;
-            }, z.core.$strict>>;
-            limits: z.ZodObject<{
-                max_processes: z.ZodNumber;
-                max_contexts_per_process: z.ZodNumber;
-                max_pages_per_context: z.ZodLiteral<1>;
-                max_active_sessions: z.ZodNumber;
-                max_queued_sessions: z.ZodNumber;
-                max_navigations_per_session: z.ZodNumber;
-                max_requests_per_session: z.ZodNumber;
-                max_redirects: z.ZodNumber;
-                max_response_bytes: z.ZodNumber;
-                max_network_bytes: z.ZodNumber;
-                max_artifact_bytes: z.ZodNumber;
-                max_downloads_per_session: z.ZodNumber;
-                max_observation_retries: z.ZodNumber;
-                navigation_timeout_ms: z.ZodNumber;
-                idle_timeout_ms: z.ZodNumber;
-                wall_time_ms: z.ZodNumber;
-                cpu_time_ms: z.ZodNumber;
-                memory_mib: z.ZodNumber;
-                process_count: z.ZodNumber;
-            }, z.core.$strict>;
-            reviewed_by: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserIntakeInputSchema: {
-        readonly schema: z.ZodObject<{
-            template: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "intake";
-        readonly owner: "browser-capability";
-    };
-    readonly ResolvedBrowserTemplateSchema: {
-        readonly schema: z.ZodObject<{
-            template: z.ZodString;
-            template_ref: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "runtime-identity";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserDestinationProposalRequestSchema: {
-        readonly schema: z.ZodObject<{
-            requested_destination: z.ZodObject<{
-                origin: z.ZodString;
-                methods: z.ZodArray<z.ZodEnum<{
-                    GET: "GET";
-                    HEAD: "HEAD";
-                    POST: "POST";
-                    PUT: "PUT";
-                    PATCH: "PATCH";
-                    DELETE: "DELETE";
-                }>>;
-                resource_types: z.ZodArray<z.ZodEnum<{
-                    document: "document";
-                    stylesheet: "stylesheet";
-                    image: "image";
-                    media: "media";
-                    font: "font";
-                    script: "script";
-                    texttrack: "texttrack";
-                    xhr: "xhr";
-                    fetch: "fetch";
-                    eventsource: "eventsource";
-                    websocket: "websocket";
-                    manifest: "manifest";
-                    other: "other";
-                }>>;
-                path_prefixes: z.ZodArray<z.ZodString>;
-                resolved_addresses: z.ZodArray<z.ZodString>;
-                credential_scope: z.ZodNullable<z.ZodString>;
-                sensitive_query_fields: z.ZodArray<z.ZodString>;
-            }, z.core.$strict>;
-            reason: z.ZodString;
-            idempotency_key: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
-    readonly BrowserDestinationDecisionRequestSchema: {
-        readonly schema: z.ZodObject<{
-            disposition: z.ZodEnum<{
-                approved: "approved";
-                refused: "refused";
-            }>;
-            reason: z.ZodString;
-            idempotency_key: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "browser";
-        readonly owner: "browser-capability";
-    };
     readonly ArtifactSweepRequestSchema: {
         readonly schema: z.ZodObject<{
             older_than_seconds: z.ZodNumber;
@@ -21263,6 +22968,161 @@ export declare const SCHEMA_REGISTRY: {
                 absent: "absent";
                 "not-in-run": "not-in-run";
             }>;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunStateClosureMemberSchema: {
+        readonly schema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+            status: z.ZodLiteral<"present">;
+            content_ref: z.ZodString;
+            artifact_ref: z.ZodOptional<z.ZodString>;
+            state_transfer_ref: z.ZodOptional<z.ZodString>;
+            kind: z.ZodEnum<{
+                publication: "publication";
+                artifact: "artifact";
+                memory: "memory";
+                integrity: "integrity";
+                workspace: "workspace";
+                context: "context";
+            }>;
+            locator: z.ZodString;
+            required: z.ZodBoolean;
+        }, z.core.$strict>, z.ZodObject<{
+            status: z.ZodLiteral<"omitted">;
+            reason: z.ZodString;
+            kind: z.ZodEnum<{
+                publication: "publication";
+                artifact: "artifact";
+                memory: "memory";
+                integrity: "integrity";
+                workspace: "workspace";
+                context: "context";
+            }>;
+            locator: z.ZodString;
+            required: z.ZodBoolean;
+        }, z.core.$strict>, z.ZodObject<{
+            status: z.ZodLiteral<"unavailable">;
+            reason: z.ZodString;
+            kind: z.ZodEnum<{
+                publication: "publication";
+                artifact: "artifact";
+                memory: "memory";
+                integrity: "integrity";
+                workspace: "workspace";
+                context: "context";
+            }>;
+            locator: z.ZodString;
+            required: z.ZodBoolean;
+        }, z.core.$strict>], "status">;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunStateClosureManifestSchema: {
+        readonly schema: z.ZodObject<{
+            schema: z.ZodLiteral<"zero-ar-run-state-closure/1">;
+            run_id: z.ZodString;
+            frontier: z.ZodObject<{
+                record_count: z.ZodNumber;
+                logical_clock: z.ZodNumber;
+                record_id: z.ZodString;
+                chain_head: z.ZodString;
+                head_projection_hash: z.ZodString;
+            }, z.core.$strict>;
+            members: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+                status: z.ZodLiteral<"present">;
+                content_ref: z.ZodString;
+                artifact_ref: z.ZodOptional<z.ZodString>;
+                state_transfer_ref: z.ZodOptional<z.ZodString>;
+                kind: z.ZodEnum<{
+                    publication: "publication";
+                    artifact: "artifact";
+                    memory: "memory";
+                    integrity: "integrity";
+                    workspace: "workspace";
+                    context: "context";
+                }>;
+                locator: z.ZodString;
+                required: z.ZodBoolean;
+            }, z.core.$strict>, z.ZodObject<{
+                status: z.ZodLiteral<"omitted">;
+                reason: z.ZodString;
+                kind: z.ZodEnum<{
+                    publication: "publication";
+                    artifact: "artifact";
+                    memory: "memory";
+                    integrity: "integrity";
+                    workspace: "workspace";
+                    context: "context";
+                }>;
+                locator: z.ZodString;
+                required: z.ZodBoolean;
+            }, z.core.$strict>, z.ZodObject<{
+                status: z.ZodLiteral<"unavailable">;
+                reason: z.ZodString;
+                kind: z.ZodEnum<{
+                    publication: "publication";
+                    artifact: "artifact";
+                    memory: "memory";
+                    integrity: "integrity";
+                    workspace: "workspace";
+                    context: "context";
+                }>;
+                locator: z.ZodString;
+                required: z.ZodBoolean;
+            }, z.core.$strict>], "status">>;
+            closure_ref: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunStateRehydrationMemberSchema: {
+        readonly schema: z.ZodObject<{
+            kind: z.ZodEnum<{
+                publication: "publication";
+                artifact: "artifact";
+                memory: "memory";
+                integrity: "integrity";
+                workspace: "workspace";
+                context: "context";
+            }>;
+            locator: z.ZodString;
+            required: z.ZodBoolean;
+            status: z.ZodEnum<{
+                omitted: "omitted";
+                unavailable: "unavailable";
+                rehydrated: "rehydrated";
+                "present-inline": "present-inline";
+            }>;
+            reason: z.ZodOptional<z.ZodString>;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunStateRehydrationReportSchema: {
+        readonly schema: z.ZodObject<{
+            level: z.ZodLiteral<"rehydrate">;
+            closure_ref: z.ZodString;
+            rehydrated: z.ZodBoolean;
+            members: z.ZodArray<z.ZodObject<{
+                kind: z.ZodEnum<{
+                    publication: "publication";
+                    artifact: "artifact";
+                    memory: "memory";
+                    integrity: "integrity";
+                    workspace: "workspace";
+                    context: "context";
+                }>;
+                locator: z.ZodString;
+                required: z.ZodBoolean;
+                status: z.ZodEnum<{
+                    omitted: "omitted";
+                    unavailable: "unavailable";
+                    rehydrated: "rehydrated";
+                    "present-inline": "present-inline";
+                }>;
+                reason: z.ZodOptional<z.ZodString>;
+            }, z.core.$strict>>;
         }, z.core.$strict>;
         readonly placement: "run-management";
         readonly owner: "runtime-core";
@@ -21299,9 +23159,9 @@ export declare const SCHEMA_REGISTRY: {
                     "task-contract": "task-contract";
                     agent: "agent";
                     validator: "validator";
+                    "domain-pack": "domain-pack";
                     posture: "posture";
                     semantic: "semantic";
-                    "domain-pack": "domain-pack";
                     "binding-profile": "binding-profile";
                 }>;
                 root_ref: z.ZodString;
@@ -21312,9 +23172,9 @@ export declare const SCHEMA_REGISTRY: {
                         "task-contract": "task-contract";
                         agent: "agent";
                         validator: "validator";
+                        "domain-pack": "domain-pack";
                         posture: "posture";
                         semantic: "semantic";
-                        "domain-pack": "domain-pack";
                         "binding-profile": "binding-profile";
                     }>;
                     name: z.ZodString;
@@ -21390,9 +23250,9 @@ export declare const SCHEMA_REGISTRY: {
                     "task-contract": "task-contract";
                     agent: "agent";
                     validator: "validator";
+                    "domain-pack": "domain-pack";
                     posture: "posture";
                     semantic: "semantic";
-                    "domain-pack": "domain-pack";
                     "binding-profile": "binding-profile";
                 }>;
                 root_ref: z.ZodString;
@@ -21424,14 +23284,6 @@ export declare const SCHEMA_REGISTRY: {
         }, z.core.$strict>;
         readonly placement: "publication";
         readonly owner: "contracts-dx";
-    };
-    readonly LegacyModelPoolImportRequestSchema: {
-        readonly schema: z.ZodObject<{
-            provider_instance_ref: z.ZodString;
-            alias: z.ZodOptional<z.ZodString>;
-        }, z.core.$strict>;
-        readonly placement: "operator-management";
-        readonly owner: "runtime-core";
     };
     readonly ToolSourceDriftRecordSchema: {
         readonly schema: z.ZodObject<{
@@ -21479,85 +23331,6 @@ export declare const SCHEMA_REGISTRY: {
         readonly placement: "operator-management";
         readonly owner: "runtime-core";
     };
-    readonly ToolSourceIngressDeliverySchema: {
-        readonly schema: z.ZodRecord<z.ZodString, z.ZodUnknown>;
-        readonly placement: "operator-management";
-        readonly owner: "runtime-core";
-    };
-    readonly ToolSourceIngressReceiptSchema: {
-        readonly schema: z.ZodObject<{
-            source_ref: z.ZodString;
-            delivery_id: z.ZodString;
-            verified: z.ZodBoolean;
-            duplicate: z.ZodBoolean;
-            evidence_ref: z.ZodNullable<z.ZodString>;
-            run_id: z.ZodNullable<z.ZodString>;
-        }, z.core.$strict>;
-        readonly placement: "operator-management";
-        readonly owner: "runtime-core";
-    };
-    readonly EffectGrantReissueRequestSchema: {
-        readonly schema: z.ZodObject<{
-            superseded_grant_ref: z.ZodString;
-            prior_run_id: z.ZodString;
-            reason: z.ZodString;
-            idempotency_key: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "effect-dispatch";
-        readonly owner: "effect-plane";
-    };
-    readonly EffectGrantReissueOutcomeSchema: {
-        readonly schema: z.ZodObject<{
-            run_id: z.ZodString;
-            superseded_ref: z.ZodString;
-            replacement_ref: z.ZodString;
-            replacement_grant: z.ZodObject<{
-                target: z.ZodString;
-                operation: z.ZodString;
-                agent_ref: z.ZodString;
-                accountable: z.ZodString;
-                approver: z.ZodString;
-                expires_at: z.ZodString;
-                max_magnitude: z.ZodNullable<z.ZodNumber>;
-                attestation: z.ZodString;
-            }, z.core.$strict>;
-            identity_diff: z.ZodArray<z.ZodString>;
-            approver: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "effect-dispatch";
-        readonly owner: "effect-plane";
-    };
-    readonly EffectGrantRevocationRequestSchema: {
-        readonly schema: z.ZodObject<{
-            reason: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "effect-dispatch";
-        readonly owner: "effect-plane";
-    };
-    readonly EffectGrantRevocationOutcomeSchema: {
-        readonly schema: z.ZodObject<{
-            grant_ref: z.ZodString;
-            revoked: z.ZodLiteral<true>;
-            authority_epoch: z.ZodNumber;
-        }, z.core.$strict>;
-        readonly placement: "effect-dispatch";
-        readonly owner: "effect-plane";
-    };
-    readonly EffectAuthorityEpochAdvanceRequestSchema: {
-        readonly schema: z.ZodObject<{
-            reason: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "effect-dispatch";
-        readonly owner: "effect-plane";
-    };
-    readonly EffectAuthorityEpochAdvanceOutcomeSchema: {
-        readonly schema: z.ZodObject<{
-            previous_epoch: z.ZodNumber;
-            authority_epoch: z.ZodNumber;
-        }, z.core.$strict>;
-        readonly placement: "effect-dispatch";
-        readonly owner: "effect-plane";
-    };
     readonly EffectTargetListSchema: {
         readonly schema: z.ZodObject<{
             mode: z.ZodEnum<{
@@ -21580,74 +23353,6 @@ export declare const SCHEMA_REGISTRY: {
             instance_ref: z.ZodString;
         }, z.core.$strict>;
         readonly placement: "intake";
-        readonly owner: "runtime-core";
-    };
-    readonly RegisterWorkspaceInstanceRequestSchema: {
-        readonly schema: z.ZodObject<{
-            name: z.ZodString;
-            binding_profile_ref: z.ZodString;
-            locator: z.ZodObject<{
-                kind: z.ZodLiteral<"local-directory">;
-                path: z.ZodString;
-            }, z.core.$strict>;
-            access: z.ZodEnum<{
-                "read-only": "read-only";
-                "read-write": "read-write";
-            }>;
-            lifecycle: z.ZodEnum<{
-                "run-scoped": "run-scoped";
-                "deployment-owned": "deployment-owned";
-            }>;
-        }, z.core.$strict>;
-        readonly placement: "environment";
-        readonly owner: "runtime-core";
-    };
-    readonly WorkspaceInstanceSchema: {
-        readonly schema: z.ZodObject<{
-            instance_ref: z.ZodString;
-            name: z.ZodString;
-            binding_profile_ref: z.ZodString;
-            slot: z.ZodEnum<{
-                "runtime-scratch": "runtime-scratch";
-                "customer-readable-external": "customer-readable-external";
-            }>;
-            mount_prefix: z.ZodString;
-            access: z.ZodEnum<{
-                "read-only": "read-only";
-                "read-write": "read-write";
-            }>;
-            lifecycle: z.ZodEnum<{
-                "run-scoped": "run-scoped";
-                "deployment-owned": "deployment-owned";
-            }>;
-            registered_at: z.ZodString;
-        }, z.core.$strict>;
-        readonly placement: "environment";
-        readonly owner: "runtime-core";
-    };
-    readonly WorkspaceInstanceListSchema: {
-        readonly schema: z.ZodObject<{
-            instances: z.ZodArray<z.ZodObject<{
-                instance_ref: z.ZodString;
-                name: z.ZodString;
-                binding_profile_ref: z.ZodString;
-                slot: z.ZodEnum<{
-                    "runtime-scratch": "runtime-scratch";
-                    "customer-readable-external": "customer-readable-external";
-                }>;
-                mount_prefix: z.ZodString;
-                access: z.ZodEnum<{
-                    "read-only": "read-only";
-                    "read-write": "read-write";
-                }>;
-                lifecycle: z.ZodEnum<{
-                    "run-scoped": "run-scoped";
-                    "deployment-owned": "deployment-owned";
-                }>;
-                registered_at: z.ZodString;
-            }, z.core.$strict>>;
-        }, z.core.$strict>;
-        readonly placement: "environment";
         readonly owner: "runtime-core";
     };
     readonly ResolvedWorkspaceInstanceSchema: {

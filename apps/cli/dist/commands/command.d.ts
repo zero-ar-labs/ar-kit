@@ -10,7 +10,7 @@
  * chooses a runtime target and once with the connected client, before the
  * built-in dispatch. Modules reach the runtime through @zero-ar/client only.
  */
-import type { Diagnostic, RouteName } from '@zero-ar/contracts';
+import type { Diagnostic } from '@zero-ar/contracts';
 import type { ZeroARClient } from '@zero-ar/client';
 import type { CliContext } from '../identity.js';
 export interface CliCommandModule {
@@ -26,7 +26,5 @@ export interface CliCommandModule {
     /** Runs with the connected client before the built-in command. Answer an exit code, or null to let it run. */
     remote?(client: ZeroARClient, args: readonly string[], context: CliContext): Promise<number | null>;
 }
-/** The not-wired refusal for a terminal operation whose route this build declares ahead of its mechanism. */
-export declare function declaredAheadCommandRefusal(context: CliContext, operation: string, route: RouteName): Diagnostic;
 /** Print one refusal the way every command error prints, and answer the failing exit code. */
 export declare function refuseCommand(diagnostic: Diagnostic): number;

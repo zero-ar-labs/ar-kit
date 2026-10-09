@@ -17,6 +17,10 @@ export const RECORD_EVENT_MAP = {
     'branch.created': null,
     'branch.head.moved': null,
     'context.assembled': null,
+    'context.segment.started': null,
+    'context.segment.committed': null,
+    'context.segment.failed': null,
+    'context.segment.expanded': null,
     'model.call.started': null,
     'model.call.finished': null,
     'model.fallback.switched': null,
@@ -36,6 +40,9 @@ export const RECORD_EVENT_MAP = {
     'environment.prepare.requested': null,
     'environment.prepared': 'environment.prepared',
     'environment.reused': null,
+    'environment.segment.started': null,
+    'environment.segment.ending': null,
+    'environment.segment.ended': null,
     'environment.job.submit.requested': null,
     'environment.job.submitted': 'environment.job.submitted',
     'environment.job.observe.requested': null,
@@ -62,6 +69,8 @@ export const RECORD_EVENT_MAP = {
     'item.attempted': null,
     'item.parked': 'item.parked',
     'item.invalidated': 'item.invalidated',
+    'plan.recorded': null,
+    'budgets.amended': null,
     'gap.settled': 'gap.settled',
     'gap.dismissed': 'gap.dismissed',
     'checkpoint.started': 'checkpoint.started',
@@ -92,12 +101,8 @@ export const RECORD_EVENT_MAP = {
     'capability.admission.cancelled': 'capability.admission.cancelled',
     'closure.epoch.committed': 'closure.epoch.committed',
     'closure.epoch.activated': 'closure.epoch.activated',
-    // Browser binding records stay internal to the log until the browser
-    // capability names its durable events.
-    'browser.binding.pinned': null,
-    'browser.destination.proposed': null,
-    'browser.destination.decided': null,
-    'browser.binding.superseded': null,
+    'state.closure.rehydrated': null,
+    'executor.continuation.accepted': null,
 };
 /** One stable product family for every resumable event name. */
 export const DURABLE_EVENT_FAMILY = {
