@@ -1,18 +1,6 @@
-/**
- * The public command target resolver.
- *
- * What this is: the one pure decision that chooses an explicit hosted URL,
- * the ZERO_AR_URL environment value, or bundled Local Lite in that order.
- *
- * How it fits: the client opens the selected target. This file never reads a
- * secret, starts a process, opens a socket, or falls back after selection.
- * Junior guide: add connection syntax here, then prove its precedence before
- * teaching any command about it.
- */
 import { refuse } from "./diagnostics.js";
 import { resolveProductEnvironment } from "./product-identity-env.js";
 const HOSTED_AUTH_ARGUMENTS = ['--api-key', '--tenant-api-key', '--authorization'];
-/** Resolve one target and remove only its connection argument from command input. */
 export function resolveCommandTarget(input) {
     refuseHostedAuthArguments(input.arguments);
     const explicit = explicitUrl(input.arguments);

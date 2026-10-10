@@ -1,11 +1,3 @@
-/**
- * The CLI release artifact generator.
- *
- * Junior guide: distribution files are part of the product, not loose docs.
- * This file renders completions, manpages, install scripts, service units and
- * examples from the same command table and identity constants used by the CLI.
- * The release builder writes these files into the attested image output.
- */
 import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -72,7 +64,7 @@ function renderManpage(identity) {
         escapeRoff(row.summary),
     ]);
     return [
-        `.TH ${identity.command.toUpperCase()} 1 "2026-10-08" "${SUCCESSOR_PRODUCT_IDENTITY.display_name} 0.4.1" "${SUCCESSOR_PRODUCT_IDENTITY.display_name} user commands"`,
+        `.TH ${identity.command.toUpperCase()} 1 "2026-10-09" "${SUCCESSOR_PRODUCT_IDENTITY.display_name} 0.4.2" "${SUCCESSOR_PRODUCT_IDENTITY.display_name} user commands"`,
         '.SH NAME',
         `${identity.command} \\- ${identity.display_name} command`,
         '.SH SYNOPSIS',
@@ -88,7 +80,6 @@ function renderManpage(identity) {
         '',
     ].join('\n');
 }
-/** The pinned project release key. The private half never leaves the signing environment. */
 export const RELEASE_KEY_FINGERPRINT = '7E5FE75754B236B53FDF5A1CA050DB8D0B817918';
 function renderInstallScript(identity) {
     const slug = SUCCESSOR_PRODUCT_IDENTITY.slug;

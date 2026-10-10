@@ -1,14 +1,3 @@
-/**
- * The shared tool-host JSON-lines protocol.
- *
- * What this is: one parser and one protocol label used by runtime hosts,
- * developer hosts, and clients. Bad lines become typed replies, not thrown
- * exceptions, so the host can answer the next admitted call.
- *
- * How it fits: the kernel decides admission and leases before a call
- * reaches this shape. This file only preserves the process-boundary wire
- * contract.
- */
 import { TRUST_TIERS } from "./vocab.js";
 export const TOOL_HOST_PROTOCOL = 'zero-ar-tool-host/1';
 export function isToolHostProtocolError(value) {

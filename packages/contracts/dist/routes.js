@@ -1,17 +1,3 @@
-/**
- * The public route table.
- *
- * What this is: every route the server offers and every client speaks,
- * declared once with its method, path, transport kind, and the registry
- * names of its request and response shapes. The client module is generated
- * from this table, and the parity vector drives a live server through all
- * of it (XCV-003).
- *
- * How it fits: a surface that needs an operation absent from this table
- * blocks until the contract exists (ERD 9.1). Adding a row here and
- * regenerating is the whole procedure for a new route; a hand-edited
- * client drifts from this table and the drift check refuses it.
- */
 import { ASSURANCE_COMPLETION_CLASSES, PRODUCT_AREAS, RUN_REVIEW_STATES, RUN_STATUSES, } from "./vocab.js";
 export { PRODUCT_AREAS, ROUTE_SCOPES } from "./vocab.js";
 export const API_ROUTES = {
@@ -99,6 +85,8 @@ export const API_ROUTES = {
     importRun: { method: 'POST', path: '/v1/imports', kind: 'bundle', request_media_type: 'application/x-ndjson', response: 'ImportOutcomeSchema', area: 'administration', authorization: { scopes: ['operator:restore'] } },
     checkRunContinuation: { method: 'POST', path: '/v1/runs/:run_id/continuation-checks', kind: 'json', request: 'RunContinuationDeclarationSchema', response: 'RunContinuationCompatibilityReportSchema', area: 'administration', authorization: { scopes: ['operator:restore'] } },
     continueImportedRun: { method: 'POST', path: '/v1/runs/:run_id/continuations', kind: 'json', request: 'RunContinuationAdmissionRequestSchema', response: 'RunContinuationAcceptedSchema', area: 'administration', authorization: { scopes: ['operator:restore', 'run:resume'] }, product_mutation: { idempotency_source: 'request-idempotency-key', changed_content_code: 'run.continuation.idempotency-reused' } },
+    handoffRun: { method: 'POST', path: '/v1/runs/:run_id/handoff', kind: 'json', request: 'RunHandoffRequestSchema', response: 'RunHandoffReceiptSchema', area: 'administration', authorization: { scopes: ['operator:restore'] }, product_mutation: { idempotency_source: 'request-idempotency-key', changed_content_code: 'run.handoff.idempotency-reused' } },
+    continuationDestination: { method: 'GET', path: '/v1/continuation-destination', kind: 'json', response: 'RunContinuationDestinationIdentitySchema', area: 'administration', authorization: { scopes: ['operator:restore'] } },
     streamRecords: {
         method: 'GET',
         path: '/v1/runs/:run_id/records/stream',
@@ -221,8 +209,6 @@ export const API_ROUTES = {
     calibrateAttention: { method: 'POST', path: '/v1/attention/calibrations', kind: 'json', request: 'AttentionCalibrationRequestSchema', response: 'AttentionCalibrationReportSchema', area: 'administration', authorization: { scopes: ['operator:attention'] } },
     publishAttentionCapacitySnapshot: { method: 'POST', path: '/v1/attention/capacity-snapshots', kind: 'json', request: 'AttentionCapacitySnapshotPublishRequestSchema', response: 'AttentionCapacitySnapshotSchema', area: 'administration', authorization: { scopes: ['operator:attention'] } },
     currentAttentionCapacitySnapshot: { method: 'GET', path: '/v1/attention/capacity-snapshots/current', kind: 'json', response: 'AttentionCapacitySnapshotSchema', area: 'administration', authorization: { scopes: ['operator:attention'] } },
-    // review:read alone: the dashboard aggregates the review workload that
-    // key already reads item by item, and plain scope lists are all-of.
     attentionDashboard: { method: 'GET', path: '/v1/attention/dashboard', kind: 'json', response: 'AttentionDashboardSchema', area: 'review-and-authority', authorization: { scopes: ['review:read'] } },
     sweepArtifacts: { method: 'POST', path: '/v1/artifact-sweeps', kind: 'json', request: 'ArtifactSweepRequestSchema', response: 'ArtifactSweepResultSchema', area: 'administration', authorization: { scopes: ['operator:reconcile'] } },
     exportPublication: { method: 'GET', path: '/v1/publications/:publication_ref/export', kind: 'bundle', response_media_type: 'application/x-ndjson', area: 'build-and-publish', authorization: { scopes: ['publication:read'] } },
@@ -234,22 +220,18 @@ export const API_ROUTES = {
         method: 'GET',
         path: '/v1/effect-targets',
         kind: 'json',
-        // Local Lite answers mode absent. A hosted tenant attaches no effect
-        // authority port in this build, so every hosted tenant refuses.
         diagnostics: [{ status: 400, code: 'effect.authority.unwired', when: 'a runtime that attaches no effect authority port, which is every hosted tenant in this build' }],
         response: 'EffectTargetListSchema',
         area: 'review-and-authority',
         authorization: { scopes: ['effect:read'] },
     },
 };
-/** The :named parameters a route's path carries, in order. */
 export function routeParams(path) {
     return path
         .split('/')
         .filter((segment) => segment.startsWith(':'))
         .map((segment) => segment.slice(1));
 }
-/** Substitute parameters into a route path. A missing parameter throws by name. */
 export function routePath(name, params = {}) {
     return API_ROUTES[name].path
         .split('/')

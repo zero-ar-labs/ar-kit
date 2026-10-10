@@ -1,14 +1,3 @@
-/**
- * Provider control-plane contracts.
- *
- * What this is: admitted adapter metadata, tenant provider instances,
- * discovered catalogue entries, explicit enablement, and the exact model
- * selection the kernel pins. Credential bytes have no field here.
- *
- * How it fits: administrators configure and enable models through these
- * generated contracts. Only a run-owned adapter call consumes a selection;
- * no contract in this file is an inference request.
- */
 import { z } from 'zod';
 import { CREDENTIAL_BINDING_STATES, MODEL_CATALOGUE_SOURCES, MODEL_COMPATIBILITY_STATES, MODEL_CREDENTIAL_MODES, MODEL_IMAGE_INPUT_STATES, MODEL_PROTOCOL_ADAPTERS, MODEL_PROVIDERS, MODEL_PROVIDER_PROFILES, MODEL_USAGE_MEASUREMENTS, PROVIDER_CREDENTIAL_PURPOSES, PROVIDER_INSTANCE_STATES, PROVIDER_MODEL_STATES, } from "./vocab.js";
 import { contentHash } from "./ids.js";
@@ -42,7 +31,6 @@ export const AdmitModelAdapterRequestSchema = z.strictObject({
     ...adapterAdmissionShape,
     signature: z.string().regex(/^[0-9a-f]{64}$/, 'expected a lowercase sha256 admission signature'),
 }).superRefine(checkAdapterProtocol);
-/** Exact signed adapter body, shared by the platform signer and admission verifier. */
 export function modelAdapterIdentity(request) {
     const { signature: _signature, ...identity } = request;
     return ModelAdapterIdentitySchema.parse(identity);
@@ -70,17 +58,14 @@ export const CreateExternalCredentialBindingRequestSchema = z.strictObject({
     purpose: z.enum(PROVIDER_CREDENTIAL_PURPOSES),
     external_ref: externalSecretRef,
 });
-/** The only public JSON shape that may carry provider secret bytes. */
 export const ProtectedCredentialIngestRequestSchema = z.strictObject({
     name,
     purpose: z.enum(PROVIDER_CREDENTIAL_PURPOSES),
     secret: secretMaterial,
 });
 export const RotateExternalCredentialRequestSchema = z.strictObject({ external_ref: externalSecretRef });
-/** Rotation counterpart to protected ingest. The secret is never returned. */
 export const RotateProtectedCredentialRequestSchema = z.strictObject({ secret: secretMaterial });
 export const RevokeCredentialRequestSchema = z.strictObject({ reason: z.string().min(1).max(500) });
-/** Exact compatible behavior one tenant admits for a configured endpoint. */
 export const ProviderCompatibilitySchema = z.strictObject({
     streaming: z.enum(MODEL_COMPATIBILITY_STATES),
     tools: z.enum(MODEL_COMPATIBILITY_STATES),
@@ -89,29 +74,17 @@ export const ProviderCompatibilitySchema = z.strictObject({
     usage: z.enum(MODEL_USAGE_MEASUREMENTS).exclude(['estimated']),
     upstream_attestation_ref: ref.nullable(),
     notes: z.array(z.string().min(1).max(500)).max(16),
-    /** Whether the model accepts image content. Absent takes the profile default from providerImageInput. */
     image_input: z.enum(MODEL_IMAGE_INPUT_STATES).optional(),
-    /** Whether prior assistant calls and correlated tool results use the Chat Completions message protocol. */
     tool_call_correlation: z.enum(MODEL_COMPATIBILITY_STATES).optional(),
-    /** Whether function definitions accept the provider strict-schema flag. */
     strict_function_schemas: z.enum(MODEL_COMPATIBILITY_STATES).optional(),
 });
-/** Profiles whose tested defaults accept image content. Every other profile receives a note naming each image. */
 const IMAGE_INPUT_PROFILES = new Set(['anthropic', 'openai']);
-/**
- * Whether one profile's model accepts images: what its admitted statement
- * declares, else the profile default, which is supported for anthropic and
- * openai and unsupported for every other profile. A statement admitted
- * before this fact existed keeps its identity and takes the default.
- */
 export function providerImageInput(profile, compatibility) {
     return compatibility?.image_input ?? (IMAGE_INPUT_PROFILES.has(profile) ? 'supported' : 'unsupported');
 }
-/** Content identity for the admitted compatibility statement. */
 export function modelCompatibilityRef(compatibility) {
     return contentHash(ProviderCompatibilitySchema.parse(compatibility));
 }
-/** The wire adapter one provider profile is allowed to use. */
 export function providerProfileProtocol(profile) {
     if (profile === 'scripted')
         return 'scripted';
@@ -119,13 +92,11 @@ export function providerProfileProtocol(profile) {
         return 'anthropic-messages';
     return 'openai-chat-completions';
 }
-/** The provider family a profile belongs to without collapsing profile identity. */
 export function providerProfileFamily(profile) {
     if (profile === 'generic-openai-compatible' || profile === 'litellm' || profile === 'ollama')
         return 'openai-compatible';
     return profile;
 }
-/** Conservative compatibility defaults for each tested profile. */
 export function providerProfileCompatibility(profile) {
     const full = {
         streaming: 'supported',
@@ -212,7 +183,6 @@ export const CreateProviderInstanceRequestSchema = z.strictObject({
         ctx.addIssue({ code: 'custom', path: ['credential_mode'], message: 'the ollama profile declares explicit no-auth mode.' });
     }
 });
-/** Build the explicit profile fields used by the SDK, CLI examples, and tests. */
 export function providerInstanceProfile(profile, endpoint, credential, options = {}) {
     const complete = CreateProviderInstanceRequestSchema.parse({
         name: 'profile.defaults',

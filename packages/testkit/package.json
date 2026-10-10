@@ -1,11 +1,11 @@
 {
   "name": "@zero-ar/testkit",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "type": "module",
   "description": "Build deterministic Zero-AR integration tests without external providers.",
   "license": "Apache-2.0",
   "dependencies": {
-    "@zero-ar/contracts": "0.4.1"
+    "@zero-ar/contracts": "0.4.2"
   },
   "engines": {
     "node": ">=24.11.0 <25"

@@ -1,25 +1,5 @@
-/**
- * The development hot-reload loop (developer-integration appendix 7.4,
- * DXI-025).
- *
- * What this is: recompile changed project source into a new publication
- * candidate, run the conformance that candidate answers for itself, and
- * move one development-namespace alias only when nothing failed.
- *
- * How it fits: an alias move changes later intake and nothing else. A run
- * that already pinned a closure keeps every ref it pinned, so this loop
- * never reaches active work. The candidate is the ordinary compiled
- * bundle a hosted commit carries, so hot reload bypasses no publication
- * identity. A namespace prefixes the alias, because an alias is a
- * lowercase dot-separated name: namespace development and agent assistant
- * make the alias development.assistant.
- */
 import { refuse, verifyBundle } from '@zero-ar/contracts';
 const NAMESPACE = /^[a-z][a-z0-9-]*$/;
-/**
- * Open a hot-reload loop over one project. The loop carries the ref it
- * last published, so each pass can say what changed and what did not.
- */
 export function developmentLoop(options) {
     if (!NAMESPACE.test(options.namespace)) {
         refuse({
@@ -89,7 +69,6 @@ async function pass(options, previous_ref) {
         : 'runs already admitted keep whatever they pinned. A closure pinned at intake never moves.');
     return { ...answer, published: true };
 }
-/** The closure check every candidate answers, plus whatever the caller adds. */
 async function runConformance(compiled, extra) {
     const failures = [];
     let passed = 0;
@@ -107,7 +86,6 @@ async function runConformance(compiled, extra) {
     }
     return { passed, failures };
 }
-/** The ordinary staged publication: a session, the missing bytes, one commit. */
 async function publishCandidate(client, compiled) {
     const session = await client.createPublicationSession({ bundle: compiled.bundle });
     for (const content_ref of session.missing_blobs) {

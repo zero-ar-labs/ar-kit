@@ -1,14 +1,5 @@
-/**
- * Public contracts for the optional cross-run memory service.
- *
- * Assertions carry cited support, valid time, classification, transaction
- * time and explicit state. Run-owned reads report watermarks and degrade to
- * session scope when the optional service is missing or stale (MEM-001
- * through MEM-010, XCV-016).
- */
 import { z } from 'zod';
 import type { MemoryClassification } from './vocab.js';
-/** The publication-owned policy that makes one narrow memory subject available to a run. */
 export declare const MemoryBindingSchema: z.ZodObject<{
     name: z.ZodString;
     subject: z.ZodObject<{
@@ -39,7 +30,6 @@ export declare const MemoryBindingSchema: z.ZodObject<{
     maximum_assertions_per_read: z.ZodDefault<z.ZodNumber>;
 }, z.core.$strict>;
 export type MemoryBinding = z.infer<typeof MemoryBindingSchema>;
-/** One published binding resolved against authenticated intake and pinned into run identity. */
 export declare const ResolvedMemoryBindingSchema: z.ZodObject<{
     name: z.ZodString;
     predicates: z.ZodArray<z.ZodString>;
@@ -73,7 +63,6 @@ export declare const ResolvedMemoryBindingSchema: z.ZodObject<{
     }, z.core.$strict>;
 }, z.core.$strict>;
 export type ResolvedMemoryBinding = z.infer<typeof ResolvedMemoryBindingSchema>;
-/** The bounded model request. Tenant and subject are absent by construction (MSH-003). */
 export declare const ModelMemoryReadRequestSchema: z.ZodObject<{
     binding: z.ZodString;
     predicate: z.ZodString;
@@ -81,7 +70,6 @@ export declare const ModelMemoryReadRequestSchema: z.ZodObject<{
     minimum_watermark: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strict>;
 export type ModelMemoryReadRequest = z.infer<typeof ModelMemoryReadRequestSchema>;
-/** A run-owned proposal. Its cited spans must resolve through the current run before admission. */
 export declare const ModelMemoryProposalSchema: z.ZodObject<{
     binding: z.ZodString;
     predicate: z.ZodString;
@@ -198,7 +186,6 @@ export declare const MemoryWriteOutcomeSchema: z.ZodObject<{
     }, z.core.$strict>;
 }, z.core.$strict>;
 export type MemoryWriteOutcome = z.infer<typeof MemoryWriteOutcomeSchema>;
-/** Additional admission bounds supplied by a publication-owned proposal path. */
 export interface MemoryAssertionAdmission {
     classification_ceiling?: MemoryClassification;
 }
@@ -344,7 +331,6 @@ export declare const RunMemoryReadOutcomeSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type RunMemoryReadOutcome = z.infer<typeof RunMemoryReadOutcomeSchema>;
-/** Exact model-visible memory bytes before subject-key sealing and artifact storage. */
 export declare const MemoryReadEnvelopeSchema: z.ZodObject<{
     schema: z.ZodLiteral<"zero-ar-memory-read-envelope/1">;
     run_id: z.ZodString;
@@ -400,7 +386,6 @@ export declare const MemoryReadEnvelopeSchema: z.ZodObject<{
     created_at: z.ZodString;
 }, z.core.$strict>;
 export type MemoryReadEnvelope = z.infer<typeof MemoryReadEnvelopeSchema>;
-/** Subject-key-sealed bytes stored by the artifact backend for one exact read envelope. */
 export declare const ProtectedMemoryReadEnvelopeSchema: z.ZodObject<{
     schema: z.ZodLiteral<"zero-ar-protected-memory-read-envelope/1">;
     subject_ref: z.ZodString;
@@ -416,14 +401,12 @@ export declare const ProtectedMemoryReadEnvelopeSchema: z.ZodObject<{
     tag: z.ZodString;
 }, z.core.$strict>;
 export type ProtectedMemoryReadEnvelope = z.infer<typeof ProtectedMemoryReadEnvelopeSchema>;
-/** One durable key row as stored under a deployment wrapping key. */
 export declare const MemoryWrappedKeySchema: z.ZodObject<{
     wrapped_key: z.ZodString;
     nonce: z.ZodString;
     tag: z.ZodString;
 }, z.core.$strict>;
 export type MemoryWrappedKey = z.infer<typeof MemoryWrappedKeySchema>;
-/** The encrypted custody rows explicitly permitted to travel with one subject stream. */
 export declare const MemorySubjectKeyMaterialSchema: z.ZodObject<{
     schema: z.ZodLiteral<"zero-ar-memory-subject-key-material/1">;
     binding_ref: z.ZodString;
@@ -444,7 +427,6 @@ export declare const MemorySubjectKeyMaterialSchema: z.ZodObject<{
     }, z.core.$strict>;
 }, z.core.$strict>;
 export type MemorySubjectKeyMaterial = z.infer<typeof MemorySubjectKeyMaterialSchema>;
-/** One content-addressed subject transfer. The subject itself travels only in the authorized request. */
 export declare const MemorySubjectTransferBundleSchema: z.ZodObject<{
     schema: z.ZodLiteral<"zero-ar-memory-subject-transfer/1">;
     subject_ref: z.ZodString;
@@ -528,22 +510,16 @@ export declare const MemorySubjectImportOutcomeSchema: z.ZodObject<{
     erased: z.ZodBoolean;
 }, z.core.$strict>;
 export type MemorySubjectImportOutcome = z.infer<typeof MemorySubjectImportOutcomeSchema>;
-/** The attachable service port. HTTP routes and the kernel depend on this contract only. */
 export interface MemoryServicePort {
     assert(input: MemoryAssertionInput, admission?: MemoryAssertionAdmission): Promise<MemoryWriteOutcome>;
     supersede(assertion_id: string, request: MemorySupersedeRequest): Promise<MemorySupersedeOutcome>;
     read(input: MemoryReadRequest): Promise<MemoryReadResponse>;
     history(input: MemoryHistoryRequest): Promise<MemoryHistoryResponse>;
     erase(input: MemorySubjectErasureRequest): Promise<MemorySubjectErasureOutcome>;
-    /** Return the deployment-keyed subject reference without disclosing the subject. */
     subjectReference(subject: string): Promise<string>;
-    /** Seal one exact model-visible read under the subject key before artifact storage. */
     sealEnvelope(subject: string, envelope: MemoryReadEnvelope): Promise<ProtectedMemoryReadEnvelope>;
-    /** Open a stored envelope only while the same subject key remains live. */
     openEnvelope(subject: string, envelope: ProtectedMemoryReadEnvelope): Promise<MemoryReadEnvelope>;
-    /** Export one canonical encrypted subject stream and only its wrapped custody rows. */
     exportSubject(subject: string): Promise<MemorySubjectTransferBundle>;
-    /** Import one verified subject transfer into a fresh stream and matching durable custody. */
     importSubject(subject: string, bundle: MemorySubjectTransferBundle): Promise<MemorySubjectImportOutcome>;
     probe?(): Promise<'ready' | 'unreachable'>;
 }

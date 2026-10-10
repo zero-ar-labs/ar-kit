@@ -1,10 +1,3 @@
-/**
- * The product identity stored-format policy.
- *
- * Junior guide: a reader can understand more names than a writer emits.
- * The cutover is complete, so every writer emits the successor format and
- * the readers still accept the historical ones. No clock is consulted.
- */
 import { PRODUCT_RUN_BUNDLE_FORMATS, PRODUCT_SBOM_FORMATS, PRODUCT_SOURCE_API_VERSIONS, } from "./vocab.js";
 export const LEGACY_SOURCE_API_VERSION = 'ramsden/v1';
 export const SUCCESSOR_SOURCE_API_VERSION = 'zero-ar/v1';
@@ -80,7 +73,6 @@ export function productRunBundleFormatReadable(value) {
 export function productSbomFormatReadable(value) {
     return PRODUCT_SBOM_FORMATS.includes(value ?? '');
 }
-/** The cutover is complete: writers use the successor identifiers, always. */
 export function productWritesUseSuccessor() {
     return true;
 }

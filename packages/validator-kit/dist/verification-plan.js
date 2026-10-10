@@ -1,10 +1,3 @@
-/**
- * The one pure visible verification-plan compiler.
- *
- * It accepts only explicit immutable inputs and returns canonical inert data.
- * There is no clock, random source, registry lookup, model, network, lease,
- * log, validator invocation, publication or authority capability in this file.
- */
 import { VerificationCheckpointInputBodySchema, VerificationCheckpointInputSchema, VerificationAttentionCapacitySnapshotBodySchema, VerificationAttentionCapacitySnapshotSchema, VerificationPlanBodySchema, VerificationPlanInputSchema, VerificationPlanSchema, canonicalJson, contentHash, } from '@zero-ar/contracts';
 import { admitAvailabilitySnapshot, admitCatalogueEntry } from "./catalogue.js";
 export const ATTENTION_NOT_EVALUATED = 'attention feasibility not evaluated';
@@ -69,28 +62,7 @@ function availabilityEntry(availability, entry) {
 function deferredClass(validatorClass) {
     return validatorClass === 'heuristic' || validatorClass === 'sampled-oracle';
 }
-/**
- * The one selection the runtime executes and the plan shows. Every validator
- * whose binding covers a rule is invoked once for that rule, so a
- * non-sufficient binding listed first cannot decide the rule alone.
- *
- * The unit is one validator for one rule, not one validator for the union of
- * its rules: the validator input names a single rule, the examined manifest
- * hashes it, and sufficiency is attributed per rule. A validator that covers
- * two rules at one stage therefore runs, and is budgeted, twice. A validator
- * identity (name, version and class) declared more than once still runs once
- * per rule, at the position of its first covering binding, and counts as
- * sufficient when any of its bindings both covers the rule and names it in
- * `sufficient_for`.
- *
- * Order is deterministic and named-human first, then heuristic and
- * sampled-oracle, then rule name, then declared binding position. The runtime
- * skips the heuristic and sampled-oracle group after an item-naming rejection
- * from the first group; the selection itself lists every invocation.
- */
 export function selectValidatorInvocations(contract, rules) {
-    // Index each validator identity once: the first binding that covers each
-    // rule, and the rules it is designated sufficient for among those covered.
     const identities = new Map();
     contract.validators.forEach((binding, position) => {
         const identity = `${binding.name}\u0000${binding.version}\u0000${binding.class}`;
@@ -127,11 +99,9 @@ export function selectValidatorInvocations(contract, rules) {
         || left.rule.localeCompare(right.rule)
         || left.binding_position - right.binding_position);
 }
-/** The declared wall-time upper bound of exactly these selected invocations. */
 function invocationCost(invocations) {
     return invocations.reduce((sum, invocation) => sum + invocation.binding.cost_wall_ms, 0);
 }
-/** Upper bound for exactly the invocations the runtime selects for these rules. */
 export function selectedValidatorCost(contract, rules) {
     return invocationCost(selectValidatorInvocations(contract, rules));
 }
@@ -141,7 +111,6 @@ function fixedCost(contract, items, interval) {
     const checkpoints = Math.max(1, Math.ceil(items / interval));
     return { perCheckpoint, acceptance, checkpoints, projected: checkpoints * perCheckpoint + acceptance };
 }
-/** Compile fixed or controller-resolved cadence from exact already-decided inputs. */
 export function verificationCheckpointInputForContract(contract, items, controlled = null) {
     if (controlled) {
         return defineVerificationCheckpointInput({
@@ -188,7 +157,6 @@ export function verificationCheckpointInputForContract(contract, items, controll
         projected_cost_ms: costs.projected,
     });
 }
-/** Compile one content-addressed plan. The same normalized inputs return the same bytes and ref. */
 export function compileVerificationPlan(raw) {
     const input = normalizeInput(raw);
     const inputRef = contentHash(input);
@@ -279,9 +247,6 @@ export function compileVerificationPlan(raw) {
         if (entry.runtime_needs.artifact_reader && available?.artifact_reader_available !== true) {
             refusals.push(refusal('artifact-reader-unavailable', `${binding.name} requires an admitted artifact reader that is absent from the availability snapshot.`, { validator: binding.name, dependency: 'artifact-reader' }));
         }
-        // A sampled-oracle binding is held to the sampled rules even when its
-        // entry declares a full population, so a mislabelled entry cannot skip
-        // its oracle and frame checks (appendix section 8).
         if (entry.input_contract.population === 'sampled' || binding.class === 'sampled-oracle') {
             if (entry.input_contract.population !== 'sampled') {
                 refusals.push(refusal('sample-frame-unpinned', `${binding.name} is bound as sampled-oracle, and its catalogue entry declares a full population, so it states no sampled frame or guarantee.`, { validator: binding.name, dependency: 'sampling-frame' }));
@@ -296,9 +261,6 @@ export function compileVerificationPlan(raw) {
             if (entry.runtime_needs.sampling_frame_ref && available?.sampling_frame_ref !== entry.runtime_needs.sampling_frame_ref) {
                 refusals.push(refusal('sample-frame-unpinned', `${binding.name} deployment sampling frame differs from the configured frame.`, { validator: binding.name, dependency: 'sampling-frame' }));
             }
-            // The pinned frame names the admitted population. An invocation samples
-            // only the worked items it is handed, so the row says where it runs and
-            // that each invocation's own frame hash is in its sampling record.
             const atCheckpoints = (contract?.invariants ?? []).filter((rule) => binding.covers.includes(rule));
             const atCompletion = (contract?.acceptance_rules ?? []).filter((rule) => binding.covers.includes(rule));
             sampledGuarantees.push(`sampled check ${binding.name}@${binding.version} (${binding.class}): oracle ${entry.runtime_needs.oracle_ref ?? 'unpinned'}, ` +
@@ -345,12 +307,6 @@ export function compileVerificationPlan(raw) {
             { stage: 'acceptance', names: contract.acceptance_rules },
         ]
         : [];
-    // One rule row per selected invocation, that is per (stage, rule,
-    // validator), because the runtime invokes every covering validator. A rule
-    // no binding covers keeps one row with no validator. Nothing is skipped by
-    // selection any more, so skipped_overlapping_binding_positions stays empty;
-    // skip_condition names the runtime skip that can still apply to a
-    // heuristic or sampled-oracle row.
     const sufficientPositionsByRule = new Map();
     (contract?.validators ?? []).forEach((binding, position) => {
         for (const rule of new Set(binding.sufficient_for)) {
@@ -579,7 +535,6 @@ export function compileVerificationPlan(raw) {
     });
     return VerificationPlanSchema.parse({ ...body, plan_ref: contentHash(body) });
 }
-/** One renderer over the canonical object; no separate explanatory state. */
 export function renderVerificationPlan(plan) {
     const status = plan.reachability.verified_completion_reachable ? 'reachable' : 'unreachable';
     const lines = [

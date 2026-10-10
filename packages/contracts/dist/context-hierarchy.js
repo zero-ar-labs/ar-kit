@@ -1,14 +1,3 @@
-/**
- * The hierarchical context public contracts.
- *
- * What this is: the immutable policy, source interval, segment manifest and
- * expansion shapes used to compact old within-run context without replacing
- * canonical entries.
- *
- * How it fits: postures pin the policy, canonical records pin model work and
- * committed segment artifacts, and projections rebuild the hierarchy without
- * contacting a provider.
- */
 import { z } from 'zod';
 import { CitedSpanSchema } from "./claims.js";
 import { contentHash } from "./ids.js";
@@ -103,27 +92,18 @@ export const ContextExpansionResultSchema = z.strictObject({
     depth: z.number().int().min(1).max(16),
     returned_segments: z.array(hash).max(256),
     returned_entries: z.array(id('ent')).max(4_096),
-    /** Historical expansion records predate exact span attribution. */
     returned_spans: z.array(CitedSpanSchema).max(4_096).default([]),
     omitted: z.array(z.strictObject({ reference: z.string().min(1), reason: z.string().min(1) })).max(4_096),
     token_estimate: count,
 });
-/** One committed segment the selector omitted from an actual or observed view. */
 export const ContextSegmentOmissionSchema = z.strictObject({
     segment_ref: hash,
     reason: z.string().min(1).max(500),
 });
-/** A typed optional-policy degradation, recorded instead of hidden fallback. */
 export const ContextHierarchyDegradationSchema = z.strictObject({
     code: z.string().min(1).max(200),
     message: z.string().min(1).max(2_000),
 });
-/**
- * The hierarchy contribution to one recorded model window.
- *
- * Included manifests are the exact artifact identities placed in the model
- * request. Observe mode keeps them under observed and leaves included empty.
- */
 export const ContextHierarchyWindowSchema = z.strictObject({
     policy_ref: hash,
     mode: z.enum(['observe', 'enforce']),

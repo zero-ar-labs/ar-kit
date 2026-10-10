@@ -1,11 +1,3 @@
-/**
- * Dynamic governed capability admission contracts (DCA0-DCA2).
- *
- * A request asks to amend one run's immutable capability closure. It grants
- * nothing. Classification binds inspected, content-addressed publication
- * bytes to a complete consequence diff. Approval binds that exact plan, and
- * a later safe-boundary activation changes only future work in the same run.
- */
 import { z } from 'zod';
 import type { ResolvedRunManifest } from './schemas.js';
 export declare const CapabilityAdmissionRequestSchema: z.ZodObject<{
@@ -26,9 +18,7 @@ export declare const CapabilityAdmissionRequestSchema: z.ZodObject<{
     expected_active_epoch: z.ZodOptional<z.ZodNumber>;
     idempotency_key: z.ZodString;
 }, z.core.$strict>;
-/** Public caller input may omit fields whose defaults are owned by the server schema. */
 export type CapabilityAdmissionRequest = z.input<typeof CapabilityAdmissionRequestSchema>;
-/** Runtime code receives the normalized request after parsing the public input. */
 export type ParsedCapabilityAdmissionRequest = z.output<typeof CapabilityAdmissionRequestSchema>;
 export declare const CapabilityAdmissionDecisionRequestSchema: z.ZodObject<{
     decision: z.ZodEnum<{
@@ -1084,7 +1074,6 @@ export declare const CapabilityAdmissionListRequestSchema: z.ZodObject<{
     cursor: z.ZodOptional<z.ZodString>;
     limit: z.ZodDefault<z.ZodNumber>;
 }, z.core.$strict>;
-/** Caller input may omit the limit because the wire schema supplies twenty. */
 export type CapabilityAdmissionListRequest = z.input<typeof CapabilityAdmissionListRequestSchema>;
 export declare const CapabilityAdmissionAcceptedSchema: z.ZodObject<{
     accepted: z.ZodLiteral<true>;

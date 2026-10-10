@@ -1,17 +1,3 @@
-/**
- * @zero-ar/sdk: authoring builders.
- *
- * What this is: defineAgent, defineTool, defineValidator, and definePosture,
- * each producing an immutable, content-addressed manifest validated at
- * declaration time (ADX-001). The SDK holds no loop, no storage, and no way
- * to promote completion; it authors declarations and talks to the runtime
- * through the public client alone.
- *
- * How it fits: this milestone carries the minimal builder set the ERD asks
- * of the runway. Tool bindings, validator conformance, posture registries,
- * and the compiler for YAML and Markdown forms grow through milestones two
- * and three without changing what a manifest is: frozen data plus a hash.
- */
 import { DomainPackSchema, MACHINE_PREDICATE, VALIDATOR_OUTCOMES, canonicalJson, contentHash, refuse } from '@zero-ar/contracts';
 import { ZeroARClient } from '@zero-ar/client';
 import { catalogueDefaults, defineCatalogueEntry } from '@zero-ar/validator-kit';
@@ -76,13 +62,11 @@ export function defineValidator(spec) {
     });
     return sealed('validator', { ...spec, verdicts: [...VALIDATOR_OUTCOMES], catalogue_entry });
 }
-/** Model output remains inert source material with no grade or sufficiency authority. */
 export function modelValidatorAuthoringProposal(candidate) {
     const normalized = JSON.parse(canonicalJson(candidate));
     const body = { schema: 'model-validator-authoring-proposal/1', status: 'unadmitted', candidate: normalized };
     return Object.freeze({ ...body, proposal_ref: contentHash(body) });
 }
-/** A declared author deterministically selects explicit validator input under a new identity. */
 export function admitModelValidatorAuthoringProposal(proposal, selection) {
     if (!selection.selected_by.trim()) {
         refuse({ code: 'sdk.validator.selection-author.missing', message: 'model-assisted validator authoring needs the declared author who selected the final input.', clause: 'VPC-040' });
@@ -111,13 +95,6 @@ export { authoringScaffold, scaffoldBindingProfile, scaffoldBytes, scaffoldDomai
 export function createRuntimeClient(baseUrl) {
     return new ZeroARClient(baseUrl);
 }
-/**
- * Compile a domain pack for publication (XCV-012). Machine claims must be
- * versioned predicates whose evidence names a validator the deployment
- * really has; a prose claim or unresolved evidence fails here, before
- * anything publishes. Notes pass through labelled as informational, with
- * no authority, so a pack cannot smuggle a claim through a sentence.
- */
 export function compileDomainPack(pack, available) {
     const parsed = DomainPackSchema.safeParse(pack);
     if (!parsed.success) {

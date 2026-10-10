@@ -1,14 +1,3 @@
-/**
- * The hierarchical context public contracts.
- *
- * What this is: the immutable policy, source interval, segment manifest and
- * expansion shapes used to compact old within-run context without replacing
- * canonical entries.
- *
- * How it fits: postures pin the policy, canonical records pin model work and
- * committed segment artifacts, and projections rebuild the hierarchy without
- * contacting a provider.
- */
 import { z } from 'zod';
 export declare const HierarchicalContextPolicySchema: z.ZodObject<{
     selector: z.ZodLiteral<"hierarchical-context-v1">;
@@ -175,24 +164,16 @@ export declare const ContextExpansionResultSchema: z.ZodObject<{
     token_estimate: z.ZodNumber;
 }, z.core.$strict>;
 export type ContextExpansionResult = z.infer<typeof ContextExpansionResultSchema>;
-/** One committed segment the selector omitted from an actual or observed view. */
 export declare const ContextSegmentOmissionSchema: z.ZodObject<{
     segment_ref: z.ZodString;
     reason: z.ZodString;
 }, z.core.$strict>;
 export type ContextSegmentOmission = z.infer<typeof ContextSegmentOmissionSchema>;
-/** A typed optional-policy degradation, recorded instead of hidden fallback. */
 export declare const ContextHierarchyDegradationSchema: z.ZodObject<{
     code: z.ZodString;
     message: z.ZodString;
 }, z.core.$strict>;
 export type ContextHierarchyDegradation = z.infer<typeof ContextHierarchyDegradationSchema>;
-/**
- * The hierarchy contribution to one recorded model window.
- *
- * Included manifests are the exact artifact identities placed in the model
- * request. Observe mode keeps them under observed and leaves included empty.
- */
 export declare const ContextHierarchyWindowSchema: z.ZodObject<{
     policy_ref: z.ZodString;
     mode: z.ZodEnum<{

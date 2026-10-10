@@ -1,34 +1,11 @@
-/**
- * The structured claim representation and the evidence facts spans carry.
- *
- * What this is: the one shape a claim takes when a contract wants
- * evidence-completeness checked. A claim carries its label, its text, and
- * the citations that support it; a citation names a source and the hash of
- * the exact span it leans on. Guarantees about evidence completeness scope
- * to this shape and to nothing else, so prose that asserts support carries
- * no such coverage (CLM-001).
- *
- * How it fits: item outputs and sub-run findings carry claim sets as JSON.
- * The quality plane's grounding check resolves each citation against the
- * application's span store; parseClaimSet is the border where unstructured
- * text is told apart from a claim set, with the reason. Entries name the
- * images they show here too, by digest and never by bytes.
- */
 import { z } from 'zod';
-/** The per-run artifact fence nonce: 128 random bits, minted at intake and outside identity. */
 export declare const ContextFenceNonceSchema: z.ZodString;
-/** One support: a source and the hash of the exact span cited from it. */
 export declare const CitationSchema: z.ZodObject<{
     source_id: z.ZodString;
     span_hash: z.ZodString;
     locator: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type Citation = z.infer<typeof CitationSchema>;
-/**
- * Selected context material as CTX-002 represents it: the original-byte
- * handle, exact offsets, the content hash of that exact slice, the
- * classification it carries, and how close it stands to its origin.
- */
 export declare const CitedSpanSchema: z.ZodObject<{
     entry_id: z.ZodString;
     start: z.ZodNumber;
@@ -42,11 +19,6 @@ export declare const CitedSpanSchema: z.ZodObject<{
     }>;
 }, z.core.$strict>;
 export type CitedSpan = z.infer<typeof CitedSpanSchema>;
-/**
- * The evidence facts an entry carries beside its text, so the content hash
- * covers them and forks and exports copy them (CTX-002, CTX-008). An entry
- * that reads an artifact names the handle and range instead of the bytes.
- */
 export declare const EntryEvidenceSchema: z.ZodObject<{
     classification: z.ZodEnum<{
         public: "public";
@@ -69,12 +41,6 @@ export declare const EntryEvidenceSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type EntryEvidence = z.infer<typeof EntryEvidenceSchema>;
-/**
- * One image an entry shows, by reference and never by bytes (WBR-007). The
- * entry's content hash covers the reference, and each window loads the
- * bytes from the artifact store and checks them against content_hash. The
- * image keeps its artifact's classification.
- */
 export declare const EntryImageSchema: z.ZodObject<{
     artifact_ref: z.ZodString;
     content_hash: z.ZodString;
@@ -93,13 +59,7 @@ export declare const EntryImageSchema: z.ZodObject<{
     }>;
 }, z.core.$strict>;
 export type EntryImage = z.infer<typeof EntryImageSchema>;
-/** The most image references one entry carries. The deployment's per-turn limit still applies per window. */
 export declare const ENTRY_IMAGE_MAX = 64;
-/**
- * One image a window carried, as context.assembled records it: by digest,
- * media type, size and classification, never by bytes. A note names why
- * the model received a line naming the image instead of the image.
- */
 export declare const ContextImageRecordSchema: z.ZodObject<{
     artifact_ref: z.ZodString;
     content_hash: z.ZodString;
@@ -130,7 +90,6 @@ export declare const ContextImageRecordSchema: z.ZodObject<{
     }>>;
 }, z.core.$strict>;
 export type ContextImageRecord = z.infer<typeof ContextImageRecordSchema>;
-/** One artifact range placed in a context window behind the run's fence nonce (CTX-007). */
 export declare const ArtifactContextSpanSchema: z.ZodObject<{
     entry_id: z.ZodString;
     start: z.ZodNumber;
@@ -148,7 +107,6 @@ export declare const ArtifactContextSpanSchema: z.ZodObject<{
     fence_nonce: z.ZodString;
 }, z.core.$strict>;
 export type ArtifactContextSpan = z.infer<typeof ArtifactContextSpanSchema>;
-/** Cited artifact evidence that could not stand, and whether it blocks verified completion (QLT-031). */
 export declare const ArtifactEvidenceBlockerSchema: z.ZodObject<{
     entry_id: z.ZodString;
     artifact_ref: z.ZodString;
@@ -201,21 +159,12 @@ export declare const ClaimSetSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type ClaimSet = z.infer<typeof ClaimSetSchema>;
-/** The hash a citation must carry for a span: sha256 over the exact bytes. */
 export declare function spanHash(bytes: string): string;
-/**
- * Name the exact slice of an artifact a claim leans on. The hash still
- * decides; the locator only says where to look. artifact.read returns one
- * for the range it read, because a model cannot compute sha256 itself.
- */
 export declare function artifactCitation(artifact_ref: string, bytes: string, offset: number): Citation;
-/** The byte range an artifact citation locator names, or null when it names none. */
 export declare function parseArtifactLocator(locator: string | undefined): {
     offset: number;
     length: number;
 } | null;
-/** What resolving one citation can find. Anything but resolved is no support.
- * A resolved span may carry its classification; derivations keep it (CLS-006). */
 export type SpanResolution = {
     status: 'resolved';
     bytes: string;
@@ -224,31 +173,14 @@ export type SpanResolution = {
     status: 'missing';
 } | {
     status: 'hash_mismatch';
-}
-/** The source moved on: the bytes exist in history but are not current (EFX-003). */
- | {
+} | {
     status: 'stale';
     reason: string;
 };
-/**
- * The seam every span store implements. The quality plane grounds claims
- * through it and the effect plane checks asserted preconditions through it
- * (CLM-002, EFX-003); implementations live with the application's corpus.
- */
 export interface SpanResolver {
     resolve(citation: Citation): SpanResolution;
-    /**
-     * Resolve a complete set against current storage when reads are
-     * asynchronous. The returned positions correspond to the citations.
-     * Callers fall back to resolve() when this port is absent.
-     */
     resolveCurrent?(citations: readonly Citation[]): Promise<readonly SpanResolution[]>;
 }
-/**
- * Tell a claim set apart from anything else, with the reason. Output that
- * does not parse here is unstructured, and no evidence-completeness wording
- * applies to it.
- */
 export declare function parseClaimSet(text: string): {
     ok: true;
     set: ClaimSet;

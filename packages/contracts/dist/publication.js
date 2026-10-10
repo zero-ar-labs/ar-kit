@@ -1,17 +1,3 @@
-/**
- * Publication contracts (hosted-publication appendix, phase HP0).
- *
- * What this is: the canonical shapes of a publication closure. A bundle
- * carries one root declaration, its complete dependency graph, and
- * content-addressed assets; a receipt names exactly what was admitted and
- * stored and what that does not establish. Names and versions are
- * discovery aids; runs pin content refs (PUB-004, PUB-005).
- *
- * How it fits: these shapes ride the operator-management contract family.
- * They add no runtime state machine and no execution authority. The SDK
- * compiles bundles, the server admits them, and both speak only these
- * generated contracts (PUB-014, PUB-024).
- */
 import { z } from 'zod';
 import { PRODUCT_IDENTITY_MIGRATION_IMPACTS, PRODUCT_SOURCE_API_VERSIONS, PUBLICATION_BLOB_ENCODINGS, PUBLICATION_EDGE_KINDS, PUBLICATION_KINDS, SKILL_ACTIVATION_POLICIES, } from "./vocab.js";
 import { contentHash } from "./ids.js";
@@ -22,14 +8,12 @@ const name = z.string().regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'expected
 const version = z.string().regex(/^\d+\.\d+\.\d+$/, 'expected semantic versioning');
 const identitySurface = z.string().min(1).max(160).regex(/^[A-Za-z0-9@._:/+-]+$/, 'expected a bounded surface label, not prose or secret material');
 const decisionRef = z.string().min(1).max(256).regex(/^[A-Za-z0-9@._:/#+-]+$/, 'expected a bounded decision reference');
-/** One compiled declaration in the closure, named for discovery, pinned by ref. */
 export const PublicationDeclarationEntrySchema = z.strictObject({
     kind: z.enum(PUBLICATION_KINDS),
     name,
     version,
     content_ref: ref,
 });
-/** One content-addressed asset: exact bytes a declaration includes. */
 export const PublicationAssetEntrySchema = z.strictObject({
     content_ref: ref,
     bytes: z.number().int().min(0),
@@ -37,17 +21,11 @@ export const PublicationAssetEntrySchema = z.strictObject({
     classification: z.string().min(1).max(64),
     role: z.string().min(1).max(64),
 });
-/** One typed edge; the closure is complete when every edge resolves inside the bundle. */
 export const PublicationDependencyEdgeSchema = z.strictObject({
     from_ref: ref,
     to_ref: ref,
     kind: z.enum(PUBLICATION_EDGE_KINDS),
 });
-/**
- * The canonical bundle manifest. Sorted lists and relative paths keep it
- * deterministic: identical sources compile to an identical bundle_ref on
- * any supported machine (PUB-001, PUB-010).
- */
 export const PublicationBundleManifestSchema = z.strictObject({
     format_version: z.literal('1.0.0'),
     root_kind: z.enum(PUBLICATION_KINDS),
@@ -56,7 +34,6 @@ export const PublicationBundleManifestSchema = z.strictObject({
     assets: z.array(PublicationAssetEntrySchema),
     edges: z.array(PublicationDependencyEdgeSchema),
     compiler: z.strictObject({ name: z.string().min(1), version, canonicalization: z.string().min(1) }),
-    /** Relative diagnostic paths only; absolute host paths never publish (PUB-010). */
     source_maps: z.array(z.strictObject({
         content_ref: ref,
         path: z.string().min(1).max(512),
@@ -68,7 +45,6 @@ export const PublicationBundleManifestSchema = z.strictObject({
     requested_aliases: z.array(name),
     bundle_ref: ref,
 });
-/** The compiled procedure: exact resources, discovery metadata, and no executable capability (PUB-011). */
 export const ProcedureManifestSchema = z.strictObject({
     kind: z.literal('procedure'),
     name,
@@ -78,22 +54,10 @@ export const ProcedureManifestSchema = z.strictObject({
     discovery: z.strictObject({ topics: z.array(z.string().min(1).max(64)).max(16), summary: z.string().min(1).max(500) }),
     resources: z.array(z.strictObject({ path: z.string().min(1).max(512), content_ref: ref, bytes: z.number().int().min(0), media_type: z.string().min(1).max(128) })),
     executable: z.literal(false),
-    /** Entry size, so a descriptor can state the cost of opening without reading it (DXI-007). */
     entry_bytes: z.number().int().min(0).optional(),
-    /** Standard skill compatibility metadata. It states, and never grants, tool access (DXI-008). */
     allowed_tools: z.array(name).max(64).optional(),
-    /**
-     * When the entry enters a window (DXI-006). Newly compiled skills state
-     * progressive; a manifest compiled before disclosure carries nothing,
-     * and that absence is its historical eager behaviour (DXI-012).
-     */
     activation: z.enum(SKILL_ACTIVATION_POLICIES).optional(),
 });
-/**
- * What a commit establishes: the named closure was admitted and stored,
- * immutably. It does not establish domain correctness, authorize effects,
- * or prove an external implementation benevolent (PUB-013).
- */
 export const PublicationReceiptSchema = z.strictObject({
     publication_ref: ref,
     bundle_ref: ref,
@@ -109,13 +73,6 @@ export const PublicationReceiptSchema = z.strictObject({
     committed_at: z.string().min(1),
     establishes: z.literal('admitted-and-stored-only'),
 });
-/**
- * Recompute everything a bundle claims: its own ref, every declaration
- * and asset hash, and every closure edge. A single changed byte or a
- * missing edge target refuses by name, before any commit (PUB-004).
- * Pure over the manifest and blobs, so the compiler, the registry, and
- * any future host all verify with the one implementation.
- */
 export function verifyBundle(bundle, blobs) {
     const { bundle_ref, ...unsealed } = bundle;
     if (contentHash(unsealed) !== bundle_ref) {
@@ -149,21 +106,17 @@ export function verifyBundle(bundle, blobs) {
         }
     }
 }
-/** Open an upload session over one compiled bundle; nothing becomes discoverable here (PUB-006). */
 export const PublicationSessionRequestSchema = z.strictObject({ bundle: PublicationBundleManifestSchema });
 export const PublicationSessionSchema = z.strictObject({
     session_id: z.string().regex(/^pub_[0-9a-f]{32}$/),
-    /** Refs the tenant's store does not hold yet; the answer is tenant-scoped by construction. */
     missing_blobs: z.array(ref),
 });
 export const PublicationBlobFrameSchema = z.strictObject({ content_ref: ref, bytes: z.string().max(4_000_000) });
 export const PublicationBlobAckSchema = z.strictObject({ content_ref: ref, staged: z.boolean() });
-/** Resumable large-blob position. Chunks travel as bounded raw bytes, not JSON strings. */
 export const PublicationBlobUploadStatusSchema = z.strictObject({ content_ref: ref, offset: z.number().int().min(0) });
 export const PublicationBlobUploadFinishSchema = z.strictObject({ content_ref: ref, staged: z.literal(true), bytes: z.number().int().min(0) });
 export const PublicationCommitRequestSchema = z.strictObject({});
 export const PublicationViewSchema = z.strictObject({ receipt: PublicationReceiptSchema });
-/** One authorized immutable declaration, with its lifecycle annotations. */
 export const DeclarationViewSchema = z.strictObject({
     content_ref: ref,
     bytes: z.string(),
@@ -174,9 +127,7 @@ export const AliasMutationRequestSchema = z.strictObject({ alias: name, content_
 export const AliasMutationResultSchema = z.strictObject({ alias: name, content_ref: ref, moved: z.literal(true) });
 export const DeprecationRequestSchema = z.strictObject({ content_ref: ref, reason: z.string().min(1).max(500) });
 export const QuarantineRequestSchema = z.strictObject({ content_ref: ref, reason: z.string().min(1).max(500) });
-/** The shared outcome of an annotation act: recorded, durably, nothing rewritten. */
 export const RegistryActOutcomeSchema = z.strictObject({ content_ref: ref, recorded: z.literal(true) });
-/** One explicit operator/governance note that an identity migration changed a live surface. */
 export const IdentityMigrationEventRequestSchema = z.strictObject({
     impact: z.enum(PRODUCT_IDENTITY_MIGRATION_IMPACTS),
     surface: identitySurface,
@@ -194,15 +145,8 @@ export const IdentityMigrationEventOutcomeSchema = z.strictObject({
     decision_ref: decisionRef,
     source_ref: ref,
 });
-/** Cell intake drain: new admissions refuse while drained; running work continues (operator procedure). */
 export const DrainRequestSchema = z.strictObject({ drained: z.boolean(), reason: z.string().min(1).max(500) });
 export const DrainOutcomeSchema = z.strictObject({ drained: z.boolean(), recorded: z.literal(true) });
-/**
- * One reconciliation sweep over a run's open effects, through the dispatcher's
- * ladder. A diagnostic says why an effect did not settle on this pass: its
- * owner could not be reached, its target is no longer registered, its
- * dispatch is still in flight, or a newer record superseded the answer.
- */
 export const ReconciliationOutcomeSchema = z.strictObject({
     reconciled: z.array(z.strictObject({
         effect_id: z.string(),
@@ -210,32 +154,23 @@ export const ReconciliationOutcomeSchema = z.strictObject({
         diagnostic: z.strictObject({ code: z.string().min(1), message: z.string().min(1) }).optional(),
     })),
 });
-/** The durable operator audit trail, newest last, read through the public surface alone. */
 export const OperatorAuditPageSchema = z.strictObject({
     entries: z.array(z.strictObject({ seq: z.number().int(), action: z.string(), detail: z.string(), actor: z.string(), at: z.string() })),
 });
-/** One alias's moves, oldest first. Earlier runs keep the ref they pinned (PUB-018). */
 export const AliasHistorySchema = z.strictObject({
     alias: name,
     entries: z.array(z.strictObject({ content_ref: ref, moved_at: z.string().min(1), actor: z.string().min(1).max(256) })),
 });
-/** A registry name projection rebuilt from the immutable publication records alone (PUB-029). */
 export const RegistryRebuildOutcomeSchema = z.strictObject({
     publications: z.number().int().min(0),
     names: z.number().int().min(0),
     equal: z.boolean(),
 });
-/**
- * One line of a framed publication export: the bundle, each blob, then a
- * checksum over every prior line. Aliases, grants and credentials are never
- * framed, so an import establishes content and nothing about authority.
- */
 export const PublicationExportFrameSchema = z.discriminatedUnion('kind', [
     z.strictObject({ kind: z.literal('bundle'), bundle: PublicationBundleManifestSchema }),
     z.strictObject({ kind: z.literal('blob'), content_ref: ref, encoding: z.enum(PUBLICATION_BLOB_ENCODINGS), bytes: z.string() }),
     z.strictObject({ kind: z.literal('checksum'), sha256: z.string().regex(/^[0-9a-f]{64}$/, 'expected 64 hex characters') }),
 ]);
-/** A publication import committed under this tenant: a new receipt for the same closure refs. */
 export const PublicationImportOutcomeSchema = z.strictObject({
     receipt: PublicationReceiptSchema,
     blobs: z.number().int().min(0),

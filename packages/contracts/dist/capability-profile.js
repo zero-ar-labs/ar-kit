@@ -1,16 +1,3 @@
-/**
- * Capability profile manifests.
- *
- * What this is: the contracts-owned description of what a named profile
- * claims, what it excludes, which components it probes, and which evidence
- * names support those claims.
- *
- * How it fits: composition roots consume this instead of maintaining private
- * health or release capability maps. The manifest ref is pinned into new runs,
- * so a profile change is visible in durable history. Before changing a
- * manifest, capture it with scripts/capture-profile-manifest-history.ts so
- * runs pinned to it stay continuable (profile-compatibility.ts).
- */
 import { z } from 'zod';
 import { refuse } from "./diagnostics.js";
 import { contentHash } from "./ids.js";
@@ -133,7 +120,6 @@ export function profileCapabilitySummaryFor(profile) {
 export function profileGuaranteeExclusions(profile) {
     return profileCapabilitySummaryFor(profile).excluded.map((entry) => `${entry.capability}: ${entry.summary}`);
 }
-/** What each deployment-observed exclusion leaves open, in the health line format `name: summary`. */
 const CELL_GUARANTEE_EXCLUSION_SUMMARIES = {
     'child-code-isolation': 'Tool, aggregator, authority and validator hosts run without Landlock confinement, so a child host can read files, shared memory and the memory of dumpable processes of the cell user outside its tenant.',
     'runtime-anchor-store-custody': 'The runtime is not confined away from the custody paths this cell has: the checkpoint store, the broker metadata and the co-located PostgreSQL data. It can alter anchor files; signatures expose an altered anchor, and truncation or rollback shows only against a latest anchor ref recorded outside the cell.',
@@ -142,7 +128,6 @@ const CELL_GUARANTEE_EXCLUSION_SUMMARIES = {
     'external-secret-store-tenant-binding': 'Credentials come from an external secret store, and the cell cannot observe whether that store binds each bearer to one tenant.',
     'signer-key-custody': 'The runtime holds the integrity signer key in its own environment, because this entrypoint has no supervisor to keep it.',
 };
-/** Health lines for the guarantees this deployment observed it cannot hold, in vocabulary order. */
 export function cellGuaranteeExclusionLines(exclusions) {
     const named = new Set(exclusions);
     return CELL_GUARANTEE_EXCLUSIONS.filter((exclusion) => named.has(exclusion)).map((exclusion) => `${exclusion}: ${CELL_GUARANTEE_EXCLUSION_SUMMARIES[exclusion]}`);
@@ -322,7 +307,6 @@ function conditional(capability, summary, vectors, requirements = ['ENV-040', 'E
         vectors,
     };
 }
-/** A capability available only under a named condition, refused at its own boundary with its own diagnostic. */
 function conditionalAt(capability, refusal_point, diagnostic_code, summary, vectors, requirements) {
     return { capability, state: 'conditional', summary, refusal_point, diagnostic_code, requirements, vectors };
 }
@@ -368,13 +352,11 @@ const hostedSupported = [
     supported('source-local-read-only', 'Admitted read-only directories resolve into immutable artifact-backed source bindings.', ['SRC-CV-001', 'SRC-CV-002', 'SRC-CV-003', 'SRC-CV-005', 'SRC-CV-014'], ['SRC-001', 'SRC-002', 'SRC-003', 'SRC-004', 'SRC-005', 'SRC-006', 'SRC-007', 'SRC-009', 'SRC-021', 'SRC-022', 'SRC-023']),
     supported('transformation-volume-reference-pack', 'The volume pack is the UAT domain reference.', ['UAT-CV-015']),
 ];
-/** Version 0.3 mechanisms that Local Lite offers only with named deployment inputs. */
 const localVersionThreeConditions = [
     conditionalAt('browser-workspace', 'profile-compilation', 'environment.capability.unavailable', 'The browser recipe is available when the operator builds and pins its image, selects the browser preset and supplies the reviewed seccomp profile. Without those inputs, Local Lite offers no browser workspace.', ['WBR-CV-002', 'WBR-CV-005'], ['UAT-PRO-001']),
     conditionalAt('hierarchical-context', 'publication', 'context.hierarchy.artifacts-unavailable', 'A publication can select hierarchical context when immutable artifact write, verify and bounded read support are attached. The source-bound evaluation is not a Full Cell release claim.', ['PUB-CV-005'], ['UAT-PRO-001']),
     conditionalAt('workspace-exec', 'profile-compilation', 'environment.capability.unavailable', 'Local Lite offers workspace.exec only when Docker answers and ZERO_AR_WORKSPACE_IMAGE pins an immutable image. Otherwise the tool is absent.', ['KCV-009', 'WBR-CV-001', 'WBR-CV-007', 'WBR-CV-008'], ['UAT-PRO-001']),
 ];
-/** Version 0.3 mechanisms present in hosted bytes but still conditional on deployment or source-bound proof. */
 const hostedVersionThreeConditions = [
     conditionalAt('automatic-run-recovery', 'profile-compilation', 'profile.capability.excluded', 'The kernel and durable wake path recover work without an operator command. A Full Cell release claim remains conditional until the exact candidate proves the journey after a process restart.', ['KCV-008', 'UAT-CV-018'], ['UAT-PRO-001']),
     conditionalAt('browser-workspace', 'profile-compilation', 'environment.capability.unavailable', 'The browser workspace requires a separately built digest-pinned image, the browser preset, reviewed seccomp and available OCI capacity.', ['WBR-CV-002', 'WBR-CV-005'], ['UAT-PRO-001']),
@@ -386,7 +368,6 @@ const hostedVersionThreeConditions = [
     conditionalAt('run-fork', 'profile-compilation', 'profile.capability.excluded', 'The public fork contract is present, but the Full Cell claim remains conditional until the candidate proves plan and sealed-workspace inheritance through the hosted topology.', ['KCV-002'], ['UAT-PRO-001']),
     conditionalAt('workspace-exec', 'profile-compilation', 'environment.capability.unavailable', 'The hosted cell offers workspace.exec only for a tenant configuration that pins an immutable workspace image and has available OCI capacity.', ['KCV-009', 'WBR-CV-001', 'WBR-CV-007', 'WBR-CV-008'], ['UAT-PRO-001']),
 ];
-/** Version 0.3 mechanisms excluded from the unfinished regulated profile. */
 const regulatedVersionThreeExclusions = [
     excluded('automatic-run-recovery', 'profile-compilation', 'profile.capability.excluded', 'Regulated automatic recovery waits for a completed regulated composition.', ['KCV-008']),
     excluded('browser-workspace', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit the browser workspace.', ['WBR-CV-002']),
@@ -398,19 +379,15 @@ const regulatedVersionThreeExclusions = [
     excluded('run-fork', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit public run forks.', ['KCV-002']),
     excluded('workspace-exec', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit workspace.exec.', ['KCV-009']),
 ];
-/** Web search and fetch (web search appendix). Local Lite offers them under named configuration. */
 const localLiteWebSearch = conditionalAt('web-search', 'profile-compilation', 'web.provider.unknown', 'Local Lite offers web.search and web.fetch only when ZERO_AR_WEB_SEARCH_PROVIDER names an admitted provider and its key is supplied. Otherwise the tools are absent and the ready line says why.', ['WEB-CV-002', 'WEB-CV-005', 'WEB-CV-006', 'WEB-CV-007'], ['WEB-002', 'WEB-003', 'WEB-008']);
-/** The hosted cell offers the web tools per tenant, from its web_search block. */
 const hostedWebSearch = conditionalAt('web-search', 'profile-compilation', 'web.provider.unknown', 'The hosted cell offers web.search and web.fetch only to a tenant whose web_search block names a shipped provider and an active web-search key binding, with a filesystem or S3-compatible artifact store. Otherwise the tenant has neither tool.', ['WEB-CV-009'], ['WEB-002', 'WEB-008', 'WEB-010']);
 const regulatedWebSearch = excluded('web-search', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit web.search or web.fetch.', ['WEB-CV-005']);
-/** Required release capabilities that stay conditional until their named candidate proof passes. */
 const hostedReleaseConditions = [
     conditionalAt('cross-run-memory', 'registration', 'memory.unwired', 'Cross-run memory attaches only for a tenant whose hosted configuration names an active memory-wrapping-key binding and whose PostgreSQL log, wrapped-key tables and artifact backend all pass their separate health probes. Without that exact configuration, memory routes refuse and runs keep session memory only.', ['MSH-CV-002', 'MSH-CV-003', 'MSH-CV-004', 'MSH-CV-006', 'MSH-CV-007', 'XCV-016'], ['MSH-001', 'MSH-002', 'MSH-003', 'MSH-004', 'MSH-005', 'MSH-006', 'MSH-007', 'MSH-008', 'MSH-009', 'MSH-010', 'MSH-011', 'MSH-012', 'MSH-013', 'MSH-014', 'MSH-015', 'MSH-016', 'MSH-017', 'MSH-018']),
     conditionalAt('environment-oci', 'profile-compilation', 'environment.capability.unavailable', 'The OCI adapter ships in the Full Cell bytes, but release admission remains conditional until UAT-CV-011 completes observation, bounded transfer, cancellation, reconciliation and confirmed teardown through the hosted composition.', ['UAT-CV-011'], ['UAT-PRO-001']),
     conditionalAt('provider-anthropic', 'profile-compilation', 'model.adapter.credential-missing', 'Anthropic is declared for the stabilized release campaign. It becomes a supported Full Cell claim only after source-bound UAT-CV-017 evidence passes on the candidate commit.', ['UAT-CV-017'], ['UAT-PRO-001']),
     conditionalAt('provider-openai', 'profile-compilation', 'model.adapter.credential-missing', 'OpenAI is declared for the stabilized release campaign. It becomes a supported Full Cell claim only after source-bound UAT-CV-017 evidence passes on the candidate commit.', ['UAT-CV-017'], ['UAT-PRO-001']),
 ];
-/** Account-backed capabilities deliberately left outside this release candidate. */
 const hostedDeferredReleaseCapabilities = [
     excluded('aggregator-composio-observation', 'profile-compilation', 'profile.capability.excluded', 'Composio observation remains implemented behind the aggregator boundary but is deferred from this release until a tenant-owned account campaign passes UAT-CV-007 and the release profile is revised.', ['UAT-CV-007']),
     excluded('aggregator-merge-observation', 'profile-compilation', 'profile.capability.excluded', 'Merge observation remains implemented behind the aggregator boundary but is deferred from this release until a tenant-owned account campaign passes UAT-CV-008 and the release profile is revised.', ['UAT-CV-008']),
@@ -482,7 +459,6 @@ const localLiteExclusions = [
     excluded('authored-orchestration', 'publication', 'profile.capability.excluded', 'Authored orchestration is not part of Local Lite.', ['UAT-CV-001']),
     excluded('reversible-http-effect-dispatch', 'profile-compilation', 'profile.capability.excluded', 'Local Lite has no HTTP effect target or authority service.', ['UAT-CV-009']),
 ];
-/** A provider profile Local Lite builds through ZERO_AR_ADAPTER (decision J-3). */
 function localLiteProvider(capability, label, profile, keyVariable, vectors) {
     return conditionalAt(capability, 'profile-compilation', 'model.adapter.credential-missing', `Local Lite builds the ${label} adapter when ZERO_AR_ADAPTER=${profile} and a key arrives through protected input, the OS credential store or ${keyVariable}; startup refuses without a key, and egress is admitted only to that adapter's host. Its release claim follows ${vectors.join(' and ')}.`, vectors, ['UAT-PRO-001']);
 }
@@ -495,11 +471,6 @@ const localLiteConditional = [
     conditionalAt('cross-run-memory', 'registration', 'memory.unwired', 'Cross-run memory is off by default. ZERO_AR_MEMORY=durable attaches it with subject keys wrapped under a deployment key from the macOS keychain or a 0600 key file; ephemeral keeps the keys in process memory and loses its subjects at restart. There is no KMS or HSM custody. With memory off, the memory routes refuse.', ['XCV-016'], ['MEM-001', 'MEM-002', 'MEM-003', 'MEM-004', 'MEM-005', 'MEM-006', 'MEM-007', 'MEM-008', 'MEM-009', 'MEM-010']),
     conditionalAt('sequential-sampled-validation', 'intake', 'contract.validator.unregistered', 'Local Lite registers the transformation pack\'s items.sampled-output-trace check under the transform.items.sampled contract; a contract that binds any other sampled-oracle validator refuses at intake as unregistered. A sampled pass or reject records its sample on the checkpoint record; a capped check parks its items and the parked record carries only the reason.', ['MTH-CV-030', 'MTH-CV-031', 'MTH-CV-032'], ['MTH-SV-001', 'VPC-030']),
 ];
-/**
- * A capability declared ahead of its mechanism. It stays excluded, naming
- * the unwired code that describes it, until a composition wires it and a
- * vector proves it through that composition. No such entry is supported.
- */
 function unwired(capability, refusal_point, diagnostic_code, summary, vectors, requirements) {
     return excluded(capability, refusal_point, diagnostic_code, summary, vectors, requirements);
 }
@@ -508,7 +479,6 @@ const unwiredInEveryComposition = [
     unwired('content-defined-chunking', 'profile-compilation', 'source.chunking.unwired', 'Source snapshots store each member whole in this build; no chunk manifest is recorded and no chunk is reused across snapshots.', ['MTH-CV-091'], ['MTH-SO-003', 'MTH-SO-004']),
     unwired('workspace-binding-profiles', 'intake', 'workspace.instances.unwired', 'Workspace instance attachment is not wired in this build: intake refuses inputs.workspace, so a run exposes no workspace tools.', ['KCV-009', 'LIF-CV-021'], ['ADX-013', 'EXT-018']),
 ];
-/** The gateway host is its own release bundle the CLI starts (decision J-1); it calls only public operations. */
 const gatewayConditional = [
     conditionalAt('gateway-signed-webhook', 'profile-compilation', 'gateway.host.unavailable', 'Available when an operator runs zeroar gateway serve with a configuration that names a signed-webhook adapter. The gateway host is its own release bundle, calls only public operations with a scoped runtime key and reads its secrets through env: or file: references; without it, nothing turns a signed webhook into intake. The vectors run it against Local Lite; none yet runs it against a hosted cell.', ['DXI-CV-017', 'DXI-CV-018', 'DXI-CV-019'], ['DXI-029', 'DXI-030', 'DXI-031', 'DXI-032', 'DXI-033']),
     conditionalAt('gateway-interactive-messaging', 'profile-compilation', 'gateway.host.unavailable', 'Available when an operator runs zeroar gateway serve with a configuration that names an interactive adapter. Commands authenticate with an HMAC and a timestamp window and each one authorizes on its own; a thread is a routing handle only. Without the gateway host, no chat channel can deliver a control. The vectors run it against Local Lite; none yet runs it against a hosted cell.', ['DXI-CV-017', 'DXI-CV-018', 'DXI-CV-019'], ['DXI-029', 'DXI-030', 'DXI-031', 'DXI-032', 'DXI-033']),

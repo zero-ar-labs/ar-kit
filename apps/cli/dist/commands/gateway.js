@@ -1,17 +1,3 @@
-/**
- * The gateway command.
- *
- * What this is: zeroar gateway serve <config.json> runs the channel gateway
- * host, which turns signed webhooks and team messages into public run
- * operations, and zeroar gateway test <config.json> checks its secret
- * references and endpoint without creating a run or calling a model.
- *
- * How it fits: the gateway host ships as its own release entry, which this
- * command spawns and waits on (decision J-1), so the command keeps importing
- * only the contracts and the client. The host receives only the environment
- * variables its configuration names, and its output and exit code are the
- * command's own.
- */
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -59,14 +45,7 @@ async function gateway(args, context) {
         process.off('SIGTERM', forward);
     }
 }
-/** Variables the host's own runtime may need, besides the references its configuration names. */
 const HOST_RUNTIME_VARIABLES = ['NODE_EXTRA_CA_CERTS', 'TZ'];
-/**
- * The host's environment: only the variables its configuration names through
- * env: references, so no other deployment secret in this shell reaches it. A
- * configuration this command cannot read hands over nothing, and the host
- * refuses it with the reason.
- */
 function gatewayEnvironment(configPath) {
     const names = new Set(HOST_RUNTIME_VARIABLES);
     try {
@@ -80,7 +59,6 @@ function gatewayEnvironment(configPath) {
         }
     }
     catch {
-        // The host reads the same file and refuses it with the reason.
     }
     const environment = {};
     for (const name of names) {
@@ -90,7 +68,6 @@ function gatewayEnvironment(configPath) {
     }
     return environment;
 }
-/** The bundled host beside the command, else the source entrypoint in a development checkout. */
 function gatewayHostEntrypoint() {
     const bundled = new URL('./gateway-host.mjs', import.meta.url).pathname;
     if (typeof ZERO_AR_RELEASE_BUNDLE !== 'undefined' && ZERO_AR_RELEASE_BUNDLE)

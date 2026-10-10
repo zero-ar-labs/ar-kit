@@ -1,19 +1,4 @@
-/**
- * Runtime artifact ingest and run state-closure contracts.
- *
- * What this is: the public metadata, durable upload position and committed
- * handle a product backend uses for input or later run evidence. Raw chunks
- * travel on the binary route, so these schemas never turn large bytes into
- * JSON. Publication uploads use a separate contract and lifecycle.
- *
- * How it fits: the authenticated tenant and application principal come from
- * deployment. Commit returns a manifest only after byte verification. Run
- * export keeps ordinary evidence in artifact bundles, carries protected
- * runtime state only in an authorized transfer, and accounts for every
- * member in one content-addressed closure.
- */
 import { z } from 'zod';
-/** One immutable destination for the artifact after commit. */
 export declare const RuntimeArtifactIntendedUseSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     kind: z.ZodLiteral<"run">;
     run_id: z.ZodString;
@@ -22,14 +7,12 @@ export declare const RuntimeArtifactIntendedUseSchema: z.ZodDiscriminatedUnion<[
     intake_ref: z.ZodString;
 }, z.core.$strict>], "kind">;
 export type RuntimeArtifactIntendedUse = z.infer<typeof RuntimeArtifactIntendedUseSchema>;
-/** Caller-known origin facts. Authentication supplies the application principal. */
 export declare const RuntimeArtifactProvenanceInputSchema: z.ZodObject<{
     source: z.ZodString;
     source_event_id: z.ZodOptional<z.ZodString>;
     observed_at: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type RuntimeArtifactProvenanceInput = z.infer<typeof RuntimeArtifactProvenanceInputSchema>;
-/** Open one durable upload with its final content declared before bytes arrive. */
 export declare const RuntimeArtifactSessionRequestSchema: z.ZodObject<{
     idempotency_key: z.ZodString;
     expected_content_hash: z.ZodString;
@@ -99,7 +82,6 @@ export declare const RuntimeArtifactManifestSchema: z.ZodObject<{
     retention_expires_at: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type RuntimeArtifactManifest = z.infer<typeof RuntimeArtifactManifestSchema>;
-/** Canonical notice that one run-bound artifact crossed verified commit. */
 export declare const RuntimeArtifactCommittedRecordSchema: z.ZodObject<{
     idempotency_key: z.ZodString;
     artifact_ref: z.ZodString;
@@ -237,17 +219,11 @@ export declare const RuntimeArtifactSessionStatusSchema: z.ZodDiscriminatedUnion
     }, z.core.$strict>;
 }, z.core.$strict>], "status">;
 export type RuntimeArtifactSessionStatus = z.infer<typeof RuntimeArtifactSessionStatusSchema>;
-/**
- * An operator's sweep of uncommitted uploads for the authenticated tenant.
- * The runtime raises a cutoff below the deployment's retention floor to that
- * floor, so a sweep never removes an upload younger than the floor (PUB-030).
- */
 export declare const ArtifactSweepRequestSchema: z.ZodObject<{
     older_than_seconds: z.ZodNumber;
     reason: z.ZodString;
 }, z.core.$strict>;
 export type ArtifactSweepRequest = z.infer<typeof ArtifactSweepRequestSchema>;
-/** What one tenant sweep removed, and the cutoff it applied after the retention floor. */
 export declare const ArtifactSweepResultSchema: z.ZodObject<{
     cutoff: z.ZodString;
     retention_floor_seconds: z.ZodNumber;
@@ -255,7 +231,6 @@ export declare const ArtifactSweepResultSchema: z.ZodObject<{
     removed_uncommitted_objects: z.ZodNumber;
 }, z.core.$strict>;
 export type ArtifactSweepResult = z.infer<typeof ArtifactSweepResultSchema>;
-/** Why a run export or import named an artifact without carrying its bytes (UAT-ART-013). */
 export declare const ArtifactTransferOmissionSchema: z.ZodObject<{
     artifact_ref: z.ZodString;
     reason: z.ZodEnum<{
@@ -268,7 +243,6 @@ export declare const ArtifactTransferOmissionSchema: z.ZodObject<{
     }>;
 }, z.core.$strict>;
 export type ArtifactTransferOmission = z.infer<typeof ArtifactTransferOmissionSchema>;
-/** One external or inline object that the exported run needs or names. */
 export declare const RunStateClosureMemberSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     status: z.ZodLiteral<"present">;
     content_ref: z.ZodString;
@@ -312,7 +286,6 @@ export declare const RunStateClosureMemberSchema: z.ZodDiscriminatedUnion<[z.Zod
     required: z.ZodBoolean;
 }, z.core.$strict>], "status">;
 export type RunStateClosureMember = z.infer<typeof RunStateClosureMemberSchema>;
-/** The exact frontier and referenced-state accounting sealed into one export. */
 export declare const RunStateClosureManifestSchema: z.ZodObject<{
     schema: z.ZodLiteral<"zero-ar-run-state-closure/1">;
     run_id: z.ZodString;
@@ -368,7 +341,6 @@ export declare const RunStateClosureManifestSchema: z.ZodObject<{
     closure_ref: z.ZodString;
 }, z.core.$strict>;
 export type RunStateClosureManifest = z.infer<typeof RunStateClosureManifestSchema>;
-/** One member's destination disposition after content verification and service import. */
 export declare const RunStateRehydrationMemberSchema: z.ZodObject<{
     kind: z.ZodEnum<{
         publication: "publication";
@@ -389,7 +361,6 @@ export declare const RunStateRehydrationMemberSchema: z.ZodObject<{
     reason: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type RunStateRehydrationMember = z.infer<typeof RunStateRehydrationMemberSchema>;
-/** Rehydrate is true only when every required closure member is available at the destination. */
 export declare const RunStateRehydrationReportSchema: z.ZodObject<{
     level: z.ZodLiteral<"rehydrate">;
     closure_ref: z.ZodString;
@@ -415,11 +386,6 @@ export declare const RunStateRehydrationReportSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type RunStateRehydrationReport = z.infer<typeof RunStateRehydrationReportSchema>;
-/**
- * One artifact frame of a run export (UAT-ART-013): an artifact bundle for
- * one committed scope, a run id or intake:<ref>, with the handles it
- * carries, or the handles the export named without bytes.
- */
 export declare const RunBundleArtifactFrameSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     kind: z.ZodLiteral<"artifact-bundle">;
     scope: z.ZodString;

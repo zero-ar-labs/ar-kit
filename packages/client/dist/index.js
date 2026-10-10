@@ -1,18 +1,3 @@
-/**
- * @zero-ar/client: the typed public API client.
- *
- * What this is: the only supported path to the runtime for the CLI, the
- * SDK, and every other surface. The json routes come from the generated
- * module, rendered from the contract route table, so this file cannot
- * invent a path the contract does not declare (XCV-003). What stays
- * hand-written is transport: fetch, the diagnostic envelope, bundle
- * transfer, and server-sent events parsed by hand.
- *
- * How it fits: a refused request throws DiagnosticError carrying the
- * server's envelope, so a caller renders the same refusal the server
- * wrote. Durable streaming resumes from a sequence cursor; losing the
- * connection loses nothing.
- */
 import { CONTRACT_VERSION, DiagnosticError, ObservationEventSchema, refuse, resolveProductEnvironment, routePath } from '@zero-ar/contracts';
 import { GeneratedRoutes } from "./generated.js";
 export { GeneratedRoutes } from "./generated.js";
@@ -49,7 +34,6 @@ class FetchTransport {
         return (await response.json());
     }
 }
-/** Open exactly the selected target, prove compatibility, and never fall back. */
 export async function connectRuntimeTarget(options) {
     let bundled = null;
     let client;
@@ -124,7 +108,6 @@ export class ZeroARClient extends GeneratedRoutes {
         this.base = base;
         this.headers = headers;
     }
-    /** The canonical run bundle as framed JSON lines. */
     async exportRun(run_id) {
         const response = await fetch(this.base + routePath('exportRun', { run_id }), { headers: this.headers });
         if (!response.ok)
@@ -141,14 +124,12 @@ export class ZeroARClient extends GeneratedRoutes {
             throw await toError(response);
         return (await response.json());
     }
-    /** One publication closure as framed JSON lines: the bundle, its blobs, then a checksum. */
     async exportPublication(publication_ref) {
         const response = await fetch(this.base + routePath('exportPublication', { publication_ref }), { headers: this.headers });
         if (!response.ok)
             throw await toError(response);
         return response.text();
     }
-    /** Commit an exported publication closure under this tenant. Aliases, grants and credentials never travel. */
     async importPublication(bundle) {
         const response = await fetch(this.base + routePath('importPublication'), {
             method: 'POST',
@@ -159,7 +140,6 @@ export class ZeroARClient extends GeneratedRoutes {
             throw await toError(response);
         return (await response.json());
     }
-    /** One bounded raw publication chunk. The caller resumes from the returned offset. */
     async stagePublicationBlobChunk(session_id, content_ref, offset, bytes) {
         const response = await fetch(this.base + routePath('stagePublicationBlobChunk', { session_id, content_ref }), {
             method: 'POST',
@@ -171,7 +151,6 @@ export class ZeroARClient extends GeneratedRoutes {
             throw await toError(response);
         return (await response.json());
     }
-    /** One bounded runtime artifact chunk. The durable session owns the next offset. */
     async stageRuntimeArtifactChunk(session_id, offset, bytes) {
         const response = await fetch(this.base + routePath('stageRuntimeArtifactChunk', { session_id }), {
             method: 'POST',
@@ -183,29 +162,10 @@ export class ZeroARClient extends GeneratedRoutes {
             throw await toError(response);
         return (await response.json());
     }
-    /**
-     * Follow durable observation until the run settles or the signal aborts.
-     * The run settles at its terminal, or at a suspension after
-     * settle_after_record_seq that no later resume or start replaced, so a
-     * replay from an early cursor passes over suspensions already resumed.
-     * A terminal-only follow crosses every suspension and ends only at a
-     * durable terminal record.
-     * A dropped stream resumes from its cursor; losing a connection loses
-     * nothing.
-     */
     async streamRecords(run_id, after, onEvent, signal, options = {}) {
         for await (const event of this.followRecords(run_id, { ...options, after, signal }))
             onEvent(event);
     }
-    /**
-     * The durable record stream as an async iterable that reconnects from the
-     * last event id whenever the stream ends or the connection drops, until
-     * the run settles as streamRecords defines it or the signal aborts. A
-     * refusal such as an unknown run throws at once, and so does a frame this
-     * client cannot read, as client.stream.unreadable naming the event; a
-     * runtime unreachable for the whole retry budget throws
-     * client.stream.unavailable naming the cursor to follow again from.
-     */
     async *followRecords(run_id, options = {}) {
         const signal = options.signal;
         const floor = options.settle_after_record_seq ?? 0;
@@ -214,8 +174,6 @@ export class ZeroARClient extends GeneratedRoutes {
         let cursor = options.after ?? 0;
         let backoff = FOLLOW_INITIAL_BACKOFF_MS;
         let failingSince = null;
-        // A suspension whose settle check did not answer is checked again before
-        // the follow reads on, because the cursor has already moved past it.
         let unchecked = null;
         while (!signal?.aborted) {
             try {
@@ -228,9 +186,6 @@ export class ZeroARClient extends GeneratedRoutes {
                     if (!frame.data)
                         continue;
                     const event = readObservationFrame(run_id, frame);
-                    // Only a frame this client read counts as progress. A frame it
-                    // cannot read threw above and is never retried, so a stream of
-                    // unreadable frames cannot hold the follow open.
                     failingSince = null;
                     backoff = FOLLOW_INITIAL_BACKOFF_MS;
                     cursor = frame.id !== null && /^[0-9]+$/.test(frame.id) ? Number(frame.id) : event.seq;
@@ -240,15 +195,11 @@ export class ZeroARClient extends GeneratedRoutes {
                         return;
                     unchecked = null;
                 }
-                // The runtime answered and then ended the stream before the run
-                // settled. Reconnect from the cursor.
                 failingSince = null;
             }
             catch (error) {
                 if (signal?.aborted)
                     return;
-                // A refusal the runtime answered, on the stream or on the settle
-                // check, will not change on retry.
                 if (refusals.has(error) || (unchecked && error instanceof DiagnosticError))
                     throw error;
                 failingSince ??= Date.now();
@@ -267,7 +218,6 @@ export class ZeroARClient extends GeneratedRoutes {
             backoff = Math.min(backoff * 2, FOLLOW_MAX_BACKOFF_MS);
         }
     }
-    /** Follow the lossy transient channel. Never treat these as state (X-1). It does not reconnect. */
     async streamProgress(run_id, onText, signal) {
         try {
             for await (const frame of this.frames(routePath('streamProgress', { run_id }), signal, null)) {
@@ -281,7 +231,6 @@ export class ZeroARClient extends GeneratedRoutes {
             throw error;
         }
     }
-    /** A suspension settles only when the caller accepts suspension as an outcome. */
     async settles(run_id, event, floor, terminalOnly) {
         if (event.event === 'run.finished' || event.event === 'run.cancelled')
             return true;
@@ -292,12 +241,6 @@ export class ZeroARClient extends GeneratedRoutes {
         const later = await this.records(run_id, event.record_seq);
         return !later.records.some((record) => record.type === 'run.resumed' || record.type === 'run.started');
     }
-    /**
-     * One event-stream connection as parsed frames. It ends when the server
-     * ends the body, throws on a dropped connection or an idle gap longer
-     * than idle_ms, and marks a refusal the server answered so followers do
-     * not retry it.
-     */
     async *frames(path, signal, idle_ms) {
         const connection = new AbortController();
         const forward = () => connection.abort(signal?.reason);
@@ -373,14 +316,7 @@ export class ZeroARClient extends GeneratedRoutes {
 }
 const FOLLOW_INITIAL_BACKOFF_MS = 250;
 const FOLLOW_MAX_BACKOFF_MS = 5_000;
-/** Errors the server answered with a 4xx status. A follower never retries them. */
 const refusals = new WeakSet();
-/**
- * The event-stream line grammar: CRLF, LF and lone CR all end a line, a
- * trailing CR waits for the next chunk in case LF follows, lines starting
- * with a colon are comments, one space after the field colon is optional,
- * data lines join with a line feed, and a blank line dispatches.
- */
 export class EventStreamParser {
     buffer = '';
     data = [];
@@ -440,11 +376,6 @@ export class EventStreamParser {
         return null;
     }
 }
-/**
- * Read one durable frame. A frame that is not JSON, or not an observation
- * event this client knows, will not read differently on retry, so it
- * throws a refusal naming the run, the event id and the event name.
- */
 function readObservationFrame(run_id, frame) {
     let reason;
     try {
@@ -466,7 +397,6 @@ function readObservationFrame(run_id, frame) {
     refusals.add(failure);
     throw failure;
 }
-/** Wait before reconnecting; an abort ends the wait at once. */
 function pause(ms, signal) {
     if (signal?.aborted)
         return Promise.resolve();
@@ -487,7 +417,6 @@ async function toError(response) {
             return new DiagnosticError(body.diagnostic);
     }
     catch {
-        // fall through to the plain error below
     }
     return new Error(`the server answered ${response.status} with no diagnostic envelope.`);
 }

@@ -1,16 +1,3 @@
-/**
- * The Zero-AR command implementation.
- *
- * What this is: the human surface over the public API and nothing else.
- * The `zeroar` entrypoint calls this file, so command behaviour has one
- * source.
- *
- * Commands in this surface include run control, replay, export, import,
- * local checks, hosted diagnostics, publication dry runs, environment
- * administration, provider administration, and tool-source administration.
- * The command table in ./commands answers reserved commands and the
- * operations a module adds before the built-in dispatch runs.
- */
 import { spawn } from 'node:child_process';
 import { mkdirSync, readFileSync, statSync, writeFileSync, existsSync } from 'node:fs';
 import { createInterface } from 'node:readline';
@@ -59,8 +46,6 @@ export async function runCli(options = {}) {
         return doctor(rest, context);
     if (command === 'publish' && rest.includes('--dry-run'))
         return publish(null, rest, context);
-    // The command table answers reserved commands, and operations a module
-    // adds, before any runtime target starts.
     const commandModule = CLI_COMMAND_MODULES.get(command);
     const answeredLocally = await commandModule?.local?.(rest, context);
     if (answeredLocally !== undefined && answeredLocally !== null)
@@ -152,8 +137,6 @@ export async function runCli(options = {}) {
                     console.log(`answered ${item}; a check's item goes to its validator at the next checkpoint, and an agent's question returns to the agent`);
                 else
                     console.log(`gap dismissed for ${item}; dismissed work never verifies`);
-                // The answer that settles the last parked item wakes the run on its
-                // own, so the CLI follows it rather than resuming it.
                 if (parked === 0 && (after.suspend_reason === 'awaiting_answer' || after.status === 'running')) {
                     console.log('every gap is answered; the run wakes on its own');
                     return await attach(client, run_id, { command: context.command, settle_after_record_seq: accepted.accepted_seq });
@@ -163,7 +146,6 @@ export async function runCli(options = {}) {
                 return 0;
             }
             case 'attention':
-                // The attention command module answered every operation it accepts above.
                 throw new Error('the attention command module returned without answering. This is a defect in apps/cli/src/commands/attention.ts.');
             case 'resume': {
                 const run_id = need(commandArguments[0], 'run id');
@@ -196,7 +178,6 @@ export async function runCli(options = {}) {
             case 'tool-source':
                 return await toolSource(client, commandArguments);
             case 'effect':
-                // The effect command module answers each effect operation before this dispatch.
                 console.error(`error: ${context.command} effect needs targets.`);
                 return 1;
             case 'source':
@@ -212,20 +193,34 @@ export async function runCli(options = {}) {
             }
             case 'export': {
                 const run_id = need(commandArguments[0], 'run id');
+                const handoffTo = argValue(commandArguments, '--handoff-to');
+                const handoff = handoffTo
+                    ? await client.handoffRun(run_id, { destination_ref: handoffTo, idempotency_key: `handoff:${run_id}:${handoffTo}` })
+                    : null;
                 const bundle = await client.exportRun(run_id);
                 const out = argValue(commandArguments, '--out') ?? `${run_id}${SUCCESSOR_PRODUCT_IDENTITY.run_bundle_suffix}`;
                 writeFileSync(out, bundle);
                 const portability = exportedRunPortability(bundle);
                 if (commandArguments.includes('--json')) {
-                    console.log(canonicalJson({ run_id, file: out, lines: bundle.split('\n').length - 1, portability }));
+                    console.log(canonicalJson({ run_id, file: out, lines: bundle.split('\n').length - 1, portability, ...(handoff ? { handoff } : {}) }));
                 }
                 else {
+                    if (handoff)
+                        console.log(`handed off to ${handoff.destination_ref}, signed by key ${handoff.signing_key_ref}; this cell no longer resumes the run`);
                     console.log(`exported ${bundle.split('\n').length - 1} lines to ${out}, checksummed and chain verified on import${exportedArtifactsNote(bundle)}`);
                     renderRunPortability(portability);
                 }
                 return 0;
             }
             case 'import': {
+                if (commandArguments[0] === '--destination') {
+                    const identity = await client.continuationDestination();
+                    if (commandArguments.includes('--json'))
+                        console.log(canonicalJson(identity));
+                    else
+                        console.log(`destination ${identity.destination_ref}\nname it on the source cell with export <run> --handoff-to ${identity.destination_ref}`);
+                    return 0;
+                }
                 const file = need(commandArguments[0], 'a bundle file');
                 const declaration = continuationDeclaration(commandArguments);
                 const outcome = await client.importRun(readFileSync(file, 'utf8'));
@@ -263,13 +258,11 @@ export async function runCli(options = {}) {
             case 'doctor':
                 return await databaseDoctor(client, commandArguments, connection.target);
             case 'context':
-                // The context command module answers every replay above.
                 throw new Error('the context command module returned without answering. This is a defect in apps/cli/src/commands/context.ts.');
             case 'publication':
             case 'registry':
             case 'artifact':
             case 'memory':
-                // Their command modules answer every operation above.
                 throw new Error(`${command} reached the built-in dispatch, but its command module answers every ${command} operation. Check the command table.`);
         }
     }
@@ -283,7 +276,6 @@ export function runCliAndExit(options = {}) {
         process.exit(1);
     });
 }
-/** Render one actionable refusal while keeping stacks behind explicit debug output. */
 export function renderCliFailure(error, options = {}) {
     if (error instanceof DiagnosticError)
         return renderDiagnostic(error.diagnostic);
@@ -426,19 +418,12 @@ function versionText(context) {
         `contract: ${identity.contract_version}`,
     ].join('\n');
 }
-/** Remove presentation-only flags before command parsing and runtime selection. */
 export function globalCliArguments(args) {
     return {
         arguments: args.filter((argument) => argument !== '--no-color'),
         no_color: args.includes('--no-color'),
     };
 }
-// ---- commands ----
-/**
- * Environment administration stays on generated client methods. The command
- * only parses human arguments and renders JSON; policy and lifecycle behavior
- * remain in the tenant management service.
- */
 async function environment(client, args) {
     const operation = need(args[0], 'an environment operation');
     const handlers = {
@@ -491,11 +476,6 @@ async function environment(client, args) {
     console.log(JSON.stringify(result, null, 2));
     return 0;
 }
-/**
- * Tool-source administration mirrors the public API. The command reads
- * JSON request files, prints JSON responses, and leaves provider policy to
- * the registry and hosted runtime.
- */
 async function toolSource(client, args) {
     const operation = need(args[0], 'a tool-source operation');
     const handlers = {
@@ -529,7 +509,6 @@ async function toolSource(client, args) {
     console.log(JSON.stringify(result, null, 2));
     return 0;
 }
-/** Local and hosted source lifecycle through generated native client methods only. */
 async function source(client, args) {
     const operation = need(args[0], 'a source operation');
     const handlers = {
@@ -551,7 +530,6 @@ async function source(client, args) {
     console.log(JSON.stringify(await handler(), null, 2));
     return 0;
 }
-/** One public capability-admission journey for bundled and hosted targets. */
 async function capability(client, args) {
     const operation = need(args[0], 'a capability operation');
     const runId = need(args[1], 'a run id');
@@ -689,7 +667,6 @@ async function capability(client, args) {
     console.error('error: capability needs request, inspect, approve, refuse, or cancel.');
     return 1;
 }
-/** Render the candidate and its manifest-visible delta without overstating runtime authority. */
 function renderCapabilityAdmission(admission) {
     const rows = [
         ['request', admission.request_id],
@@ -716,11 +693,6 @@ function renderCapabilityAdmission(admission) {
         console.log(`next: ${action.action}, ${neutralize(action.reason)}`);
     console.log(t.dim('The delta describes the admitted candidate and manifest-visible capability change. It is not the entire model-visible tool closure, and runtime-reserved operations are not represented here.'));
 }
-/**
- * Provider administration is a remote control-plane surface. Request files
- * use the generated public schemas, and protected credential bytes are read
- * from a file without entering command arguments or response rendering.
- */
 async function provider(client, args) {
     const operation = need(args[0], 'a provider operation');
     const jsonRequest = (index, label, parse) => {
@@ -798,8 +770,6 @@ async function run(client, args, context) {
             consumption: {
                 model_tokens: Number(argValue(args, '--tokens') ?? 50_000),
                 compute_ms: Number(argValue(args, '--compute-ms') ?? 600_000),
-                // Tool calls and bytes are always declared, so a run can use its
-                // workspace and record its own plan within a budget it can see.
                 tool_calls: Number(argValue(args, '--tool-calls') ?? 64),
                 bytes: Number(argValue(args, '--bytes') ?? 64 * 1_048_576),
             },
@@ -833,12 +803,6 @@ async function run(client, args, context) {
     void snapshot;
     return attach(client, created.run_id, { command: context.command });
 }
-/**
- * Follow a run through its durable record stream until it settles, then
- * print the result. The follow reconnects from its cursor when the stream
- * drops. A suspension at or below settle_after_record_seq is history and
- * does not end the follow. Ctrl-C detaches and leaves the run going.
- */
 async function attach(client, run_id, options) {
     const abort = new AbortController();
     const progress = client.streamProgress(run_id, (text) => process.stdout.write(t.dim(neutralize(text))), abort.signal).catch(() => undefined);
@@ -897,8 +861,6 @@ function cursorValue(args, flag) {
     return Number(raw);
 }
 function renderEvent(raw) {
-    // Everything in a payload arrived from a run, so it neutralizes before
-    // it touches the terminal (XCV-009).
     const event = neutralizeDeep(raw);
     const at = t.dim(event.at.slice(11, 19));
     switch (event.event) {
@@ -915,13 +877,12 @@ function renderEvent(raw) {
             console.log(`${at}  ${t.dim(`lease settled ${String(event.payload['amount'])} of ${String(event.payload['reserved'])}${event.payload['overrun'] ? `, ${String(event.payload['overrun'])} over the reservation` : ''}`)}`);
             return;
         case 'lease.released':
-            return; // the settle line already carries the numbers
+            return;
         case 'checkpoint.started':
             console.log(`${at}  ${t.dim(`checkpoint over ${event.payload['covered_items'].length} items`)}`);
             return;
         case 'checkpoint.passed': {
             const n = event.payload['covered_items'].length;
-            // A sampled pass names how much it examined, so promotion never reads as exhaustive.
             const sampling = event.payload['sampling'];
             const sampled = sampling ? `, on a sample of ${sampling.examined} of ${sampling.population}` : '';
             console.log(`${at}  ${t.state('verified')} checkpoint: ${n} items promoted by ${event.payload['validator_versions'].join(', ')}${sampled}`);
@@ -946,7 +907,7 @@ function renderEvent(raw) {
             console.log(`${at}  gap dismissed for ${String(event.payload['item_id'])} by ${String(event.payload['resolver'])}: ${t.dim(String(event.payload['reason']))}`);
             return;
         case 'item.invalidated':
-            return; // the checkpoint line already carries the count
+            return;
         case 'completion.proposed':
             console.log(`${at}  completion proposed; checking the claim against the verification plan`);
             return;
@@ -974,8 +935,6 @@ function renderEvent(raw) {
 }
 async function showResult(client, run_id, asJson = false) {
     const result = await client.result(run_id);
-    // The typed payload, canonical bytes: what the SDK and the HTTP route
-    // return, unchanged, for pipelines and cross-surface comparison.
     if (asJson) {
         console.log(canonicalJson(result));
         return 0;
@@ -1003,8 +962,6 @@ async function showResult(client, run_id, asJson = false) {
     return result.terminal === 'complete' || result.terminal === 'unverified_artifact' ? 0 : result.status === 'suspended' ? 2 : 0;
 }
 async function inspect(client, run_id) {
-    // Keep hosted refusals fail-fast: a rejected snapshot must not fan out a
-    // second authenticated request merely to enrich the same inspection.
     const s = await client.snapshot(run_id);
     const plan = await client.verificationPlan(run_id);
     const rows = [
@@ -1053,7 +1010,6 @@ async function inspect(client, run_id) {
     console.log(neutralize(renderVerificationPlan(plan)));
     return 0;
 }
-/** The run's controllers view, or null from a server whose build does not wire or offer the route. */
 async function controllersView(client, run_id) {
     try {
         return await client.controllers(run_id);
@@ -1064,7 +1020,6 @@ async function controllersView(client, run_id) {
         throw error;
     }
 }
-/** The inspect rows for the controllers: what the run pinned, then what was only recommended. */
 function controllerRows(view) {
     if (!view)
         return [['controllers', 'not wired on this server']];
@@ -1109,8 +1064,6 @@ async function doctor(rest = [], context) {
         ['run portability levels', true, 'export seals, import verifies and refolds, referenced state rehydrates separately, and executor compatibility is explicit'],
     ];
     const failed = checks.filter(([, ok]) => !ok).length;
-    // A stable machine-readable report for an installer or an operator
-    // (DXI-027). The words and the shape both stay stable across versions.
     if (rest.includes('--json')) {
         console.log(canonicalJson({
             schema: 'zero-ar-doctor/1',
@@ -1129,7 +1082,6 @@ async function doctor(rest = [], context) {
     }
     return failed === 0 ? 0 : 1;
 }
-/** Describe what an export carries without claiming destination-side work happened. */
 function exportedRunPortability(bundle) {
     const frames = bundle.trim().split('\n').map((line) => JSON.parse(line));
     const manifest = frames.find((frame) => frame['kind'] === 'manifest');
@@ -1147,7 +1099,6 @@ function exportedRunPortability(bundle) {
             : { status: 'unavailable', detail: 'this export has no continuation capsule' },
     };
 }
-/** Turn an import and optional compatibility check into the four honest portability levels. */
 function importedRunPortability(outcome, compatibility, continued) {
     const rehydration = outcome.state_closure;
     const refused = compatibility?.checks.filter((check) => check.status === 'refused').map((check) => check.message) ?? [];
@@ -1175,13 +1126,11 @@ function importedRunPortability(outcome, compatibility, continued) {
                     : { status: 'unavailable', detail: 'the bundle did not carry a continuation capsule' },
     };
 }
-/** Print the four levels in stable order so one success cannot imply another. */
 export function renderRunPortability(status) {
     for (const level of RUN_PORTABILITY_LEVELS) {
         console.log(neutralize(`${level}: ${status[level].status} (${status[level].detail})`));
     }
 }
-/** Read one data-only executor declaration; no credential field exists in its schema. */
 function continuationDeclaration(args) {
     const path = argValue(args, '--executor');
     if (!path) {
@@ -1193,7 +1142,6 @@ function continuationDeclaration(args) {
     }
     return RunContinuationDeclarationSchema.parse(JSON.parse(readFileSync(path, 'utf8')));
 }
-/** The Local Lite manifest beside an installed bundle, when there is one (DXI-027). */
 function installedRelease(serverEntry) {
     const manifest = resolve(serverEntry, '..', '..', 'local-lite-manifest.json');
     if (!existsSync(manifest))
@@ -1284,8 +1232,6 @@ function profile(rest, context) {
         data_home: home,
         database: resolve(envValue('DB') ?? `${home}/local.db`),
         versions: { contract: CONTRACT_VERSION, node: process.versions.node },
-        // A provider account is optional after the offline run; the source is
-        // classified, never the value (DXI-028).
         credential_source: keySource === 'stdin'
             ? 'protected-stdin'
             : keySource === 'keychain'
@@ -1310,10 +1256,6 @@ function profile(rest, context) {
     console.log(t.label('uninstall') + '  ' + report.uninstall);
     return 0;
 }
-/**
- * Local publication work: compile the closure, verify every hash and edge,
- * and either explain the plan or commit it through the hosted session API.
- */
 async function publish(client, rest, context) {
     const source = rest.find((argument) => !argument.startsWith('--'));
     if (!source) {
@@ -1407,7 +1349,6 @@ async function init(rest, context) {
     console.log(`start a run: ${context.command} run "Summarise the objective"`);
     return 0;
 }
-/** Generate one extension without installing or executing package scripts. */
 function scaffold(rest, context) {
     const kind = rest[0];
     const name = rest[1];
@@ -1439,7 +1380,6 @@ function scaffold(rest, context) {
         console.log(`next: ${step}`);
     return 0;
 }
-/** Compile and verify locally; a lock update is explicit and visible. */
 async function validate(rest) {
     const selected = rest.find((argument) => !argument.startsWith('--')) ?? '.';
     const path = resolve(selected);
@@ -1478,7 +1418,6 @@ function writeAuthoringScaffold(root, files) {
         console.log(`wrote ${file.path}`);
     }
 }
-/** Write one versioned external repository while preserving existing files. */
 function initExternalProduct(dir, rest, context) {
     const fixture = (argValue(rest, '--fixture') ?? 'facilities-operations');
     if (!['facilities-operations', 'large-corpus-review'].includes(fixture)) {
@@ -1503,13 +1442,6 @@ function writeTemplateFile(root, file) {
     writeFileSync(path, file.content);
     console.log(`wrote ${file.path}`);
 }
-/**
- * The interrupted runs a command's short-lived local server may adopt.
- * attach adopts the run it follows. Every other command adopts none: its
- * server stops when the command ends, so a run it relaunched would stop
- * again a moment later with nothing gained and a provider call spent. A
- * resume adopts its own run through the resume path itself.
- */
 function localRecoveryScope(command, args) {
     return command === 'attach' && args[0] ? `runs:${args[0]}` : 'none';
 }
@@ -1517,7 +1449,6 @@ function startServer(recovery) {
     const entry = serverEntrypointPath();
     const childEnvironment = { ...process.env };
     delete childEnvironment[productEnvironmentNames('API_KEY').name];
-    // An operator who set the scope explicitly keeps it.
     const recoveryName = productEnvironmentNames('RECOVERY').name;
     childEnvironment[recoveryName] ??= recovery;
     const child = spawn(process.execPath, ['--disable-warning=ExperimentalWarning', entry], {
@@ -1550,7 +1481,6 @@ function serverEntrypointPath() {
         return bundledEntrypoint;
     throw new Error('local run commands need a server entrypoint, but this package carries only the public CLI files. Use the source-free release bundle, or select a hosted endpoint with --url or ZERO_AR_URL.');
 }
-// ---- small helpers ----
 function resolveLocalDataHome(cwd) {
     return resolve(cwd, productLocalDataDirectory());
 }
@@ -1626,10 +1556,5 @@ function envValue(suffix, fallback) {
 function isDirectEntrypoint(metaUrl, argvEntry) {
     return argvEntry !== undefined && pathToFileURL(resolve(argvEntry)).href === metaUrl;
 }
-// Development convenience only: running this module directly behaves like
-// the successor command. A release bundle inlines this module into the
-// command entrypoints, whose own call is the only invocation there; a second
-// one here would render help twice and spawn a second server on one
-// database, so the bundle flag turns this off at build time.
 if (typeof ZERO_AR_RELEASE_BUNDLE === 'undefined' && isDirectEntrypoint(import.meta.url, process.argv[1]))
     runCliAndExit();

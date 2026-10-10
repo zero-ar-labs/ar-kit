@@ -6,7 +6,7 @@ run, with its history and current position intact. The agent calls the
 selected models and tools within declared limits. A result receives the
 status *verified* only when its named checks pass.
 
-> This page describes Zero-AR version 0.4.1. It uses controlled English based
+> This page describes Zero-AR version 0.4.2. It uses controlled English based
 > on ASD-STE100, but it is not certified ASD-STE100. Commands and field names
 > are in a monospace font.
 
@@ -45,7 +45,7 @@ In each deployment, the W0 Kernel runs the work, the Quality Plane decides
 whether the work is verified, and the optional Effect Plane holds the
 authority to change outside systems.
 
-## What version 0.4.1 includes
+## What version 0.4.2 includes
 
 | Capability | What it does | Condition |
 |---|---|---|
@@ -62,6 +62,9 @@ authority to change outside systems.
 | Controlled continuation | A compatible destination can import a run and continue it one time. | The destination decides whether it is compatible. Import authority and resume authority are both necessary. |
 | Operator validators and questions | A Full Cell can run the validators of an operator outside the runtime. A validator can ask a person a question about one item during the work. | The publication names the validators. It does not upload validator code. |
 | Web search and page fetch | `web.search` sends up to three queries to one search provider at the same time. `web.fetch` reads one page and keeps it as a Markdown artifact that expires. | Local Lite needs a configured provider and its key, from the Keychain or an environment variable. A hosted tenant needs a configured `web_search` block. The run history keeps no query text and no page text. |
+| Handoff between cells | A suspended run can move to a second Full Cell that shares nothing with the first. The first cell signs the run over to one named cell and stops it, and only that cell continues it, once. | The cell that hands the run over needs an integrity signer. The continuing cell pins the first key it sees for each signer. |
+| Waiting for replies and decisions | A run that acts through an effect target can wait for a reply at no cost, and a reply that a product posts to the run wakes it. While an action waits for a person's decision, the run continues with work that does not depend on it. The agent reads what became of each action before its next step. | A decision window withdraws an action that no person decides. The window is 72 hours unless the operator sets another, and never extends past the grant. |
+| Attachments | `document.extract` reads a PDF, JPEG or PNG file of the run, such as an attachment on a reply, with the extractor that the run pins. | The run needs a source binding that pins the extractor. |
 
 ## Who uses Zero-AR
 
@@ -174,6 +177,8 @@ run and records the reason.
 | The budget is empty. | The call does not start. The run suspends and gives the reason. A person can add budget, then resume the run. |
 | An answer needs human attention budget, but none is left. | Zero-AR refuses the answer before it records it, and the item continues to wait. An authorized operator can add attention budget and send the answer again. |
 | The agent asks a question. | The run suspends until a person answers. |
+| An effect waits for a person's decision. | The run keeps working on anything that does not depend on it. When nothing else is left, it waits at no cost until the decision arrives or the decision window closes. A closed window withdraws the effect, nothing is sent, and the agent reads why. |
+| The agent waits for a reply. | The run sleeps at no cost until a reply is posted to it, a decision lands, or the time the agent chose runs out, and then continues with what arrived. |
 | The authority service does not answer. | Zero-AR does not send the effect. Nothing goes to the outside system. |
 | An effect may have been sent, but the target does not answer. | Zero-AR records an unknown outcome. It does not claim a receipt, and it does not send the effect again until it finds out what the target did. An unknown outcome prevents verified completion. |
 | The process stops. | On restart, Zero-AR recovers the state of each run and continues the work in progress. A run that a person paused, or that waits for a person, continues to wait. |
@@ -208,7 +213,7 @@ time. A pause never stops work in progress. To stop the current step now, use
 - An identity provider or a secret store.
 - The outside systems where effects occur.
 
-## Known limits in 0.4.1
+## Known limits in 0.4.2
 
 - Controls and budget additions record the application that sent them, not
   the end user it acted for.
@@ -218,7 +223,7 @@ time. A pause never stops work in progress. To stop the current step now, use
   Zero-AR checks that the workspace network is internal, but it does not
   check which hosts the proxy lets through.
 - The workspace runs on Docker only.
-- General production effect dispatch is not enabled. Version 0.4.1 includes a
+- General production effect dispatch is not enabled. Version 0.4.2 includes a
   reversible HTTP target whose exact change, reversal and active grants must
   match.
 - The browser workspace is a separate reference image. An operator must build
@@ -226,16 +231,15 @@ time. A pause never stops work in progress. To stop the current step now, use
 - A tool that cannot state a limit for its own bytes or compute time can use
   more of them than the budget allows. Zero-AR reports that the use of that
   tool is not fully bounded.
-- A run exported from one Full Cell continues in another only when the two
-  cells share one continuation authority, which no shipped configuration sets
-  up yet. A standalone Full Cell refuses a run from another cell and says why.
-  Version 0.4.2 is to add a handoff that needs no shared authority.
+- A run moves to another Full Cell only through a signed handoff that names
+  that cell. The cell that hands it over needs an integrity signer, and any
+  other cell refuses the run and says why.
 - Some behavior is in the code but not yet proven through a shipped
   deployment. One example is artifact provenance through a real environment.
 - The hosted Full Cell does not yet record environment cost totals.
 
 ---
 
-This page describes Zero-AR version 0.4.1. It describes what Zero-AR does and
+This page describes Zero-AR version 0.4.2. It describes what Zero-AR does and
 what it guarantees. The commands and names on this page are those of the
 public API and the `zeroar` command.

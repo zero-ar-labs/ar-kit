@@ -1,16 +1,7 @@
-/**
- * Public capability-admission publication helpers.
- *
- * Junior guide: a local skill path ends in this file. The compiler turns
- * it into immutable bytes, the public client stages those bytes, and only
- * content hashes cross the runtime boundary. Run admission still happens
- * through the generated API and the server's policy checks.
- */
 import { ProcedureManifestSchema, refuse, verifyBundle } from '@zero-ar/contracts';
 import { compileAuthoringSource } from "./publication.js";
 const PUBLICATION_CHUNK_BYTES = 256 * 1024;
 const MAX_JSON_PUBLICATION_BYTES = 4_000_000;
-/** Compile and publish one local Agent Skill without sending its local path. */
 export async function publishCapabilitySource(client, sourcePath) {
     const compiled = await compileAuthoringSource(sourcePath);
     verifyBundle(compiled.bundle, compiled.blobs);
@@ -38,7 +29,6 @@ export async function publishCapabilitySource(client, sourcePath) {
         receipt,
     };
 }
-/** Commit one verified compiled closure through resumable public routes. */
 export async function commitCompiledPublication(client, compiled) {
     verifyBundle(compiled.bundle, compiled.blobs);
     const session = await client.createPublicationSession({ bundle: compiled.bundle });

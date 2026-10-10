@@ -1,18 +1,8 @@
-/**
- * The product identity release-signing policy.
- *
- * Junior guide: a release manifest needs to say which identity signs new
- * artifacts and which identity may only verify old artifacts. This file does
- * not hold private keys. It records the policy a release builder and verifier
- * must compare before a package set or image can be treated as a successor
- * release.
- */
 import { refuse } from "./diagnostics.js";
 import { contentHash } from "./ids.js";
 import { LEGACY_PRODUCT_IDENTITY, PRODUCT_IDENTITY_SOURCE_REF, PRODUCT_IDENTITY_MIGRATION, SUCCESSOR_PRODUCT_IDENTITY, } from "./product-identity.generated.js";
 import { PRODUCT_RELEASE_SIGNING_ARTIFACT_KINDS } from "./vocab.js";
 export const PRODUCT_RELEASE_SIGNING_PLAN_SCHEMA = 'zero-ar-release-signing-plan/v1';
-/** Produce the signing plan a successor release manifest must carry. */
 export function productReleaseSigningPlan(artifact_kind) {
     if (!PRODUCT_RELEASE_SIGNING_ARTIFACT_KINDS.includes(artifact_kind)) {
         refuse({
@@ -41,7 +31,6 @@ export function productReleaseSigningPlan(artifact_kind) {
     };
     return { ...body, plan_ref: contentHash(body) };
 }
-/** Explain why a release-signing plan does not match the identity policy. */
 export function productReleaseSigningPlanRefusals(plan) {
     const { plan_ref, ...body } = plan;
     const refusals = [];
@@ -85,7 +74,6 @@ export function productReleaseSigningPlanRefusals(plan) {
         refusals.push('release signing plan ref does not match its body.');
     return refusals;
 }
-/** Refuse a release-signing plan before an artifact is published. */
 export function assertProductReleaseSigningPlan(plan) {
     const refusals = productReleaseSigningPlanRefusals(plan);
     if (refusals.length > 0) {

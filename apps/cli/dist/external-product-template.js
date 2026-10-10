@@ -1,15 +1,7 @@
-/**
- * The versioned external-product repository template.
- *
- * Junior guide: this module writes application code, not runtime code. Both
- * reference products share the native Zero-AR boundary while keeping their
- * channel, language and projection files different. Dependency overrides let
- * conformance install one exact set of packed release artifacts.
- */
 import { SUPPORTED_NODE_RUNTIME } from '@zero-ar/contracts';
 export const EXTERNAL_PRODUCT_SCAFFOLD_VERSION = '1.0.0';
 export const EXTERNAL_PRODUCT_API_VERSION = 'v1';
-export const EXTERNAL_PRODUCT_PACKAGE_VERSION = '0.4.1';
+export const EXTERNAL_PRODUCT_PACKAGE_VERSION = '0.4.2';
 const FIXTURES = {
     'facilities-operations': {
         package_name: 'zero-ar-facilities-operations',
@@ -33,7 +25,6 @@ const FIXTURES = {
     },
 };
 const ALLOWED_PACKAGES = ['@zero-ar/contracts', '@zero-ar/client', '@zero-ar/sdk'];
-/** Render one complete external repository without touching the filesystem. */
 export function externalProductTemplate(options) {
     const copy = FIXTURES[options.fixture];
     const packageSpecs = Object.fromEntries(ALLOWED_PACKAGES.map((name) => [name, packageSpec(name, options.package_specs?.[name])]));
@@ -278,7 +269,7 @@ function compatibility() {
 import type { HealthResponse } from '@zero-ar/contracts';
 
 export const SUPPORTED_ZERO_AR_API = 'v1';
-export const SUPPORTED_ZERO_AR_PACKAGES = '0.4.1';
+export const SUPPORTED_ZERO_AR_PACKAGES = '0.4.2';
 
 export function assertCompatibleRuntime(health: HealthResponse): void {
   if (health.product !== 'zero-ar') {

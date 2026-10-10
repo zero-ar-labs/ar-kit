@@ -1,13 +1,3 @@
-/**
- * Bounded MCP peer discovery client.
- *
- * What this is: the network edge that reads one fresh MCP catalogue through
- * an admitted egress port and compiles it into an immutable peer snapshot.
- *
- * How it fits: credential bytes exist only during each outbound request.
- * Discovery remains observation. Publication and admission happen later in
- * the import compiler, and active runs pin those separately reviewed refs.
- */
 import { Client, StreamableHTTPClientTransport, } from '@modelcontextprotocol/client';
 import { InteropBindingManifestSchema, InteropJsonSchema, compileMcpPeerSnapshot, contentHash, refuse, } from '@zero-ar/contracts';
 import { MCP_PROTOCOL_VERSION, MCP_TASKS_EXTENSION, ZERO_AR_MCP_VERSION, } from "./constants.js";
@@ -181,7 +171,6 @@ async function boundedResponse(response, binding) {
         headers: response.headers,
     });
 }
-/** Build the one bounded fetch function shared by discovery and invocation. */
 export function admittedMcpFetch(binding, egress) {
     const endpoint = new URL(binding.connection.endpoint).href;
     return async (input, init) => {
@@ -271,7 +260,6 @@ function resultTtl(value) {
 function resultScope(value) {
     return value.cacheScope === 'public' ? 'public' : 'private';
 }
-/** Discover one fresh peer catalogue and return only its immutable normalized snapshot. */
 export async function discoverMcpPeer(options) {
     const binding = InteropBindingManifestSchema.parse(options.binding);
     endpointBinding(binding);
@@ -375,7 +363,6 @@ export async function discoverMcpPeer(options) {
         await client.close();
     }
 }
-/** The first client release supports the core revision and optional Tasks metadata. */
 export const ZERO_AR_MCP_CLIENT_CAPABILITIES = Object.freeze({
     protocol_version: MCP_PROTOCOL_VERSION,
     understood_extensions: [MCP_TASKS_EXTENSION],

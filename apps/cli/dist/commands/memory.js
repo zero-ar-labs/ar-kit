@@ -1,14 +1,3 @@
-/**
- * The cross-run memory operator command.
- *
- * What this is: local key-file setup and rotation preparation, plus the
- * public assertion, history, erasure, transfer, run-read and health journeys.
- * Key and transfer material is written once to a mode-0600 file and is never
- * printed.
- *
- * How it fits: local operations finish before a runtime starts. Every
- * service operation reaches only generated @zero-ar/client methods.
- */
 import { randomBytes } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';

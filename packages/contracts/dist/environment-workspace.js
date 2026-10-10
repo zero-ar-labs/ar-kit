@@ -1,10 +1,3 @@
-/**
- * Public durable-workspace handles and transfer bundles.
- *
- * A handle locates one encrypted workspace generation and carries no
- * authority. A transfer carries verified file bytes without a host path,
- * authority or key. Reattachment independently revalidates every binding.
- */
 import { z } from 'zod';
 import { contentHash } from "./ids.js";
 import { SANDBOX_WORKSPACE_STATUSES, SANDBOX_WORKSPACE_ZONES } from "./vocab.js";
@@ -31,7 +24,6 @@ export const SandboxWorkspaceHandleSchema = z.strictObject({
     expires_at: z.string().datetime(),
     identity_ref: hash,
 });
-/** The byte and retention limits that travel with a portable generation. */
 export const SandboxWorkspacePolicySchema = z.strictObject({
     contract: z.literal('sandbox-workspace-policy/1'),
     source_max_bytes: z.number().int().nonnegative(),
@@ -42,7 +34,6 @@ export const SandboxWorkspacePolicySchema = z.strictObject({
     })),
     retention_ms: z.number().int().positive(),
 });
-/** One plaintext file in a transfer bundle, named only by its portable relative path. */
 export const SandboxWorkspaceTransferEntrySchema = z.strictObject({
     zone: z.enum(SANDBOX_WORKSPACE_ZONES),
     path: z.string().min(1),
@@ -51,11 +42,6 @@ export const SandboxWorkspaceTransferEntrySchema = z.strictObject({
     mode: z.number().int().nonnegative().max(0o777),
     content_base64: z.string(),
 });
-/**
- * One sealed generation that another workspace controller can re-encrypt.
- * Host and key references in source_handle identify the source but grant no
- * access. The bundle carries no host path, authority reference or key bytes.
- */
 export const SandboxWorkspaceTransferBundleSchema = z.strictObject({
     schema: z.literal('zero-ar-sandbox-workspace-transfer/1'),
     source_handle: SandboxWorkspaceHandleSchema,
@@ -72,7 +58,6 @@ export function sandboxWorkspaceHandleHasValidIdentity(handle) {
     const { identity_ref, ...material } = handle;
     return identity_ref === deriveSandboxWorkspaceIdentity(material);
 }
-/** The full expected binding supplied when an existing generation is used. */
 export const SandboxWorkspaceAccessRequestSchema = z.strictObject({
     handle: SandboxWorkspaceHandleSchema,
     tenant: z.string().min(1),

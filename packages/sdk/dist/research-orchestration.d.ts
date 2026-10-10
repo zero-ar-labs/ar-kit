@@ -1,14 +1,3 @@
-/**
- * Research orchestration runs authored attempts and graph nodes.
- *
- * What this is: an SDK layer over the public runtime client. It creates
- * independent runs, observes durable records, scores attempts with an
- * external check, merges structured research artifacts, and submits one
- * final disposition run after blocking gaps are resolved.
- *
- * How it fits: the kernel still owns each run. This file never appends
- * records or reads projections directly.
- */
 import type { Citation, IntakeRequest, RunResult } from '@zero-ar/contracts';
 import type { ZeroARClient } from '@zero-ar/client';
 type PublicOrchestrationClient = Pick<ZeroARClient, 'createRun' | 'streamRecords' | 'records' | 'result' | 'control' | 'resume'>;

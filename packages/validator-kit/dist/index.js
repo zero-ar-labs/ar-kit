@@ -1,19 +1,3 @@
-/**
- * @zero-ar/validator-kit: declaring a validator and proving it on cases.
- *
- * What this is: one typed declaration for a validator, the content-addressed
- * manifest of what it examined, fixtures that run labelled cases against
- * it, and the pure checkers domain packs build on: claim grounding, the
- * classification airlock and sequential sampling. A validator states what
- * it found. It never promotes a run to complete and never touches runtime
- * state, so nothing here reaches a kernel, a store or a projection.
- *
- * How it fits: ERD 16.3 names validator-kit a supported public package and
- * says domain packs depend on it, so the item a validator examines carries
- * the same fields the quality plane's ledger holds. The runner in the
- * quality plane remains the seam that admits a finding; this package only
- * helps an author write one and test it out of process.
- */
 import { VALIDATOR_CLASSES, contentHash, refuse } from '@zero-ar/contracts';
 import { admitCatalogueEntry, defineFirstPartyCatalogueEntry } from "./catalogue.js";
 import { validatorFindingProblem } from "./finding.js";
@@ -25,9 +9,7 @@ export { CorpusStore, GROUNDING_LIMIT, groundClaims, groundedClaims } from "./gr
 export { airlockExtract, assertLevel, classifiedDerivation, conformAirlockValue, declareAirlockType, joinClassification } from "./classification.js";
 const NAME = /^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/;
 const VERSION = /^\d+\.\d+\.\d+$/;
-/** The three answers a validator may give. Nothing here says complete. */
 export const VALIDATOR_FINDINGS = ['pass', 'reject', 'indeterminate'];
-/** The manifest of exactly what was placed before a validator. */
 export function examinedManifest(input) {
     return {
         input_hash: contentHash(input),
@@ -45,11 +27,6 @@ const FINDING_FIXES = {
     'validator.finding.contradictory': 'return reject with the failing items, or pass with none',
     'validator.finding.outside-population': 'name only items from the input the validator was given',
 };
-/**
- * Refuse a malformed finding with the same rule the runtime runner applies.
- * `population` is captured before the validator runs, so a validator that
- * changes its input cannot widen the set of items it may name.
- */
 function refuseMalformedFinding(name, finding, population) {
     const problem = validatorFindingProblem(finding, population);
     if (!problem)
@@ -63,7 +40,6 @@ function refuseMalformedFinding(name, finding, population) {
 function givenItems(input) {
     return new Set(input.items.map((item) => item.item_id));
 }
-/** Declare one validator. The declaration is the whole contract. */
 export function defineValidator(definition) {
     if (!NAME.test(definition.name)) {
         refuse({ code: 'validator.name.invalid', message: `validator name ${definition.name} does not fit lowercase dot-separated naming.`, fix: 'a name like schema.rows-present' });
@@ -124,17 +100,6 @@ export function defineValidator(definition) {
         },
     };
 }
-/**
- * Run labelled cases against a validator and report each outcome. This
- * compares answers; it does not decide whether the validator is good enough,
- * which is a judgement its author records against the declared class.
- *
- * Each case applies the runtime runner's finding rule: the examined manifest
- * and the item population are fixed before the validator runs, the validator
- * receives its own copy of the input, and a malformed finding refuses the
- * case run, so no case reports agreement for a finding the runtime would
- * record as infrastructure indeterminate.
- */
 export async function runLabelledCases(validator, cases) {
     const outcomes = [];
     for (const item of cases) {
@@ -152,7 +117,6 @@ export async function runLabelledCases(validator, cases) {
     }
     return outcomes;
 }
-/** Build a worked item for a labelled case without spelling every field. */
 export function examinedItem(item_id, output, state = 'completed_unverified', attempts = 1) {
     return { item_id, state, attempts, output };
 }
@@ -174,7 +138,6 @@ function rejection(rejected, reason) {
         ? { verdict: 'pass', reason }
         : { verdict: 'reject', rejected_items: rejected, failure_class: 'shape', reason: `${rejected.length} items failed ${reason}: ${rejected.slice(0, 5).join(', ')}` };
 }
-/** Deterministic exact-object JSON shape factory over a deliberately bounded schema subset. */
 export function jsonShapeValidator(name, version, schema) {
     const schemaRef = contentHash(schema);
     return defineValidator({
@@ -215,7 +178,6 @@ export function jsonShapeValidator(name, version, schema) {
         },
     });
 }
-/** Deterministic uniqueness factory over one exact top-level JSON key. */
 export function uniquenessValidator(name, version, key) {
     return defineValidator({
         name,
@@ -251,7 +213,6 @@ export function uniquenessValidator(name, version, key) {
         },
     });
 }
-/** Deterministic referential-integrity factory inside one examined JSON population. */
 export function referentialIntegrityValidator(name, version, key, reference) {
     return defineValidator({
         name,
@@ -281,7 +242,6 @@ export function referentialIntegrityValidator(name, version, key, reference) {
         },
     });
 }
-/** Deterministic arithmetic reconciliation over a total and numeric component array. */
 export function arithmeticReconciliationValidator(name, version, totalField, componentsField, tolerance = 0) {
     if (!Number.isFinite(tolerance) || tolerance < 0) {
         refuse({ code: 'validator.arithmetic.tolerance', message: 'arithmetic reconciliation needs a finite non-negative tolerance.', clause: 'VPC-007' });
@@ -313,7 +273,6 @@ export function arithmeticReconciliationValidator(name, version, totalField, com
         },
     });
 }
-/** Deterministic manifest reconciliation over declared members and byte totals. */
 export function artifactManifestValidator(name, version) {
     return defineValidator({
         name,
@@ -353,7 +312,6 @@ export function artifactManifestValidator(name, version) {
     });
 }
 function defineFirstPartyEntryForFactory(input) {
-    // Kept local to avoid giving factories a second authoring format.
     return defineFirstPartyCatalogueEntry({
         name: input.name,
         version: input.version,

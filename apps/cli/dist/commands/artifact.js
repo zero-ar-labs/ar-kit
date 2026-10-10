@@ -1,18 +1,4 @@
-/**
- * The artifact command.
- *
- * What this is: artifact sweep, the operator removal of runtime artifact
- * uploads that never committed (PUB-030). It calls POST /v1/artifact-sweeps
- * through the client; the runtime raises a cutoff below its retention floor
- * to the floor and sweeps only the authenticated tenant. Committed artifacts
- * are never touched. It also counts the artifact frames of an exported run
- * for the export line. Usage mistakes answer before any runtime starts.
- *
- * How it fits: runCli consults this module before its built-in dispatch, and
- * the usage table in ../identity.ts prints its row.
- */
 import { RUN_BUNDLE_ARTIFACT_FRAME_KINDS, RunBundleArtifactFrameSchema } from '@zero-ar/contracts';
-/** The cutoff a sweep asks for when the caller names none: one day, the default floor. */
 const DEFAULT_OLDER_THAN_SECONDS = 86_400;
 export const artifactCommand = {
     command: 'artifact',
@@ -54,7 +40,6 @@ function flagValue(args, flag) {
     const index = args.indexOf(flag);
     return index >= 0 ? args[index + 1] : undefined;
 }
-/** How many artifacts an exported run bundle carries and names without bytes, for the export line. */
 export function exportedArtifactsNote(bundle) {
     const kinds = RUN_BUNDLE_ARTIFACT_FRAME_KINDS;
     let carried = 0;

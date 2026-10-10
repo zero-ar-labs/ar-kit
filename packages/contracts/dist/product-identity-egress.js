@@ -1,11 +1,3 @@
-/**
- * The product identity egress review policy.
- *
- * Junior guide: a rename can make two URLs look related, but outbound access
- * is not inherited from spelling. This file normalizes URL origins and checks
- * them against reviewed configuration before hosted wiring can admit them.
- * The kernel still enforces the final per-run destination list.
- */
 import { refuse } from "./diagnostics.js";
 import { contentHash } from "./ids.js";
 import { PRODUCT_IDENTITY, PRODUCT_IDENTITY_SOURCE_REF } from "./product-identity.generated.js";
@@ -18,24 +10,16 @@ export const DEFAULT_PRODUCT_MODEL_PROVIDER_ORIGINS = {
     together: 'https://api.together.ai',
     fireworks: 'https://api.fireworks.ai',
 };
-/**
- * The origins of the web search adapters this build ships. Their hosts are
- * fixed in code and reviewed with it, as the named model providers' are, so
- * an operator lists only a host the deployment chooses itself.
- */
 export const DEFAULT_PRODUCT_WEB_SEARCH_ORIGINS = {
     parallel: 'https://api.parallel.ai',
     exa: 'https://api.exa.ai',
 };
-/** Normalize an endpoint to the exact origin the egress policy compares. */
 export function productIdentityEgressOrigin(raw) {
     return parsedEgressUrl(raw).origin;
 }
-/** Return the exact host that the runtime egress guard compares. */
 export function productIdentityEgressHost(raw) {
     return parsedEgressUrl(raw).host;
 }
-/** Build the required destination for one model provider endpoint. */
 export function productModelProviderEgressDestination(provider, endpoint) {
     if (!MODEL_PROVIDERS.includes(provider)) {
         refuse({
@@ -60,7 +44,6 @@ export function productModelProviderEgressDestination(provider, endpoint) {
         reason: `the ${provider} model adapter endpoint`,
     };
 }
-/** The reviewed default model-provider origins for the first-beta hosted cell. */
 export function defaultProductModelProviderEgressReviews(providers = ['openai', 'anthropic', 'openrouter', 'together', 'fireworks']) {
     return providers.map((provider) => ({
         url: DEFAULT_PRODUCT_MODEL_PROVIDER_ORIGINS[provider],
@@ -70,7 +53,6 @@ export function defaultProductModelProviderEgressReviews(providers = ['openai', 
         change_ref: PRODUCT_IDENTITY.ratification.decision_ref,
     }));
 }
-/** The reviewed default origins of the shipped web search adapters. */
 export function defaultProductWebSearchEgressReviews() {
     return Object.values(DEFAULT_PRODUCT_WEB_SEARCH_ORIGINS).map((url) => ({
         url,
@@ -80,7 +62,6 @@ export function defaultProductWebSearchEgressReviews() {
         change_ref: PRODUCT_IDENTITY.ratification.decision_ref,
     }));
 }
-/** Verify that every required outbound origin has an exact reviewed entry. */
 export function assertProductIdentityEgressReview(input) {
     const reviewed = input.reviewed.map((entry) => normalizeReviewed(entry));
     const required = input.required.map((entry) => normalizeRequired(entry));

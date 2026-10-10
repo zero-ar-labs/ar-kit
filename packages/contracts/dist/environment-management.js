@@ -1,11 +1,3 @@
-/**
- * Public environment administration contracts.
- *
- * This file is the shared language used by the server, generated client, SDK,
- * and CLI. A junior developer should add an operation here and to the route
- * table before adding transport code. The runtime implementation sits behind
- * EnvironmentManagementPort, so public surfaces never import an adapter.
- */
 import { z } from 'zod';
 import { AbandonEnvironmentResultSchema, CancelEnvironmentJobResultSchema, EnvironmentAdapterDescriptorSchema, EnvironmentJobHandleSchema, EnvironmentProfileRegistrationSchema, EnvironmentProfileSchema, EnvironmentStatusSchema, ObserveEnvironmentJobResultSchema, ReconcileEnvironmentJobResultSchema, TeardownEnvironmentResultSchema, } from "./environment.js";
 import { ENVIRONMENT_BACKENDS, ENVIRONMENT_ISOLATIONS, ENVIRONMENT_MEASUREMENT_PHASES, ENVIRONMENT_MEASUREMENT_UNITS, ENVIRONMENT_PROFILE_STATES, OPERATION_CLASSES, } from "./vocab.js";
@@ -117,7 +109,6 @@ export const EnvironmentMetricsSchema = z.strictObject({
     measurements_by_adapter: z.record(z.string(), z.array(EnvironmentMeasurementSummarySchema)),
     cost_by_adapter: z.record(z.string(), z.record(z.string(), z.number().nonnegative())),
 });
-/** Published tool requirements plus operator preference, never model input. */
 export const EnvironmentResolutionRequestSchema = z.strictObject({
     operation_class: z.enum(OPERATION_CLASSES).refine((value) => value !== 'effect-proposal', 'effect proposals do not resolve through environments'),
     acceptable_backends: z.array(z.enum(ENVIRONMENT_BACKENDS)).min(1),

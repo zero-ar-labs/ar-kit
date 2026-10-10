@@ -1,11 +1,3 @@
-/**
- * The product identity egress review policy.
- *
- * Junior guide: a rename can make two URLs look related, but outbound access
- * is not inherited from spelling. This file normalizes URL origins and checks
- * them against reviewed configuration before hosted wiring can admit them.
- * The kernel still enforces the final per-run destination list.
- */
 import type { ModelProvider, ProductEgressReviewPurpose } from './vocab.js';
 export declare const PRODUCT_IDENTITY_EGRESS_REVIEW_PROTOCOL: "product-identity-egress-review/v1";
 export type ProductHostedModelProvider = Exclude<ModelProvider, 'scripted'>;
@@ -35,21 +27,10 @@ export interface ProductIdentityEgressReviewReport {
     admitted_origins: readonly string[];
 }
 export declare const DEFAULT_PRODUCT_MODEL_PROVIDER_ORIGINS: Readonly<Record<ProductNamedModelProvider, string>>;
-/**
- * The origins of the web search adapters this build ships. Their hosts are
- * fixed in code and reviewed with it, as the named model providers' are, so
- * an operator lists only a host the deployment chooses itself.
- */
 export declare const DEFAULT_PRODUCT_WEB_SEARCH_ORIGINS: Readonly<Record<'parallel' | 'exa', string>>;
-/** Normalize an endpoint to the exact origin the egress policy compares. */
 export declare function productIdentityEgressOrigin(raw: string): string;
-/** Return the exact host that the runtime egress guard compares. */
 export declare function productIdentityEgressHost(raw: string): string;
-/** Build the required destination for one model provider endpoint. */
 export declare function productModelProviderEgressDestination(provider: ProductHostedModelProvider, endpoint?: string): ProductIdentityRequiredEgressDestination;
-/** The reviewed default model-provider origins for the first-beta hosted cell. */
 export declare function defaultProductModelProviderEgressReviews(providers?: readonly ProductNamedModelProvider[]): ProductIdentityReviewedEgressDestination[];
-/** The reviewed default origins of the shipped web search adapters. */
 export declare function defaultProductWebSearchEgressReviews(): ProductIdentityReviewedEgressDestination[];
-/** Verify that every required outbound origin has an exact reviewed entry. */
 export declare function assertProductIdentityEgressReview(input: ProductIdentityEgressReviewInput): ProductIdentityEgressReviewReport;

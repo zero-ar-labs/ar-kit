@@ -1,19 +1,5 @@
-/**
- * Public payload schemas.
- *
- * What this is: the zod definitions for everything that crosses a public
- * boundary: intake, controls, records, entries, snapshots, results, and the
- * management operations. TypeScript types infer from these, JSON Schema
- * generates from these, and the server validates with these. One source,
- * many projections (section 9.1 of the ERD).
- *
- * How it fits: every schema registers its structural placement and owner in
- * SCHEMA_REGISTRY, which generates the footprint inventory. A shape missing
- * from the registry fails the build (DX-016, XCV-011).
- */
 import { z } from 'zod';
 import { RECORD_TYPES } from './vocab.js';
-/** Internal persistence and composition parsers for live closed-vocabulary fields. */
 export declare const LeaseStateSchema: z.ZodEnum<{
     reserved: "reserved";
     settled: "settled";
@@ -23,13 +9,11 @@ export declare const StoreKindSchema: z.ZodEnum<{
     sqlite: "sqlite";
     postgres: "postgres";
 }>;
-/** The three principal roles. The accountable owner is always a named person (K-18). */
 export declare const PrincipalsSchema: z.ZodObject<{
     executing: z.ZodString;
     originating: z.ZodString;
     accountable: z.ZodString;
 }, z.core.$strict>;
-/** Consumption amounts by denomination. Absent means zero allowance, not unlimited. */
 export declare const ConsumptionSchema: z.ZodObject<{
     model_tokens: z.ZodNumber;
     tool_calls: z.ZodOptional<z.ZodNumber>;
@@ -47,14 +31,7 @@ export declare const BudgetsSchema: z.ZodObject<{
     verification_reserve_fraction: z.ZodNumber;
     max_turns: z.ZodNumber;
 }, z.core.$strict>;
-/**
- * The turn ceiling a caller derives when it sets none. Spend bounds the run:
- * one turn per two thousand work tokens, never fewer than the item count
- * needs and never past the schema limit, so a larger budget buys a longer
- * unattended run instead of meeting a fixed default.
- */
 export declare function turnCeilingForBudget(model_tokens: number, items?: number): number;
-/** One input artifact the caller asks the run to depend on. */
 export declare const InputArtifactBindingSchema: z.ZodObject<{
     alias: z.ZodOptional<z.ZodString>;
     artifact_ref: z.ZodString;
@@ -75,7 +52,6 @@ export declare const InputArtifactBindingSchema: z.ZodObject<{
     required_for_completion: z.ZodDefault<z.ZodBoolean>;
 }, z.core.$strict>;
 export type InputArtifactBinding = z.infer<typeof InputArtifactBindingSchema>;
-/** The verified input artifact descriptor pinned into the run manifest. */
 export declare const ResolvedInputArtifactSchema: z.ZodObject<{
     alias: z.ZodOptional<z.ZodString>;
     artifact_ref: z.ZodString;
@@ -99,7 +75,6 @@ export declare const ResolvedInputArtifactSchema: z.ZodObject<{
     required_for_completion: z.ZodBoolean;
 }, z.core.$strict>;
 export type ResolvedInputArtifact = z.infer<typeof ResolvedInputArtifactSchema>;
-/** The credential-free handle persisted before an imported remote tool parks. */
 export declare const RemoteToolTaskHandleSchema: z.ZodObject<{
     protocol: z.ZodLiteral<"mcp">;
     invoke_id: z.ZodString;
@@ -122,7 +97,6 @@ export declare const RemoteToolTaskHandleSchema: z.ZodObject<{
     observed_at: z.ZodString;
 }, z.core.$strict>;
 export type RemoteToolTaskHandle = z.infer<typeof RemoteToolTaskHandleSchema>;
-/** A unit of work arriving at intake (ERD 9.2). Budgets arrive with the work. */
 export declare const IntakeRequestSchema: z.ZodObject<{
     objective: z.ZodString;
     agent_ref: z.ZodOptional<z.ZodString>;
@@ -180,11 +154,6 @@ export declare const IntakeRequestSchema: z.ZodObject<{
     correlation_id: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type IntakeRequest = z.infer<typeof IntakeRequestSchema>;
-/**
- * The complete execution closure one run pins before external work
- * (KRN-024). Empty arrays and nulls state that a component is not
- * applicable; omission never means discovery may fill it in later.
- */
 export declare const ResolvedRunManifestSchema: z.ZodObject<{
     schema: z.ZodLiteral<"resolved-run-manifest/1">;
     contract_version: z.ZodLiteral<"v1">;
@@ -949,12 +918,6 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
     }, z.core.$strict>>>;
 }, z.core.$strict>;
 export type ResolvedRunManifest = z.infer<typeof ResolvedRunManifestSchema>;
-/**
- * The task contract (QLT-001): what must hold, where it is checked, what
- * repair may assume, and which validator's coverage the contract designates
- * sufficient. The runtime enforces the protocol; the contract supplies the
- * meaning of pass (NG-2).
- */
 export declare const TaskContractSchema: z.ZodObject<{
     name: z.ZodString;
     version: z.ZodString;
@@ -1035,7 +998,6 @@ export declare const PlanCheckSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     timeout_ms: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strict>], "kind">;
 export type PlanCheck = z.infer<typeof PlanCheckSchema>;
-/** One work item of an agent's plan, with the checks fixed before the work they judge. */
 export declare const PlanItemSchema: z.ZodObject<{
     item_id: z.ZodString;
     objective: z.ZodString;
@@ -1055,7 +1017,6 @@ export declare const PlanItemSchema: z.ZodObject<{
     }, z.core.$strict>], "kind">>;
 }, z.core.$strict>;
 export type PlanItem = z.infer<typeof PlanItemSchema>;
-/** What the model sends through plan.record: items to add, or existing items to revise. */
 export declare const PlanRecordRequestSchema: z.ZodObject<{
     items: z.ZodArray<z.ZodObject<{
         item_id: z.ZodString;
@@ -1404,12 +1365,6 @@ export declare const VerificationAttentionCapacitySnapshotSchema: z.ZodObject<{
     snapshot_ref: z.ZodString;
 }, z.core.$strict>;
 export type VerificationAttentionCapacitySnapshot = z.infer<typeof VerificationAttentionCapacitySnapshotSchema>;
-/**
- * The attention capacity the engine read at admission, version two: the
- * operator-published snapshot it pinned, the posture's gap classes, and the
- * engine's decision per class, so the plan reports what admission concluded
- * rather than recomputing it (BUD-009, MTH-AT-004).
- */
 export declare const VerificationAttentionCapacitySnapshotV2BodySchema: z.ZodObject<{
     schema: z.ZodLiteral<"verification-attention-capacity-snapshot/2">;
     capacity_snapshot_ref: z.ZodString;
@@ -3238,13 +3193,7 @@ export declare const VerificationPlanSchema: z.ZodObject<{
     plan_ref: z.ZodString;
 }, z.core.$strict>;
 export type VerificationPlan = z.infer<typeof VerificationPlanSchema>;
-/**
- * The longest answer a person may settle a parked item with. The settling
- * record keeps the answer whole, and checks read it from there, so a longer
- * answer is refused rather than cut.
- */
 export declare const GAP_ANSWER_MAX_CHARS = 4096;
-/** An agent's question as its item records it and the review inbox shows it (GAP-010). */
 export declare const AgentQuestionRecordSchema: z.ZodObject<{
     asked_by: z.ZodLiteral<"agent">;
     text: z.ZodString;
@@ -3253,7 +3202,6 @@ export declare const AgentQuestionRecordSchema: z.ZodObject<{
     allow_other: z.ZodBoolean;
 }, z.core.$strict>;
 export type AgentQuestionRecord = z.infer<typeof AgentQuestionRecordSchema>;
-/** A control addressed to a run. The id locates; principal and scope authorize (K-19). */
 export declare const ControlRequestSchema: z.ZodObject<{
     verb: z.ZodEnum<{
         steer: "steer";
@@ -3270,16 +3218,11 @@ export declare const ControlRequestSchema: z.ZodObject<{
     active_handling_ms: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strict>;
 export type ControlRequest = z.infer<typeof ControlRequestSchema>;
-/** One retryable public request to start or resume an existing run. */
 export declare const RunLifecycleCommandRequestSchema: z.ZodObject<{
     idempotency_key: z.ZodString;
     reason: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type RunLifecycleCommandRequest = z.infer<typeof RunLifecycleCommandRequestSchema>;
-/**
- * What one budget amendment adds (BUD-012). It only adds: no field lowers a
- * budget, and the verification reserve fraction stays as the run declared it.
- */
 export declare const BudgetAdditionSchema: z.ZodObject<{
     model_tokens: z.ZodOptional<z.ZodNumber>;
     tool_calls: z.ZodOptional<z.ZodNumber>;
@@ -3289,7 +3232,6 @@ export declare const BudgetAdditionSchema: z.ZodObject<{
     max_turns: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strict>;
 export type BudgetAddition = z.infer<typeof BudgetAdditionSchema>;
-/** One retryable request to add budget to a run that has not ended. */
 export declare const BudgetAmendmentRequestSchema: z.ZodObject<{
     idempotency_key: z.ZodString;
     add: z.ZodObject<{
@@ -3303,18 +3245,12 @@ export declare const BudgetAmendmentRequestSchema: z.ZodObject<{
     reason: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type BudgetAmendmentRequest = z.infer<typeof BudgetAmendmentRequestSchema>;
-/**
- * A deferred resume. Only this command may name not_before, the earliest
- * time its timer wake may launch the run (B-2, MTH-TW-003). The scheduler
- * records this as a canonical wake before the command is accepted.
- */
 export declare const RunResumeDeferredRequestSchema: z.ZodObject<{
     idempotency_key: z.ZodString;
     reason: z.ZodOptional<z.ZodString>;
     not_before: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type RunResumeDeferredRequest = z.infer<typeof RunResumeDeferredRequestSchema>;
-/** Fork management request (ERD 9.5). A fork inherits history, never authority. */
 export declare const ForkRequestSchema: z.ZodObject<{
     at_entry_id: z.ZodString;
     reason: z.ZodOptional<z.ZodString>;
@@ -3332,8 +3268,6 @@ export declare const ForkRequestSchema: z.ZodObject<{
     idempotency_key: z.ZodString;
 }, z.core.$strict>;
 export type ForkRequest = z.infer<typeof ForkRequestSchema>;
-/** Re-execution request (ERD 9.5): evaluation by running the saved inputs again.
- * Omitting the frontier re-runs from the objective. */
 export declare const ReexecuteRequestSchema: z.ZodObject<{
     at_entry_id: z.ZodOptional<z.ZodString>;
     reason: z.ZodOptional<z.ZodString>;
@@ -3352,7 +3286,6 @@ export declare const ReexecuteRequestSchema: z.ZodObject<{
     idempotency_key: z.ZodString;
 }, z.core.$strict>;
 export type ReexecuteRequest = z.infer<typeof ReexecuteRequestSchema>;
-/** A model-visible entry. Entries form a tree; any entry is a fork target (K-8). */
 export declare const EntrySchema: z.ZodObject<{
     entry_id: z.ZodString;
     run_id: z.ZodString;
@@ -3418,7 +3351,6 @@ export declare const EntrySchema: z.ZodObject<{
     content_hash: z.ZodString;
 }, z.core.$strict>;
 export type Entry = z.infer<typeof EntrySchema>;
-/** The envelope every runtime record travels in. Payloads validate per type. */
 export declare const RecordEnvelopeSchema: z.ZodObject<{
     record_id: z.ZodString;
     run_id: z.ZodString;
@@ -3519,6 +3451,7 @@ export declare const RecordEnvelopeSchema: z.ZodObject<{
         "closure.epoch.activated": "closure.epoch.activated";
         "state.closure.rehydrated": "state.closure.rehydrated";
         "executor.continuation.accepted": "executor.continuation.accepted";
+        "run.handoff.recorded": "run.handoff.recorded";
     }>;
     type_version: z.ZodNumber;
     at: z.ZodString;
@@ -3526,7 +3459,6 @@ export declare const RecordEnvelopeSchema: z.ZodObject<{
     chain_hash: z.ZodString;
 }, z.core.$strict>;
 export type RecordEnvelope = z.infer<typeof RecordEnvelopeSchema>;
-/** A canonical record in a portable bundle. Storage assigns `seq` on import. */
 export declare const PortableRecordEnvelopeSchema: z.ZodObject<{
     type: z.ZodEnum<{
         "run.created": "run.created";
@@ -3622,6 +3554,7 @@ export declare const PortableRecordEnvelopeSchema: z.ZodObject<{
         "closure.epoch.activated": "closure.epoch.activated";
         "state.closure.rehydrated": "state.closure.rehydrated";
         "executor.continuation.accepted": "executor.continuation.accepted";
+        "run.handoff.recorded": "run.handoff.recorded";
     }>;
     at: z.ZodString;
     run_id: z.ZodString;
@@ -3633,7 +3566,6 @@ export declare const PortableRecordEnvelopeSchema: z.ZodObject<{
     chain_hash: z.ZodString;
 }, z.core.$strict>;
 export type PortableRecordEnvelope = z.infer<typeof PortableRecordEnvelopeSchema>;
-/** The historical Zero-AR bundle manifest remains readable after version two. */
 export declare const RunBundleManifestV1Schema: z.ZodObject<{
     run_id: z.ZodString;
     entry_count: z.ZodNumber;
@@ -3646,7 +3578,6 @@ export declare const RunBundleManifestV1Schema: z.ZodObject<{
     }>;
     format_version: z.ZodLiteral<1>;
 }, z.core.$strict>;
-/** Version two binds the public schema catalogue and projection semantics. */
 export declare const RunBundleManifestV2Schema: z.ZodObject<{
     run_id: z.ZodString;
     entry_count: z.ZodNumber;
@@ -3699,7 +3630,6 @@ export declare const RunBundleManifestSchema: z.ZodDiscriminatedUnion<[z.ZodObje
     }>;
 }, z.core.$strict>], "format_version">;
 export type RunBundleManifest = z.infer<typeof RunBundleManifestSchema>;
-/** A verified, stateless materialization of one portable run bundle. */
 export declare const RunMaterializationSchema: z.ZodObject<{
     schema: z.ZodLiteral<"zero-ar-run-materialization/1">;
     level: z.ZodLiteral<"materialize">;
@@ -3724,11 +3654,6 @@ export declare const RunMaterializationSchema: z.ZodObject<{
     diagnostics: z.ZodArray<z.ZodNever>;
 }, z.core.$strict>;
 export type RunMaterialization = z.infer<typeof RunMaterializationSchema>;
-/**
- * What a sequential sampled-oracle check examined and why it stopped: the
- * pinned oracle and frame, each examined item's oracle answer, the boundary
- * trace, and the error guarantee label it can state (MTH-SV-001 to MTH-SV-010).
- */
 export declare const SequentialSamplingRecordSchema: z.ZodObject<{
     oracle_ref: z.ZodString;
     frame_hash: z.ZodNullable<z.ZodString>;
@@ -3752,7 +3677,6 @@ export declare const SequentialSamplingRecordSchema: z.ZodObject<{
     guarantee: z.ZodRecord<z.ZodString, z.ZodUnknown>;
 }, z.core.$strict>;
 export type SequentialSamplingRecord = z.infer<typeof SequentialSamplingRecordSchema>;
-/** The review-time estimate recorded when a parked batch suspends a run (MTH-AT-007, GAP-004). */
 export declare const AttentionEstimateRecordSchema: z.ZodObject<{
     class: z.ZodString;
     items: z.ZodNumber;
@@ -3763,9 +3687,7 @@ export declare const AttentionEstimateRecordSchema: z.ZodObject<{
 }, z.core.$strict>;
 export type AttentionEstimateRecord = z.infer<typeof AttentionEstimateRecordSchema>;
 export declare const RECORD_PAYLOADS: Record<(typeof RECORD_TYPES)[number], z.ZodType>;
-/** Resolve the payload semantics named by one portable record envelope. */
 export declare function recordPayloadSchema(type: string, version: number): z.ZodType | null;
-/** The newest payload version written for one canonical record type. */
 export declare function latestRecordPayloadVersion(type: (typeof RECORD_TYPES)[number]): number;
 export interface RecordVersionCatalogue {
     schema: 'zero-ar-record-version-catalogue/1';
@@ -3773,7 +3695,6 @@ export interface RecordVersionCatalogue {
         versions: readonly number[];
     }>;
 }
-/** A runtime-independent list of record payload versions this release reads. */
 export declare function recordVersionCatalogue(): RecordVersionCatalogue;
 export interface RecordSchemaCatalogue {
     schema: 'zero-ar-record-schema-catalogue/1';
@@ -3781,9 +3702,7 @@ export interface RecordSchemaCatalogue {
         versions: Record<string, unknown>;
     }>;
 }
-/** Language-neutral JSON Schemas for every record type and supported version. */
 export declare function recordSchemaCatalogue(): RecordSchemaCatalogue;
-/** The run head snapshot: a synchronization checkpoint, never the canonical source (X-2). */
 export declare const RunSnapshotSchema: z.ZodObject<{
     run_id: z.ZodString;
     status: z.ZodEnum<{
@@ -3815,6 +3734,8 @@ export declare const RunSnapshotSchema: z.ZodObject<{
         operator_pause: "operator_pause";
         stagnation: "stagnation";
         remote_task: "remote_task";
+        awaiting_approval: "awaiting_approval";
+        awaiting_external: "awaiting_external";
     }>>;
     turn: z.ZodNumber;
     current_branch: z.ZodNullable<z.ZodString>;
@@ -3878,6 +3799,7 @@ export declare const RunSnapshotSchema: z.ZodObject<{
                 "reserved-memory": "reserved-memory";
                 "reserved-plan": "reserved-plan";
                 "reserved-context": "reserved-context";
+                "reserved-run": "reserved-run";
                 "explicit-author": "explicit-author";
                 "explicit-operator": "explicit-operator";
                 "skill-allowed-tools": "skill-allowed-tools";
@@ -3902,7 +3824,6 @@ export declare const RunSnapshotSchema: z.ZodObject<{
     snapshot_version: z.ZodNumber;
 }, z.core.$strict>;
 export type RunSnapshot = z.infer<typeof RunSnapshotSchema>;
-/** Filters for the tenant run-head index. Time bounds are inclusive then exclusive. */
 export declare const WorkQueryRequestSchema: z.ZodObject<{
     cursor: z.ZodOptional<z.ZodString>;
     limit: z.ZodOptional<z.ZodNumber>;
@@ -3932,7 +3853,6 @@ export declare const WorkQueryRequestSchema: z.ZodObject<{
     correlation_id: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type WorkQueryRequest = z.infer<typeof WorkQueryRequestSchema>;
-/** One bounded search row from the rebuildable run-head projection. */
 export declare const WorkQueryItemSchema: z.ZodObject<{
     run_id: z.ZodString;
     created_at: z.ZodString;
@@ -3977,7 +3897,6 @@ export declare const WorkQueryItemSchema: z.ZodObject<{
     objective: z.ZodString;
 }, z.core.$strict>;
 export type WorkQueryItem = z.infer<typeof WorkQueryItemSchema>;
-/** A keyset page. The cursor is an opaque hash, never a run identifier. */
 export declare const WorkQueryPageSchema: z.ZodObject<{
     items: z.ZodArray<z.ZodObject<{
         run_id: z.ZodString;
@@ -4566,7 +4485,6 @@ export declare const IntegrityHealthSchema: z.ZodObject<{
     reason: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type IntegrityHealth = z.infer<typeof IntegrityHealthSchema>;
-/** The result surface: artifact, completion state, and what was not established. */
 export declare const RunResultSchema: z.ZodObject<{
     run_id: z.ZodString;
     status: z.ZodEnum<{
@@ -4667,7 +4585,6 @@ export declare const DiagnosticSchema: z.ZodObject<{
     fix: z.ZodOptional<z.ZodString>;
     clause: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
-/** A durable observation event as served by the records endpoints. */
 export declare const ObservationEventSchema: z.ZodObject<{
     seq: z.ZodNumber;
     record_seq: z.ZodNumber;
@@ -4742,7 +4659,6 @@ export declare const ObservationEventSchema: z.ZodObject<{
     payload: z.ZodRecord<z.ZodString, z.ZodUnknown>;
 }, z.core.$strict>;
 export type ObservationEvent = z.infer<typeof ObservationEventSchema>;
-/** One lossy text delta from the transient progress stream. */
 export declare const ProgressEventSchema: z.ZodObject<{
     text: z.ZodString;
 }, z.core.$strict>;
@@ -5278,6 +5194,8 @@ export declare const CreatedRunSchema: z.ZodObject<{
             operator_pause: "operator_pause";
             stagnation: "stagnation";
             remote_task: "remote_task";
+            awaiting_approval: "awaiting_approval";
+            awaiting_external: "awaiting_external";
         }>>;
         turn: z.ZodNumber;
         current_branch: z.ZodNullable<z.ZodString>;
@@ -5341,6 +5259,7 @@ export declare const CreatedRunSchema: z.ZodObject<{
                     "reserved-memory": "reserved-memory";
                     "reserved-plan": "reserved-plan";
                     "reserved-context": "reserved-context";
+                    "reserved-run": "reserved-run";
                     "explicit-author": "explicit-author";
                     "explicit-operator": "explicit-operator";
                     "skill-allowed-tools": "skill-allowed-tools";
@@ -5381,7 +5300,6 @@ export declare const StartAcceptedSchema: z.ZodObject<{
     accepted_seq: z.ZodNumber;
 }, z.core.$strict>;
 export type StartAccepted = z.infer<typeof StartAcceptedSchema>;
-/** The answer to a budget amendment: the whole budget after it, and whether it repeats an earlier acceptance. */
 export declare const BudgetAmendmentAcceptedSchema: z.ZodObject<{
     run_id: z.ZodString;
     accepted: z.ZodLiteral<true>;
@@ -5653,6 +5571,7 @@ export declare const RecordsPageSchema: z.ZodObject<{
             "closure.epoch.activated": "closure.epoch.activated";
             "state.closure.rehydrated": "state.closure.rehydrated";
             "executor.continuation.accepted": "executor.continuation.accepted";
+            "run.handoff.recorded": "run.handoff.recorded";
         }>;
         type_version: z.ZodNumber;
         at: z.ZodString;
@@ -5661,7 +5580,6 @@ export declare const RecordsPageSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type RecordsPage = z.infer<typeof RecordsPageSchema>;
-/** One tenant-visible review item reconstructed from its durable run records. */
 export declare const ReviewItemSchema: z.ZodObject<{
     run_id: z.ZodString;
     item_id: z.ZodString;
@@ -5715,7 +5633,6 @@ export declare const ReviewInboxSchema: z.ZodObject<{
     truncated: z.ZodBoolean;
 }, z.core.$strict>;
 export type ReviewInbox = z.infer<typeof ReviewInboxSchema>;
-/** The operator's erasure order: a named person, a subject, exact entries (ECV-006, XCV-010). */
 export declare const ErasureRequestSchema: z.ZodObject<{
     subject: z.ZodString;
     entry_ids: z.ZodArray<z.ZodString>;
@@ -5828,7 +5745,6 @@ export declare const PostureSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type Posture = z.infer<typeof PostureSchema>;
-/** A machine predicate: kebab words, no prose. The compiler refuses anything else. */
 export declare const MACHINE_PREDICATE: RegExp;
 export declare const PackClaimSchema: z.ZodObject<{
     predicate: z.ZodString;
@@ -5955,10 +5871,6 @@ export declare const CompiledPackSchema: z.ZodObject<{
     }, z.core.$strict>;
 }, z.core.$strict>;
 export type CompiledPack = z.infer<typeof CompiledPackSchema>;
-/**
- * The footprint registry: every public shape mapped to its structural home
- * and owner. The inventory script renders and gates this (DX-016).
- */
 export declare const SCHEMA_REGISTRY: {
     readonly CapabilityAdmissionRequestSchema: {
         readonly schema: z.ZodObject<{
@@ -7965,7 +7877,8 @@ export declare const SCHEMA_REGISTRY: {
         }, z.core.$strict>, z.ZodObject<{
             source_alias: z.ZodString;
             operation: z.ZodLiteral<"document.extract">;
-            locator: z.ZodString;
+            locator: z.ZodOptional<z.ZodString>;
+            artifact_ref: z.ZodOptional<z.ZodString>;
             max_pages: z.ZodOptional<z.ZodNumber>;
             languages: z.ZodOptional<z.ZodArray<z.ZodString>>;
         }, z.core.$strict>], "operation">;
@@ -16907,6 +16820,7 @@ export declare const SCHEMA_REGISTRY: {
                 "closure.epoch.activated": "closure.epoch.activated";
                 "state.closure.rehydrated": "state.closure.rehydrated";
                 "executor.continuation.accepted": "executor.continuation.accepted";
+                "run.handoff.recorded": "run.handoff.recorded";
             }>;
             type_version: z.ZodNumber;
             at: z.ZodString;
@@ -17012,6 +16926,7 @@ export declare const SCHEMA_REGISTRY: {
                 "closure.epoch.activated": "closure.epoch.activated";
                 "state.closure.rehydrated": "state.closure.rehydrated";
                 "executor.continuation.accepted": "executor.continuation.accepted";
+                "run.handoff.recorded": "run.handoff.recorded";
             }>;
             at: z.ZodString;
             run_id: z.ZodString;
@@ -17159,6 +17074,8 @@ export declare const SCHEMA_REGISTRY: {
                 operator_pause: "operator_pause";
                 stagnation: "stagnation";
                 remote_task: "remote_task";
+                awaiting_approval: "awaiting_approval";
+                awaiting_external: "awaiting_external";
             }>>;
             turn: z.ZodNumber;
             current_branch: z.ZodNullable<z.ZodString>;
@@ -17222,6 +17139,7 @@ export declare const SCHEMA_REGISTRY: {
                         "reserved-memory": "reserved-memory";
                         "reserved-plan": "reserved-plan";
                         "reserved-context": "reserved-context";
+                        "reserved-run": "reserved-run";
                         "explicit-author": "explicit-author";
                         "explicit-operator": "explicit-operator";
                         "skill-allowed-tools": "skill-allowed-tools";
@@ -18693,6 +18611,8 @@ export declare const SCHEMA_REGISTRY: {
                     operator_pause: "operator_pause";
                     stagnation: "stagnation";
                     remote_task: "remote_task";
+                    awaiting_approval: "awaiting_approval";
+                    awaiting_external: "awaiting_external";
                 }>>;
                 turn: z.ZodNumber;
                 current_branch: z.ZodNullable<z.ZodString>;
@@ -18756,6 +18676,7 @@ export declare const SCHEMA_REGISTRY: {
                             "reserved-memory": "reserved-memory";
                             "reserved-plan": "reserved-plan";
                             "reserved-context": "reserved-context";
+                            "reserved-run": "reserved-run";
                             "explicit-author": "explicit-author";
                             "explicit-operator": "explicit-operator";
                             "skill-allowed-tools": "skill-allowed-tools";
@@ -19122,6 +19043,37 @@ export declare const SCHEMA_REGISTRY: {
             executor_ref: z.ZodString;
             name: z.ZodString;
             version: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunHandoffRequestSchema: {
+        readonly schema: z.ZodObject<{
+            destination_ref: z.ZodString;
+            idempotency_key: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunHandoffReceiptSchema: {
+        readonly schema: z.ZodObject<{
+            run_id: z.ZodString;
+            destination_ref: z.ZodString;
+            handoff_ref: z.ZodString;
+            recorded_seq: z.ZodNumber;
+            signing_key_ref: z.ZodString;
+            repeated: z.ZodBoolean;
+        }, z.core.$strict>;
+        readonly placement: "run-management";
+        readonly owner: "runtime-core";
+    };
+    readonly RunContinuationDestinationIdentitySchema: {
+        readonly schema: z.ZodObject<{
+            schema: z.ZodLiteral<"zero-ar-run-continuation-destination/1">;
+            destination_ref: z.ZodString;
+            executor_ref: z.ZodString;
+            authority_ref: z.ZodString;
+            handoff_signing: z.ZodBoolean;
         }, z.core.$strict>;
         readonly placement: "run-management";
         readonly owner: "runtime-core";
@@ -19502,6 +19454,7 @@ export declare const SCHEMA_REGISTRY: {
                     "closure.epoch.activated": "closure.epoch.activated";
                     "state.closure.rehydrated": "state.closure.rehydrated";
                     "executor.continuation.accepted": "executor.continuation.accepted";
+                    "run.handoff.recorded": "run.handoff.recorded";
                 }>;
                 type_version: z.ZodNumber;
                 at: z.ZodString;

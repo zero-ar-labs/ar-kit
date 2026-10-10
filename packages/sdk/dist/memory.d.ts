@@ -1,13 +1,3 @@
-/**
- * Subject-scoped helpers for the public memory routes.
- *
- * What this is: a small SDK journey that binds one operator-selected subject
- * once, then delegates assertion, history, erasure and run-read operations to
- * the generated client. It adds no memory store and holds no key material.
- *
- * How it fits: applications use the same public routes as the CLI. Runtime
- * publication bindings still govern every model-visible memory operation.
- */
 import type { ZeroARClient } from '@zero-ar/client';
 import type { MemoryAssertionInput, MemoryReadRequest, MemorySubjectTransferBundle } from '@zero-ar/contracts';
 type SubjectAssertion = Omit<MemoryAssertionInput, 'subject'>;
@@ -17,7 +7,6 @@ export declare class SubjectMemory {
     private readonly client;
     readonly subject: string;
     constructor(client: PublicMemoryClient, subject: string);
-    /** Admit one cited assertion for this subject through the public service. */
     assert(input: SubjectAssertion): Promise<{
         assertion_id: string;
         supports_recorded: number;
@@ -26,7 +15,6 @@ export declare class SubjectMemory {
             at: string | null;
         };
     }>;
-    /** Replace one current assertion while preserving both identities in history. */
     supersede(assertion_id: string, replacement: SubjectAssertion): Promise<{
         superseded_assertion_id: string;
         replacement_assertion_id: string;
@@ -35,7 +23,6 @@ export declare class SubjectMemory {
             at: string | null;
         };
     }>;
-    /** Read the subject's durable history for one predicate. */
     history(predicate: string): Promise<{
         subject: string;
         predicate: string;
@@ -66,13 +53,11 @@ export declare class SubjectMemory {
             at: string | null;
         };
     }>;
-    /** Erase the subject stream under the caller's already-authorized route. */
     erase(by: string, reason: string): Promise<{
         subject_ref: string;
         erased: boolean;
         records_redacted: number;
     }>;
-    /** Export this subject's canonical encrypted stream and permitted wrapped custody rows. */
     exportTransfer(): Promise<{
         schema: "zero-ar-memory-subject-transfer/1";
         subject_ref: string;
@@ -101,7 +86,6 @@ export declare class SubjectMemory {
         };
         content_ref: string;
     }>;
-    /** Import one verified transfer for this subject into a fresh compatible custody. */
     importTransfer(bundle: MemorySubjectTransferBundle): Promise<{
         subject_ref: string;
         stream_id: string;
@@ -113,7 +97,6 @@ export declare class SubjectMemory {
         records: number;
         erased: boolean;
     }>;
-    /** Ask one run to perform its recorded memory read for this subject. */
     readForRun(run_id: string, input: SubjectRead): Promise<{
         run_id: string;
         query_ref: string;
@@ -152,6 +135,5 @@ export declare class SubjectMemory {
         } | null;
     }>;
 }
-/** Bind one subject to an SDK helper without creating a second service plane. */
 export declare function memoryFor(client: PublicMemoryClient, subject: string): SubjectMemory;
 export {};

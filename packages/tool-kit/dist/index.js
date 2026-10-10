@@ -1,17 +1,3 @@
-/**
- * @zero-ar/tool-kit: one typed tool definition and its development host.
- *
- * What this is: defineTool derives the model schema, the runtime
- * validation, the documentation, the fixtures and the handler typing from
- * one authoritative schema, and serveTools runs those handlers over the
- * admitted out-of-process protocol (DXI-019, DXI-021).
- *
- * How it fits: a handler defined here never enters an agent declaration
- * and never executes inside zero-ar-server. The toolkit reaches no
- * runtime package, holds no effect credential, and cannot commit a
- * receipt; publication and the tool host decide what actually runs
- * (DXI-020).
- */
 import { createInterface } from 'node:readline';
 import { TOOL_HOST_PROTOCOL, contentHash, isToolHostProtocolError, parseToolHostLine, refuse } from '@zero-ar/contracts';
 export function string(options = {}) {
@@ -63,7 +49,6 @@ export function integer(options = {}) {
         },
     };
 }
-/** One of a fixed list of strings, numbers or booleans. */
 export function enumOf(values, options = {}) {
     if (values.length === 0)
         refuse({ code: 'tool.schema.invalid', message: 'an enum needs at least one value.', fix: "enumOf(['pickup', 'delivery'])" });
@@ -96,7 +81,6 @@ export function array(items, options = {}) {
         },
     };
 }
-/** The value, or null. A primitive keeps one type list; anything else becomes a choice with null. */
 export function nullable(schema) {
     const { description, ...rest } = schema.json;
     const json = typeof rest['type'] === 'string' && ['string', 'number', 'integer', 'boolean'].includes(rest['type'])
@@ -112,11 +96,6 @@ export function nullable(schema) {
 export function optional(schema) {
     return { json: schema.json, parse: (value, path) => schema.parse(value, path), optional: true };
 }
-/**
- * An object with exactly these fields. The required list keeps the order the
- * fields are written in, which is the order a model sees and fills them, and
- * leaves out each optional field.
- */
 export function object(shape, options = {}) {
     const isOptional = (field) => field.optional === true;
     return {
@@ -148,10 +127,6 @@ export function object(shape, options = {}) {
 }
 const NAME = /^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/;
 const VERSION = /^\d+\.\d+\.\d+$/;
-/**
- * One definition, every surface. The manifest is what publishes; the
- * handler stays here and runs only in an admitted host.
- */
 export function defineTool(definition) {
     if (!NAME.test(definition.name)) {
         refuse({ code: 'tool.name.invalid', message: `tool name ${definition.name} does not fit lowercase dot-separated naming.`, fix: 'a name like archive.search' });
@@ -181,7 +156,6 @@ export function defineTool(definition) {
         run: (input, context) => definition.execute(input, context),
     });
 }
-/** Secrets never ride a tool result or a host log line (DXI-021). */
 const SECRET = /\b(sk-[A-Za-z0-9._-]{8,}|secret:\/\/[A-Za-z0-9._/-]+|bearer\s+[A-Za-z0-9._-]{8,})/gi;
 export function redact(text) {
     return text.replace(SECRET, '[redacted]');
@@ -196,7 +170,6 @@ export class ToolHost {
             this.tools.set(tool.name, tool);
         }
     }
-    /** The version handshake a host answers before any call. */
     handshake() {
         return {
             protocol: TOOL_HOST_PROTOCOL,
@@ -205,15 +178,9 @@ export class ToolHost {
                 .sort((left, right) => left.name.localeCompare(right.name)),
         };
     }
-    /** Liveness only. It states nothing about a call in flight. */
     health() {
         return { ready: true, tools: this.tools.size };
     }
-    /**
-     * One call: validate against the declared schema, enforce the deadline
-     * and cancellation, and answer with a typed envelope either way. A
-     * handler that throws is an error result, never a host crash.
-     */
     async invoke(request, signal) {
         const tool = this.tools.get(request.tool);
         if (!tool) {
@@ -244,7 +211,6 @@ export class ToolHost {
             signal?.removeEventListener('abort', abort);
         }
     }
-    /** Serve the same definitions over JSON lines, the way a host is launched. */
     stdio(streams = {}) {
         const input = streams.input ?? process.stdin;
         const output = streams.output ?? process.stdout;
@@ -272,15 +238,9 @@ export class ToolHost {
         });
     }
 }
-/** One host builder over any number of typed definitions. */
 export function serveTools(options) {
     return new ToolHost(options.tools);
 }
-/**
- * The conformance fixtures a definition generates for itself: the schema
- * refuses what it does not declare, and the handler answers its own
- * declared shape. A developer runs these before publishing.
- */
 export async function conformance(tool, samples) {
     const host = new ToolHost([tool]);
     let passed = 0;

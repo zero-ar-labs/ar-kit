@@ -1,18 +1,4 @@
-/**
- * Controllers view contracts.
- *
- * What this is: one read of what the optimization controllers decided for a
- * run. Canonical decisions come from what the run pinned at admission;
- * telemetry is labelled a noncanonical recommendation because it lives in
- * process memory and a restart forgets it (MTH-002, MTH-004).
- *
- * How it fits: served at GET /v1/runs/{run_id}/controllers under the run
- * read scope and ZeroARClient.controllers(); the engine builds it from
- * run.created and its telemetry, and zeroar inspect prints it. The view
- * never feeds a decision back into the kernel.
- */
 import { z } from 'zod';
-/** The checkpoint schedule the run pinned in run.created. */
 export declare const PinnedCheckpointDecisionSchema: z.ZodObject<{
     controller: z.ZodString;
     interval_items: z.ZodNumber;

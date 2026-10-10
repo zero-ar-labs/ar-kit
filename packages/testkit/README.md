@@ -60,6 +60,8 @@ recreate the same ordering and rejection pattern.
 - `LogicalClock` for ordered instants without wall time.
 - `seededGenerator` and `syntheticHazardPopulation`.
 - `scratchDir` and `scratchRoot` for self-cleaning temporary workspaces.
+- `noColorEnv` for a child process whose output a test parses: colour off,
+  and no forced colour inherited from a test runner attached to a terminal.
 
 ## What this does not establish
 

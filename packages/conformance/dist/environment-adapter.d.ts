@@ -1,12 +1,3 @@
-/**
- * Reusable EnvironmentAdapter lifecycle conformance harness.
- *
- * Junior developers pass an adapter, its immutable profile, and one admitted
- * binding. The harness drives generated request and result types through every
- * operation, checks idempotent stable handles, and returns a small report. It
- * is a function rather than a base class, so provider packages keep their own
- * composition and test framework.
- */
 import type { EnvironmentAdapter, EnvironmentHandleBinding, EnvironmentProfile } from '@zero-ar/contracts';
 export interface EnvironmentAdapterConformanceInput {
     adapter: EnvironmentAdapter;

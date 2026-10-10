@@ -1,24 +1,7 @@
-/**
- * The deterministic project loader (developer-integration appendix, DXI-1C).
- *
- * What this is: build-time discovery of declared source kinds under one
- * root, with an explicit order, a lock of exactly what resolved, and
- * diagnostics that say what was found, why it was included, what it
- * compiled to, and what shadowed it (DXI-022, DXI-023).
- *
- * How it fits: discovery happens at development, test, or publication
- * time only. Production run workers consume immutable refs from the
- * published closure and never reach this code. Nothing here executes a
- * tool, calls a model, resolves a credential, or infers an operation
- * class; a user-global directory, a parent directory, a live network
- * catalogue, and a mutable alias are all outside the build unless the
- * project pins them (DXI-024).
- */
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve } from 'node:path';
 import { canonicalJson, contentHash, refuse } from '@zero-ar/contracts';
 import { compileProject } from "./publication.js";
-/** The declared source kinds a project may carry. Nothing else is discovered. */
 export const SOURCE_KINDS = ['agent', 'instructions', 'skill', 'tool', 'validator', 'task-contract', 'posture', 'domain-pack', 'context'];
 const KIND_BY_SUFFIX = [
     { match: (path) => /(^|\/)SKILL\.md$/.test(path), kind: 'skill' },
@@ -33,7 +16,6 @@ const KIND_BY_SUFFIX = [
 function kindOf(relativePath) {
     return KIND_BY_SUFFIX.find((candidate) => candidate.match(relativePath))?.kind ?? 'context';
 }
-/** Files under one directory, in a stable order, skipping nothing silently. */
 function walk(root, directory, out) {
     for (const name of readdirSync(directory).sort()) {
         if (name === 'node_modules' || name.startsWith('.') || name === 'zero-ar.lock.json' || name === 'zero-ar.skill-lock.json')
@@ -45,11 +27,6 @@ function walk(root, directory, out) {
             out.push(path);
     }
 }
-/**
- * Load one project deterministically. Resolution order is: explicit
- * loader options, paths the entry declares, the project lock, then
- * explicit overlays. Nothing outside the root participates.
- */
 export async function loadProject(options) {
     const root = resolve(options.root);
     const rootEntries = new Set(readdirSync(root));
@@ -115,7 +92,6 @@ export async function loadProject(options) {
             });
         }
     }
-    // An overlay for a path that does not exist is still explicit source.
     for (const [path, content] of overlays) {
         const relativePath = relative(root, path);
         if (byPath.has(relativePath))
@@ -171,7 +147,6 @@ export async function loadProject(options) {
         async compile() {
             const errors = diagnostics.filter((diagnostic) => diagnostic.severity === 'error');
             if (errors.length > 0) {
-                // The refusal carries each finding's fix, so the terminal says what to run next.
                 const fixes = [...new Set(errors.flatMap((error) => (error.fix ? [error.fix] : [])))];
                 refuse({
                     code: 'project.incomplete',
@@ -193,14 +168,12 @@ export async function loadProject(options) {
     };
     return project;
 }
-/** Render the loader's answer for a terminal, one line per finding. */
 export function renderDiagnostics(project) {
     const lines = project.diagnostics().map((diagnostic) => `${diagnostic.severity} ${diagnostic.code}: ${diagnostic.message}${diagnostic.fix ? ` fix: ${diagnostic.fix}` : ''}`);
     const lock = project.lock();
     lines.push(`lock ${lock.lock_ref} over ${lock.resources.length} discovered sources from ${lock.entry}`);
     return lines.join('\n');
 }
-/** The canonical bytes of a lock, for comparing two machines' builds. */
 export function lockBytes(project) {
     return canonicalJson(project.lock());
 }

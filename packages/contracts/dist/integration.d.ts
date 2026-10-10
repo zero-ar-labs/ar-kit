@@ -1,27 +1,5 @@
-/**
- * Developer-integration contracts (developer-integration appendix, DXI-0).
- *
- * What this is: the shapes progressive skill disclosure, tenant model
- * composition, and gateway adapters speak. A skill descriptor says a
- * pinned skill exists without carrying its body; a load request names an
- * exact pinned ref and nothing else; a resolved model plan expands the
- * model identity a run already pins; a gateway manifest describes a
- * translator that reaches only public operations.
- *
- * How it fits: none of this adds a runtime plane, a state machine, an
- * extension kind, or a private path (DXI-034, DXI-035). Descriptors are
- * derived from published procedure manifests, load results name immutable
- * refs, model plans ride the resolved run manifest, and gateway state
- * lives outside Zero-AR as adapter-local delivery bookkeeping.
- */
 import { z } from 'zod';
 import type { ProcedureManifest } from './publication.js';
-/**
- * The compact form the model sees for a pinned skill: enough to decide
- * whether to open it, and no instruction bytes beyond the standard
- * description (DXI-007). Everything here derives from the published
- * manifest, so a descriptor is never a second source of truth.
- */
 export declare const SkillDescriptorSchema: z.ZodObject<{
     skill_ref: z.ZodString;
     name: z.ZodString;
@@ -38,13 +16,7 @@ export declare const SkillDescriptorSchema: z.ZodObject<{
     }>;
 }, z.core.$strict>;
 export type SkillDescriptor = z.infer<typeof SkillDescriptorSchema>;
-/**
- * Derive the descriptor from the published manifest. A manifest compiled
- * before progressive disclosure carries no activation field, and its
- * historical eager behaviour is what absence means (DXI-012).
- */
 export declare function skillDescriptor(manifest: ProcedureManifest, skill_ref: string): SkillDescriptor;
-/** Load the exact entry artifact of one pinned skill. */
 export declare const SkillOpenRequestSchema: z.ZodObject<{
     skill_ref: z.ZodString;
     retention: z.ZodOptional<z.ZodEnum<{
@@ -53,7 +25,6 @@ export declare const SkillOpenRequestSchema: z.ZodObject<{
     }>>;
 }, z.core.$strict>;
 export type SkillOpenRequest = z.infer<typeof SkillOpenRequestSchema>;
-/** Load one declared resource, optionally a bounded line range inside it. */
 export declare const SkillReadRequestSchema: z.ZodObject<{
     skill_ref: z.ZodString;
     path: z.ZodString;
@@ -65,13 +36,11 @@ export declare const SkillReadRequestSchema: z.ZodObject<{
     }>>;
 }, z.core.$strict>;
 export type SkillReadRequest = z.infer<typeof SkillReadRequestSchema>;
-/** Page the pinned descriptor set. Metadata only: no provider call, no network, no embedding. */
 export declare const SkillSearchRequestSchema: z.ZodObject<{
     query: z.ZodOptional<z.ZodString>;
     page: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strict>;
 export type SkillSearchRequest = z.infer<typeof SkillSearchRequestSchema>;
-/** What a load admitted: exact bytes by ref, with the range and retention in force. */
 export declare const SkillLoadResultSchema: z.ZodObject<{
     skill_ref: z.ZodString;
     path: z.ZodNullable<z.ZodString>;
@@ -87,7 +56,6 @@ export declare const SkillLoadResultSchema: z.ZodObject<{
     }>;
 }, z.core.$strict>;
 export type SkillLoadResult = z.infer<typeof SkillLoadResultSchema>;
-/** One deterministic page over pinned descriptors, with the rest accounted. */
 export declare const SkillSearchResultSchema: z.ZodObject<{
     page: z.ZodNumber;
     pages: z.ZodNumber;
@@ -109,25 +77,17 @@ export declare const SkillSearchResultSchema: z.ZodObject<{
     omitted: z.ZodNumber;
 }, z.core.$strict>;
 export type SkillSearchResult = z.infer<typeof SkillSearchResultSchema>;
-/** Read one bounded byte range from a committed artifact handle. */
 export declare const ArtifactReadRequestSchema: z.ZodObject<{
     artifact_ref: z.ZodString;
     offset: z.ZodNumber;
     length: z.ZodNumber;
 }, z.core.$strict>;
 export type ArtifactReadRequest = z.infer<typeof ArtifactReadRequestSchema>;
-/** One declared ordered fallback set a tenant permits by name (DXI-015). */
 export declare const ModelFallbackSetSchema: z.ZodObject<{
     name: z.ZodString;
     members: z.ZodArray<z.ZodString>;
 }, z.core.$strict>;
 export type ModelFallbackSet = z.infer<typeof ModelFallbackSetSchema>;
-/**
- * The tenant's model inventory: which admitted instances are configured,
- * which exact catalogue entries are enabled, and what names resolve to
- * them. Configuration and inventory only; it holds no secret and performs
- * no inference (DXI-013, DXI-018).
- */
 export declare const TenantModelPoolSchema: z.ZodObject<{
     tenant: z.ZodString;
     provider_instances: z.ZodArray<z.ZodString>;
@@ -141,12 +101,6 @@ export declare const TenantModelPoolSchema: z.ZodObject<{
     quota_policy_ref: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type TenantModelPool = z.infer<typeof TenantModelPoolSchema>;
-/**
- * The complete model plan a run pins before its first call: one exact
- * primary, the declared ordered fallbacks, and why this selector resolved
- * here. It enters the resolved run manifest and the transitive identity,
- * so a substitution nobody declared cannot happen quietly (DXI-014).
- */
 export declare const ResolvedModelPlanSchema: z.ZodObject<{
     primary: z.ZodObject<{
         model_ref: z.ZodString;
@@ -342,29 +296,20 @@ export declare const ResolvedModelPlanSchema: z.ZodObject<{
     resolution_policy_ref: z.ZodString;
 }, z.core.$strict>;
 export type ResolvedModelPlan = z.infer<typeof ResolvedModelPlanSchema>;
-/** Point one alias at one exact enabled catalogue entry (DXI-018). */
 export declare const SetModelAliasRequestSchema: z.ZodObject<{
     alias: z.ZodString;
     catalogue_entry_ref: z.ZodString;
 }, z.core.$strict>;
 export type SetModelAliasRequest = z.infer<typeof SetModelAliasRequestSchema>;
-/** Declare one ordered fallback set a run may pin by name (DXI-015). */
 export declare const DeclareFallbackSetRequestSchema: z.ZodObject<{
     name: z.ZodString;
     members: z.ZodArray<z.ZodString>;
 }, z.core.$strict>;
 export type DeclareFallbackSetRequest = z.infer<typeof DeclareFallbackSetRequestSchema>;
-/** Name the alias intake resolves when an agent asks for the project default. */
 export declare const SetDefaultModelAliasRequestSchema: z.ZodObject<{
     alias: z.ZodString;
 }, z.core.$strict>;
 export type SetDefaultModelAliasRequest = z.infer<typeof SetDefaultModelAliasRequestSchema>;
-/**
- * What an admitted gateway adapter is and may reach. It authenticates at
- * the channel boundary, maps trusted configuration to tenant identity,
- * and calls generated public operations. It owns no model loop and holds
- * no secret value: only refs into the deployment secret facility.
- */
 export declare const GatewayAdapterManifestSchema: z.ZodObject<{
     name: z.ZodString;
     version: z.ZodString;
@@ -390,10 +335,6 @@ export declare const GatewayAdapterManifestSchema: z.ZodObject<{
     }, z.core.$strict>;
 }, z.core.$strict>;
 export type GatewayAdapterManifest = z.infer<typeof GatewayAdapterManifestSchema>;
-/**
- * Adapter-local delivery bookkeeping. This is not canonical run state:
- * losing it costs redelivery, never run truth (DXI-029, DXI-031).
- */
 export declare const GatewayDeliveryCursorSchema: z.ZodObject<{
     adapter: z.ZodString;
     channel_key: z.ZodString;

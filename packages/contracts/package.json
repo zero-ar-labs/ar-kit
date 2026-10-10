@@ -1,6 +1,6 @@
 {
   "name": "@zero-ar/contracts",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "type": "module",
   "description": "Schemas, identifiers and state machines for Zero-AR integrations.",
   "license": "Apache-2.0",

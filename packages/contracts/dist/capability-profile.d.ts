@@ -1,16 +1,3 @@
-/**
- * Capability profile manifests.
- *
- * What this is: the contracts-owned description of what a named profile
- * claims, what it excludes, which components it probes, and which evidence
- * names support those claims.
- *
- * How it fits: composition roots consume this instead of maintaining private
- * health or release capability maps. The manifest ref is pinned into new runs,
- * so a profile change is visible in durable history. Before changing a
- * manifest, capture it with scripts/capture-profile-manifest-history.ts so
- * runs pinned to it stay continuable (profile-compatibility.ts).
- */
 import { z } from 'zod';
 import type { CellGuaranteeExclusion, Profile, ProfileCapability, ProfileCapabilityRefusalPoint } from './vocab.js';
 export declare const ProfileArtifactPolicySchema: z.ZodObject<{
@@ -532,7 +519,6 @@ export declare function profileCapabilityManifestRef(manifest: ProfileCapability
 export declare function profileCapabilitySummary(manifest: ProfileCapabilityManifest): ProfileCapabilitySummary;
 export declare function profileCapabilitySummaryFor(profile: Profile): ProfileCapabilitySummary;
 export declare function profileGuaranteeExclusions(profile: Profile): string[];
-/** Health lines for the guarantees this deployment observed it cannot hold, in vocabulary order. */
 export declare function cellGuaranteeExclusionLines(exclusions: readonly CellGuaranteeExclusion[]): string[];
 export declare function compileProfileCapabilityManifest(value: unknown, options?: CompileOptions): ProfileCapabilityManifest;
 export declare function assertProfileCapabilitySupported(manifest: ProfileCapabilityManifest, capability: ProfileCapability, boundary?: ProfileCapabilityRefusalPoint): ProfileCapabilityEntry;

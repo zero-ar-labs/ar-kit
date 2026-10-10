@@ -1,11 +1,3 @@
-/**
- * Environment lifecycle contracts.
- *
- * These schemas define the one provider-neutral protocol for disposable or
- * externally recoverable compute. Adapters translate provider operations;
- * Zero-AR keeps run, lease, effect, artifact, and completion meaning outside
- * the environment boundary (ENV-001 and ENV-002).
- */
 import { z } from 'zod';
 import { contentHash } from "./ids.js";
 import { BROWSER_SANDBOX_MODES, CONTAINER_LIFETIMES, SEGMENT_END_REASONS, SEGMENT_PROCESSES, ENVIRONMENT_BACKENDS, ENVIRONMENT_ISOLATIONS, ENVIRONMENT_LIFECYCLE_OPERATIONS, ENVIRONMENT_MOUNT_MODES, ENVIRONMENT_NETWORK_MODES, ENVIRONMENT_PROFILE_STATES, ENVIRONMENT_REUSE_POLICIES, ENVIRONMENT_STATUSES, ENVIRONMENT_SUSPENSION_DISPOSITIONS, ENVIRONMENT_TENANT_SHARING, OPERATION_CLASSES, } from "./vocab.js";
@@ -28,7 +20,6 @@ export const EnvironmentReusePolicySchema = z.enum(ENVIRONMENT_REUSE_POLICIES);
 export const EnvironmentStatusSchema = z.enum(ENVIRONMENT_STATUSES);
 export const EnvironmentSuspensionDispositionSchema = z.enum(ENVIRONMENT_SUSPENSION_DISPOSITIONS);
 export const EnvironmentTenantSharingSchema = z.enum(ENVIRONMENT_TENANT_SHARING);
-/** Generic environments can host only work that carries no effect dispatch. */
 export const EnvironmentOperationClassSchema = z
     .enum(OPERATION_CLASSES)
     .refine((value) => value !== 'effect-proposal', 'effect-proposal work dispatches only through the Effect Plane (ENV-009)');
@@ -83,7 +74,6 @@ export const EnvironmentLifecycleAssuranceSchema = z.strictObject({
     automatic_expiry_ms: count.nullable(),
     retained_resources: z.array(z.string().min(1)).max(64),
 });
-/** One versioned adapter capability and omission declaration (ENV-038). */
 export const EnvironmentAdapterDescriptorSchema = z.strictObject({
     contract: z.literal('environment-adapter/1'),
     name,
@@ -99,13 +89,6 @@ export const EnvironmentAdapterDescriptorSchema = z.strictObject({
     reviewer: z.string().min(1),
     conformance_refs: z.array(hash).min(1),
 });
-/**
- * Container runtime settings a browser needs (browser workspace appendix, C3):
- * shared memory, bounded in-memory mounts, an init process that reaps zombie
- * processes, a reviewed seccomp profile pinned by digest, and the declared
- * browser sandbox mode. A browser keeps its own sandbox only under a reviewed
- * syscall profile; without one the profile must say the sandbox is off.
- */
 export const EnvironmentRuntimeSettingsSchema = z
     .strictObject({
     shm_mib: z.number().int().positive().max(65_536).optional(),
@@ -116,14 +99,10 @@ export const EnvironmentRuntimeSettingsSchema = z
     init: z.boolean().optional(),
     syscall_profile_ref: z.string().regex(/^sha256:[0-9a-f]{64}$/).optional(),
     browser_sandbox: z.enum(BROWSER_SANDBOX_MODES).optional(),
-    /** per-run keeps one live container per run segment and runs each command in it (C1). */
     container_lifetime: z.enum(CONTAINER_LIFETIMES).optional(),
     segment_process: z.enum(SEGMENT_PROCESSES).optional(),
-    /** A segment idle this long ends; default 10 minutes. */
     idle_ms: z.number().int().min(1_000).max(86_400_000).optional(),
-    /** A segment this old ends before its next command; default 2 hours. */
     max_segment_ms: z.number().int().min(10_000).max(604_800_000).optional(),
-    /** Keep the sealed generation before the latest when older ones are deleted (C5). */
     keep_previous_generation: z.boolean().optional(),
 })
     .superRefine((settings, context) => {
@@ -138,26 +117,18 @@ export const EnvironmentRuntimeSettingsSchema = z
         context.addIssue({ code: 'custom', message: 'a tmpfs mount may not cover the root or the workspace mount.' });
     }
 });
-/** A run's container segment started (browser workspace appendix, C1). */
 export const EnvironmentSegmentStartedSchema = z.strictObject({
     environment_id: environmentId,
     segment_id: z.string().regex(/^seg_[0-9a-f]{32}$/),
     container: z.string().min(1).max(128),
     owner: z.string().min(1).max(200),
 });
-/**
- * A run's container segment is about to end, and why (C5). It is recorded
- * before the container is stopped or removed or the workspace sealed, so no
- * segment ends without canonical evidence; the matching ended record states
- * the outcome.
- */
 export const EnvironmentSegmentEndingSchema = z.strictObject({
     environment_id: environmentId,
     segment_id: z.string().regex(/^seg_[0-9a-f]{32}$/),
     container: z.string().min(1).max(128),
     reason: z.enum(SEGMENT_END_REASONS),
 });
-/** A run's container segment ended, with the reason and the workspace generation it sealed, if any (C1, C5). */
 export const EnvironmentSegmentEndedSchema = z.strictObject({
     environment_id: environmentId,
     segment_id: z.string().regex(/^seg_[0-9a-f]{32}$/),
@@ -166,7 +137,6 @@ export const EnvironmentSegmentEndedSchema = z.strictObject({
     sealed_generation: z.number().int().positive().nullable(),
     detail: z.string().max(1_000).nullable(),
 });
-/** Immutable operator configuration. Enablement is separate mutable state. */
 export const EnvironmentProfileSchema = z.strictObject({
     profile_ref: hash,
     name,
@@ -195,14 +165,8 @@ export const EnvironmentProfileSchema = z.strictObject({
     cost_dimensions: z.array(z.string().min(1)).max(32),
     created_by: z.string().min(1),
     reviewed_by: z.string().min(1),
-    /** Absent for every profile made before C3, so their identities do not move. */
     runtime: EnvironmentRuntimeSettingsSchema.optional(),
 });
-/**
- * Compute the immutable profile identity from every material field. The
- * mutable enablement state and credential issuance epoch live outside this
- * value, so rotating the same scoped credential does not move active runs.
- */
 export function deriveEnvironmentProfileRef(profile) {
     return contentHash(profile);
 }
@@ -210,14 +174,12 @@ export function environmentProfileHasValidRef(profile) {
     const { profile_ref, ...material } = profile;
     return profile_ref === deriveEnvironmentProfileRef(material);
 }
-/** Mutable admission state kept beside, rather than inside, the immutable profile. */
 export const EnvironmentProfileRegistrationSchema = z.strictObject({
     profile: EnvironmentProfileSchema,
     state: EnvironmentProfileStateSchema,
     secret_issuance_epoch: z.number().int().positive(),
     published_at: z.string().datetime().nullable(),
 });
-/** Every provider handle is bound to the admitted Zero-AR operation. */
 export const EnvironmentHandleBindingSchema = z.strictObject({
     tenant: z.string().min(1),
     run_id: runId,
@@ -234,7 +196,6 @@ export const EnvironmentHandleSchema = z.strictObject({
     environment_id: environmentId,
     provider_handle: z.string().min(1),
     binding: EnvironmentHandleBindingSchema,
-    /** Non-authorizing durable-workspace locator and observed generation. */
     workspace_handle: workspaceId.nullable().optional(),
     workspace_generation: z.number().int().positive().nullable().optional(),
     identity_ref: hash,
@@ -306,13 +267,7 @@ export const ObserveEnvironmentJobResultSchema = z
     stdout_bytes: count,
     stderr_bytes: count,
     inline_output_json: z.string().max(4_096).nullable(),
-    /** Cost the adapter reports for a terminal job, by declared cost dimension. Absent when it reports none. */
     known_cost: z.record(z.string(), count).optional(),
-    /**
-     * Files the finished job left under declared output paths that no earlier
-     * job left, relative to the output root, for collection (browser
-     * workspace appendix, C2). Absent when the adapter lists none.
-     */
     outputs_ready: z.array(z.string().min(1).max(1_024)).max(32).optional(),
 })
     .superRefine((result, context) => matchingStatus(result, result.job, 'job', context));
@@ -331,7 +286,6 @@ export const ReconcileEnvironmentJobResultSchema = z
     stdout_bytes: count,
     stderr_bytes: count,
     inline_output_json: z.string().max(4_096).nullable(),
-    /** Cost the adapter reports for a terminal job, by declared cost dimension. Absent when it reports none. */
     known_cost: z.record(z.string(), count).optional(),
 })
     .superRefine((result, context) => matchingStatus(result, result.job, 'job', context));
@@ -365,7 +319,6 @@ export const CollectedEnvironmentArtifactSchema = z.strictObject({
     source_job_id: jobId,
     adapter_digest: hash,
     destination_ref: z.string().min(1),
-    /** The media type the artifact was stored with, when the adapter names one (C2). */
     media_type: z.string().min(1).max(128).optional(),
 });
 export const CollectEnvironmentArtifactResultSchema = z
@@ -415,13 +368,11 @@ export const AbandonEnvironmentResultSchema = z
     matchingStatus(result, result.environment, 'environment', context);
     matchingStatus(result, result.job, 'job', context);
 });
-/** Durable suspension disposition for every environment handle still open. */
 export const SuspendedEnvironmentHandleSchema = z.strictObject({
     environment: EnvironmentHandleSchema,
     jobs: z.array(EnvironmentJobHandleSchema),
     disposition: EnvironmentSuspensionDispositionSchema,
     recorded_at: z.string().datetime(),
-    /** Internal runtime provenance; never sent to the environment adapter. */
     closure_epoch: z.number().int().positive().optional(),
     closure_ref: hash.optional(),
 }).superRefine((value, context) => {
@@ -429,29 +380,18 @@ export const SuspendedEnvironmentHandleSchema = z.strictObject({
         context.addIssue({ code: 'custom', message: 'closure_epoch and closure_ref must be present together' });
     }
 });
-/**
- * One recorded reuse. A later call in the same run, tenant, and profile runs
- * its job in an environment an earlier call prepared. The environment handle
- * keeps its preparing binding; this record carries the binding of the call it
- * now serves and names the submission that call makes (ENV-006 and appendix
- * section 9: reuse is explicit, bounded by expiry, and recorded).
- */
 export const EnvironmentReuseRecordSchema = z.strictObject({
     environment_id: environmentId,
-    /** The serving call: its run, tenant, profile, adapter, operation, lease, and tool-call identity. */
     binding: EnvironmentHandleBindingSchema,
     submission_request_id: controlId,
-    /** Jobs the environment had already run when this call began. */
     prior_jobs: count,
     policy: EnvironmentReusePolicySchema,
-    /** The environment expiry the reuse decision checked, or null when the provider sets none. */
     expires_at: z.string().datetime().nullable(),
 }).superRefine((value, context) => {
     if (value.policy !== 'run') {
         context.addIssue({ code: 'custom', path: ['policy'], message: 'only the run reuse policy serves a later call from a prepared environment.' });
     }
 });
-/** Current facts that resume must revalidate before it contacts a provider. */
 export const EnvironmentResumeContextSchema = z.strictObject({
     tenant: z.string().min(1),
     accepted_adapter_digest: hash,
@@ -465,7 +405,6 @@ export const EnvironmentResumeContextSchema = z.strictObject({
     egress_destinations: z.array(z.string().url()),
     classification_ceiling: z.string().min(1),
 });
-/** One already-admitted run-internal invocation crossing from the kernel. */
 export const EnvironmentExecutionRequestSchema = z.strictObject({
     tool: name,
     input: z.record(z.string(), z.unknown()),
@@ -478,14 +417,12 @@ export const EnvironmentExecutionRequestSchema = z.strictObject({
     accountable_owner: z.string().min(1),
     closure_epoch: z.number().int().min(1).optional(),
     closure_ref: hash.optional(),
-    /** The environment profile the run pinned for this tool at admission. Absent in runs recorded before resolution. */
     profile_ref: hash.optional(),
 }).superRefine((value, context) => {
     if ((value.closure_epoch === undefined) !== (value.closure_ref === undefined)) {
         context.addIssue({ code: 'custom', path: ['closure_epoch'], message: 'closure_epoch and closure_ref must be present or absent together' });
     }
 });
-/** One output a call left, stored as an artifact (C2). The tool result names each, and an image reaches the model. */
 export const EnvironmentResultArtifactSchema = z.strictObject({
     artifact_ref: z.string().min(1),
     source_path: z.string().min(1).max(1_024),
@@ -499,12 +436,9 @@ export const EnvironmentExecutionResultSchema = z.strictObject({
     output: z.record(z.string(), z.unknown()).optional(),
     error: z.string().optional(),
     used: count.optional(),
-    /** Outputs the call left under declared paths, each collected as an artifact. */
     artifacts: z.array(EnvironmentResultArtifactSchema).max(32).optional(),
-    /** Why an output the call left was not collected, one line each. */
     artifact_refusals: z.array(z.string().min(1).max(1_000)).max(32).optional(),
 });
-/** Only these lifecycle states carry work that still needs disposition. */
 export function isNonTerminalEnvironmentStatus(status) {
     return status !== 'collected' && status !== 'cancelled' && status !== 'failed' && status !== 'torn-down' && status !== 'abandoned';
 }

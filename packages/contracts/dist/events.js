@@ -1,14 +1,3 @@
-/**
- * Which records publish as durable observation events.
- *
- * What this is: the one mapping from a runtime record type to the durable
- * event name clients subscribe to, or null for records that stay internal to
- * the log. The outbox writes exactly what this map says.
- *
- * How it fits: durable observation is a projection of the log (X-2), and the
- * projection's vocabulary is closed. Internal records still reconstruct runs;
- * they simply are not events a client resumes on.
- */
 export const RECORD_EVENT_MAP = {
     'run.created': null,
     'run.started': 'run.started',
@@ -103,8 +92,8 @@ export const RECORD_EVENT_MAP = {
     'closure.epoch.activated': 'closure.epoch.activated',
     'state.closure.rehydrated': null,
     'executor.continuation.accepted': null,
+    'run.handoff.recorded': null,
 };
-/** One stable product family for every resumable event name. */
 export const DURABLE_EVENT_FAMILY = {
     'run.started': 'work',
     'turn.completed': 'work',

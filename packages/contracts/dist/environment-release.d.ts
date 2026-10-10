@@ -1,11 +1,3 @@
-/**
- * Signed environment adapter release contracts.
- *
- * A junior developer uses the body to describe one exact adapter package,
- * source revision, dependency inventory, runtime artifacts, and supported
- * hosts. Release tooling signs that body. Runtime admission verifies the
- * signature and compares it with the adapter descriptor before enablement.
- */
 import { z } from 'zod';
 export declare const EnvironmentAdapterCompatibilitySchema: z.ZodObject<{
     contract: z.ZodLiteral<"environment-adapter/1">;

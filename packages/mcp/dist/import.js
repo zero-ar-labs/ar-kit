@@ -1,17 +1,5 @@
-/**
- * MCP discovery import compiler.
- *
- * What this is: the review boundary that turns one immutable peer snapshot
- * into a native tool or resource publication plan. Remote descriptions and
- * annotations remain metadata and cannot choose authority or operation class.
- *
- * How it fits: callers inspect the dry-run plan, then attach a separate
- * admission reference. Active runs pin that admitted content rather than a
- * mutable endpoint catalogue.
- */
 import { McpImportedResourcePlanSchema, McpImportedToolPlanSchema, contentHash, refuse, } from '@zero-ar/contracts';
 import { assertBoundedJsonSchema } from "./schema-policy.js";
-/** Derive the host-facing binding a run pins for one reviewed remote tool. */
 export function mcpToolExecutionBindingRef(input) {
     return contentHash(input);
 }

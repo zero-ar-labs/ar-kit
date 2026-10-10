@@ -1,11 +1,3 @@
-/**
- * The command's identity and its usage table.
- *
- * What this is: the usage and example data that drive help, completions,
- * manpages and release artifacts, and the identity report that help, doctor
- * and version print: product, command, runtime build, contract version.
- * Every surface reads these so the command never describes itself by hand.
- */
 import { CONTRACT_VERSION, SUCCESSOR_PRODUCT_IDENTITY, SUPPORTED_NODE_RUNTIME } from '@zero-ar/contracts';
 export const CLI_USAGE_ROWS = [
     { command: 'run', syntax: 'run "<objective>" [--items-from manifest.ndjson] [--source alias=ref] [--contract name] [--attention n] [--idempotency-key key] [--detach]', summary: 'start a run' },
@@ -30,8 +22,9 @@ export const CLI_USAGE_ROWS = [
     { command: 'fork', syntax: 'fork <run> --at <entry>', summary: 'continue history under a new identity' },
     { command: 'replay', syntax: 'replay <run>', summary: 're-execute the saved inputs, models called again' },
     { command: 'rebuild', syntax: 'rebuild <run>', summary: 'refold the head projection from the log' },
-    { command: 'export', syntax: 'export <run> [--out f] [--json]', summary: 'seal canonical history and report each portability level' },
+    { command: 'export', syntax: 'export <run> [--out f] [--handoff-to destination] [--json]', summary: 'seal canonical history and report each portability level; --handoff-to signs the run over to one other cell first' },
     { command: 'import', syntax: 'import <file> [--executor declaration.json] [--continue] [--json]', summary: 'verify, materialize, rehydrate, then optionally admit an executor' },
+    { command: 'import', syntax: 'import --destination [--json]', summary: 'name this cell for a source to hand a run to' },
     { command: 'publish', syntax: 'publish <source> [--dry-run] [--verification-input file] [--url u] [--json]', summary: 'compile locally, preview verification, or commit through hosted publication' },
     { command: 'publication', syntax: 'publication export <publication-ref> [--out f]', summary: 'one published closure as checksummed lines, with no alias or credential' },
     { command: 'publication', syntax: 'publication import <file> [--json]', summary: 'commit an exported closure here with identical refs and a new receipt' },
@@ -61,7 +54,6 @@ export const CLI_USAGE_ROWS = [
     { command: 'help', syntax: 'help', summary: 'print this command guide' },
 ];
 export const CLI_COMMANDS = [...new Set(CLI_USAGE_ROWS.map((row) => row.command))].sort();
-/** Copyable first steps for the commands used in the primary product journey. */
 export const CLI_COMMAND_EXAMPLES = {
     init: ['init documentary-agent --form yaml'],
     validate: ['validate documentary-agent'],
@@ -71,7 +63,6 @@ export const CLI_COMMAND_EXAMPLES = {
     result: ['result <run-id>', 'result <run-id> --json'],
     doctor: ['doctor', 'doctor --json'],
 };
-/** The full guide groups the command table by the job a person is doing. */
 export const CLI_HELP_SECTIONS = [
     { title: 'get started', commands: ['init', 'scaffold', 'validate', 'run', 'attach', 'inspect', 'result'] },
     { title: 'guide and control runs', commands: ['records', 'context', 'verification-plan', 'steer', 'redirect', 'pause', 'budget', 'answer', 'resume', 'fork', 'replay', 'cancel'] },
@@ -80,7 +71,6 @@ export const CLI_HELP_SECTIONS = [
     { title: 'administer hosted runtime', commands: ['environment', 'provider', 'tool-source', 'effect'] },
     { title: 'reference', commands: ['version', 'help'] },
 ];
-/** Commands whose work can run against bundled or hosted Zero-AR. */
 export const CLI_REMOTE_CAPABLE_COMMANDS = [
     'run',
     'attach',

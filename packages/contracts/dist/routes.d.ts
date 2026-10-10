@@ -1,17 +1,3 @@
-/**
- * The public route table.
- *
- * What this is: every route the server offers and every client speaks,
- * declared once with its method, path, transport kind, and the registry
- * names of its request and response shapes. The client module is generated
- * from this table, and the parity vector drives a live server through all
- * of it (XCV-003).
- *
- * How it fits: a surface that needs an operation absent from this table
- * blocks until the contract exists (ERD 9.1). Adding a row here and
- * regenerating is the whole procedure for a new route; a hand-edited
- * client drifts from this table and the drift check refuses it.
- */
 import type { ApiMediaType, ApiQueryParameterType, ProductArea, ProductMutationIdempotencySource, RouteScope } from './vocab.js';
 export { PRODUCT_AREAS, ROUTE_SCOPES } from './vocab.js';
 export type { ProductArea, RouteScope } from './vocab.js';
@@ -47,7 +33,6 @@ export interface ApiRouteHeaderParameter {
     description: string;
     maxLength?: number;
 }
-/** One typed refusal a route answers before or instead of its success shape. */
 export interface ApiRouteDiagnostic {
     status: 400 | 404 | 409;
     code: string;
@@ -56,26 +41,17 @@ export interface ApiRouteDiagnostic {
 export interface ApiRoute {
     method: 'GET' | 'POST';
     path: string;
-    /** json answers a body; bundle moves framed JSON lines; sse streams events. */
     kind: 'json' | 'bundle' | 'sse';
-    /** SCHEMA_REGISTRY names for request bodies, responses, or stream events. */
     request?: string;
     response?: string;
     query?: readonly ApiRouteQueryParameter[];
-    /** An optional SCHEMA_REGISTRY object type used by generated clients for a multi-field query. */
     query_request?: string;
-    /** Extra typed request headers beyond the application Authorization credential. */
     headers?: readonly ApiRouteHeaderParameter[];
-    /** Route-specific refusals, named by diagnostic code, beyond the shared diagnostic responses. */
     diagnostics?: readonly ApiRouteDiagnostic[];
-    /** JSON is the default. Binary, framed, and stream routes state their media explicitly. */
     request_media_type?: ApiMediaType;
     response_media_type?: ApiMediaType;
-    /** Exactly one of the five primary product areas (LIF-031). The inventory derives from this field. */
     area: ProductArea;
-    /** Public routes state why. Protected routes state their exact scope expression. */
     authorization: ApiRouteAuthorization;
-    /** Present only for commands in the external-product mutation profile. */
     product_mutation?: {
         idempotency_source: ProductMutationIdempotencySource;
         changed_content_code: string;
@@ -576,6 +552,31 @@ export declare const API_ROUTES: {
         readonly product_mutation: {
             readonly idempotency_source: "request-idempotency-key";
             readonly changed_content_code: "run.continuation.idempotency-reused";
+        };
+    };
+    readonly handoffRun: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/handoff";
+        readonly kind: "json";
+        readonly request: "RunHandoffRequestSchema";
+        readonly response: "RunHandoffReceiptSchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:restore"];
+        };
+        readonly product_mutation: {
+            readonly idempotency_source: "request-idempotency-key";
+            readonly changed_content_code: "run.handoff.idempotency-reused";
+        };
+    };
+    readonly continuationDestination: {
+        readonly method: "GET";
+        readonly path: "/v1/continuation-destination";
+        readonly kind: "json";
+        readonly response: "RunContinuationDestinationIdentitySchema";
+        readonly area: "administration";
+        readonly authorization: {
+            readonly scopes: readonly ["operator:restore"];
         };
     };
     readonly streamRecords: {
@@ -1567,7 +1568,5 @@ export declare const API_ROUTES: {
     };
 };
 export type RouteName = keyof typeof API_ROUTES;
-/** The :named parameters a route's path carries, in order. */
 export declare function routeParams(path: string): string[];
-/** Substitute parameters into a route path. A missing parameter throws by name. */
 export declare function routePath(name: RouteName, params?: Record<string, string>): string;

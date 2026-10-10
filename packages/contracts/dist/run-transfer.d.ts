@@ -1,13 +1,3 @@
-/**
- * Cross-executor run continuation contracts.
- *
- * What this is: the content-addressed capsule, executor declaration and
- * compatibility result used when a restored run moves to another harness.
- *
- * How it fits: the capsule summarizes canonical history and referenced
- * state. It grants nothing. The kernel still takes the execution claim,
- * records acceptance and uses the existing recovery and resume paths.
- */
 import { z } from 'zod';
 export declare const RunContinuationExecutorSchema: z.ZodObject<{
     executor_ref: z.ZodString;
@@ -43,7 +33,6 @@ export declare const RunContinuationFrontierSchema: z.ZodObject<{
     head_projection_hash: z.ZodString;
 }, z.core.$strict>;
 export type RunContinuationFrontier = z.infer<typeof RunContinuationFrontierSchema>;
-/** A data-only description of exactly what another executor would inherit. */
 export declare const RunContinuationCapsuleSchema: z.ZodObject<{
     schema: z.ZodLiteral<"zero-ar-run-continuation/1">;
     run_id: z.ZodString;
@@ -148,7 +137,6 @@ export declare const RunContinuationCapsuleSchema: z.ZodObject<{
     capsule_ref: z.ZodString;
 }, z.core.$strict>;
 export type RunContinuationCapsule = z.infer<typeof RunContinuationCapsuleSchema>;
-/** What one executor says it can interpret and bind before taking a claim. */
 export declare const RunContinuationDeclarationSchema: z.ZodObject<{
     executor: z.ZodObject<{
         executor_ref: z.ZodString;
@@ -180,14 +168,12 @@ export declare const RunContinuationDeclarationSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type RunContinuationDeclaration = z.infer<typeof RunContinuationDeclarationSchema>;
-/** Transport-authenticated authority supplied beside, never inside, a continuation request. */
 export declare const RunContinuationAuthoritySchema: z.ZodObject<{
     principal: z.ZodString;
     scopes: z.ZodTuple<[z.ZodLiteral<"operator:restore">, z.ZodLiteral<"run:resume">], null>;
     scope_epoch: z.ZodNumber;
 }, z.core.$strict>;
 export type RunContinuationAuthority = z.infer<typeof RunContinuationAuthoritySchema>;
-/** One deployment-owned claim against the source capsule's continuation authority. */
 export declare const RunContinuationFenceClaimSchema: z.ZodObject<{
     run_id: z.ZodString;
     source_capsule_ref: z.ZodString;
@@ -197,7 +183,6 @@ export declare const RunContinuationFenceClaimSchema: z.ZodObject<{
     request_fingerprint: z.ZodString;
 }, z.core.$strict>;
 export type RunContinuationFenceClaim = z.infer<typeof RunContinuationFenceClaimSchema>;
-/** The durable authority answer. Repeated means this exact destination already owns the frontier. */
 export declare const RunContinuationFenceReceiptSchema: z.ZodObject<{
     claim_ref: z.ZodString;
     source_capsule_ref: z.ZodString;
@@ -260,7 +245,6 @@ export declare const RunContinuationCompatibilityCheckSchema: z.ZodObject<{
     message: z.ZodString;
 }, z.core.$strict>;
 export type RunContinuationCompatibilityCheck = z.infer<typeof RunContinuationCompatibilityCheckSchema>;
-/** Pure compatibility says what blocks a claim without calling a model or tool. */
 export declare const RunContinuationCompatibilityReportSchema: z.ZodObject<{
     schema: z.ZodLiteral<"zero-ar-run-continuation-compatibility/1">;
     run_id: z.ZodString;
@@ -458,3 +442,83 @@ export declare const RunContinuationAcceptedSchema: z.ZodObject<{
     }, z.core.$strict>;
 }, z.core.$strict>;
 export type RunContinuationAccepted = z.infer<typeof RunContinuationAcceptedSchema>;
+export declare const RunHandoffDocumentSchema: z.ZodObject<{
+    schema: z.ZodLiteral<"zero-ar-run-handoff/1">;
+    run_id: z.ZodString;
+    destination_ref: z.ZodString;
+    frontier: z.ZodObject<{
+        record_count: z.ZodNumber;
+        logical_clock: z.ZodNumber;
+        record_id: z.ZodString;
+        chain_head: z.ZodString;
+        head_projection_hash: z.ZodString;
+    }, z.core.$strict>;
+    issued_at: z.ZodString;
+}, z.core.$strict>;
+export type RunHandoffDocument = z.infer<typeof RunHandoffDocumentSchema>;
+export declare const RunHandoffSignatureSchema: z.ZodObject<{
+    key_id: z.ZodString;
+    signing_key_ref: z.ZodString;
+    public_key_pem: z.ZodString;
+    signature: z.ZodString;
+}, z.core.$strict>;
+export type RunHandoffSignature = z.infer<typeof RunHandoffSignatureSchema>;
+export declare const RunHandoffRecordedSchema: z.ZodObject<{
+    handoff: z.ZodObject<{
+        schema: z.ZodLiteral<"zero-ar-run-handoff/1">;
+        run_id: z.ZodString;
+        destination_ref: z.ZodString;
+        frontier: z.ZodObject<{
+            record_count: z.ZodNumber;
+            logical_clock: z.ZodNumber;
+            record_id: z.ZodString;
+            chain_head: z.ZodString;
+            head_projection_hash: z.ZodString;
+        }, z.core.$strict>;
+        issued_at: z.ZodString;
+    }, z.core.$strict>;
+    signer: z.ZodObject<{
+        key_id: z.ZodString;
+        signing_key_ref: z.ZodString;
+        public_key_pem: z.ZodString;
+        signature: z.ZodString;
+    }, z.core.$strict>;
+    idempotency_key: z.ZodString;
+}, z.core.$strict>;
+export type RunHandoffRecorded = z.infer<typeof RunHandoffRecordedSchema>;
+export declare const RunHandoffRequestSchema: z.ZodObject<{
+    destination_ref: z.ZodString;
+    idempotency_key: z.ZodString;
+}, z.core.$strict>;
+export type RunHandoffRequest = z.infer<typeof RunHandoffRequestSchema>;
+export declare const RunHandoffReceiptSchema: z.ZodObject<{
+    run_id: z.ZodString;
+    destination_ref: z.ZodString;
+    handoff_ref: z.ZodString;
+    recorded_seq: z.ZodNumber;
+    signing_key_ref: z.ZodString;
+    repeated: z.ZodBoolean;
+}, z.core.$strict>;
+export type RunHandoffReceipt = z.infer<typeof RunHandoffReceiptSchema>;
+export declare const RunContinuationDestinationIdentitySchema: z.ZodObject<{
+    schema: z.ZodLiteral<"zero-ar-run-continuation-destination/1">;
+    destination_ref: z.ZodString;
+    executor_ref: z.ZodString;
+    authority_ref: z.ZodString;
+    handoff_signing: z.ZodBoolean;
+}, z.core.$strict>;
+export type RunContinuationDestinationIdentity = z.infer<typeof RunContinuationDestinationIdentitySchema>;
+export interface HandoffKeyTrustInput {
+    key_id: string;
+    signing_key_ref: string;
+    commit: boolean;
+}
+export interface HandoffKeyTrust {
+    trusted: boolean;
+    first_use: boolean;
+    pinned_ref: string | null;
+}
+export declare function trustHandoffKeyIn(pins: Map<string, string> | Record<string, string>, input: HandoffKeyTrustInput): {
+    trust: HandoffKeyTrust;
+    pinned_now: boolean;
+};
