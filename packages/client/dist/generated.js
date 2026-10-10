@@ -1,8 +1,3 @@
-/**
- * Generated from the contract route table by scripts/generate-client.ts.
- * Do not edit by hand; add the route to API_ROUTES and regenerate. The
- * drift check in XCV-003 compares these bytes against a fresh render.
- */
 function withQuery(path, values) {
     const query = new URLSearchParams();
     for (const [name, value] of Object.entries(values)) {
@@ -106,6 +101,12 @@ export class GeneratedRoutes {
     }
     continueImportedRun(run_id, body) {
         return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/continuations`, body);
+    }
+    handoffRun(run_id, body) {
+        return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/handoff`, body);
+    }
+    continuationDestination() {
+        return this.transport.json('GET', `/v1/continuation-destination`);
     }
     createPublicationSession(body) {
         return this.transport.json('POST', `/v1/publication-sessions`, body);

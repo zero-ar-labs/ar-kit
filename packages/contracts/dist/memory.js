@@ -1,18 +1,9 @@
-/**
- * Public contracts for the optional cross-run memory service.
- *
- * Assertions carry cited support, valid time, classification, transaction
- * time and explicit state. Run-owned reads report watermarks and degrade to
- * session scope when the optional service is missing or stale (MEM-001
- * through MEM-010, XCV-016).
- */
 import { z } from 'zod';
 import { CitationSchema } from "./claims.js";
 import { MEMORY_AVAILABILITY_MODES, MEMORY_CLASSIFICATIONS, MEMORY_READ_MODES, MEMORY_WRITE_MODES, } from "./vocab.js";
 const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const timestamp = z.string().datetime({ offset: true });
 const name = z.string().regex(/^[a-z][a-z0-9-]{0,62}$/, 'expected a lowercase name');
-/** The publication-owned policy that makes one narrow memory subject available to a run. */
 export const MemoryBindingSchema = z.strictObject({
     name,
     subject: z.strictObject({
@@ -29,23 +20,19 @@ export const MemoryBindingSchema = z.strictObject({
     classification_ceiling: z.enum(MEMORY_CLASSIFICATIONS).default('internal'),
     maximum_assertions_per_read: z.number().int().min(1).max(200).default(50),
 });
-/** One published binding resolved against authenticated intake and pinned into run identity. */
 export const ResolvedMemoryBindingSchema = MemoryBindingSchema.extend({
     binding_ref: hash,
     tenant: z.string().min(1).max(128),
     subject: MemoryBindingSchema.shape.subject.extend({
-        /** The runtime, never the model, derives this exact namespaced subject. */
         resolved: z.string().min(1).max(512),
     }),
 });
-/** The bounded model request. Tenant and subject are absent by construction (MSH-003). */
 export const ModelMemoryReadRequestSchema = z.strictObject({
     binding: name,
     predicate: name,
     valid_at: timestamp,
     minimum_watermark: z.number().int().nonnegative().optional(),
 });
-/** A run-owned proposal. Its cited spans must resolve through the current run before admission. */
 export const ModelMemoryProposalSchema = z.strictObject({
     binding: name,
     predicate: name,
@@ -129,7 +116,6 @@ export const RunMemoryReadOutcomeSchema = z.strictObject({
     reason: z.string().nullable(),
     read: MemoryReadResponseSchema.nullable(),
 });
-/** Exact model-visible memory bytes before subject-key sealing and artifact storage. */
 export const MemoryReadEnvelopeSchema = z.strictObject({
     schema: z.literal('zero-ar-memory-read-envelope/1'),
     run_id: z.string().regex(/^run_[0-9a-f]{32}$/),
@@ -140,7 +126,6 @@ export const MemoryReadEnvelopeSchema = z.strictObject({
     read: MemoryReadResponseSchema,
     created_at: timestamp,
 });
-/** Subject-key-sealed bytes stored by the artifact backend for one exact read envelope. */
 export const ProtectedMemoryReadEnvelopeSchema = z.strictObject({
     schema: z.literal('zero-ar-protected-memory-read-envelope/1'),
     subject_ref: hash,
@@ -150,13 +135,11 @@ export const ProtectedMemoryReadEnvelopeSchema = z.strictObject({
     ciphertext: z.string().min(1),
     tag: z.string().min(1),
 });
-/** One durable key row as stored under a deployment wrapping key. */
 export const MemoryWrappedKeySchema = z.strictObject({
     wrapped_key: z.string().min(1).max(1_024),
     nonce: z.string().min(1).max(256),
     tag: z.string().min(1).max(256),
 });
-/** The encrypted custody rows explicitly permitted to travel with one subject stream. */
 export const MemorySubjectKeyMaterialSchema = z.strictObject({
     schema: z.literal('zero-ar-memory-subject-key-material/1'),
     binding_ref: hash,
@@ -169,7 +152,6 @@ export const MemorySubjectKeyMaterialSchema = z.strictObject({
         tag: z.string().min(1).max(256).nullable(),
     }),
 });
-/** One content-addressed subject transfer. The subject itself travels only in the authorized request. */
 export const MemorySubjectTransferBundleSchema = z.strictObject({
     schema: z.literal('zero-ar-memory-subject-transfer/1'),
     subject_ref: hash,

@@ -1,17 +1,3 @@
-/**
- * The one finding check shared by the validator kit and the runtime runner.
- *
- * What this is: a pure function that names what makes a raw finding
- * malformed. The verdict must be pass, reject or indeterminate, the reason
- * non-empty, any failure class from the closed vocabulary; a reject names at
- * least one item, a pass names none, only an indeterminate names undecided
- * items, and every named item was given to it.
- *
- * How it fits: defineValidator and runLabelledCases refuse a malformed finding
- * with the code returned here, and the quality plane's runner turns the same
- * problem into infrastructure indeterminate, so case evidence and runtime
- * admission agree on every finding (VAL-004, C-ARCH-VERIFIED-COMPLETION-005).
- */
 import { FAILURE_CLASSES, VALIDATOR_OUTCOMES } from '@zero-ar/contracts';
 function describeValue(value) {
     try {
@@ -21,11 +7,6 @@ function describeValue(value) {
         return String(value);
     }
 }
-/**
- * Check one raw finding against the validator seam. `population` is the set
- * of item ids the validator was given, captured before its code ran. Returns
- * null for a well-formed finding.
- */
 export function validatorFindingProblem(raw, population) {
     if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
         return { code: 'validator.finding.shape', problem: 'the finding is not an object' };

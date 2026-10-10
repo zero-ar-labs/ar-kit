@@ -1,11 +1,3 @@
-/**
- * The product package graph for the Zero-AR migration.
- *
- * Junior guide: package names are part of runtime identity. This file is
- * the manifest that says which `@zero-ar/*` package maps to which
- * `@zero-ar/*` package. The guard below catches half-renamed graphs before
- * an SDK handle starts work.
- */
 import type { PackageDistribution, ProductPackageGraphState, ProductPackageImplementationIdentity } from './vocab.js';
 export declare const PRODUCT_PACKAGE_GRAPH_PROTOCOL: "product-package-graph/v1";
 export interface ProductPackageIdentity {
@@ -21,9 +13,7 @@ export interface ProductPackageGraphNode {
 }
 export type ProductPackageGraphInput = readonly (string | ProductPackageGraphNode)[];
 export interface ProductPackageGraphOptions {
-    /** Release checks require every row in the matrix, not only the packages this process loaded. */
     require_complete_release?: boolean;
-    /** Successor releases can require the legacy names to appear only as wrappers. */
     require_legacy_wrappers?: boolean;
 }
 export interface ProductPackageGraphReport {

@@ -1,14 +1,3 @@
-/**
- * Tool-source administration contracts.
- *
- * What this is: provider-neutral payloads for configuring Composio and
- * Merge sources, discovering provider catalogues, reviewing imports, and
- * narrowing access without rewriting prior runs.
- *
- * How it fits: the runtime still executes only Zero-AR tool contracts.
- * These shapes describe the operator acts that turn provider catalogue
- * entries into pinned tool bindings.
- */
 import { z } from 'zod';
 import { contentHash } from "./ids.js";
 import { AGGREGATOR_PROVIDERS, OPERATION_CLASSES, TOOL_SOURCE_DRIFT_FIELDS, TOOL_SOURCE_STATES, TOOL_SOURCE_TOOL_STATES } from "./vocab.js";
@@ -108,17 +97,10 @@ export const ToolSourceTestResultSchema = z.strictObject({
 export function toolSourceProvider(request) {
     return request.provider;
 }
-/**
- * The one content address for a discovered provider catalogue. The registry
- * and the aggregator host both hash through this function, so a snapshot one
- * pins reads as the same snapshot in the other (TAG-023). Tools sort by name
- * in UTF-16 code-unit order, which does not depend on the host locale.
- */
 export function catalogueSnapshotRef(input) {
     const tools = [...input.tools].sort((left, right) => (left.name < right.name ? -1 : left.name > right.name ? 1 : 0));
     return contentHash({ provider: input.provider, instance: input.instance, tools });
 }
-/** One recorded difference between a source's pinned catalogue and what the provider now serves (TAG-025). */
 export const ToolSourceDriftRecordSchema = z.strictObject({
     source_ref: ref,
     pinned_snapshot_ref: ref,
@@ -131,7 +113,6 @@ export const ToolSourceDriftRecordSchema = z.strictObject({
     })).max(10_000),
     recorded_at: z.string().min(1),
 });
-/** The durable drift history of one source. Drifted means its enabled bindings refuse until re-enabled. */
 export const ToolSourceDriftReportSchema = z.strictObject({
     source_ref: ref,
     drifted: z.boolean(),

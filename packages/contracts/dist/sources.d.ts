@@ -1,10 +1,3 @@
-/**
- * Public source registration, snapshot and run-binding contracts.
- *
- * A source instance is mutable operator configuration. A snapshot,
- * collection, member and binding are separate immutable identities. Runs
- * accept only resolved binding refs, then pin the expanded descriptor.
- */
 import { z } from 'zod';
 import type { MemoryClassification } from './vocab.js';
 export declare const SOURCE_ACCESS_PROFILES: readonly ["local-read-only"];
@@ -12,24 +5,14 @@ export declare const SOURCE_INSTANCE_STATES: readonly ["ready", "disabled", "rem
 export declare const SOURCE_LOCATOR_KINDS: readonly ["local-directory"];
 export declare const SOURCE_OPERATIONS: readonly ["list", "stat", "read", "search", "document.extract"];
 export declare const SOURCE_EXTRACTION_METHODS: readonly ["poppler-text", "tesseract-ocr"];
-/** The active profile's fixed classification range. Deployment destinations remain separately configured. */
 export declare const LOCAL_READ_ONLY_SOURCE_POLICY: Readonly<{
     readonly classification_floor: "public";
     readonly classification_ceiling: "internal";
 }>;
-/** Compare labels using the one contracts-owned classification ordering. */
 export declare function sourceClassificationAdmitted(classification: MemoryClassification, floor?: MemoryClassification, ceiling?: MemoryClassification): boolean;
-/** One Tesseract language code, such as eng, fra or chi_sim. */
 export declare const DOCUMENT_OCR_LANGUAGE_PATTERN: RegExp;
-/** The OCR languages an extraction reads when its call declares none. */
 export declare const DOCUMENT_OCR_DEFAULT_LANGUAGES: readonly string[];
-/** The most OCR languages one extraction may declare. */
 export declare const DOCUMENT_OCR_MAX_LANGUAGES = 4;
-/**
- * The bounds one document extraction keeps. The tool host enforces them and
- * source preflight states them. A kept page image fits the default image
- * limit a model reads under, so a vision model can open it whole.
- */
 export declare const DOCUMENT_EXTRACTION_LIMITS: Readonly<{
     max_document_bytes: number;
     max_pages: 500;
@@ -61,12 +44,6 @@ export declare const SourceExtractorIdentitySchema: z.ZodObject<{
     code_hash: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type SourceExtractorIdentity = z.infer<typeof SourceExtractorIdentitySchema>;
-/**
- * The identity extractor 1.0.0 pinned: English OCR with host binaries. Runs
- * resolved before 1.1.0 and their exported bundles carry it, so their logs
- * still read. Such a run refuses extraction as identity drift and resumes
- * extraction only under a new run that pins the current extractor.
- */
 export declare const SourceExtractorIdentityV1Schema: z.ZodObject<{
     name: z.ZodLiteral<"zero-ar.pdf-extractor">;
     version: z.ZodString;
@@ -80,7 +57,6 @@ export declare const SourceExtractorIdentityV1Schema: z.ZodObject<{
     }>;
 }, z.core.$strict>;
 export type SourceExtractorIdentityV1 = z.infer<typeof SourceExtractorIdentityV1Schema>;
-/** The OCR languages an extraction under this pinned identity reads when its call declares none. */
 export declare function extractorDefaultLanguages(identity: SourceExtractorIdentity | SourceExtractorIdentityV1): readonly string[];
 export declare const SourceLocatorSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     kind: z.ZodLiteral<"local-directory">;
@@ -121,7 +97,6 @@ export declare const RegisterSourceRequestSchema: z.ZodObject<{
         max_depth: z.ZodDefault<z.ZodNumber>;
     }, z.core.$strict>>;
 }, z.core.$strict>;
-/** Public caller input; the schema fills classification, evidence and bounds defaults. */
 export type RegisterSourceRequest = z.input<typeof RegisterSourceRequestSchema>;
 export declare const SourceInstanceSchema: z.ZodObject<{
     source_ref: z.ZodString;
@@ -283,7 +258,6 @@ export declare const SourceBindingInputSchema: z.ZodObject<{
     binding_ref: z.ZodString;
     required_for_completion: z.ZodDefault<z.ZodBoolean>;
 }, z.core.$strict>;
-/** Public caller input; required_for_completion defaults to true at intake. */
 export type SourceBindingInput = z.input<typeof SourceBindingInputSchema>;
 export declare const ResolvedSourceBindingSchema: z.ZodObject<{
     alias: z.ZodString;
@@ -483,7 +457,8 @@ export declare const SourceOperationRequestSchema: z.ZodDiscriminatedUnion<[z.Zo
 }, z.core.$strict>, z.ZodObject<{
     source_alias: z.ZodString;
     operation: z.ZodLiteral<"document.extract">;
-    locator: z.ZodString;
+    locator: z.ZodOptional<z.ZodString>;
+    artifact_ref: z.ZodOptional<z.ZodString>;
     max_pages: z.ZodOptional<z.ZodNumber>;
     languages: z.ZodOptional<z.ZodArray<z.ZodString>>;
 }, z.core.$strict>], "operation">;
@@ -504,20 +479,7 @@ export declare const SourceOperationResultSchema: z.ZodObject<{
     provenance_ref: z.ZodString;
 }, z.core.$strict>;
 export type SourceOperationResult = z.infer<typeof SourceOperationResultSchema>;
-/**
- * The page text one extraction carries inline, in UTF-8 bytes across all its
- * pages. Whole pages go in, in page order, while they fit, so a short
- * document reaches the model in the same result that extracted it and its
- * view stays under the default tool result inline threshold of 4,096 bytes.
- * A page that does not fit is read through its text artifact.
- */
 export declare const DOCUMENT_EXTRACTION_INLINE_TEXT_BYTES = 2048;
-/**
- * The image an OCR page was read from. A kept image is a derived artifact
- * bound to the run, so a model that reads images opens it with
- * artifact.read. An image over the per-page bound, or over what the
- * extraction had left, is not kept, and the page says which bound it met.
- */
 export declare const DocumentPageImageSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     kept: z.ZodLiteral<true>;
     artifact_ref: z.ZodString;
@@ -582,11 +544,6 @@ export declare const DocumentExtractionPageSchema: z.ZodObject<{
     }, z.core.$strict>], "kept">>;
 }, z.core.$strict>;
 export type DocumentExtractionPage = z.infer<typeof DocumentExtractionPageSchema>;
-/**
- * Which pages carry their text inline: whole pages in page order while the
- * UTF-8 bytes stay within the budget. A page that does not fit ends the run
- * of inline pages, so inline text is always a prefix of the document.
- */
 export declare function inlinePageNumbers(pages: readonly {
     page: number;
     text_bytes: number;

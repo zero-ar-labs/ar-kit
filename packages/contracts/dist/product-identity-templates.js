@@ -1,17 +1,8 @@
-/**
- * The product identity project-template policy.
- *
- * Junior guide: a generated project is a writer, and writers emit the
- * successor identity now that the cutover is complete. Keeping the template
- * in contracts lets the CLI, SDK fixtures and release checks agree, and the
- * legacy-surface diagnostic still explains what an old project carries.
- */
 import { refuse } from "./diagnostics.js";
 import { activeSourceApiVersion, LEGACY_SOURCE_API_VERSION, SUCCESSOR_SOURCE_API_VERSION, } from "./product-identity-formats.js";
 import { LEGACY_PRODUCT_IDENTITY, PRODUCT_IDENTITY_MIGRATION, SUCCESSOR_PRODUCT_IDENTITY, } from "./product-identity.generated.js";
 const AGENT_NAME = /^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/;
 const SEMVER = /^\d+\.\d+\.\d+$/;
-/** Build the starter project files from the writer policy in one place. */
 export function productProjectTemplate(options = {}) {
     const agentName = options.agent_name ?? 'assistant';
     const agentVersion = options.agent_version ?? '1.0.0';
@@ -89,7 +80,6 @@ export function productProjectTemplate(options = {}) {
         files,
     };
 }
-/** Explain a legacy surface without hiding whether it still works. */
 export function legacyProductSurfaceDiagnostic(options) {
     const supportEnds = options.support_ends ?? PRODUCT_IDENTITY_MIGRATION.legacy_support_ends;
     const stillWorks = options.still_works ?? true;

@@ -1,15 +1,3 @@
-/**
- * Authenticated MCP projection over native Zero-AR work.
- *
- * What this is: the minimal work-entrypoint server for MCP 2026-07-28 and
- * the Tasks extension. The official SDK serves discovery and catalogue
- * operations. A narrow HTTP shim serves the extension methods that SDK 2.0.0
- * does not dispatch.
- *
- * How it fits: every task id resolves to a native run, and every mutation is
- * a native client command. Restarting this package loses no work because it
- * stores no task, quality, effect, cancellation, or artifact state.
- */
 import { CLIENT_CAPABILITIES_META_KEY, PROTOCOL_VERSION_META_KEY, SERVER_INFO_META_KEY, SUBSCRIPTION_ID_META_KEY, Server, classifyInboundRequest, createMcpHandler, isJsonContentType, } from '@modelcontextprotocol/server';
 import { fromJsonSchema } from '@modelcontextprotocol/client';
 import { DiagnosticError, McpPublishedWorkEntrypointSchema, SourceBindingInputSchema, assuranceEnvelopeFromRunResult, canonicalJson, contentHash, nativeRunIdFromMcpTask, projectMcpTask, } from '@zero-ar/contracts';
@@ -178,7 +166,6 @@ function page(items, cursor, size) {
     const next = offset + selected.length;
     return { items: selected, ...(next < items.length ? { nextCursor: `offset:${next}` } : {}) };
 }
-/** The agent's question an item waits on, from its latest park, or null when a check parked it. */
 function parkedQuestion(records, itemId) {
     const parked = records.filter((record) => record.type === 'item.parked' && record.payload['item_id'] === itemId).at(-1);
     return parked?.payload['question'] ?? null;
@@ -188,8 +175,6 @@ function pendingInputs(records) {
     for (const record of records) {
         if (record.type === 'item.parked') {
             const itemId = String(record.payload['item_id'] ?? '');
-            // An agent's question shows the question and why it was asked, and
-            // offers its choices when other answers are not allowed (GAP-011).
             const question = record.payload['question'];
             const reason = question
                 ? `${question.text} Why: ${question.why}`.slice(0, 2_000)
@@ -482,7 +467,6 @@ export function createZeroARMcpServer(options) {
                 if (!pending)
                     continue;
                 const parsedAnswer = parseInputResponse(rawResponse);
-                // An answer that names one of the question's choices is that choice.
                 const choices = parkedQuestion(current.records, pending.handle)?.choices ?? null;
                 const answer = parsedAnswer.text !== undefined && choices?.includes(parsedAnswer.text) ? { choice: parsedAnswer.text } : parsedAnswer;
                 await context.native.control(current.runId, {
@@ -492,8 +476,6 @@ export function createZeroARMcpServer(options) {
                     ...answer,
                 });
             }
-            // The answer that settles the last pending input wakes the run in the
-            // runtime, so the update only answers.
             return jsonRpcResult(parsed.id, { resultType: 'complete' });
         }
         if (parsed.method === 'tasks/cancel') {

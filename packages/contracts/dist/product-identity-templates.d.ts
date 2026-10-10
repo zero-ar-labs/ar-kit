@@ -1,11 +1,3 @@
-/**
- * The product identity project-template policy.
- *
- * Junior guide: a generated project is a writer, and writers emit the
- * successor identity now that the cutover is complete. Keeping the template
- * in contracts lets the CLI, SDK fixtures and release checks agree, and the
- * legacy-surface diagnostic still explains what an old project carries.
- */
 import type { Diagnostic } from './diagnostics.js';
 import type { ProductSourceApiVersion } from './vocab.js';
 export type ProductProjectTemplateIdentity = 'legacy' | 'successor';
@@ -38,7 +30,5 @@ export interface LegacyProductSurfaceDiagnosticOptions {
     support_ends?: string | null;
     migration_action?: string;
 }
-/** Build the starter project files from the writer policy in one place. */
 export declare function productProjectTemplate(options?: ProductProjectTemplateOptions): ProductProjectTemplate;
-/** Explain a legacy surface without hiding whether it still works. */
 export declare function legacyProductSurfaceDiagnostic(options: LegacyProductSurfaceDiagnosticOptions): Diagnostic;

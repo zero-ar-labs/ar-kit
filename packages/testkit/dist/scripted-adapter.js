@@ -1,12 +1,3 @@
-/**
- * The public deterministic model adapter for tests.
- *
- * Junior guide: test suites need a model that never calls a provider and
- * always gives the same answer for the same transcript. This file keeps that
- * adapter inside `@zero-ar/testkit`, so public test fixtures do not import a
- * private runtime package. It can declare image support and records how
- * many image parts each request carried, so a test can see what reached it.
- */
 import { setTimeout as sleep } from 'node:timers/promises';
 import { approxTokens, assertRunOwnedModelRequest, contentHash, messageImageCount, messageText } from '@zero-ar/contracts';
 export class ScriptedAdapter {
@@ -15,9 +6,7 @@ export class ScriptedAdapter {
     model_ref = 'scripted/deterministic';
     outbound_url = null;
     image_input;
-    /** Total stream calls, so tests can assert reconstruction called nothing. */
     calls = 0;
-    /** How many image parts each request carried, in call order. */
     image_counts = [];
     script;
     batch;
@@ -56,8 +45,6 @@ export class ScriptedAdapter {
             return `call_${contentHash({ kind: 'model-tool-call', model_call_id: request.ownership.call_id, index }).slice('sha256:'.length)}`;
         };
         const operationName = (kind, fallback) => (request.control_operations?.find((operation) => operation.kind === kind)?.name ?? fallback);
-        // A contract with several output schemas offers one item operation per
-        // schema, so the script names the one whose item ids include its item.
         const itemOperationName = (itemId) => request.control_operations?.find((operation) => {
             const ids = operation.input_schema['properties']?.['item_id']?.['enum'];
             return operation.kind === 'item_result' && Array.isArray(ids) && ids.includes(itemId);

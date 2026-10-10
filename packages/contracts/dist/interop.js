@@ -1,14 +1,3 @@
-/**
- * Protocol interoperability contracts and canonical projections.
- *
- * What this is: immutable protocol bindings, discovery snapshots, published
- * work entrypoints, MCP task aliases and assurance envelopes. Secret material
- * has no field in these shapes.
- *
- * How it fits: protocol packages translate these contracts to native client
- * calls. The functions here project canonical native state and never own a
- * second run, cancellation, quality or effect state machine.
- */
 import { z } from 'zod';
 import { contentHash } from "./ids.js";
 import { refuse } from "./diagnostics.js";
@@ -174,7 +163,6 @@ export const McpPublishedWorkEntrypointSchema = mcpPublishedWorkEntrypointBodySc
         context.addIssue({ code: 'custom', path: ['entrypoint_ref'], message: 'the entrypoint reference must identify the exact published work-entrypoint body.' });
     }
 });
-/** Compile one immutable work entrypoint after publication selected its exact agent. */
 export function compileMcpPublishedWorkEntrypoint(input) {
     const body = McpPublishedWorkEntrypointBodySchema.parse(input);
     return McpPublishedWorkEntrypointSchema.parse({ ...body, entrypoint_ref: contentHash(body) });

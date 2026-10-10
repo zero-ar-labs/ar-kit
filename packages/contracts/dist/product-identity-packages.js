@@ -1,11 +1,3 @@
-/**
- * The product package graph for the Zero-AR migration.
- *
- * Junior guide: package names are part of runtime identity. This file is
- * the manifest that says which `@zero-ar/*` package maps to which
- * `@zero-ar/*` package. The guard below catches half-renamed graphs before
- * an SDK handle starts work.
- */
 import { refuse } from "./diagnostics.js";
 import { contentHash } from "./ids.js";
 import { LEGACY_PRODUCT_IDENTITY, PRODUCT_IDENTITY_SOURCE_REF, SUCCESSOR_PRODUCT_IDENTITY } from "./product-identity.generated.js";

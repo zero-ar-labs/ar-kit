@@ -1,12 +1,4 @@
-/**
- * Canonical validator catalogue identity and admission.
- *
- * Catalogue declarations are inert, content-addressed data. They describe
- * one exact implementation or factory and the evidence observed around it;
- * they cannot designate task-contract sufficiency or execute a validator.
- */
 import { FAILURE_CLASSES, VALIDATOR_OUTCOMES, ValidatorAvailabilitySnapshotBodySchema, ValidatorAvailabilitySnapshotSchema, ValidatorCatalogueEntryBodySchema, ValidatorCatalogueEntrySchema, canonicalJson, contentHash, refuse, } from '@zero-ar/contracts';
-/** Evidence grade is derived from named evidence; callers never assign it. */
 export function deriveValidatorEvidenceGrade(entry) {
     const evidence = entry.evidence;
     const protocol = evidence.protocol_conformance.length > 0;
@@ -57,12 +49,10 @@ function entryBody(source) {
         evidence_grade: deriveValidatorEvidenceGrade(ungraded),
     });
 }
-/** Admit one exact catalogue declaration and seal its content identity. */
 export function defineCatalogueEntry(source) {
     const body = entryBody(source);
     return ValidatorCatalogueEntrySchema.parse({ ...body, catalogue_entry_ref: contentHash(body) });
 }
-/** Re-validate a transported entry, including its derived grade and ref. */
 export function admitCatalogueEntry(input) {
     const parsed = ValidatorCatalogueEntrySchema.safeParse(input);
     if (!parsed.success) {
@@ -91,7 +81,6 @@ export function admitCatalogueEntry(input) {
     }
     return parsed.data;
 }
-/** Seal mutable deployment availability into one immutable snapshot. */
 export function defineAvailabilitySnapshot(deployment, inputs) {
     const body = ValidatorAvailabilitySnapshotBodySchema.parse({
         schema: 'validator-availability-snapshot/1',
@@ -118,7 +107,6 @@ export function defineAvailabilitySnapshot(deployment, inputs) {
     });
     return ValidatorAvailabilitySnapshotSchema.parse({ ...body, snapshot_ref: contentHash(body) });
 }
-/** Re-validate availability bytes without discovery or a runtime read. */
 export function admitAvailabilitySnapshot(input) {
     const parsed = ValidatorAvailabilitySnapshotSchema.parse(input);
     const { snapshot_ref, ...body } = parsed;
@@ -142,7 +130,6 @@ export function admitAvailabilitySnapshot(input) {
         snapshot_ref: contentHash(normalizedBody),
     });
 }
-/** Shared complete defaults for bounded item validators. */
 export function catalogueDefaults() {
     return {
         finding_contract: {
@@ -187,11 +174,9 @@ export function catalogueDefaults() {
         },
     };
 }
-/** A stable evidence ref for repository-bound first-party proof declarations. */
 export function catalogueEvidenceRef(entrypoint, evidence) {
     return contentHash({ schema: 'validator-catalogue-evidence/1', entrypoint, evidence });
 }
-/** Compact custom-validator authoring over the same canonical entry contract. */
 export function defineCustomCatalogueEntry(input) {
     const defaults = catalogueDefaults();
     if (!input.description_boundary.trim()) {
@@ -230,10 +215,6 @@ export function defineCustomCatalogueEntry(input) {
         limitations: input.limitations,
     });
 }
-/**
- * Seal the compact first-party catalogue with independently visible evidence
- * dimensions. The named VG0 vectors execute the cases these refs identify.
- */
 export function defineFirstPartyCatalogueEntry(input) {
     const defaults = catalogueDefaults();
     const klass = input.class ?? 'deterministic';
@@ -289,7 +270,6 @@ export function defineFirstPartyCatalogueEntry(input) {
         limitations: input.limitations,
     });
 }
-/** Canonical bytes are useful for catalogue/API equality checks. */
 export function canonicalCatalogueEntry(entry) {
     return canonicalJson(admitCatalogueEntry(entry));
 }

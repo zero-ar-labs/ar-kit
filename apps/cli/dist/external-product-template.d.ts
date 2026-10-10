@@ -1,14 +1,6 @@
-/**
- * The versioned external-product repository template.
- *
- * Junior guide: this module writes application code, not runtime code. Both
- * reference products share the native Zero-AR boundary while keeping their
- * channel, language and projection files different. Dependency overrides let
- * conformance install one exact set of packed release artifacts.
- */
 export declare const EXTERNAL_PRODUCT_SCAFFOLD_VERSION: "1.0.0";
 export declare const EXTERNAL_PRODUCT_API_VERSION: "v1";
-export declare const EXTERNAL_PRODUCT_PACKAGE_VERSION: "0.4.1";
+export declare const EXTERNAL_PRODUCT_PACKAGE_VERSION: "0.4.2";
 export type ExternalProductFixture = 'facilities-operations' | 'large-corpus-review';
 export interface ExternalProductTemplateOptions {
     fixture: ExternalProductFixture;
@@ -27,5 +19,4 @@ export interface ExternalProductTemplate {
     fixture: ExternalProductFixture;
     files: ExternalProductTemplateFile[];
 }
-/** Render one complete external repository without touching the filesystem. */
 export declare function externalProductTemplate(options: ExternalProductTemplateOptions): ExternalProductTemplate;

@@ -1,11 +1,3 @@
-/**
- * Environment lifecycle contracts.
- *
- * These schemas define the one provider-neutral protocol for disposable or
- * externally recoverable compute. Adapters translate provider operations;
- * Zero-AR keeps run, lease, effect, artifact, and completion meaning outside
- * the environment boundary (ENV-001 and ENV-002).
- */
 import { z } from 'zod';
 export declare const EnvironmentBackendSchema: z.ZodEnum<{
     ssh: "ssh";
@@ -79,7 +71,6 @@ export declare const EnvironmentTenantSharingSchema: z.ZodEnum<{
     "tenant-owned": "tenant-owned";
     "deployment-shared": "deployment-shared";
 }>;
-/** Generic environments can host only work that carries no effect dispatch. */
 export declare const EnvironmentOperationClassSchema: z.ZodEnum<{
     observation: "observation";
     "run-internal": "run-internal";
@@ -139,7 +130,6 @@ export declare const EnvironmentLifecycleAssuranceSchema: z.ZodObject<{
     retained_resources: z.ZodArray<z.ZodString>;
 }, z.core.$strict>;
 export type EnvironmentLifecycleAssurance = z.infer<typeof EnvironmentLifecycleAssuranceSchema>;
-/** One versioned adapter capability and omission declaration (ENV-038). */
 export declare const EnvironmentAdapterDescriptorSchema: z.ZodObject<{
     contract: z.ZodLiteral<"environment-adapter/1">;
     name: z.ZodString;
@@ -196,13 +186,6 @@ export declare const EnvironmentAdapterDescriptorSchema: z.ZodObject<{
     conformance_refs: z.ZodArray<z.ZodString>;
 }, z.core.$strict>;
 export type EnvironmentAdapterDescriptor = z.infer<typeof EnvironmentAdapterDescriptorSchema>;
-/**
- * Container runtime settings a browser needs (browser workspace appendix, C3):
- * shared memory, bounded in-memory mounts, an init process that reaps zombie
- * processes, a reviewed seccomp profile pinned by digest, and the declared
- * browser sandbox mode. A browser keeps its own sandbox only under a reviewed
- * syscall profile; without one the profile must say the sandbox is off.
- */
 export declare const EnvironmentRuntimeSettingsSchema: z.ZodObject<{
     shm_mib: z.ZodOptional<z.ZodNumber>;
     tmpfs: z.ZodOptional<z.ZodArray<z.ZodObject<{
@@ -228,7 +211,6 @@ export declare const EnvironmentRuntimeSettingsSchema: z.ZodObject<{
     keep_previous_generation: z.ZodOptional<z.ZodBoolean>;
 }, z.core.$strict>;
 export type EnvironmentRuntimeSettings = z.infer<typeof EnvironmentRuntimeSettingsSchema>;
-/** A run's container segment started (browser workspace appendix, C1). */
 export declare const EnvironmentSegmentStartedSchema: z.ZodObject<{
     environment_id: z.ZodString;
     segment_id: z.ZodString;
@@ -236,12 +218,6 @@ export declare const EnvironmentSegmentStartedSchema: z.ZodObject<{
     owner: z.ZodString;
 }, z.core.$strict>;
 export type EnvironmentSegmentStarted = z.infer<typeof EnvironmentSegmentStartedSchema>;
-/**
- * A run's container segment is about to end, and why (C5). It is recorded
- * before the container is stopped or removed or the workspace sealed, so no
- * segment ends without canonical evidence; the matching ended record states
- * the outcome.
- */
 export declare const EnvironmentSegmentEndingSchema: z.ZodObject<{
     environment_id: z.ZodString;
     segment_id: z.ZodString;
@@ -260,7 +236,6 @@ export declare const EnvironmentSegmentEndingSchema: z.ZodObject<{
     }>;
 }, z.core.$strict>;
 export type EnvironmentSegmentEnding = z.infer<typeof EnvironmentSegmentEndingSchema>;
-/** A run's container segment ended, with the reason and the workspace generation it sealed, if any (C1, C5). */
 export declare const EnvironmentSegmentEndedSchema: z.ZodObject<{
     environment_id: z.ZodString;
     segment_id: z.ZodString;
@@ -281,7 +256,6 @@ export declare const EnvironmentSegmentEndedSchema: z.ZodObject<{
     detail: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type EnvironmentSegmentEnded = z.infer<typeof EnvironmentSegmentEndedSchema>;
-/** Immutable operator configuration. Enablement is separate mutable state. */
 export declare const EnvironmentProfileSchema: z.ZodObject<{
     profile_ref: z.ZodString;
     name: z.ZodString;
@@ -421,14 +395,8 @@ export declare const EnvironmentProfileSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type EnvironmentProfile = z.infer<typeof EnvironmentProfileSchema>;
-/**
- * Compute the immutable profile identity from every material field. The
- * mutable enablement state and credential issuance epoch live outside this
- * value, so rotating the same scoped credential does not move active runs.
- */
 export declare function deriveEnvironmentProfileRef(profile: Omit<EnvironmentProfile, 'profile_ref'>): string;
 export declare function environmentProfileHasValidRef(profile: EnvironmentProfile): boolean;
-/** Mutable admission state kept beside, rather than inside, the immutable profile. */
 export declare const EnvironmentProfileRegistrationSchema: z.ZodObject<{
     profile: z.ZodObject<{
         profile_ref: z.ZodString;
@@ -578,7 +546,6 @@ export declare const EnvironmentProfileRegistrationSchema: z.ZodObject<{
     published_at: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type EnvironmentProfileRegistration = z.infer<typeof EnvironmentProfileRegistrationSchema>;
-/** Every provider handle is bound to the admitted Zero-AR operation. */
 export declare const EnvironmentHandleBindingSchema: z.ZodObject<{
     tenant: z.ZodString;
     run_id: z.ZodString;
@@ -2267,7 +2234,6 @@ export declare const AbandonEnvironmentResultSchema: z.ZodObject<{
     diagnostic: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type AbandonEnvironmentResult = z.infer<typeof AbandonEnvironmentResultSchema>;
-/** Durable suspension disposition for every environment handle still open. */
 export declare const SuspendedEnvironmentHandleSchema: z.ZodObject<{
     environment: z.ZodObject<{
         environment_id: z.ZodString;
@@ -2383,13 +2349,6 @@ export declare const SuspendedEnvironmentHandleSchema: z.ZodObject<{
     closure_ref: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type SuspendedEnvironmentHandle = z.infer<typeof SuspendedEnvironmentHandleSchema>;
-/**
- * One recorded reuse. A later call in the same run, tenant, and profile runs
- * its job in an environment an earlier call prepared. The environment handle
- * keeps its preparing binding; this record carries the binding of the call it
- * now serves and names the submission that call makes (ENV-006 and appendix
- * section 9: reuse is explicit, bounded by expiry, and recorded).
- */
 export declare const EnvironmentReuseRecordSchema: z.ZodObject<{
     environment_id: z.ZodString;
     binding: z.ZodObject<{
@@ -2417,7 +2376,6 @@ export declare const EnvironmentReuseRecordSchema: z.ZodObject<{
     expires_at: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type EnvironmentReuseRecord = z.infer<typeof EnvironmentReuseRecordSchema>;
-/** Current facts that resume must revalidate before it contacts a provider. */
 export declare const EnvironmentResumeContextSchema: z.ZodObject<{
     tenant: z.ZodString;
     accepted_adapter_digest: z.ZodString;
@@ -2437,7 +2395,6 @@ export declare const EnvironmentResumeContextSchema: z.ZodObject<{
     classification_ceiling: z.ZodString;
 }, z.core.$strict>;
 export type EnvironmentResumeContext = z.infer<typeof EnvironmentResumeContextSchema>;
-/** One already-admitted run-internal invocation crossing from the kernel. */
 export declare const EnvironmentExecutionRequestSchema: z.ZodObject<{
     tool: z.ZodString;
     input: z.ZodRecord<z.ZodString, z.ZodUnknown>;
@@ -2453,7 +2410,6 @@ export declare const EnvironmentExecutionRequestSchema: z.ZodObject<{
     profile_ref: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
 export type EnvironmentExecutionRequest = z.infer<typeof EnvironmentExecutionRequestSchema>;
-/** One output a call left, stored as an artifact (C2). The tool result names each, and an image reaches the model. */
 export declare const EnvironmentResultArtifactSchema: z.ZodObject<{
     artifact_ref: z.ZodString;
     source_path: z.ZodString;
@@ -2479,7 +2435,6 @@ export declare const EnvironmentExecutionResultSchema: z.ZodObject<{
     artifact_refusals: z.ZodOptional<z.ZodArray<z.ZodString>>;
 }, z.core.$strict>;
 export type EnvironmentExecutionResult = z.infer<typeof EnvironmentExecutionResultSchema>;
-/** The lifecycle-backed port the kernel can call after admission and lease reservation. */
 export interface EnvironmentExecutionPort {
     readonly identity: {
         name: string;
@@ -2487,11 +2442,6 @@ export interface EnvironmentExecutionPort {
     };
     readonly profiles: Readonly<Record<string, string>>;
     execute(request: EnvironmentExecutionRequest, signal?: AbortSignal): Promise<EnvironmentExecutionResult>;
-    /**
-     * Resolve each run-internal tool to one registered profile ref before the
-     * run manifest is built, so the run pins its profiles at admission. A port
-     * without it keeps the static profile map.
-     */
     resolveForRun?(input: {
         tenant: string;
         run_id: string;
@@ -2505,26 +2455,15 @@ export interface EnvironmentExecutionPort {
         jobs: number;
         uncertainties: string[];
     }>;
-    /**
-     * Tear down what the run still holds. Retained names every environment
-     * still open afterwards: one whose teardown answer is unknown, or one on an
-     * adapter this port cannot reach. A port that reports none may omit it.
-     */
     teardownRun(run_id: string): Promise<{
         removed: string[];
         retained?: string[];
     }>;
-    /**
-     * Rebuild in-process capacity holds from the canonical environment records
-     * after a restart. A port without in-process state may omit it.
-     */
     restore?(): Promise<{
         environments: number;
     }>;
-    /** Runs the canonical records still show holding an open environment, including one this port cannot reach. */
     openRuns?(): Promise<string[]>;
 }
-/** The full adapter protocol. Short execute compiles into these methods. */
 export interface EnvironmentAdapter {
     descriptor(): Promise<EnvironmentAdapterDescriptor>;
     prepare(request: PrepareEnvironmentRequest): Promise<PrepareEnvironmentResult>;
@@ -2536,5 +2475,4 @@ export interface EnvironmentAdapter {
     teardown(request: TeardownEnvironmentRequest): Promise<TeardownEnvironmentResult>;
     abandon(request: AbandonEnvironmentRequest): Promise<AbandonEnvironmentResult>;
 }
-/** Only these lifecycle states carry work that still needs disposition. */
 export declare function isNonTerminalEnvironmentStatus(status: z.infer<typeof EnvironmentStatusSchema>): boolean;

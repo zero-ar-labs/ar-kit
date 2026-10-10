@@ -1,12 +1,3 @@
-/**
- * The generated product identity constants.
- *
- * What this is: the typed projection of PRODUCT_IDENTITY.yaml.
- *
- * How it fits: packages import the successor identity from one generated
- * module; the retired identity stays only so readers of legacy stored
- * formats can name it.
- */
 export declare const PRODUCT_IDENTITY_SOURCE = "PRODUCT_IDENTITY.yaml";
 export declare const PRODUCT_IDENTITY_SOURCE_REF = "sha256:08acc193d619e075f9221af22b92d62a604a185ea873eea15cd8e4827bc8dfb3";
 export declare const PRODUCT_IDENTITY: {
@@ -91,7 +82,6 @@ export declare const PRODUCT_IDENTITY_MIGRATION: {
     readonly legacy_writes_end: "2026-09-02T00:00:00Z";
     readonly legacy_support_ends: "2026-09-02T00:00:00Z";
 };
-/** The identity every new surface carries. The cutover is complete, so no clock is consulted. */
 export declare function activeProductIdentity(): {
     readonly display_name: "Zero-AR";
     readonly wordmark: "ZERO-AR";

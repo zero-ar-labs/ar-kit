@@ -1,17 +1,4 @@
-/**
- * Context replay contracts.
- *
- * What this is: the answer to rebuilding one recorded model window from the
- * log alone: the recorded and recomputed context refs, whether they agree,
- * and every recorded span resolved against the bytes stored now. Erased or
- * changed bytes read as stale, never as equal (CTX-002, CTX-012).
- *
- * How it fits: served at GET /v1/runs/{run_id}/contexts/{turn} and read
- * through the generated client. A run recorded before spans were persisted
- * answers spans_recorded false instead of a guess.
- */
 import { z } from 'zod';
-/** One recorded whole-entry span and how it reads against current bytes. */
 export declare const ContextReplaySpanSchema: z.ZodObject<{
     span: z.ZodObject<{
         entry_id: z.ZodString;
@@ -32,7 +19,6 @@ export declare const ContextReplaySpanSchema: z.ZodObject<{
     reason: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type ContextReplaySpan = z.infer<typeof ContextReplaySpanSchema>;
-/** One recorded artifact range reread under the run's recorded fence nonce. */
 export declare const ContextReplayArtifactSpanSchema: z.ZodObject<{
     span: z.ZodObject<{
         entry_id: z.ZodString;
@@ -57,7 +43,6 @@ export declare const ContextReplayArtifactSpanSchema: z.ZodObject<{
     reason: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type ContextReplayArtifactSpan = z.infer<typeof ContextReplayArtifactSpanSchema>;
-/** One summary artifact from the recorded window and how it reads now. */
 export declare const ContextReplaySegmentSchema: z.ZodObject<{
     manifest: z.ZodObject<{
         schema: z.ZodLiteral<"zero-ar-context-segment/1">;
@@ -105,7 +90,6 @@ export declare const ContextReplaySegmentSchema: z.ZodObject<{
     reason: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type ContextReplaySegment = z.infer<typeof ContextReplaySegmentSchema>;
-/** The replay of one turn's window. Equal holds only when every span resolves and the refs match. */
 export declare const ContextReplaySchema: z.ZodObject<{
     run_id: z.ZodString;
     turn: z.ZodNumber;

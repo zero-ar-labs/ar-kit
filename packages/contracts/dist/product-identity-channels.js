@@ -1,13 +1,3 @@
-/**
- * The product identity channel gate.
- *
- * What this is: a small parser and refusal helper for external channels that
- * may carry the Zero-AR name, such as npm scopes and source organizations.
- *
- * Junior guide: before a release script publishes anywhere, it asks this
- * file whether that destination appears in PRODUCT_IDENTITY.yaml. If not, the
- * operation stops and tells the operator where to record custody.
- */
 import { refuse } from "./diagnostics.js";
 import { PRODUCT_IDENTITY, PRODUCT_IDENTITY_SOURCE_REF } from "./product-identity.generated.js";
 import { PRODUCT_DISTRIBUTION_CHANNEL_KINDS } from "./vocab.js";

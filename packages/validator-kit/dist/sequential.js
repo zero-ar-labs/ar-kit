@@ -1,25 +1,5 @@
-/**
- * Sequential sampled validation (appendix MTH, algorithm 3).
- *
- * What this is: Wald's sequential probability ratio test as a validator
- * factory over pinned hypotheses, error bounds, cap, ordering, sampling
- * model and domain oracle. The exact rational ratio updates once per item,
- * so a crossing decides the same everywhere (MTH-007), and a finding records
- * the frame, each oracle answer, the trace, the stop reason and the label.
- *
- * How it fits: domain packs ship sampled validators through the public kit,
- * and the quality runner checks each record against the input it admitted.
- * Evaluation is synchronous, so the cap, not the wall clock, bounds it.
- */
 import { SequentialSamplingRecordSchema, contentHash, refuse } from '@zero-ar/contracts';
 import { defineFirstPartyCatalogueEntry } from "./catalogue.js";
-/**
- * The most items one sampled check may examine. In-process evaluation is
- * synchronous and the ratio's digits grow with every item, so the declared
- * wall clock cannot interrupt a long sample. At this bound the slowest
- * measured case, a Bernoulli sample that never crosses, took about a quarter
- * of a second; the domain oracle's own cost per item comes on top.
- */
 export const SEQUENTIAL_MAX_SAMPLE = 10_000;
 const MILLION = 1000000n;
 export function sequentialErrorGuarantee(config, population_size) {
@@ -79,17 +59,14 @@ export function sequentialBoundaryTrace(config, examined, defects, population_si
         trace.bad_defects = label.bad_defects;
     return trace;
 }
-/** The worked rows a sequential check samples, in the pinned order. */
 export function sequentialSamplingFrame(items) {
     return items
         .filter((item) => item.state === 'completed_unverified' || item.state === 'verified')
         .sort((a, b) => (a.item_id < b.item_id ? -1 : a.item_id > b.item_id ? 1 : 0));
 }
-/** The content identity of a sampling frame: the sorted worked item ids. */
 export function sequentialFrameHash(items) {
     return contentHash(sequentialSamplingFrame(items).map((item) => item.item_id));
 }
-/** The guarantee a configuration states, as one line a verification plan can show. */
 export function sequentialGuaranteeStatement(config) {
     const label = sequentialErrorGuarantee(config);
     return `sampled guarantee of ${config.name}@${config.version}: defect rate at most ${config.p0_ppm} ppm is good and at least ${config.p1_ppm} ppm is bad, ` +
@@ -162,8 +139,6 @@ export function sequentialSampledValidator(config, klass = 'sampled-oracle') {
             const examinedItems = [];
             const defects = [];
             const label = sequentialErrorGuarantee(config, sampling_model === 'finite-population-without-replacement' ? frame.length : undefined);
-            // The recorded trace is the full recomputation an auditor would run, so
-            // its digits match sequentialBoundaryTrace exactly; it runs once, at stop.
             const record = (stop_reason) => ({
                 oracle_ref: config.oracle_ref,
                 frame_hash,
@@ -175,9 +150,6 @@ export function sequentialSampledValidator(config, klass = 'sampled-oracle') {
                 trace: { ...sequentialBoundaryTrace(config, examinedItems.length, defects.length, frame.length) },
                 guarantee: { ...label },
             });
-            // Exact rational SPRT: ratio as num/den, boundaries as fractions. Each
-            // examined item multiplies one factor into each side, the same value a
-            // full recomputation gives, so a check costs one update per item.
             const boundaries = boundaryFractions(config);
             const step = ratioStepper(config, sampling_model, frame.length);
             let ratio = { num: 1n, den: 1n };
@@ -234,23 +206,11 @@ export function sequentialSampledValidator(config, klass = 'sampled-oracle') {
                 verdict: 'indeterminate',
                 reason: `${examinedItems.length} samples of ${frame.length} ended without a boundary crossing ${stoppedBy}, ` +
                     `and a cap is never a pass (assumption ${label.assumption}; measured false-pass and false-rejection rates are deployment metrics under QLT-010)`,
-                // The stop reason vocabulary has no frame-exhausted value yet, so a
-                // frame that runs out below the cap records sample-cap; the reason
-                // and examined equal to population tell the two apart.
                 sampling: record('sample-cap'),
             };
         },
     };
 }
-/**
- * Name what makes a finding's sampling record unusable against the input the
- * runtime admitted, or null when the record is sound or none is needed. A
- * sampled-oracle pass or reject needs one; an indeterminate finding and any
- * other class may carry none. The record must parse, name the registered
- * oracle (a sampled-oracle validator must have one pinned), cover exactly
- * the admitted frame, count what it lists, and stop for the reason its
- * verdict implies.
- */
 export function sampledFindingProblem(finding, context) {
     if (finding.sampling === undefined) {
         if (context.class === 'sampled-oracle' && (finding.verdict === 'pass' || finding.verdict === 'reject')) {
@@ -368,14 +328,6 @@ function bernoulliRatio(config, examined, defects) {
     }
     return { num, den };
 }
-/**
- * The one-item update of the exact likelihood ratio. Bernoulli multiplies in
- * p1 over p0 for a defect and its complement for a good item. The finite
- * model multiplies in the ratio of consecutive binomial coefficients with the
- * shared divisor cancelled, so the value equals the full hypergeometric ratio
- * and a factor that reaches zero keeps that side at zero, as the full count
- * does. examined and defects are the counts before this item.
- */
 function ratioStepper(config, sampling_model, population_size) {
     if (sampling_model === 'finite-population-without-replacement') {
         const { acceptable_defects, bad_defects } = finitePopulationDefectBounds(population_size, config);

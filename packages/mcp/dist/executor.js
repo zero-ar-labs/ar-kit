@@ -1,23 +1,11 @@
-/**
- * Admitted MCP tool execution and remote-task reconciliation.
- *
- * What this is: a credential-free runtime catalogue that executes only the
- * exact imported binding a run pinned, through the deployment egress port.
- *
- * How it fits: ordinary calls use the official MCP client. The declared Tasks
- * extension uses its explicit JSON-RPC boundary, returns a durable handle and
- * closes every client or request before the kernel parks the run.
- */
 import { CLIENT_CAPABILITIES_META_KEY, Client, PROTOCOL_VERSION_META_KEY, ProtocolError, SdkError, SdkErrorCode, StreamableHTTPClientTransport, isCallToolResult, } from '@modelcontextprotocol/client';
 import { DiagnosticError, InteropBindingManifestSchema, InteropJsonSchema, McpImportedToolPlanSchema, McpPeerSnapshotSchema, RemoteToolTaskHandleSchema, canonicalJson, contentHash, } from '@zero-ar/contracts';
 import { admittedMcpFetch } from "./client.js";
 import { MCP_PROTOCOL_VERSION, MCP_TASKS_EXTENSION, ZERO_AR_MCP_VERSION } from "./constants.js";
 import { mcpToolExecutionBindingRef } from "./import.js";
-/** A peer answer arrived, but its wire shape cannot carry the declared MCP result. */
 class McpMalformedResponseError extends Error {
     name = 'McpMalformedResponseError';
 }
-/** The named credential could not be resolved before any peer request began. */
 class McpCredentialResolutionError extends Error {
     name = 'McpCredentialResolutionError';
 }
@@ -153,7 +141,6 @@ function terminalFault(error) {
     }
     return null;
 }
-/** One deployment-owned executor for a finite, reviewed imported catalogue. */
 export class McpRemoteToolExecutor {
     tools;
     credentials;

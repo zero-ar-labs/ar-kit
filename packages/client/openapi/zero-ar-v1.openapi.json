@@ -4190,6 +4190,240 @@
         }
       }
     },
+    "/v1/runs/{run_id}/handoff": {
+      "post": {
+        "operationId": "handoffRun",
+        "tags": [
+          "administration"
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "The command or its declared content is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request carries no admitted credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The authenticated principal lacks the required scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The addressed public resource does not exist for this principal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The command conflicts with current canonical state or prior idempotent content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request passed the declared transfer bound.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The server encountered an internal defect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "The operation completed. Creation and idempotent replay may use different successful status codes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunHandoffReceiptSchema"
+                }
+              }
+            }
+          }
+        },
+        "x-zero-ar-route-kind": "json",
+        "x-zero-ar-authorization": {
+          "scopes": [
+            "operator:restore"
+          ]
+        },
+        "x-zero-ar-product-mutation": {
+          "idempotency_source": "request-idempotency-key",
+          "changed_content_code": "run.handoff.idempotency-reused"
+        },
+        "x-zero-ar-required-scopes": [
+          "operator:restore"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunHandoffRequestSchema"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/continuation-destination": {
+      "get": {
+        "operationId": "continuationDestination",
+        "tags": [
+          "administration"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "The command or its declared content is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request carries no admitted credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The authenticated principal lacks the required scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The addressed public resource does not exist for this principal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The command conflicts with current canonical state or prior idempotent content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request passed the declared transfer bound.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The server encountered an internal defect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticEnvelope"
+                }
+              }
+            }
+          },
+          "2XX": {
+            "description": "The operation completed. Creation and idempotent replay may use different successful status codes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunContinuationDestinationIdentitySchema"
+                }
+              }
+            }
+          }
+        },
+        "x-zero-ar-route-kind": "json",
+        "x-zero-ar-authorization": {
+          "scopes": [
+            "operator:restore"
+          ]
+        },
+        "x-zero-ar-required-scopes": [
+          "operator:restore"
+        ]
+      }
+    },
     "/v1/runs/{run_id}/records/stream": {
       "get": {
         "operationId": "streamRecords",
@@ -20796,6 +21030,10 @@
                 "minLength": 1,
                 "maxLength": 4096
               },
+              "artifact_ref": {
+                "type": "string",
+                "pattern": "^artifact:\\/\\/[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]+$"
+              },
               "max_pages": {
                 "type": "integer",
                 "exclusiveMinimum": 0,
@@ -20813,8 +21051,7 @@
             },
             "required": [
               "source_alias",
-              "operation",
-              "locator"
+              "operation"
             ],
             "additionalProperties": false
           }
@@ -52432,7 +52669,8 @@
               "closure.epoch.committed",
               "closure.epoch.activated",
               "state.closure.rehydrated",
-              "executor.continuation.accepted"
+              "executor.continuation.accepted",
+              "run.handoff.recorded"
             ]
           },
           "type_version": {
@@ -52591,7 +52829,8 @@
               "closure.epoch.committed",
               "closure.epoch.activated",
               "state.closure.rehydrated",
-              "executor.continuation.accepted"
+              "executor.continuation.accepted",
+              "run.handoff.recorded"
             ]
           },
           "type_version": {
@@ -53079,7 +53318,9 @@
                   "awaiting_answer",
                   "operator_pause",
                   "stagnation",
-                  "remote_task"
+                  "remote_task",
+                  "awaiting_approval",
+                  "awaiting_external"
                 ]
               },
               {
@@ -53378,6 +53619,7 @@
                             "reserved-memory",
                             "reserved-plan",
                             "reserved-context",
+                            "reserved-run",
                             "explicit-author",
                             "explicit-operator",
                             "skill-allowed-tools",
@@ -57883,7 +58125,9 @@
                       "awaiting_answer",
                       "operator_pause",
                       "stagnation",
-                      "remote_task"
+                      "remote_task",
+                      "awaiting_approval",
+                      "awaiting_external"
                     ]
                   },
                   {
@@ -58182,6 +58426,7 @@
                                 "reserved-memory",
                                 "reserved-plan",
                                 "reserved-context",
+                                "reserved-run",
                                 "explicit-author",
                                 "explicit-operator",
                                 "skill-allowed-tools",
@@ -59397,6 +59642,95 @@
         ],
         "additionalProperties": false
       },
+      "RunHandoffRequestSchema": {
+        "type": "object",
+        "properties": {
+          "destination_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "destination_ref",
+          "idempotency_key"
+        ],
+        "additionalProperties": false
+      },
+      "RunHandoffReceiptSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "pattern": "^run_[0-9a-f]{32}$"
+          },
+          "destination_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "handoff_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "recorded_seq": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "signing_key_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "repeated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "run_id",
+          "destination_ref",
+          "handoff_ref",
+          "recorded_seq",
+          "signing_key_ref",
+          "repeated"
+        ],
+        "additionalProperties": false
+      },
+      "RunContinuationDestinationIdentitySchema": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "zero-ar-run-continuation-destination/1"
+          },
+          "destination_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "executor_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "authority_ref": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "handoff_signing": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "schema",
+          "destination_ref",
+          "executor_ref",
+          "authority_ref",
+          "handoff_signing"
+        ],
+        "additionalProperties": false
+      },
       "RunContinuationDeclarationSchema": {
         "type": "object",
         "properties": {
@@ -60335,7 +60669,8 @@
                     "closure.epoch.committed",
                     "closure.epoch.activated",
                     "state.closure.rehydrated",
-                    "executor.continuation.accepted"
+                    "executor.continuation.accepted",
+                    "run.handoff.recorded"
                   ]
                 },
                 "type_version": {

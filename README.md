@@ -31,14 +31,14 @@ Two public images run the runtime. Each is built for linux/amd64 and linux/arm64
 
 | Image | Use it when |
 | --- | --- |
-| `ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.4.1` | One person runs and inspects work on one machine. The entrypoint is the `zeroar` command, and runs stay in `.zero-ar` under the mounted project directory. |
-| `ghcr.io/zero-ar-labs/zero-ar/full-cell:v0.4.1` | Applications connect over the network. The cell serves the HTTP API on port 8420, keeps runs in PostgreSQL and gives each tenant its own key. |
+| `ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.4.2` | One person runs and inspects work on one machine. The entrypoint is the `zeroar` command, and runs stay in `.zero-ar` under the mounted project directory. |
+| `ghcr.io/zero-ar-labs/zero-ar/full-cell:v0.4.2` | Applications connect over the network. The cell serves the HTTP API on port 8420, keeps runs in PostgreSQL and gives each tenant its own key. |
 
 With no model settings, Local Lite uses a deterministic adapter, so a first run needs no credential and makes no network call:
 
 ```bash
 docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" \
-  ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.4.1 run "Summarise the objective"
+  ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.4.2 run "Summarise the objective"
 ```
 
 [Running Zero-AR](./docs/running-zero-ar.md) covers both images: model provider keys, the Full Cell configuration file, persistent storage, credentials, health and the HTTP API.
@@ -47,7 +47,7 @@ A tag can move, so pull by digest for anything you keep. [`release/release-image
 
 ## Build on Zero-AR
 
-**Developer release:** the nine public packages are published to npm at version 0.4.1. This repository also carries their exact tested tarballs, emitted JavaScript, TypeScript declarations and the [OpenAPI 3.1 contract](./packages/client/openapi/zero-ar-v1.openapi.json). The runtime server is not in any package; it ships in the two images.
+**Developer release:** the nine public packages are published to npm at version 0.4.2. This repository also carries their exact tested tarballs, emitted JavaScript, TypeScript declarations and the [OpenAPI 3.1 contract](./packages/client/openapi/zero-ar-v1.openapi.json). The runtime server is not in any package; it ships in the two images.
 
 Every SDK and command example below needs a running Zero-AR endpoint. With the public images, that endpoint is a Full Cell. The Local Lite image keeps its server inside the container, so use its own `zeroar` command for local work.
 
@@ -56,7 +56,7 @@ Node.js 24.11.0 or later in the Node 24 LTS line is required.
 ### SDK
 
 ```bash
-npm install @zero-ar/sdk@0.4.1
+npm install @zero-ar/sdk@0.4.2
 ```
 
 ```js
@@ -85,7 +85,7 @@ The handle is a client convenience. A process can discard it and recreate it lat
 ### Client and OpenAPI
 
 ```bash
-npm install @zero-ar/client@0.4.1
+npm install @zero-ar/client@0.4.2
 ```
 
 The typed client and the [OpenAPI 3.1 document](./packages/client/openapi/zero-ar-v1.openapi.json) come from the same route table, and `@zero-ar/client` exports that document as `@zero-ar/client/openapi`. Generate a client in another language from it; each operation lists the scopes it needs under `x-zero-ar-authorization`. The SDK and CLI use this same client.
@@ -93,7 +93,7 @@ The typed client and the [OpenAPI 3.1 document](./packages/client/openapi/zero-a
 ### Command line
 
 ```bash
-npm install --global @zero-ar/cli@0.4.1
+npm install --global @zero-ar/cli@0.4.2
 
 export ZERO_AR_URL=https://your-zero-ar.example
 export ZERO_AR_API_KEY=your-tenant-key
@@ -196,7 +196,7 @@ npm run verify
 npm run exercise
 ```
 
-`verify` checks the byte inventory and its binding to source commit `51303d6c7b329411daef7b4111e72ef0cea69bd3`. `exercise` installs all nine tarballs in an isolated consumer, imports their public entrypoints, reads the OpenAPI contract and runs the packaged command. Neither command publishes anything. See [PROVENANCE.md](./PROVENANCE.md) for the complete boundary.
+`verify` checks the byte inventory and its binding to source commit `e0064302805c8462e499ee144c24adf8e1248cf1`. `exercise` installs all nine tarballs in an isolated consumer, imports their public entrypoints, reads the OpenAPI contract and runs the packaged command. Neither command publishes anything. See [PROVENANCE.md](./PROVENANCE.md) for the complete boundary.
 
 ## Repository map
 

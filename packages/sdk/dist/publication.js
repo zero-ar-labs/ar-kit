@@ -1,18 +1,3 @@
-/**
- * The publication compiler (hosted-publication appendix, phase HP0).
- *
- * What this is: compileProject turns one authored project, YAML or
- * TypeScript rooted, into a deterministic PublicationBundle: canonical
- * declarations, content-addressed assets, complete typed edges, and a
- * bundle ref that is a pure function of the source bytes. verifyBundle
- * recomputes every hash and closure edge, so tampering refuses before
- * any commit (PUB-001, PUB-002, PUB-004).
- *
- * How it fits: this is mechanism, not policy. Nothing here talks to a
- * server, executes a procedure, or grants authority; globs expand and
- * die here, paths stay relative, and a procedure compiles inert
- * (PUB-010, PUB-011).
- */
 var __rewriteRelativeImportExtension = (this && this.__rewriteRelativeImportExtension) || function (path, preserveJsx) {
     if (typeof path === "string" && /^\.\.?\//.test(path)) {
         return path.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+?)?)\.([cm]?)ts$/i, function (m, tsx, d, ext, cm) {
@@ -27,12 +12,7 @@ import { pathToFileURL } from 'node:url';
 import { BindingProfileSchema, DomainPackSchema, MACHINE_PREDICATE, MemoryBindingSchema, OPERATION_CLASSES, PostureSchema, TRUST_TIERS, TaskContractSchema, VALIDATOR_CLASSES, VALIDATOR_OUTCOMES, canonicalJson, contentHash, productSourceApiVersionReadable, refuse, spanHash, } from '@zero-ar/contracts';
 import { ProcedureManifestSchema, PublicationBundleManifestSchema } from '@zero-ar/contracts';
 import { admitCatalogueEntry, catalogueDefaults, compileVerificationPlan, defineCatalogueEntry, verificationCheckpointInputForContract } from '@zero-ar/validator-kit';
-const COMPILER = { name: '@zero-ar/sdk', version: '0.4.1', canonicalization: 'canonical-json-1' };
-/**
- * The YAML parser is an SDK authoring dependency, loaded only when a YAML
- * source actually compiles. Runtime workers consume compiled artifacts,
- * so the parser stays off the run path and out of the runtime image (PUB-020).
- */
+const COMPILER = { name: '@zero-ar/sdk', version: '0.4.2', canonicalization: 'canonical-json-1' };
 async function parseYaml(text) {
     let parser;
     try {
@@ -59,7 +39,6 @@ function mediaType(path) {
     const dot = path.lastIndexOf('.');
     return MEDIA[dot >= 0 ? path.slice(dot) : ''] ?? 'application/octet-stream';
 }
-/** Resolve inside the project only: escapes and symlinks refuse, whatever declared them (PUB-SEC-004). */
 function contained(root, from, declared) {
     const path = resolve(dirname(from), declared);
     if (path !== root && !path.startsWith(root + '/')) {
@@ -70,7 +49,6 @@ function contained(root, from, declared) {
     }
     return path;
 }
-/** Expand one declared resource: a plain path, or dir/** for every file under it, sorted. */
 function expand(root, from, declared) {
     if (declared.endsWith('/**')) {
         const base = contained(root, from, declared.slice(0, -3));
@@ -92,7 +70,6 @@ function expand(root, from, declared) {
     }
     return [contained(root, from, declared)];
 }
-/** Every regular skill file in stable relative-path order; adjacency confers no authority. */
 function skillFiles(root) {
     const files = [];
     const walk = (dir) => {
@@ -114,7 +91,6 @@ function skillFiles(root) {
     walk(root);
     return files;
 }
-/** Parse and validate the standard SKILL.md frontmatter without changing its bytes. */
 async function skillSource(path, directory, selectedVersion) {
     const text = readFileSync(path, 'utf8');
     if (!text.startsWith('---\n')) {
@@ -158,7 +134,6 @@ async function skillSource(path, directory, selectedVersion) {
         body: text.slice(boundary + 5),
     };
 }
-/** Parse YAML front matter once during authoring. Markdown bodies carry documentation only. */
 async function frontmatterDocument(path) {
     const text = readFileSync(path, 'utf8');
     if (!text.startsWith('---\n')) {
@@ -170,7 +145,6 @@ async function frontmatterDocument(path) {
     }
     return (await parseYaml(text.slice(4, boundary)));
 }
-/** Parse the agent root from every supported authoring form into one source shape. */
 async function agentSource(path) {
     if (path.endsWith('.yaml') || path.endsWith('.yml') || path.endsWith('.json') || path.endsWith('.md')) {
         const doc = path.endsWith('.json')
@@ -211,7 +185,6 @@ async function agentSource(path) {
     }
     refuse({ code: 'publish.source.unknown', message: `${path} is not a supported authoring form; use YAML, JSON, Markdown front matter or TypeScript.`, clause: 'PUB-001' });
 }
-/** Parse one project declaration without carrying its source form into the bundle. */
 async function declarationSource(path) {
     if (path.endsWith('.yaml') || path.endsWith('.yml'))
         return (await parseYaml(readFileSync(path, 'utf8')));
@@ -232,7 +205,6 @@ function requireSourceDocument(doc, expectedKind, sourceName) {
     }
     return doc.apiVersion;
 }
-/** Semantic declarations are inert data. Reject fields that would encode behaviour. */
 function semanticData(value, path = 'spec') {
     if (value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')
         return;
@@ -250,7 +222,6 @@ function semanticData(value, path = 'spec') {
         semanticData(entry, `${path}.${key}`);
     }
 }
-/** One asset writer for source files and deterministic authoring output. */
 function assetWriter(blobs, assets) {
     const generated = (text, type, role) => {
         const ref = spanHash(text);
@@ -265,7 +236,6 @@ function assetWriter(blobs, assets) {
     add.generated = generated;
     return add;
 }
-/** Bundle one Tool Kit host into immutable JavaScript while the authoring dependencies are present. */
 async function bundledToolHost(root, entryPath, hostPath, exported, addAsset) {
     let build;
     try {
@@ -328,7 +298,6 @@ function executionAssetRefs(binding) {
         ? [binding.entry_ref, binding.package_lock_ref, ...(binding.host_ref ? [binding.host_ref] : []), ...(binding.bundle_ref ? [binding.bundle_ref] : [])]
         : [];
 }
-/** Pin a local executable package and compare its public-kit manifest with the declaration. */
 async function executableBinding(root, declarationPath, spec, addAsset, expected) {
     const raw = spec['binding'];
     if (raw === undefined)
@@ -462,11 +431,6 @@ function compiledValidatorCatalogue(spec, identity, binding) {
         limitations: limitations,
     });
 }
-/**
- * A schema with every required list in one order, so a declaration and its
- * implementation agree whatever order each lists required fields in. The
- * declaration's own order is what publishes, and what the model sees.
- */
 function requiredAsSet(value) {
     if (Array.isArray(value))
         return value.map(requiredAsSet);
@@ -477,7 +441,6 @@ function requiredAsSet(value) {
         key === 'required' && Array.isArray(entry) && entry.every((name) => typeof name === 'string') ? [...entry].sort() : requiredAsSet(entry),
     ]));
 }
-/** Normalize one tool contract and its optional executable binding. */
 async function compiledTool(root, path, doc, addAsset) {
     const spec = doc.spec ?? {};
     const name = doc.metadata?.name ?? '';
@@ -573,7 +536,6 @@ async function compiledTool(root, path, doc, addAsset) {
         bindingRefs: executionAssetRefs(binding),
     };
 }
-/** Canonicalize published override bounds and refuse any source-time widening. */
 function normalizedOverrides(agent, toolNames, workspace) {
     const requested = agent.overrides ?? {};
     const models = [...new Set(requested.models ?? [])].sort();
@@ -597,7 +559,6 @@ function normalizedOverrides(agent, toolNames, workspace) {
     }
     return { models, tools, workspace_operations: workspaceOperations };
 }
-/** Compile one standard Agent Skill into the runtime's inert procedure envelope. */
 async function compileStandardSkill(directory, admittedTools, addAsset, selectedVersion) {
     const source = join(directory, 'SKILL.md');
     if (!existsSync(source)) {
@@ -635,18 +596,10 @@ async function compileStandardSkill(directory, admittedTools, addAsset, selected
         executable: false,
         entry_bytes: entry.bytes,
         allowed_tools: [...parsed.allowed_tools].sort(),
-        // Newly compiled skills advertise and load on request. Selecting many
-        // skills never means carrying many skill bodies (DXI-006).
         activation: 'progressive',
     });
     return { manifest, entry, resources, compatibility, source };
 }
-/**
- * Compile one project rooted at an agent source into its complete,
- * deterministic publication bundle. Identical source bytes give an
- * identical bundle_ref; nothing here reads a clock or an absolute path
- * into the output.
- */
 export async function compileProject(sourcePath) {
     const source = resolve(sourcePath);
     const root = dirname(source);
@@ -670,8 +623,6 @@ export async function compileProject(sourcePath) {
         });
         return ref;
     };
-    // Validators are immutable declarations. A task contract may designate
-    // sufficiency, while the implementation remains deployment-owned.
     const validatorRefs = [];
     const validators = new Map();
     for (const declared of agent.validators ?? []) {
@@ -743,8 +694,6 @@ export async function compileProject(sourcePath) {
                     clause: 'PUB-002',
                 });
             }
-            // The same sufficiency rules run admission applies (Q-7), so a closure
-            // that could never create a run does not publish.
             if (binding.class === 'heuristic' && binding.sufficient_for.length > 0) {
                 refuse({
                     code: 'publish.contract.sufficiency-heuristic',
@@ -805,9 +754,6 @@ export async function compileProject(sourcePath) {
         for (const evidenceRef of evidenceRefs)
             edges.push({ from_ref: domainPackRef, to_ref: evidenceRef, kind: 'requires' });
     }
-    // Workspace is empty unless the agent selects a reviewed profile. A
-    // selected profile materializes a distinct immutable tool per mount and
-    // operation; intake may later attach only a compatible instance.
     const bindingProfileRefs = [];
     const bindingProfiles = new Map();
     for (const declared of agent.binding_profiles ?? []) {
@@ -822,8 +768,6 @@ export async function compileProject(sourcePath) {
         bindingProfiles.set(key, { ref, profile });
         bindingProfileRefs.push(ref);
     }
-    // Tools keep one contract while executable bytes remain a separately
-    // pinned process binding.
     const toolRefs = [];
     const toolNames = new Set();
     const materializedWorkspace = [];
@@ -874,7 +818,6 @@ export async function compileProject(sourcePath) {
         toolRefs.push(ref);
         toolNames.add(name);
     }
-    // Legacy procedure wrappers remain readable during the additive migration.
     const procedureRefs = [];
     for (const declared of agent.procedures ?? []) {
         const dir = contained(root, source, declared);
@@ -911,9 +854,6 @@ export async function compileProject(sourcePath) {
         for (const resource of resources)
             edges.push({ from_ref: ref, to_ref: resource.content_ref, kind: 'includes' });
     }
-    // Standard Agent Skills need no Zero-AR wrapper. Every regular package
-    // file enters the closure, while scripts and allowed-tools remain inert
-    // dependency metadata and any unresolved names stay visible.
     const skillCompatibility = [];
     for (const declared of agent.skills ?? []) {
         const dir = contained(root, source, declared);
@@ -936,7 +876,6 @@ export async function compileProject(sourcePath) {
             clause: 'MSH-002',
         });
     }
-    // The agent root: instructions ride as an asset, dependencies as refs.
     const instructions = addAsset(contained(root, source, agent.instructions), 'instructions');
     const agentDeclaration = {
         kind: 'agent',
@@ -995,7 +934,6 @@ export async function compileProject(sourcePath) {
     const bundle = PublicationBundleManifestSchema.parse({ ...unsealed, bundle_ref: contentHash(unsealed) });
     return { bundle, blobs };
 }
-/** Compile an agent, standard skill or standalone public extension through one entry point. */
 export async function compileAuthoringSource(sourcePath) {
     const source = resolve(sourcePath);
     if (existsSync(source) && statSync(source).isDirectory()) {
@@ -1017,7 +955,6 @@ export async function compileAuthoringSource(sourcePath) {
     }
     return compileStandaloneDeclaration(source, doc);
 }
-/** Build a one-root closure for a scaffolded extension. */
 async function compileStandaloneDeclaration(source, doc) {
     const root = dirname(source);
     const blobs = new Map();
@@ -1134,7 +1071,6 @@ async function standaloneValidator(root, path, doc, addAsset) {
         bindingRefs: executionAssetRefs(binding),
     };
 }
-/** Compile one reusable standard Agent Skill with no wrapper manifest. */
 export async function compileSkill(directoryPath, selectedVersion) {
     const directory = resolve(directoryPath);
     if (!lstatSync(directory).isDirectory() || lstatSync(directory).isSymbolicLink()) {
@@ -1181,7 +1117,6 @@ export async function compileSkill(directoryPath, selectedVersion) {
     }
     return compiled;
 }
-/** Derive the source lock for one compiled Agent Skill. */
 export function skillLock(compiled) {
     const raw = compiled.blobs.get(compiled.bundle.root_ref);
     if (!raw || compiled.bundle.root_kind !== 'procedure') {
@@ -1198,7 +1133,6 @@ export function skillLock(compiled) {
         ].sort((left, right) => (left.path < right.path ? -1 : left.path > right.path ? 1 : 0)),
     };
 }
-/** Recover a standard Agent Skill directory from a publication archive without rewriting source bytes. */
 export function exportAgentSkill(archive, procedureRef = archive.bundle.root_ref) {
     const blobs = archive.blobs instanceof Map ? archive.blobs : new Map(Object.entries(archive.blobs));
     const declaration = archive.bundle.declarations.find((candidate) => candidate.kind === 'procedure' && candidate.content_ref === procedureRef);
@@ -1222,7 +1156,6 @@ export function exportAgentSkill(archive, procedureRef = archive.bundle.root_ref
     return { name: manifest.name, version: manifest.version, package_ref: procedureRef, files };
 }
 export { verifyBundle } from '@zero-ar/contracts';
-/** The readable dry-run plan: what would publish, and what that would not establish. */
 export function renderPlan(compiled) {
     const { bundle } = compiled;
     const rootEntry = bundle.declarations.find((declaration) => declaration.content_ref === bundle.root_ref);
@@ -1237,11 +1170,6 @@ export function renderPlan(compiled) {
     ];
     return lines.join('\n');
 }
-/**
- * Publication preflight over exact caller-supplied deployment and budget
- * snapshots. It reads only the already-compiled closure and calls the same
- * pure compiler used at runtime.
- */
 export function previewPublicationVerificationPlan(compiled, input) {
     const contractDeclaration = compiled.bundle.declarations.find((entry) => entry.kind === 'task-contract');
     const contract = contractDeclaration

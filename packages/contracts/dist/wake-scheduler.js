@@ -1,14 +1,3 @@
-/**
- * Wake scheduler report contracts.
- *
- * What this is: the operator view of one tenant's timing wheel: the
- * declared configuration, the last tick, running totals per condition
- * family, the durable backlog and recent resume failures (MTH-TW-010).
- *
- * How it fits: served at GET /v1/scheduler/wakes with operator:audit and
- * answered per tenant, so one tenant's report never names another tenant's
- * wakes. The wake records in the log stay canonical; this is a projection.
- */
 import { z } from 'zod';
 const runId = z.string().regex(/^run_[0-9a-f]{32}$/, 'expected a run id');
 const wakeId = z.string().regex(/^wak_[0-9a-f]{32}$/, 'expected a wake id');
@@ -23,7 +12,6 @@ const wakeCounts = {
     duplicate_suppressed: count,
     backlogged: count,
 };
-/** The wheel configuration as declared at startup (MTH-TW-002). */
 export const WakeSchedulerDeclarationSchema = z.strictObject({
     levels: z.array(z.strictObject({
         name: z.string().min(1).max(64),
@@ -43,7 +31,6 @@ export const WakeSchedulerDeclarationSchema = z.strictObject({
     clock_mapping: z.string().min(1).max(200),
     backward_wall_clock_policy: z.string().min(1).max(200),
 });
-/** How one tick mapped wall and monotonic time (MTH-TW-009). */
 export const WakeClockDiagnosticSchema = z.strictObject({
     previous_wall_ms: count.nullable(),
     current_wall_ms: count,

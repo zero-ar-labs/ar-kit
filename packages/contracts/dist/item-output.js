@@ -1,14 +1,3 @@
-/**
- * Task-contract item output schemas.
- *
- * What this is: the bounded JSON Schema subset a task contract may bind to
- * exact item ids or item-id prefixes, plus compilation and admission helpers.
- *
- * How it fits: model adapters receive the compiled object schemas, one item
- * operation per published schema so each item id travels with its own shape,
- * while the kernel validates one structured result against its item's schema
- * and stores the accepted value as canonical JSON in the existing string ledger.
- */
 import { z } from 'zod';
 import { canonicalJson } from "./canonical.js";
 const JsonValueSchema = z.lazy(() => z.union([
@@ -109,7 +98,6 @@ function schemaProblem(value, path = '$', depth = 0) {
     }
     return null;
 }
-/** One provider-strict object schema accepted for task item outputs. */
 export const ItemOutputJsonSchemaSchema = JsonValueSchema.superRefine((value, context) => {
     const root = objectValue(value);
     if (!root || root['type'] !== 'object') {
@@ -120,15 +108,8 @@ export const ItemOutputJsonSchemaSchema = JsonValueSchema.superRefine((value, co
     if (problem)
         context.addIssue({ code: 'custom', message: problem });
 });
-/** The most item output schema bindings one task contract may publish. */
 export const ITEM_OUTPUT_SCHEMA_BINDINGS_MAX = 64;
-/**
- * The most control operations one model call may carry: one item operation
- * per binding, one for plain-text items, the question operation and the
- * completion operation.
- */
 export const MODEL_CONTROL_OPERATIONS_MAX = ITEM_OUTPUT_SCHEMA_BINDINGS_MAX + 3;
-/** One schema binding. Exactly one selector is present. */
 export const ItemOutputSchemaBindingSchema = z.strictObject({
     item_kind: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/),
     item_id: z.string().min(1).max(512).optional(),
@@ -148,18 +129,9 @@ function bindingFor(contract, item_id) {
         throw new Error(`item ${item_id} matches more than one item output schema. Publish disjoint exact ids or prefixes.`);
     return matched[0] ?? null;
 }
-/** The one schema the task contract binds to an item, or null when the item remains plain text. */
 export function itemOutputSchemaFor(contract, item_id) {
     return bindingFor(contract, item_id)?.output_schema ?? null;
 }
-/**
- * A model-facing copy of a schema whose properties follow its required list.
- * Publication stores schemas as canonical JSON, which sorts object keys, so
- * the required list is the only authored order left. Providers that decode
- * strictly write fields in property order, so a field that depends on others
- * keeps its authored place after them. Properties outside the list follow in
- * their existing order. Validation never depends on this order.
- */
 export function authoredPropertyOrder(schema) {
     const copy = { ...schema };
     const properties = schema['properties'];
@@ -178,7 +150,6 @@ export function authoredPropertyOrder(schema) {
 function childOrder(value) {
     return value !== null && typeof value === 'object' && !Array.isArray(value) ? authoredPropertyOrder(value) : value;
 }
-/** The unique object schemas a model-facing item operation may submit. */
 export function compileItemOutputSchema(contract) {
     const schemas = new Map();
     for (const binding of contract?.item_output_schemas ?? [])
@@ -210,11 +181,6 @@ function itemOperation(name, description, itemIds, output) {
         strict: true,
     };
 }
-/**
- * One operation name per published item kind and schema, fixed by the
- * contract rather than by which items remain, so names hold for a whole run.
- * Provider tool names allow 64 characters, and a repeated name gains a suffix.
- */
 function itemOperationGroups(contract) {
     const groups = new Map();
     const names = new Set([SINGLE_ITEM_OPERATION, TEXT_ITEM_OPERATION]);
@@ -231,15 +197,6 @@ function itemOperationGroups(contract) {
     }
     return groups;
 }
-/**
- * Compile the provider-neutral item operations for the untouched item set.
- *
- * A contract that publishes at most one output schema keeps the one
- * emit_item_result operation. A contract that publishes more gets one
- * operation per item kind and schema, each listing only its own item ids and
- * carrying only its own schema, so strict decoding can never pair an item id
- * with another item's shape. Items without a schema share emit_text_result.
- */
 export function compileItemResultControlOperations(contract, itemIds) {
     if (itemIds.length === 0)
         return [];
@@ -281,7 +238,6 @@ export function compileItemResultControlOperations(contract, itemIds) {
     }
     return operations;
 }
-/** The completion operation supplied only after the kernel finds it eligible. */
 export function completionProposalControlOperation() {
     return {
         kind: 'completion_proposal',
@@ -296,7 +252,6 @@ export function completionProposalControlOperation() {
         strict: true,
     };
 }
-/** The bounds of one agent question (GAP-008). */
 export const AGENT_QUESTION_LIMITS = Object.freeze({
     question_chars: 500,
     why_chars: 300,
@@ -304,14 +259,7 @@ export const AGENT_QUESTION_LIMITS = Object.freeze({
     choices_max: 8,
     choice_chars: 120,
 });
-/** The question cap a contract that states none allows (GAP-008). */
 export const DEFAULT_MAX_AGENT_QUESTIONS = 3;
-/**
- * The question operation, offered only when the run can ask: on the items a
- * question may bear on, which are untouched or invalidated and not parked.
- * Strict decoding needs every field listed, so the optional ones are
- * nullable, and the kernel enforces the length bounds when it admits one.
- */
 export function questionProposalControlOperation(itemIds) {
     return {
         kind: 'question',
@@ -335,10 +283,6 @@ export function questionProposalControlOperation(itemIds) {
         strict: true,
     };
 }
-/**
- * Read a proposed question against its bounds. A problem names the bound and
- * what to send instead, since it reaches the model as the refusal reason.
- */
 export function parseAgentQuestion(input) {
     const limits = AGENT_QUESTION_LIMITS;
     const item_id = input['item_id'];
@@ -432,7 +376,6 @@ function valueProblem(value, schema, path = 'output') {
     }
     return null;
 }
-/** Validate and canonicalize one model item result without changing the ledger. */
 export function admitItemOutput(contract, item_id, value) {
     let schema;
     try {

@@ -1,12 +1,3 @@
-/**
- * Reusable EnvironmentAdapter lifecycle conformance harness.
- *
- * Junior developers pass an adapter, its immutable profile, and one admitted
- * binding. The harness drives generated request and result types through every
- * operation, checks idempotent stable handles, and returns a small report. It
- * is a function rather than a base class, so provider packages keep their own
- * composition and test framework.
- */
 import { AbandonEnvironmentResultSchema, CancelEnvironmentJobResultSchema, CollectEnvironmentArtifactResultSchema, ENVIRONMENT_LIFECYCLE_OPERATIONS, EnvironmentAdapterDescriptorSchema, ObserveEnvironmentJobResultSchema, PrepareEnvironmentResultSchema, ReconcileEnvironmentJobResultSchema, SubmitEnvironmentJobResultSchema, TeardownEnvironmentResultSchema, makeId, } from '@zero-ar/contracts';
 export async function runEnvironmentAdapterConformance(input) {
     const descriptor = EnvironmentAdapterDescriptorSchema.parse(await input.adapter.descriptor());

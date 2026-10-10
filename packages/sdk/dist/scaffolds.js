@@ -1,20 +1,8 @@
-/**
- * Deterministic authoring scaffolds for projects and public extensions.
- *
- * What this is: byte-stable source templates using only public Zero-AR
- * packages. Each template names its package choices, immutable binding
- * inputs and validation command. The CLI writes these bytes without
- * adding timestamps, host paths or generated identifiers.
- *
- * How it fits: scaffolding is authoring-time work. Generated tools and
- * validators run through their public kits in child hosts; skills remain
- * inert data; domain packs compose public declarations only.
- */
 import { AUTHORING_SCAFFOLD_KINDS, AUTHORING_SOURCE_FORMS, ProcedureManifestSchema, SUPPORTED_NODE_RUNTIME, canonicalJson, contentHash, refuse, spanHash, } from '@zero-ar/contracts';
 const NAME = /^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/;
 const DIRECTORY_NAME = /^[a-z][a-z0-9-]*$/;
 const VERSION = /^\d+\.\d+\.\d+$/;
-const PUBLIC_VERSION = '0.4.1';
+const PUBLIC_VERSION = '0.4.2';
 const TOOL_KIT = '@zero-ar/tool-kit';
 const VALIDATOR_KIT = '@zero-ar/validator-kit';
 function checked(kind, name, version = '1.0.0') {
@@ -34,7 +22,6 @@ function finish(kind, name, files, next_steps) {
     const body = { schema: 'zero-ar-authoring-scaffold/v1', kind, name, files: stableFiles, next_steps };
     return { ...body, scaffold_ref: contentHash(body) };
 }
-/** One minimal project. Its agent receives no ambient tools or workspace capabilities. */
 export function scaffoldProject(options = {}) {
     const name = options.name ?? 'assistant';
     const version = options.version ?? '1.0.0';
@@ -93,7 +80,6 @@ export function scaffoldProject(options = {}) {
         { path: 'zero-ar.project.yaml', content: project },
     ], [`npm install`, `npm run check`, `zeroar publish ${entry} --dry-run`]);
 }
-/** A standards-shaped Agent Skill with progressive disclosure and an immutable source lock. */
 export function scaffoldSkill(name = 'source-review', version = '1.0.0') {
     checked('skill', name, version);
     const entry = [
@@ -138,7 +124,6 @@ export function scaffoldSkill(name = 'source-review', version = '1.0.0') {
         { path: 'zero-ar.skill-lock.json', content: `${JSON.stringify(lock, null, 2)}\n` },
     ], ['zeroar validate .', 'zeroar publish . --dry-run']);
 }
-/** A bounded typed tool and its out-of-process JSON-lines host. */
 export function scaffoldTool(name = 'example.lookup', version = '1.0.0') {
     checked('tool', name, version);
     const packageName = name.replaceAll('.', '-');
@@ -214,7 +199,6 @@ export function scaffoldTool(name = 'example.lookup', version = '1.0.0') {
         { path: 'src/tool.test.ts', content: test },
     ]), ['npm install --ignore-scripts', 'npm test', 'zeroar publish tool.yaml --dry-run']);
 }
-/** A typed validator with labelled cases and a process-host binding identity. */
 export function scaffoldValidator(name = 'example.output-present', version = '1.0.0') {
     checked('validator', name, version);
     const packageName = name.replaceAll('.', '-');
@@ -286,7 +270,6 @@ export function scaffoldValidator(name = 'example.output-present', version = '1.
         { path: 'src/validator.test.ts', content: test },
     ]), ['npm install --ignore-scripts', 'npm test', 'zeroar publish validator.yaml --dry-run']);
 }
-/** A public-SDK domain pack declaring all five machine-claim categories. */
 export function scaffoldDomainPack(name = 'example-pack', version = '1.0.0') {
     checked('domain-pack', name, version);
     const validator = `${name}.evidence`;
@@ -348,7 +331,6 @@ export function scaffoldDomainPack(name = 'example-pack', version = '1.0.0') {
         { path: 'README.md', content: `# ${title(name)}\n\nThis pack composes public contracts and validator evidence. It has no kernel import or runtime privilege.\n` },
     ], ['zeroar validate zero-ar-pack.yaml', 'zeroar publish zero-ar-pack.yaml --dry-run']);
 }
-/** A reviewed binding profile. No workspace capability is created until an agent selects it. */
 export function scaffoldBindingProfile(name = 'workspace.scratch', version = '1.0.0') {
     checked('binding-profile', name, version);
     const declaration = [
@@ -367,7 +349,6 @@ export function scaffoldBindingProfile(name = 'workspace.scratch', version = '1.
     ].join('\n');
     return finish('binding-profile', name, [{ path: 'binding-profile.yaml', content: declaration }], ['review the path prefix and per-operation classes', 'select this exact profile from an agent before publishing']);
 }
-/** Select a scaffold by its contracts-owned kind vocabulary. */
 export function authoringScaffold(kind, name, options = {}) {
     switch (kind) {
         case 'project': return scaffoldProject({ ...(name ? { name } : {}), ...options });
@@ -378,7 +359,6 @@ export function authoringScaffold(kind, name, options = {}) {
         case 'binding-profile': return scaffoldBindingProfile(name ?? 'workspace.scratch', options.version ?? '1.0.0');
     }
 }
-/** Canonical bytes make repeated generation directly comparable. */
 export function scaffoldBytes(scaffold) {
     return canonicalJson(scaffold);
 }

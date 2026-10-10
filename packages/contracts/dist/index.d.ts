@@ -1,10 +1,3 @@
-/**
- * @zero-ar/contracts
- *
- * The one source for public payloads, closed vocabularies, identifiers,
- * canonical serialization, diagnostics, and the four state machines. Every
- * other package imports from here; nothing here imports a runtime package.
- */
 export * from './vocab.js';
 export * from './events.js';
 export * from './canonical.js';
@@ -59,5 +52,4 @@ export * from './wake-scheduler.js';
 export * from './attention.js';
 export * from './effect-authority.js';
 export * from './workspace-instances.js';
-/** Public API contract version. Major-version path, additive minor evolution. */
 export declare const CONTRACT_VERSION = "v1";

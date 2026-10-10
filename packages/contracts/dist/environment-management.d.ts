@@ -1,11 +1,3 @@
-/**
- * Public environment administration contracts.
- *
- * This file is the shared language used by the server, generated client, SDK,
- * and CLI. A junior developer should add an operation here and to the route
- * table before adding transport code. The runtime implementation sits behind
- * EnvironmentManagementPort, so public surfaces never import an adapter.
- */
 import { z } from 'zod';
 import type { AbandonEnvironmentResult, CancelEnvironmentJobResult, EnvironmentAdapterDescriptor, EnvironmentJobHandle, EnvironmentProfileRegistration, ObserveEnvironmentJobResult, ReconcileEnvironmentJobResult, TeardownEnvironmentResult } from './environment.js';
 import type { EnvironmentDeploymentCapability } from './environment-deployment.js';
@@ -598,7 +590,6 @@ export declare const EnvironmentMetricsSchema: z.ZodObject<{
     cost_by_adapter: z.ZodRecord<z.ZodString, z.ZodRecord<z.ZodString, z.ZodNumber>>;
 }, z.core.$strict>;
 export type EnvironmentMetrics = z.infer<typeof EnvironmentMetricsSchema>;
-/** Published tool requirements plus operator preference, never model input. */
 export declare const EnvironmentResolutionRequestSchema: z.ZodObject<{
     operation_class: z.ZodEnum<{
         observation: "observation";
@@ -783,7 +774,6 @@ export interface EnvironmentActorContext {
     tenant: string;
     principal: string;
 }
-/** The sole server-side port behind all generated environment operations. */
 export interface EnvironmentManagementPort {
     capabilities(context: EnvironmentActorContext): Promise<EnvironmentDeploymentCapability[]>;
     register(context: EnvironmentActorContext, request: RegisterEnvironmentRequest): Promise<EnvironmentProfileRegistration>;

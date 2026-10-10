@@ -1,10 +1,3 @@
-/**
- * Public durable-workspace handles and transfer bundles.
- *
- * A handle locates one encrypted workspace generation and carries no
- * authority. A transfer carries verified file bytes without a host path,
- * authority or key. Reattachment independently revalidates every binding.
- */
 import { z } from 'zod';
 export declare const SandboxWorkspaceStatusSchema: z.ZodEnum<{
     sealed: "sealed";
@@ -42,7 +35,6 @@ export declare const SandboxWorkspaceHandleSchema: z.ZodObject<{
     identity_ref: z.ZodString;
 }, z.core.$strict>;
 export type SandboxWorkspaceHandle = z.infer<typeof SandboxWorkspaceHandleSchema>;
-/** The byte and retention limits that travel with a portable generation. */
 export declare const SandboxWorkspacePolicySchema: z.ZodObject<{
     contract: z.ZodLiteral<"sandbox-workspace-policy/1">;
     source_max_bytes: z.ZodNumber;
@@ -54,7 +46,6 @@ export declare const SandboxWorkspacePolicySchema: z.ZodObject<{
     retention_ms: z.ZodNumber;
 }, z.core.$strict>;
 export type SandboxWorkspacePolicy = z.infer<typeof SandboxWorkspacePolicySchema>;
-/** One plaintext file in a transfer bundle, named only by its portable relative path. */
 export declare const SandboxWorkspaceTransferEntrySchema: z.ZodObject<{
     zone: z.ZodEnum<{
         sources: "sources";
@@ -68,11 +59,6 @@ export declare const SandboxWorkspaceTransferEntrySchema: z.ZodObject<{
     content_base64: z.ZodString;
 }, z.core.$strict>;
 export type SandboxWorkspaceTransferEntry = z.infer<typeof SandboxWorkspaceTransferEntrySchema>;
-/**
- * One sealed generation that another workspace controller can re-encrypt.
- * Host and key references in source_handle identify the source but grant no
- * access. The bundle carries no host path, authority reference or key bytes.
- */
 export declare const SandboxWorkspaceTransferBundleSchema: z.ZodObject<{
     schema: z.ZodLiteral<"zero-ar-sandbox-workspace-transfer/1">;
     source_handle: z.ZodObject<{
@@ -125,7 +111,6 @@ export declare const SandboxWorkspaceTransferBundleSchema: z.ZodObject<{
     content_ref: z.ZodString;
 }, z.core.$strict>;
 export type SandboxWorkspaceTransferBundle = z.infer<typeof SandboxWorkspaceTransferBundleSchema>;
-/** A deployment-bound bridge between run references and portable workspace generations. */
 export interface SandboxWorkspaceRunTransferPort {
     exportGeneration(reference: {
         tenant: string;
@@ -138,7 +123,6 @@ export interface SandboxWorkspaceRunTransferPort {
 }
 export declare function deriveSandboxWorkspaceIdentity(handle: Omit<SandboxWorkspaceHandle, 'identity_ref'>): string;
 export declare function sandboxWorkspaceHandleHasValidIdentity(handle: SandboxWorkspaceHandle): boolean;
-/** The full expected binding supplied when an existing generation is used. */
 export declare const SandboxWorkspaceAccessRequestSchema: z.ZodObject<{
     handle: z.ZodObject<{
         contract: z.ZodLiteral<"sandbox-workspace/1">;

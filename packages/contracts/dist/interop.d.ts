@@ -1,17 +1,5 @@
-/**
- * Protocol interoperability contracts and canonical projections.
- *
- * What this is: immutable protocol bindings, discovery snapshots, published
- * work entrypoints, MCP task aliases and assurance envelopes. Secret material
- * has no field in these shapes.
- *
- * How it fits: protocol packages translate these contracts to native client
- * calls. The functions here project canonical native state and never own a
- * second run, cancellation, quality or effect state machine.
- */
 import { z } from 'zod';
 import type { RunResult, RunSnapshot } from './schemas.js';
-/** A bounded JSON value used for schemas and normalized peer metadata. */
 export type InteropJson = null | boolean | number | string | InteropJson[] | {
     [key: string]: InteropJson;
 };
@@ -199,7 +187,6 @@ export declare const McpPublishedWorkEntrypointSchema: z.ZodObject<{
     entrypoint_ref: z.ZodString;
 }, z.core.$strict>;
 export type McpPublishedWorkEntrypoint = z.infer<typeof McpPublishedWorkEntrypointSchema>;
-/** Compile one immutable work entrypoint after publication selected its exact agent. */
 export declare function compileMcpPublishedWorkEntrypoint(input: McpPublishedWorkEntrypointBody): McpPublishedWorkEntrypoint;
 export declare const McpPeerToolSchema: z.ZodObject<{
     name: z.ZodString;

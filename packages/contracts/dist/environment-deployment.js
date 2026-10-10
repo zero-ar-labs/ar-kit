@@ -1,13 +1,3 @@
-/**
- * Conditional environment deployment and acceptance contracts.
- *
- * What this is: the public, non-secret account of whether an adapter exists,
- * is installed, is configured, passed its host checks, is admitted, and can
- * be selected. It also defines the retained real-host acceptance record.
- *
- * How it fits: hosted composition compiles these states before serving work,
- * while the native API and generated client expose the same facts to operators.
- */
 import { z } from 'zod';
 import { contentHash } from "./ids.js";
 import { refuse } from "./diagnostics.js";

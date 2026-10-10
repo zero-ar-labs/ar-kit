@@ -1,16 +1,3 @@
-/**
- * Attention capacity contracts.
- *
- * What this is: the operator surface for review capacity: an observe-only
- * calibration from the tenant's own log, a versioned capacity snapshot an
- * operator publishes, and a dashboard by attention class (MTH-AT-001 to
- * MTH-AT-010). Waits and service times stay separate; a person's handling
- * time is measured only where the reviewer reports it.
- *
- * How it fits: routes under /v1/attention. Publishing a snapshot is the act
- * that makes enforced admission possible; calibration persists nothing.
- * Each tenant calibrates from its own store, so classes never pool tenants.
- */
 import { z } from 'zod';
 export declare const AttentionDistributionSchema: z.ZodObject<{
     min: z.ZodNumber;
@@ -19,7 +6,6 @@ export declare const AttentionDistributionSchema: z.ZodObject<{
     max: z.ZodNumber;
 }, z.core.$strict>;
 export type AttentionDistribution = z.infer<typeof AttentionDistributionSchema>;
-/** The calibrated model of one attention class, waits and service separated. */
 export declare const AttentionClassModelSchema: z.ZodObject<{
     sample: z.ZodNumber;
     missing_data: z.ZodObject<{
@@ -52,7 +38,6 @@ export declare const AttentionClassModelSchema: z.ZodObject<{
     rho_ppm: z.ZodNumber;
 }, z.core.$strict>;
 export type AttentionClassModel = z.infer<typeof AttentionClassModelSchema>;
-/** What an operator supplies to calibrate. Everything else comes from the tenant's log. */
 export declare const AttentionCalibrationRequestSchema: z.ZodObject<{
     reviewers: z.ZodNumber;
     window_ms: z.ZodNumber;
@@ -61,7 +46,6 @@ export declare const AttentionCalibrationRequestSchema: z.ZodObject<{
     classes: z.ZodOptional<z.ZodArray<z.ZodString>>;
 }, z.core.$strict>;
 export type AttentionCalibrationRequest = z.infer<typeof AttentionCalibrationRequestSchema>;
-/** An observe-only calibration report. Nothing is persisted and nothing is admitted from it. */
 export declare const AttentionCalibrationReportSchema: z.ZodObject<{
     version: z.ZodLiteral<"attention-littles-v1">;
     calibration_mode: z.ZodLiteral<"observe-only">;
@@ -103,11 +87,6 @@ export declare const AttentionCalibrationReportSchema: z.ZodObject<{
     ref: z.ZodString;
 }, z.core.$strict>;
 export type AttentionCalibrationReport = z.infer<typeof AttentionCalibrationReportSchema>;
-/**
- * Publish the next capacity snapshot. The runtime recalibrates from the log;
- * a flat batch price needs evidence, and the drift tolerance registered here
- * decides when the snapshot stops admitting enforced intake (MTH-AT-007, MTH-AT-008).
- */
 export declare const AttentionCapacitySnapshotPublishRequestSchema: z.ZodObject<{
     reviewers: z.ZodNumber;
     window_ms: z.ZodNumber;
@@ -123,7 +102,6 @@ export declare const AttentionCapacitySnapshotPublishRequestSchema: z.ZodObject<
     }, z.core.$strict>>>;
 }, z.core.$strict>;
 export type AttentionCapacitySnapshotPublishRequest = z.infer<typeof AttentionCapacitySnapshotPublishRequestSchema>;
-/** One published snapshot and its standing. Invalid names the prediction error that invalidated it. */
 export declare const AttentionCapacitySnapshotSchema: z.ZodObject<{
     snapshot_ref: z.ZodString;
     version: z.ZodNumber;
@@ -179,7 +157,6 @@ export declare const AttentionCapacitySnapshotSchema: z.ZodObject<{
     }, z.core.$strict>;
 }, z.core.$strict>;
 export type AttentionCapacitySnapshot = z.infer<typeof AttentionCapacitySnapshotSchema>;
-/** The operator dashboard by class (MTH-AT-010). Without a snapshot the class set is empty and the reason says so. */
 export declare const AttentionDashboardSchema: z.ZodObject<{
     measured_at: z.ZodString;
     snapshot_ref: z.ZodNullable<z.ZodString>;

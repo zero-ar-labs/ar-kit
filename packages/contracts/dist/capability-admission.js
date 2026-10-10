@@ -1,11 +1,3 @@
-/**
- * Dynamic governed capability admission contracts (DCA0-DCA2).
- *
- * A request asks to amend one run's immutable capability closure. It grants
- * nothing. Classification binds inspected, content-addressed publication
- * bytes to a complete consequence diff. Approval binds that exact plan, and
- * a later safe-boundary activation changes only future work in the same run.
- */
 import { z } from 'zod';
 import { contentHash } from "./ids.js";
 import { CAPABILITY_ADMISSION_CLASSES, CAPABILITY_ADMISSION_DECISIONS, CAPABILITY_ADMISSION_KINDS, CAPABILITY_ADMISSION_STATUSES, CAPABILITY_INVALIDATION_STRATEGIES, CAPABILITY_NEXT_ACTIONS, CAPABILITY_PACKAGE_KINDS, ROUTE_SCOPES, } from "./vocab.js";
@@ -16,14 +8,12 @@ const epoch = z.number().int().min(1);
 const boundedHashes = z.array(hash).max(256);
 export const CapabilityAdmissionRequestSchema = z.strictObject({
     kind: z.enum(CAPABILITY_ADMISSION_KINDS).default('add'),
-    /** Exact tenant publication ref. Host paths, URLs and aliases never enter the log. */
     candidate_locator: hash,
     expected_content_hash: hash.optional(),
     declared_package_kind: z.enum(CAPABILITY_PACKAGE_KINDS),
     requested_capabilities: z.array(z.string().min(1).max(256)).max(128).default([]),
     reason: z.string().min(1).max(2_000),
     requested_activation_mode: z.literal('next-safe-boundary').default('next-safe-boundary'),
-    /** Optional optimistic guard for callers that already inspected the run. */
     expected_active_epoch: epoch.optional(),
     idempotency_key: z.string().min(1).max(256),
 });
@@ -146,7 +136,6 @@ export const CapabilityAdmissionViewSchema = z.strictObject({
         scope_epoch: epoch,
     }),
     requested_at: z.string().datetime(),
-    /** Null only while an exact publication is being resolved and classified. */
     plan: CapabilityAdmissionPlanSchema.nullable(),
     status: z.enum(CAPABILITY_ADMISSION_STATUSES),
     decision: z.enum(CAPABILITY_ADMISSION_DECISIONS).nullable(),

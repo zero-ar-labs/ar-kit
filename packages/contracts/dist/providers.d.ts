@@ -1,14 +1,3 @@
-/**
- * Provider control-plane contracts.
- *
- * What this is: admitted adapter metadata, tenant provider instances,
- * discovered catalogue entries, explicit enablement, and the exact model
- * selection the kernel pins. Credential bytes have no field here.
- *
- * How it fits: administrators configure and enable models through these
- * generated contracts. Only a run-owned adapter call consumes a selection;
- * no contract in this file is an inference request.
- */
 import { z } from 'zod';
 import type { ModelImageInput, ModelProtocolAdapter, ModelProvider, ModelProviderProfile } from './vocab.js';
 declare const ModelAdapterIdentitySchema: z.ZodObject<{
@@ -56,7 +45,6 @@ export declare const AdmitModelAdapterRequestSchema: z.ZodObject<{
     conformance_ref: z.ZodString;
 }, z.core.$strict>;
 export type AdmitModelAdapterRequest = z.infer<typeof AdmitModelAdapterRequestSchema>;
-/** Exact signed adapter body, shared by the platform signer and admission verifier. */
 export declare function modelAdapterIdentity(request: AdmitModelAdapterRequest): ModelAdapterIdentity;
 export declare function modelAdapterRef(request: AdmitModelAdapterRequest): string;
 export declare const AdmittedModelAdapterSchema: z.ZodObject<{
@@ -131,7 +119,6 @@ export declare const CreateExternalCredentialBindingRequestSchema: z.ZodObject<{
     external_ref: z.ZodString;
 }, z.core.$strict>;
 export type CreateExternalCredentialBindingRequest = z.infer<typeof CreateExternalCredentialBindingRequestSchema>;
-/** The only public JSON shape that may carry provider secret bytes. */
 export declare const ProtectedCredentialIngestRequestSchema: z.ZodObject<{
     name: z.ZodString;
     purpose: z.ZodEnum<{
@@ -156,7 +143,6 @@ export declare const RotateExternalCredentialRequestSchema: z.ZodObject<{
     external_ref: z.ZodString;
 }, z.core.$strict>;
 export type RotateExternalCredentialRequest = z.infer<typeof RotateExternalCredentialRequestSchema>;
-/** Rotation counterpart to protected ingest. The secret is never returned. */
 export declare const RotateProtectedCredentialRequestSchema: z.ZodObject<{
     secret: z.ZodString;
 }, z.core.$strict>;
@@ -165,7 +151,6 @@ export declare const RevokeCredentialRequestSchema: z.ZodObject<{
     reason: z.ZodString;
 }, z.core.$strict>;
 export type RevokeCredentialRequest = z.infer<typeof RevokeCredentialRequestSchema>;
-/** Exact compatible behavior one tenant admits for a configured endpoint. */
 export declare const ProviderCompatibilitySchema: z.ZodObject<{
     streaming: z.ZodEnum<{
         supported: "supported";
@@ -210,20 +195,10 @@ export declare const ProviderCompatibilitySchema: z.ZodObject<{
     }>>;
 }, z.core.$strict>;
 export type ProviderCompatibility = z.infer<typeof ProviderCompatibilitySchema>;
-/**
- * Whether one profile's model accepts images: what its admitted statement
- * declares, else the profile default, which is supported for anthropic and
- * openai and unsupported for every other profile. A statement admitted
- * before this fact existed keeps its identity and takes the default.
- */
 export declare function providerImageInput(profile: ModelProviderProfile, compatibility?: ProviderCompatibility | null): ModelImageInput;
-/** Content identity for the admitted compatibility statement. */
 export declare function modelCompatibilityRef(compatibility: ProviderCompatibility): string;
-/** The wire adapter one provider profile is allowed to use. */
 export declare function providerProfileProtocol(profile: ModelProviderProfile): ModelProtocolAdapter;
-/** The provider family a profile belongs to without collapsing profile identity. */
 export declare function providerProfileFamily(profile: ModelProviderProfile): ModelProvider;
-/** Conservative compatibility defaults for each tested profile. */
 export declare function providerProfileCompatibility(profile: ModelProviderProfile): ProviderCompatibility;
 export declare const CreateProviderInstanceRequestSchema: z.ZodObject<{
     name: z.ZodString;
@@ -304,7 +279,6 @@ export declare const CreateProviderInstanceRequestSchema: z.ZodObject<{
     credential_binding_ref: z.ZodNullable<z.ZodString>;
 }, z.core.$strict>;
 export type CreateProviderInstanceRequest = z.infer<typeof CreateProviderInstanceRequestSchema>;
-/** Build the explicit profile fields used by the SDK, CLI examples, and tests. */
 export declare function providerInstanceProfile(profile: ModelProviderProfile, endpoint: string, credential: {
     mode: 'binding';
     binding_ref: string;

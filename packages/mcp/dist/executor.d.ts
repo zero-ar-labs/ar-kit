@@ -1,13 +1,3 @@
-/**
- * Admitted MCP tool execution and remote-task reconciliation.
- *
- * What this is: a credential-free runtime catalogue that executes only the
- * exact imported binding a run pinned, through the deployment egress port.
- *
- * How it fits: ordinary calls use the official MCP client. The declared Tasks
- * extension uses its explicit JSON-RPC boundary, returns a durable handle and
- * closes every client or request before the kernel parks the run.
- */
 import type { InteropBindingManifest, McpImportedToolPlan, McpPeerSnapshot, RemoteToolTaskHandle, ToolExecutionOutcome, ToolHostEgressContext } from '@zero-ar/contracts';
 import type { ToolManifest } from '@zero-ar/tool-kit';
 import type { McpCredentialResolver, McpEgressPort } from './client.js';
@@ -26,7 +16,6 @@ export interface McpToolExecutionResult {
     used?: number;
     pending?: RemoteToolTaskHandle;
 }
-/** One deployment-owned executor for a finite, reviewed imported catalogue. */
 export declare class McpRemoteToolExecutor {
     private readonly tools;
     private readonly credentials;

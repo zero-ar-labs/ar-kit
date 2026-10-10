@@ -1,14 +1,3 @@
-/**
- * Tool-source administration contracts.
- *
- * What this is: provider-neutral payloads for configuring Composio and
- * Merge sources, discovering provider catalogues, reviewing imports, and
- * narrowing access without rewriting prior runs.
- *
- * How it fits: the runtime still executes only Zero-AR tool contracts.
- * These shapes describe the operator acts that turn provider catalogue
- * entries into pinned tool bindings.
- */
 import { z } from 'zod';
 import type { AggregatorProviderName } from './vocab.js';
 export declare const RegisterComposioToolSourceRequestSchema: z.ZodObject<{
@@ -287,12 +276,6 @@ export declare const ToolSourceTestResultSchema: z.ZodObject<{
 }, z.core.$strict>;
 export type ToolSourceTestResult = z.infer<typeof ToolSourceTestResultSchema>;
 export declare function toolSourceProvider(request: RegisterToolSourceRequest): AggregatorProviderName;
-/**
- * The one content address for a discovered provider catalogue. The registry
- * and the aggregator host both hash through this function, so a snapshot one
- * pins reads as the same snapshot in the other (TAG-023). Tools sort by name
- * in UTF-16 code-unit order, which does not depend on the host locale.
- */
 export declare function catalogueSnapshotRef(input: {
     provider: AggregatorProviderName;
     instance: string;
@@ -300,7 +283,6 @@ export declare function catalogueSnapshotRef(input: {
         name: string;
     }[];
 }): string;
-/** One recorded difference between a source's pinned catalogue and what the provider now serves (TAG-025). */
 export declare const ToolSourceDriftRecordSchema: z.ZodObject<{
     source_ref: z.ZodString;
     pinned_snapshot_ref: z.ZodString;
@@ -319,7 +301,6 @@ export declare const ToolSourceDriftRecordSchema: z.ZodObject<{
     recorded_at: z.ZodString;
 }, z.core.$strict>;
 export type ToolSourceDriftRecord = z.infer<typeof ToolSourceDriftRecordSchema>;
-/** The durable drift history of one source. Drifted means its enabled bindings refuse until re-enabled. */
 export declare const ToolSourceDriftReportSchema: z.ZodObject<{
     source_ref: z.ZodString;
     drifted: z.ZodBoolean;

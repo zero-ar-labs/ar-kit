@@ -1,15 +1,16 @@
-# Running Zero-AR 0.4.1
+# Running Zero-AR 0.4.2
 
-This guide runs Zero-AR 0.4.1 from its two published container images. You
-need Docker and gpg. The client packages need Node.js 24.11 or later in the
-Node 24 line.
+This guide runs Zero-AR 0.4.2 from its two published container images. You
+need Docker. gpg and jq are optional: they check the signed record of image
+digests before you pull. The client packages need Node.js 24.11 or later in
+the Node 24 line.
 
 ## The images
 
 | Image | What it holds | Use it when |
 |---|---|---|
-| `ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.4.1` | The `zeroar` command with Local Lite: one SQLite file under your project directory, no database engine, no account. | You run and inspect work on one machine, try an agent, or develop against the deterministic adapter. |
-| `ghcr.io/zero-ar-labs/zero-ar/full-cell:v0.4.1` | The hosted Full Cell: PostgreSQL, tenant API keys, isolated child hosts, a managed secret broker and the HTTP API on port 8420. | Applications connect over the network, tenants need their own keys, or work belongs in PostgreSQL. |
+| `ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.4.2` | The `zeroar` command with Local Lite: one SQLite file under your project directory, no database engine, no account. | You run and inspect work on one machine, try an agent, or develop against the deterministic adapter. |
+| `ghcr.io/zero-ar-labs/zero-ar/full-cell:v0.4.2` | The hosted Full Cell: PostgreSQL, tenant API keys, isolated child hosts, a managed secret broker and the HTTP API on port 8420. | Applications connect over the network, tenants need their own keys, or work belongs in PostgreSQL. |
 
 Both images are built for linux/amd64 and linux/arm64, so Docker pulls the
 native platform. Both run as a non-root user and carry no source.
@@ -41,8 +42,8 @@ Each `digest` value already starts with `sha256:`. Read it with `jq`, or copy
 it by hand, and pull by it:
 
 ```sh
-FULL_CELL=$(jq -r '.images[] | select(.image | endswith("/full-cell:v0.4.1")) | .digest' release/release-images.json)
-LOCAL_LITE=$(jq -r '.images[] | select(.image | endswith("/local-lite:v0.4.1")) | .digest' release/release-images.json)
+FULL_CELL=$(jq -r '.images[] | select(.image | endswith("/full-cell:v0.4.2")) | .digest' release/release-images.json)
+LOCAL_LITE=$(jq -r '.images[] | select(.image | endswith("/local-lite:v0.4.2")) | .digest' release/release-images.json)
 docker pull "ghcr.io/zero-ar-labs/zero-ar/full-cell@$FULL_CELL"
 docker pull "ghcr.io/zero-ar-labs/zero-ar/local-lite@$LOCAL_LITE"
 ```
@@ -146,6 +147,10 @@ results; `web.fetch` reads one page and keeps it until the retention ends.
 | `ZERO_AR_WEB_SEARCH_FALLBACK`, `ZERO_AR_WEB_SEARCH_FALLBACK_KEY` | An optional second provider and its key |
 | `ZERO_AR_WEB_SEARCH_CLASSIFICATION` | The highest classification a query may carry: `public`, `internal` (default), `confidential` or `restricted` |
 | `ZERO_AR_WEB_CONTENT_RETENTION_DAYS` | Days pages and results are kept, 0 to 3650, 30 by default |
+
+The classification is a declaration, not yet a check: no run is compared
+against it before a query leaves. Leave web search off for work whose
+content must not reach a search provider.
 
 ```sh
 docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" \
@@ -372,7 +377,7 @@ conformance evidence you accept. The `conformance_ref` must appear in
 content hash of the identity, so compute it before first start. The
 `adapter-admit` request adds an HMAC-SHA256 signature made with the admission
 key; a wrong key refuses with `provider.adapter.signature-invalid`. With
-`@zero-ar/contracts@0.4.1` installed and `ZERO_AR_ADAPTER_ADMISSION_KEY` set to
+`@zero-ar/contracts@0.4.2` installed and `ZERO_AR_ADAPTER_ADMISSION_KEY` set to
 the cell's value:
 
 ```js
@@ -424,7 +429,9 @@ and name it in the tenant block:
 The cell refuses a block it could not serve: no artifact store, a fallback
 that is the primary, or a key binding the broker does not hold. The shipped
 providers' hosts are reviewed by default, so `egress_destinations` needs no
-entry for them.
+entry for them. `query_classification` is a declaration, not yet a check:
+no run is compared against it before a query leaves, so give the block only
+to tenants whose content may reach the provider.
 
 A published agent declares `web.search` with exactly the cell's contract:
 
@@ -444,6 +451,27 @@ spec:
   input_schema: {"type":"object","properties":{"queries":{"type":"array","items":{"type":"string","minLength":1,"maxLength":400},"minItems":1,"maxItems":3,"description":"One to three search queries, run at the same time."},"mode":{"type":"string","enum":["fast","balanced","deep"],"description":"fast by default; deep is slower and costs more."},"max_results":{"type":"integer","minimum":1,"maximum":10,"description":"Results per query, 5 by default."},"include_domains":{"type":"array","items":{"type":"string","minLength":1,"maxLength":253},"maxItems":20,"description":"Only these domains."},"exclude_domains":{"type":"array","items":{"type":"string","minLength":1,"maxLength":253},"maxItems":20,"description":"Never these domains."},"freshness_days":{"type":"integer","minimum":1,"maximum":3650,"description":"Only pages published within this many days."}},"required":["queries"],"additionalProperties":false}
 ```
 <!-- web-search-declaration:end -->
+
+### Handing a run to another cell
+
+A suspended run can move to a second Full Cell that shares nothing with this
+one. The second cell names itself, the first signs the run over to that name
+and stops it, and only the named cell continues it, once:
+
+```sh
+# On the cell that will continue the run:
+zeroar import --destination
+# On the cell that holds it:
+zeroar export <run> --handoff-to <destination> --out run.zar
+# Back on the continuing cell:
+zeroar import run.zar --executor declaration.json --continue
+```
+
+Signing needs an `integrity_signer` on the tenant that hands the run off.
+After the handoff, that cell refuses to resume the run, and any other cell
+that imports the export refuses to continue it. The continuing cell pins
+the first key it sees for a signer and refuses a later handoff from the same
+signer made with a different key.
 
 ### Port, health and readiness
 
@@ -540,13 +568,13 @@ in the developer kit. The `@zero-ar/client` package exports the same file as
 `/cell/openapi/zero-ar-v1.openapi.json`. Each operation lists the scopes it
 needs under `x-zero-ar-authorization`.
 
-The SDK, typed client and CLI are on npm at 0.4.1. In the SDK,
+The SDK, typed client and CLI are on npm at 0.4.2. In the SDK,
 `createZeroAR({ endpoint, apiKey })` connects to a cell and sends the key as
 the bearer.
 
 ```sh
-npm install @zero-ar/sdk@0.4.1 @zero-ar/client@0.4.1
-npm install --global @zero-ar/cli@0.4.1
+npm install @zero-ar/sdk@0.4.2 @zero-ar/client@0.4.2
+npm install --global @zero-ar/cli@0.4.2
 ```
 
 The npm `zeroar` command is an API client with no Local Lite server, so it

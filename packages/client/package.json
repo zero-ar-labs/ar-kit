@@ -1,11 +1,11 @@
 {
   "name": "@zero-ar/client",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "type": "module",
   "description": "Typed API client and OpenAPI contract for controlling Zero-AR work.",
   "license": "Apache-2.0",
   "dependencies": {
-    "@zero-ar/contracts": "0.4.1"
+    "@zero-ar/contracts": "0.4.2"
   },
   "engines": {
     "node": ">=24.11.0 <25"

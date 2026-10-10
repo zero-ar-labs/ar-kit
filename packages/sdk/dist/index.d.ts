@@ -1,17 +1,3 @@
-/**
- * @zero-ar/sdk: authoring builders.
- *
- * What this is: defineAgent, defineTool, defineValidator, and definePosture,
- * each producing an immutable, content-addressed manifest validated at
- * declaration time (ADX-001). The SDK holds no loop, no storage, and no way
- * to promote completion; it authors declarations and talks to the runtime
- * through the public client alone.
- *
- * How it fits: this milestone carries the minimal builder set the ERD asks
- * of the runway. Tool bindings, validator conformance, posture registries,
- * and the compiler for YAML and Markdown forms grow through milestones two
- * and three without changing what a manifest is: frozen data plus a hash.
- */
 import type { CompiledPack, DomainPack, ToolDisclosureClass, TrustTier, ValidatorCatalogueEntryBody } from '@zero-ar/contracts';
 import { ZeroARClient } from '@zero-ar/client';
 interface Named {
@@ -75,11 +61,9 @@ export declare function defineAgent(spec: AgentSpec): Readonly<{
 };
 export interface ToolSpec extends Named {
     description: string;
-    /** The single authoritative input contract used by every generated surface. */
     input_schema: Record<string, unknown>;
     operation_class: 'observation' | 'run-internal' | 'effect-proposal';
     isolation: TrustTier;
-    /** Effect-proposal tools name the target operation they can propose. */
     target?: string;
     operation?: string;
     disclosure?: {
@@ -197,9 +181,7 @@ export interface ModelValidatorAuthoringProposal {
     proposal_ref: string;
     candidate: unknown;
 }
-/** Model output remains inert source material with no grade or sufficiency authority. */
 export declare function modelValidatorAuthoringProposal(candidate: unknown): ModelValidatorAuthoringProposal;
-/** A declared author deterministically selects explicit validator input under a new identity. */
 export declare function admitModelValidatorAuthoringProposal(proposal: ModelValidatorAuthoringProposal, selection: {
     selected_by: string;
     validator: ValidatorSpec;
@@ -309,13 +291,6 @@ export type { PublishedCapabilityCandidate } from './capability-admission.js';
 export { authoringScaffold, scaffoldBindingProfile, scaffoldBytes, scaffoldDomainPack, scaffoldProject, scaffoldSkill, scaffoldTool, scaffoldValidator, } from './scaffolds.js';
 export type { AuthoringScaffold, ProjectScaffoldOptions, ScaffoldFile } from './scaffolds.js';
 export declare function createRuntimeClient(baseUrl: string): ZeroARClient;
-/**
- * Compile a domain pack for publication (XCV-012). Machine claims must be
- * versioned predicates whose evidence names a validator the deployment
- * really has; a prose claim or unresolved evidence fails here, before
- * anything publishes. Notes pass through labelled as informational, with
- * no authority, so a pack cannot smuggle a claim through a sentence.
- */
 export declare function compileDomainPack(pack: DomainPack, available: {
     name: string;
     version: string;

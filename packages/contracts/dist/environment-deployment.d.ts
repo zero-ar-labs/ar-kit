@@ -1,13 +1,3 @@
-/**
- * Conditional environment deployment and acceptance contracts.
- *
- * What this is: the public, non-secret account of whether an adapter exists,
- * is installed, is configured, passed its host checks, is admitted, and can
- * be selected. It also defines the retained real-host acceptance record.
- *
- * How it fits: hosted composition compiles these states before serving work,
- * while the native API and generated client expose the same facts to operators.
- */
 import { z } from 'zod';
 import type { EnvironmentAdapter, EnvironmentHandleBinding, EnvironmentProfile } from './environment.js';
 import { CONDITIONAL_ENVIRONMENT_BACKENDS } from './vocab.js';
@@ -312,7 +302,6 @@ export declare const EnvironmentDeploymentCapabilityListSchema: z.ZodObject<{
     }, z.core.$strict>>;
 }, z.core.$strict>;
 export type EnvironmentDeploymentCapabilityList = z.infer<typeof EnvironmentDeploymentCapabilityListSchema>;
-/** Runtime-only seam implemented by an explicitly installed adapter package. */
 export interface ConditionalEnvironmentDeployment {
     adapter: EnvironmentAdapter;
     profile: EnvironmentProfile;
@@ -320,9 +309,7 @@ export interface ConditionalEnvironmentDeployment {
     usage_for?(output: Record<string, unknown> | null): number | undefined;
     probe(): Promise<EnvironmentHostObservation>;
 }
-/** The streaming artifact port a composition hands an adapter so collected outputs land in the tenant store. */
 export interface EnvironmentArtifactSinkPort {
-    /** Store one output. A media type and classification, when given, are the ones the artifact is stored with. */
     put(input: {
         chunks: AsyncIterable<Uint8Array>;
         destination_ref: string;
@@ -335,7 +322,6 @@ export interface EnvironmentArtifactSinkPort {
         bytes: number;
     }>;
 }
-/** Runtime ports needed by an optional deployment without embedding bytes in configuration. */
 export interface ConditionalEnvironmentRuntimeContext {
     tenant: string;
     credentials: {
@@ -354,10 +340,8 @@ export interface ConditionalEnvironmentRuntimeContext {
         source_path: string;
         max_bytes: number;
     }): AsyncIterable<Uint8Array>;
-    /** Where collected outputs are committed. Absent means the adapter keeps its hash-only default. */
     artifact_sink?: EnvironmentArtifactSinkPort;
 }
-/** The common export every conditional adapter package supplies. */
 export interface ConditionalEnvironmentDeploymentModule {
     openEnvironmentDeployment(input: {
         configuration: unknown;

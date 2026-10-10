@@ -1,19 +1,3 @@
-/**
- * Authored orchestration (M7): a declared multi-run plan executed above
- * the runtime through the public client alone.
- *
- * What this is: defineOrchestration seals a named sequence of run steps
- * into an immutable, content-addressed plan, and runOrchestration walks
- * it, one real run per step, handing each step the artifacts of the
- * steps before it. The orchestrator holds no runtime authority: every
- * run is created, observed, and read through the generated client, and
- * a step that does not reach verified complete halts the plan when the
- * plan says so, with the step and reason named.
- *
- * What this deliberately is not: a workflow engine inside the kernel.
- * The runtime keeps one loop per run; sequencing lives up here, in
- * authored configuration, where a person can read it.
- */
 import { contentHash, refuse } from '@zero-ar/contracts';
 import { makeId } from '@zero-ar/contracts';
 const STEP_NAME = /^[a-z][a-z0-9-]*$/;
@@ -44,11 +28,6 @@ export function defineOrchestration(plan) {
     return Object.freeze({ ...body, hash: contentHash(body) });
 }
 const DEFAULT_BUDGETS = { consumption: { model_tokens: 50_000 }, attention: 0, verification_reserve_fraction: 0.2, max_turns: 8 };
-/**
- * Walk the plan: one real run per step, artifacts handed forward, every
- * observation through the public client. A cited step that produced no
- * artifact refuses before any model is called for the citing step.
- */
 export async function runOrchestration(client, plan, options) {
     const artifacts = new Map();
     const outcome = { plan_ref: plan.hash, steps: [], halted: null };
