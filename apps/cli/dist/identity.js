@@ -47,6 +47,7 @@ export const CLI_USAGE_ROWS = [
     { command: 'capability', syntax: 'capability approve|refuse <run> <request> --plan <ref> [--reason <text>]', summary: 'decide the exact inspected plan' },
     { command: 'capability', syntax: 'capability cancel <run> <request> [--reason <text>]', summary: 'cancel live pre-commit admission work' },
     { command: 'gateway', syntax: 'gateway serve|test <config.json>', summary: 'run the channel gateway host, or check its secrets and endpoint' },
+    { command: 'target', syntax: 'target check <target.json> --operation <name> --params <json|@file> [--refuse-params <json|@file>] [--secret-env NAME] [--json]', summary: 'check that an app endpoint answers actions the way the runtime reads them' },
     { command: 'init', syntax: 'init [dir] [--form yaml|json|markdown|typescript] [--kind agent|external-product]', summary: 'scaffold and lock an agent project' },
     { command: 'scaffold', syntax: 'scaffold skill|tool|validator|domain-pack|binding-profile <name> [dir]', summary: 'generate one public extension package' },
     { command: 'validate', syntax: 'validate [source|dir] [--write-lock]', summary: 'compile, verify and check authoring locks' },
@@ -66,7 +67,7 @@ export const CLI_COMMAND_EXAMPLES = {
 export const CLI_HELP_SECTIONS = [
     { title: 'get started', commands: ['init', 'scaffold', 'validate', 'run', 'attach', 'inspect', 'result'] },
     { title: 'guide and control runs', commands: ['records', 'context', 'verification-plan', 'steer', 'redirect', 'pause', 'budget', 'answer', 'resume', 'fork', 'replay', 'cancel'] },
-    { title: 'publish and integrate', commands: ['publish', 'publication', 'source', 'capability', 'gateway'] },
+    { title: 'publish and integrate', commands: ['publish', 'publication', 'source', 'capability', 'gateway', 'target'] },
     { title: 'operate', commands: ['doctor', 'profile', 'rebuild', 'export', 'import', 'registry', 'artifact', 'memory', 'attention'] },
     { title: 'administer hosted runtime', commands: ['environment', 'provider', 'tool-source', 'effect'] },
     { title: 'reference', commands: ['version', 'help'] },

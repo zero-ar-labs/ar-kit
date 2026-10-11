@@ -3,11 +3,11 @@
   "product": "Zero-AR Developer Kit",
   "source": {
     "repository": "https://github.com/zero-ar-labs/zero-ar",
-    "commit": "e0064302805c8462e499ee144c24adf8e1248cf1",
-    "package_set_ref": "sha256:336305541f9a319e5e0d9a4ece996eeac96d651bd3dd16cdf9d3eecf04281d50",
-    "package_exercise_ref": "sha256:6103ddabcf027b7b25d3af21f8d97eb1b7fb595e5fefcdfd0b606032954963af",
+    "commit": "f7cd49e89603091c0e79f74d95a9e6fd879c0bb4",
+    "package_set_ref": "sha256:c658e5fbbc6e40d7fc517d2e352856a19832bb23236873f3ecfdc68a956e31ff",
+    "package_exercise_ref": "sha256:a116c8baf767a99fb04492559ea579609fb9110aaa9461493cf09a3997693815",
     "generator_path": "scripts/export-public-developer-kit.ts",
-    "generator_sha256": "83dc94623988a1faf22c2172063802f919357aebc764b8079eb2bb14192ef9f2"
+    "generator_sha256": "8fbc629f0ebf5c3b184003d4510094a2bb2474f567c8a986a1470a171db1df3a"
   },
   "destination": {
     "repository": "https://github.com/zero-ar-labs/ar-kit",
@@ -22,75 +22,75 @@
   "packages": [
     {
       "name": "@zero-ar/contracts",
-      "version": "0.4.2",
+      "version": "0.5.0",
       "workspace_path": "packages/contracts",
-      "manifest_ref": "sha256:bf34aed4f4ad6a3de548a5abc24dcaaa4e2e2d7d5c7c3db33232ddecf237507c",
-      "tarball_path": "release/tarballs/zero-ar-contracts-0.4.2.tgz",
-      "tarball_sha256": "e1b0d2833de92b072607bc47c17654d9508e79e35d65aec8eac559040b8484c4"
+      "manifest_ref": "sha256:bba9f3bdd023e955356822a5c3e6f19ced6b634ee56c6f28a4f636bf789019b8",
+      "tarball_path": "release/tarballs/zero-ar-contracts-0.5.0.tgz",
+      "tarball_sha256": "4d658a246cc9804cedd223c382784c765ec4f461a2304af07d4c084e9d233147"
     },
     {
       "name": "@zero-ar/client",
-      "version": "0.4.2",
+      "version": "0.5.0",
       "workspace_path": "packages/client",
-      "manifest_ref": "sha256:582941b56577ddbdeaa8255b1124e04bbff5f3f16622bbaaa0685ba7cc238214",
-      "tarball_path": "release/tarballs/zero-ar-client-0.4.2.tgz",
-      "tarball_sha256": "7b02870f5a1c1e09f2d0bb92e1f35123dd685b9e2843a8ca0650b4286e960bac"
+      "manifest_ref": "sha256:7710002acb51bcd060883a672967647e3fd3a575b30722c7c5def7c95a3d4aff",
+      "tarball_path": "release/tarballs/zero-ar-client-0.5.0.tgz",
+      "tarball_sha256": "7ee4b39d87f1824a41ca14c467effba7aa660e513770c3763c12b41f03d3995d"
     },
     {
       "name": "@zero-ar/validator-kit",
-      "version": "0.4.2",
+      "version": "0.5.0",
       "workspace_path": "packages/validator-kit",
-      "manifest_ref": "sha256:e759bab32e8d33bce458983bdc015a4d035ec3e90ea548c7b78fb7067280e8d8",
-      "tarball_path": "release/tarballs/zero-ar-validator-kit-0.4.2.tgz",
-      "tarball_sha256": "4854cb80736d8fc03ae18f3ae55d9163a8292159010587c311e61b4691d00e96"
+      "manifest_ref": "sha256:b04549d06fca17c1a4553cc887c006b23be8f5dedb8cb5f544693e1186fcde39",
+      "tarball_path": "release/tarballs/zero-ar-validator-kit-0.5.0.tgz",
+      "tarball_sha256": "a2708b0d8f2cb9911e67a0b35a864e8805a1d034f375b6fcb2c52c3b326e6a27"
     },
     {
       "name": "@zero-ar/sdk",
-      "version": "0.4.2",
+      "version": "0.5.0",
       "workspace_path": "packages/sdk",
-      "manifest_ref": "sha256:c451b16093bd29c3a1533378a431f46a30901ad7a835e5ae5d7d7f1326159bfc",
-      "tarball_path": "release/tarballs/zero-ar-sdk-0.4.2.tgz",
-      "tarball_sha256": "3047a53138650ac9fa3b53570e59074c7b5e70ae3ed7f0c6524a0c299fd59cb7"
+      "manifest_ref": "sha256:254448106f3bf41710868be65557b1ee9079fa6800dd1bf3176e6e41bc4e0433",
+      "tarball_path": "release/tarballs/zero-ar-sdk-0.5.0.tgz",
+      "tarball_sha256": "7f9bb82c8bba8ebc9af79f86a1f18ce7a8bd7a4169f6fa630468622eac23e265"
     },
     {
       "name": "@zero-ar/cli",
-      "version": "0.4.2",
+      "version": "0.5.0",
       "workspace_path": "apps/cli",
-      "manifest_ref": "sha256:453700fc80ae83ec633a8eed8b7f084c685dfc6d98b0164e0bb793ce1dc2862e",
-      "tarball_path": "release/tarballs/zero-ar-cli-0.4.2.tgz",
-      "tarball_sha256": "0198ce0d41d543185a208b764d11e3231c65130711157701ecabcd3cd25cc197"
+      "manifest_ref": "sha256:37274f4e09eda263838538dddb047f1c30044f89feadb601e8e9817f345f6adc",
+      "tarball_path": "release/tarballs/zero-ar-cli-0.5.0.tgz",
+      "tarball_sha256": "33eb26f40b38e553a1aee5a5b1a98d8928bf6ed5716d4b17b96eb8a074003842"
     },
     {
       "name": "@zero-ar/conformance",
-      "version": "0.4.2",
+      "version": "0.5.0",
       "workspace_path": "packages/conformance",
-      "manifest_ref": "sha256:f660785718d384deb922c8b690c4712ec00f37a1e6602f009df0e0dd2f164778",
-      "tarball_path": "release/tarballs/zero-ar-conformance-0.4.2.tgz",
-      "tarball_sha256": "fba70b2d335b1f18f7d92d8eda4b088ab0291a82db318178af5dbb4116b7df85"
+      "manifest_ref": "sha256:12e4df81f844ac71f26e20df225eb1ed131298c00898ff15d759fc8f58af10c5",
+      "tarball_path": "release/tarballs/zero-ar-conformance-0.5.0.tgz",
+      "tarball_sha256": "417e3aa238772c42bde70e3f3a9c5d6f509b677b320d8cd8b41298ae7e33cf79"
     },
     {
       "name": "@zero-ar/tool-kit",
-      "version": "0.4.2",
+      "version": "0.5.0",
       "workspace_path": "packages/tool-kit",
-      "manifest_ref": "sha256:e3f01ba6a218551ec025d3c5196dcd5d7f207a5fc5beda0110f3c50b25ae9a51",
-      "tarball_path": "release/tarballs/zero-ar-tool-kit-0.4.2.tgz",
-      "tarball_sha256": "0ab3b008e8321894f04b15b48f5e6d964caabf4c78f853612bea1ff06fcf259b"
+      "manifest_ref": "sha256:9ec2654c2b4d60d30b83b8ff9eba91fed1baeb04912b4e791b41c32691b03302",
+      "tarball_path": "release/tarballs/zero-ar-tool-kit-0.5.0.tgz",
+      "tarball_sha256": "abc3fdec8b27b75eca18fe2790de3e1f5839d27c7a2c46dd5647da94515e82a3"
     },
     {
       "name": "@zero-ar/mcp",
-      "version": "0.4.2",
+      "version": "0.5.0",
       "workspace_path": "packages/mcp",
-      "manifest_ref": "sha256:c5a2a4583a3cb87f7d8191ffb730740c3d1d343ccc1069cc9765bd89f7b4d089",
-      "tarball_path": "release/tarballs/zero-ar-mcp-0.4.2.tgz",
-      "tarball_sha256": "507f899f208a715475efee7942ad1febc2aff640d970b579ffa60e875566f479"
+      "manifest_ref": "sha256:9e8e1c9b0d7328170b01e5b8033d1bc4e1772fe8367ebdb95017889c43d95980",
+      "tarball_path": "release/tarballs/zero-ar-mcp-0.5.0.tgz",
+      "tarball_sha256": "582dfd20e7d7f809f7681d82064c9b5b16a42e61e1ab6f5dc40147c481d87bb5"
     },
     {
       "name": "@zero-ar/testkit",
-      "version": "0.4.2",
+      "version": "0.5.0",
       "workspace_path": "packages/testkit",
-      "manifest_ref": "sha256:76d59f3b166bcccab3d5f190cfe771f5e1ada1d71f01f9ab88f3638850bc067b",
-      "tarball_path": "release/tarballs/zero-ar-testkit-0.4.2.tgz",
-      "tarball_sha256": "a0fd79e437702b19063fbc467d35a38178caee6be3e8823d4efbf2a8cc3babd3"
+      "manifest_ref": "sha256:5aede1e7379fed6742391b42a862ffb16851ad57cc62fb7302c62ed584ebe356",
+      "tarball_path": "release/tarballs/zero-ar-testkit-0.5.0.tgz",
+      "tarball_sha256": "d4d070b76fe2627111c080494f77d54cd56a5a05fe41444bada6f9dce394f3e9"
     }
   ],
   "files": [
@@ -98,11 +98,6 @@
       "path": ".github/workflows/check.yml",
       "bytes": 517,
       "sha256": "3b85e0862f6492b3c363cedebac44f1494718f53d4b669550b1063d708351f61"
-    },
-    {
-      "path": ".github/workflows/publish-npm-v0.4.2.yml",
-      "bytes": 1740,
-      "sha256": "ba67fcd16803f360a9d3c6762b24ebc426f4bbf656ab7b3a524ed412e8bc35c6"
     },
     {
       "path": ".gitignore",
@@ -176,8 +171,8 @@
     },
     {
       "path": "apps/cli/dist/commands/index.js",
-      "bytes": 722,
-      "sha256": "ece1744be821d9b6890e1ce15941316c3559aeb419f95d414a75784a7599dab0"
+      "bytes": 786,
+      "sha256": "002e9819d2ef7211f2f85f38ebde71b92f221dbaf137a734f91558deb07cbd04"
     },
     {
       "path": "apps/cli/dist/commands/memory.d.ts",
@@ -210,6 +205,16 @@
       "sha256": "4405093d3eb0122c74b17b7d703c068f66e8968ac69e227a7df570659be79c90"
     },
     {
+      "path": "apps/cli/dist/commands/target.d.ts",
+      "bytes": 1440,
+      "sha256": "a29f0096cd3716188922a829b5791371d27234cd10d1013303b452cbd0bce91a"
+    },
+    {
+      "path": "apps/cli/dist/commands/target.js",
+      "bytes": 17077,
+      "sha256": "49d4a841a1b0568aa58d12d6a2335d47c7cc636b3f918b298b8632cc1ec48d1b"
+    },
+    {
       "path": "apps/cli/dist/commands/tool-source.d.ts",
       "bytes": 112,
       "sha256": "1697496bd856f7471699b1a1097a139ec02e7421bebb77fdf4e2b0425355bd19"
@@ -222,12 +227,12 @@
     {
       "path": "apps/cli/dist/external-product-template.d.ts",
       "bytes": 1093,
-      "sha256": "c1b60034f28103a607d8f3b54085ce08d5d72346e44695f4a14761634164d68e"
+      "sha256": "52a7aaac2607eff8710abdc1a39608fcd75e4948485b67629974bfa4f7e716a5"
     },
     {
       "path": "apps/cli/dist/external-product-template.js",
       "bytes": 40011,
-      "sha256": "33590be8521b7191f38bd990020ac8e3f719e14da1f9a3914d1dcfc61ed32c07"
+      "sha256": "9675df5ef2bf31b7ba8c243f88ddabb109c0073b11c116c8bfb7c4986f530d15"
     },
     {
       "path": "apps/cli/dist/identity.d.ts",
@@ -236,8 +241,8 @@
     },
     {
       "path": "apps/cli/dist/identity.js",
-      "bytes": 10300,
-      "sha256": "c89c3020bead2374f586d3dc62bb1acbcd7d0a7b42fd71c7609459ba08fef150"
+      "bytes": 10562,
+      "sha256": "23ecd65dbdaec87ad87020cf43c69294e2f2b3c15888215ce851bd67f69d094f"
     },
     {
       "path": "apps/cli/dist/main.d.ts",
@@ -257,7 +262,7 @@
     {
       "path": "apps/cli/dist/release-artifacts.js",
       "bytes": 14977,
-      "sha256": "8f16dbc1ca579969b90282fb2d57a85044e884569bbba7c789274781bb48179b"
+      "sha256": "b7e87cc6d6ab7f971450f2918e7a4df8537b8b1e8f84accdd5ffe29bfbc17747"
     },
     {
       "path": "apps/cli/dist/terminal.d.ts",
@@ -292,7 +297,7 @@
     {
       "path": "apps/cli/package.json",
       "bytes": 1283,
-      "sha256": "8113a92fdd6a3742a6719665a5755c917f66b359e2ec7cdce4dbc2c989d55511"
+      "sha256": "117b05ff86da7b5c15e10c6cb1f70ef9b0f3b548eef29f49df492451d858e9e0"
     },
     {
       "path": "apps/cli/README.md",
@@ -316,13 +321,18 @@
     },
     {
       "path": "docs/how-zero-ar-works.md",
-      "bytes": 16450,
-      "sha256": "c106b35b44a891204a3853cf4389ada0a25a58c1a1626188e1bc09328e6c344b"
+      "bytes": 17407,
+      "sha256": "b60d437e3cc89ef003daf1e873b878d512ed23aa5fd378a7d3820990ffa1e25f"
+    },
+    {
+      "path": "docs/let-your-app-take-actions.md",
+      "bytes": 10766,
+      "sha256": "e2ba7c47b685003276ee1944d3c2c2b32daffcd4eeef6ae05f70df5dc0840f27"
     },
     {
       "path": "docs/running-zero-ar.md",
       "bytes": 29459,
-      "sha256": "f8b70636697012d9ab1c136db475b2c8d50aa88c96562677c548ae09021fea48"
+      "sha256": "ffc045bff34895510f3955ed9cab4abe19ed51feeb422aae60fa844a07cad5a8"
     },
     {
       "path": "LICENSE",
@@ -337,7 +347,7 @@
     {
       "path": "package.json",
       "bytes": 491,
-      "sha256": "28a169a0250d0a79ad40bc755f56b04ea6d78091d6d7d49f43b858dc56c1c960"
+      "sha256": "6478ffed33ea15ab31b2fafe3a4a613f982b07b2ee066ed51adb76d216d8d24c"
     },
     {
       "path": "packages/client/dist/generated.d.ts",
@@ -371,13 +381,13 @@
     },
     {
       "path": "packages/client/openapi/zero-ar-v1.openapi.json",
-      "bytes": 2338730,
-      "sha256": "ef935db47545eb85f5a56132102a631ae9728e14bf9f1f149e23967adbcc3fd2"
+      "bytes": 2345745,
+      "sha256": "507293d3c3638985ec4b7573b7060b168044412fb32c18ccf9063e115a59f9b9"
     },
     {
       "path": "packages/client/package.json",
       "bytes": 1009,
-      "sha256": "0bc3856753bd9742e8738b0baeebe8d4eb0724f07c4f5a77cfbf97fd9ae06aa8"
+      "sha256": "13c029fca6765516b91f10300ed62eb34a01cca5998715b43153f7c187054a4d"
     },
     {
       "path": "packages/client/README.md",
@@ -427,7 +437,7 @@
     {
       "path": "packages/conformance/package.json",
       "bytes": 1277,
-      "sha256": "1ba572cb463f3d83fc0eacb299f1d2f602e8b1a0c3ee16f8484c5b2494d7853d"
+      "sha256": "fbce4aed2f1bfa443bea6139cb8bf334117121e515321d271fd1e6d1f5cecd5e"
     },
     {
       "path": "packages/conformance/README.md",
@@ -486,13 +496,13 @@
     },
     {
       "path": "packages/contracts/dist/capability-profile.d.ts",
-      "bytes": 26569,
-      "sha256": "5543946bc08d3b9acafb5ab2fed2e0c6e2803540cb30ab9dd1712eb816dd052f"
+      "bytes": 26931,
+      "sha256": "2aa689340eccf3aae3d1f243c431a156f5a6369392530b52448c9a2eddb8bd04"
     },
     {
       "path": "packages/contracts/dist/capability-profile.js",
-      "bytes": 58056,
-      "sha256": "fe05624140bd354fb21bb776aab640831254cdb7db18e9eb16e4f175a437b8d4"
+      "bytes": 59453,
+      "sha256": "1a461c8ba4ae98322cb88e43398963201f00a4f48114ee99e3ebc3e8210a190b"
     },
     {
       "path": "packages/contracts/dist/claims.d.ts",
@@ -556,13 +566,13 @@
     },
     {
       "path": "packages/contracts/dist/effect-approvals.d.ts",
-      "bytes": 4946,
-      "sha256": "eb012a04e28ebe73edcc439685343f47c052185b1f7554e0608f8d50f29a7bf0"
+      "bytes": 6902,
+      "sha256": "c939c745b79451bdc614eb4ec2693abce55664a39fead1d2078466fc33b08735"
     },
     {
       "path": "packages/contracts/dist/effect-approvals.js",
-      "bytes": 3373,
-      "sha256": "ddf87242324bd09cb070761cc22972b18877be0bdbe768f48cf9c42ba5ed7ebf"
+      "bytes": 5614,
+      "sha256": "a7c4fe7abe3b56853efbdeec80cad4a31f3b0f5a3e073c5f3dbe21605fb71f7d"
     },
     {
       "path": "packages/contracts/dist/effect-authority.d.ts",
@@ -573,6 +583,16 @@
       "path": "packages/contracts/dist/effect-authority.js",
       "bytes": 383,
       "sha256": "32cbfe278d35d318fe4b1137e78b4e4c3b65d47390e8d5be0c24891987eb4d2f"
+    },
+    {
+      "path": "packages/contracts/dist/effect-wire.d.ts",
+      "bytes": 2546,
+      "sha256": "15183fe28f5a19388113509c2fdaa658fd917bf8c4b2e838337f4f3e3cb201a3"
+    },
+    {
+      "path": "packages/contracts/dist/effect-wire.js",
+      "bytes": 7435,
+      "sha256": "be1046903561e3225726e2321ca23d7a97727df308d0de37920952a445499ac2"
     },
     {
       "path": "packages/contracts/dist/effects.d.ts",
@@ -666,13 +686,13 @@
     },
     {
       "path": "packages/contracts/dist/index.d.ts",
-      "bytes": 2099,
-      "sha256": "436953a26e6579fb76c13391016f1f0b2477b901d57a57a0b205ef96fa8188b7"
+      "bytes": 2133,
+      "sha256": "2137fa5da8c9fdf0e8de5edada24c37aa6db136c039895208ae78ff8c6a24412"
     },
     {
       "path": "packages/contracts/dist/index.js",
-      "bytes": 2091,
-      "sha256": "469a6c9f7c91610807a5d939c980e33f24dba3ebddad20f5c7e4edbf1c09a314"
+      "bytes": 2125,
+      "sha256": "e028b69a3037f2c692a2132f9e91990e57239c364c9ffb227a59faa96c2cb45e"
     },
     {
       "path": "packages/contracts/dist/integration.d.ts",
@@ -861,8 +881,8 @@
     },
     {
       "path": "packages/contracts/dist/profile-manifest-history.js",
-      "bytes": 45735,
-      "sha256": "92162415ae43eebc45a6354f81256f362b4f9444e92a1d01e5ecd56ee52939dc"
+      "bytes": 52011,
+      "sha256": "2a7f19113691c57d152c339006f89ad4d894f5c5750ba235c322277343208299"
     },
     {
       "path": "packages/contracts/dist/providers.d.ts",
@@ -916,23 +936,23 @@
     },
     {
       "path": "packages/contracts/dist/schemas.d.ts",
-      "bytes": 1075031,
-      "sha256": "723230ffdcaf5d67ba0e4aad0960c7946c78dcda9d538a33ded7df83ec1fe0b5"
+      "bytes": 1078620,
+      "sha256": "87ab0f6160b995931d665c3cf283b1b39d57f24f4e12fc51a01e5d73739940dc"
     },
     {
       "path": "packages/contracts/dist/schemas.js",
-      "bytes": 144111,
-      "sha256": "ae6e7c3cb3386f4fb37ccf790a023cf567b19c3b951b872c74c150c3c3f2129d"
+      "bytes": 144321,
+      "sha256": "51c90a4ea0f0b727b18f3199606639c0f25c63425fe4608993ea40becbba95f0"
     },
     {
       "path": "packages/contracts/dist/sources.d.ts",
-      "bytes": 23451,
-      "sha256": "713cf127722d18817cd06cfcf3883e6021d8945a6c31cdaca066fbca213ef68d"
+      "bytes": 23466,
+      "sha256": "8ce7cde1e7940dbdfa59f982322d417ceb3e8b4ec6e27ac752b47481fd8ed844"
     },
     {
       "path": "packages/contracts/dist/sources.js",
-      "bytes": 13889,
-      "sha256": "b97d5be3b31da9a42ce961a67a7ff843aff6b98d579ed5e888ea3e7a888db90e"
+      "bytes": 13900,
+      "sha256": "bf175e9084cc0c091afcd9f1c4eefa883d2cf1ec6d00201c0b8cabb6314157da"
     },
     {
       "path": "packages/contracts/dist/state-machines.d.ts",
@@ -966,13 +986,13 @@
     },
     {
       "path": "packages/contracts/dist/vocab.d.ts",
-      "bytes": 52640,
-      "sha256": "ebb5b7a9e9e02a47f4ef4f2cc4a2be1ab9b088a315ade156af75d4ae43ab4d49"
+      "bytes": 52671,
+      "sha256": "ea3833ffcec56a619965dd47732c22bc4eb7a683f12576c22269f69ce116caf4"
     },
     {
       "path": "packages/contracts/dist/vocab.js",
-      "bytes": 33339,
-      "sha256": "ee8259fb9fa48c0f7ffa6a96cc4c0c67cdb8b9fa6750814c83a9c6ee63765f11"
+      "bytes": 33374,
+      "sha256": "bb11d13583b1aa77779b45c7c81f2174513b063415367201455e86d2ed8f54a6"
     },
     {
       "path": "packages/contracts/dist/wake-scheduler.d.ts",
@@ -1007,7 +1027,7 @@
     {
       "path": "packages/contracts/package.json",
       "bytes": 932,
-      "sha256": "357b401b750965542f2696ef3582ee5fadcf1f64c5da4a51815affd94682341a"
+      "sha256": "41a942dd53939ff715617e58c81ec92da180ab28f580aeafdc16d256f960ef4a"
     },
     {
       "path": "packages/contracts/README.md",
@@ -1027,12 +1047,12 @@
     {
       "path": "packages/mcp/dist/constants.d.ts",
       "bytes": 313,
-      "sha256": "9270ef11ab72c107dc97de1412e6eef8524035ec5898e940ba5bc2966e2c6515"
+      "sha256": "03b9305ca29302ddb6ac5fa2424d9f7984d378684db3355e76d378f709fc9175"
     },
     {
       "path": "packages/mcp/dist/constants.js",
       "bytes": 273,
-      "sha256": "b333af045a30180be2f06cc95254ee50e76d0456ca5142697081728e7442f8bc"
+      "sha256": "9c9c0b9568c7b994f08165a0ff63484e30ce7619fbf264c04fc8420e3f4d7a2f"
     },
     {
       "path": "packages/mcp/dist/executor.d.ts",
@@ -1097,7 +1117,7 @@
     {
       "path": "packages/mcp/package.json",
       "bytes": 1100,
-      "sha256": "26750dd4912444b61399ca9f8e3e163df7f85173696c2b5ecb5c2424b2e26ffc"
+      "sha256": "03dc80851ed9c86fe2fbf7d08f6f47dcb5bffd9dec775910b54d263f953b84f0"
     },
     {
       "path": "packages/mcp/README.md",
@@ -1182,7 +1202,7 @@
     {
       "path": "packages/sdk/dist/publication.js",
       "bytes": 68372,
-      "sha256": "8153d3cd2fc2fee75569d593d82bb546a08accc2c0998c83f3f73a29d5c6e588"
+      "sha256": "565b3332645516b1af0a59fdb01d9462086bb98edde81e4efc56e39349c715f3"
     },
     {
       "path": "packages/sdk/dist/research-orchestration.d.ts",
@@ -1202,7 +1222,7 @@
     {
       "path": "packages/sdk/dist/scaffolds.js",
       "bytes": 19709,
-      "sha256": "db85261823a10018d05534199393db24680c85f22ea08cbc5cb5d1bbb662e328"
+      "sha256": "e0dbe2d4b22357fd7557c229ae7de182f46b1f79a6c4679932092cfb300990e8"
     },
     {
       "path": "packages/sdk/LICENSE",
@@ -1217,7 +1237,7 @@
     {
       "path": "packages/sdk/package.json",
       "bytes": 1045,
-      "sha256": "b4e5cbbf815bacf884909aebc30ff2a658933352de3ea38f07e463a708e2a927"
+      "sha256": "f4f7755a90bf97e879574c64e412ef798a81ace9608cd99fa3f0d80112a69b7e"
     },
     {
       "path": "packages/sdk/README.md",
@@ -1277,7 +1297,7 @@
     {
       "path": "packages/testkit/package.json",
       "bytes": 949,
-      "sha256": "8a365ce61b331abff50baf491b0c4be62194acff408d1290996dc71a69d9387c"
+      "sha256": "17ee50fa382fbee4d240eb26b0d8d9a54ee91e0dbbc540f76ef94a0a7cebb8ee"
     },
     {
       "path": "packages/testkit/README.md",
@@ -1307,7 +1327,7 @@
     {
       "path": "packages/tool-kit/package.json",
       "bytes": 924,
-      "sha256": "5b830f84c889e924b7b84e328117b427ef942fe027b754a3668703637daa6717"
+      "sha256": "17281730ba3010f45cc9130eb5dd71543960a70705799677b208cc13f47269e5"
     },
     {
       "path": "packages/tool-kit/README.md",
@@ -1397,92 +1417,92 @@
     {
       "path": "packages/validator-kit/package.json",
       "bytes": 964,
-      "sha256": "49cae10f46c03fca9f6c595a9b907f1765c23bb4e554ca5c015eca32d477df10"
+      "sha256": "c258b363fe9330700d41da54a90ec96ed35bcc043ae30a810180e11a0c759110"
     },
     {
       "path": "packages/validator-kit/README.md",
-      "bytes": 6334,
-      "sha256": "9c14133a361b3cb53cfa21ecfc5595734215be4065b47fe91acb8b95424d7f8a"
+      "bytes": 6383,
+      "sha256": "70b0b1bfa5cd726945e3a5b02d8b391bc3b83dbaa5156388dece8df1d60e600d"
     },
     {
       "path": "PROVENANCE.md",
       "bytes": 698,
-      "sha256": "1db554c918eb8e7460770f529bfde7f566b8ee4a333da74145329e4b890ff202"
+      "sha256": "22a01077e744666470040c29247ea5c55fd2c961cbf3b1ea3646c99a2906c2b8"
     },
     {
       "path": "README.md",
-      "bytes": 15863,
-      "sha256": "021b748cf56deadfc1fdc59b9ea525fd8f77c8961682190bbe0404da5657c65c"
+      "bytes": 15957,
+      "sha256": "701982d5937b5645f13d5b83a167eb6899e4322eaca53ff9da89fe52c77d566a"
     },
     {
       "path": "release/package-release-exercise-report.json",
       "bytes": 3734,
-      "sha256": "161c573d30a9b16f636b8cba7d31ff50c2f5efdc8600509caedd857cde312c63"
+      "sha256": "fd58c1e2ce07a8a8cacc1c55bddc5d8a6eaa36723d63f675469f0b31e511b05c"
     },
     {
       "path": "release/package-release-identity-report.json",
-      "bytes": 494794,
-      "sha256": "2704d25cd8a1016e7879868fae841593ce5a0fc56f5b07fc2bbc73bac093090f"
+      "bytes": 505078,
+      "sha256": "65ae8684fe00e40611b307255e906f8c3c580c3e036c466195074432f948ee6a"
     },
     {
       "path": "release/package-release-manifest.json",
       "bytes": 12981,
-      "sha256": "ae631a590e9daa025dd31d0c8b0a48ac87f82bad3d9bc0639bd660ca1e6fef33"
+      "sha256": "9f43bb3375304a99b94fce91ae0718d14615486bfac3ff42bc87520e2ab70b04"
     },
     {
       "path": "release/release-images.json",
       "bytes": 546,
-      "sha256": "41940f51e820da8fc2fb482d106bacf798aa39e2d2d6dfc367b353f54a41fe20"
+      "sha256": "3d905c4b1edbe8f04f20f3d7331d58babc41f7b0f586f867b23c27ef5a71d76a"
     },
     {
       "path": "release/release-images.json.asc",
       "bytes": 833,
-      "sha256": "817e08e51efa3cda5a2c0c9df51916f6c30bf84b9730d4c0ea0e478d6f8c722a"
+      "sha256": "c23e0491bad3e4e7d6b6788f82e60423c1f408daf0f5eb58eff60a6d2b6fda69"
     },
     {
-      "path": "release/tarballs/zero-ar-cli-0.4.2.tgz",
-      "bytes": 55040,
-      "sha256": "0198ce0d41d543185a208b764d11e3231c65130711157701ecabcd3cd25cc197"
+      "path": "release/tarballs/zero-ar-cli-0.5.0.tgz",
+      "bytes": 60035,
+      "sha256": "33eb26f40b38e553a1aee5a5b1a98d8928bf6ed5716d4b17b96eb8a074003842"
     },
     {
-      "path": "release/tarballs/zero-ar-client-0.4.2.tgz",
-      "bytes": 140658,
-      "sha256": "7b02870f5a1c1e09f2d0bb92e1f35123dd685b9e2843a8ca0650b4286e960bac"
+      "path": "release/tarballs/zero-ar-client-0.5.0.tgz",
+      "bytes": 140993,
+      "sha256": "7ee4b39d87f1824a41ca14c467effba7aa660e513770c3763c12b41f03d3995d"
     },
     {
-      "path": "release/tarballs/zero-ar-conformance-0.4.2.tgz",
-      "bytes": 54561,
-      "sha256": "fba70b2d335b1f18f7d92d8eda4b088ab0291a82db318178af5dbb4116b7df85"
+      "path": "release/tarballs/zero-ar-conformance-0.5.0.tgz",
+      "bytes": 54560,
+      "sha256": "417e3aa238772c42bde70e3f3a9c5d6f509b677b320d8cd8b41298ae7e33cf79"
     },
     {
-      "path": "release/tarballs/zero-ar-contracts-0.4.2.tgz",
-      "bytes": 275730,
-      "sha256": "e1b0d2833de92b072607bc47c17654d9508e79e35d65aec8eac559040b8484c4"
+      "path": "release/tarballs/zero-ar-contracts-0.5.0.tgz",
+      "bytes": 280623,
+      "sha256": "4d658a246cc9804cedd223c382784c765ec4f461a2304af07d4c084e9d233147"
     },
     {
-      "path": "release/tarballs/zero-ar-mcp-0.4.2.tgz",
-      "bytes": 26357,
-      "sha256": "507f899f208a715475efee7942ad1febc2aff640d970b579ffa60e875566f479"
+      "path": "release/tarballs/zero-ar-mcp-0.5.0.tgz",
+      "bytes": 26355,
+      "sha256": "582dfd20e7d7f809f7681d82064c9b5b16a42e61e1ab6f5dc40147c481d87bb5"
     },
     {
-      "path": "release/tarballs/zero-ar-sdk-0.4.2.tgz",
-      "bytes": 45243,
-      "sha256": "3047a53138650ac9fa3b53570e59074c7b5e70ae3ed7f0c6524a0c299fd59cb7"
+      "path": "release/tarballs/zero-ar-sdk-0.5.0.tgz",
+      "bytes": 45244,
+      "sha256": "7f9bb82c8bba8ebc9af79f86a1f18ce7a8bd7a4169f6fa630468622eac23e265"
     },
     {
-      "path": "release/tarballs/zero-ar-testkit-0.4.2.tgz",
+      "path": "release/tarballs/zero-ar-testkit-0.5.0.tgz",
       "bytes": 9313,
-      "sha256": "a0fd79e437702b19063fbc467d35a38178caee6be3e8823d4efbf2a8cc3babd3"
+      "sha256": "d4d070b76fe2627111c080494f77d54cd56a5a05fe41444bada6f9dce394f3e9"
     },
     {
-      "path": "release/tarballs/zero-ar-tool-kit-0.4.2.tgz",
-      "bytes": 10283,
-      "sha256": "0ab3b008e8321894f04b15b48f5e6d964caabf4c78f853612bea1ff06fcf259b"
+      "path": "release/tarballs/zero-ar-tool-kit-0.5.0.tgz",
+      "bytes": 10282,
+      "sha256": "abc3fdec8b27b75eca18fe2790de3e1f5839d27c7a2c46dd5647da94515e82a3"
     },
     {
-      "path": "release/tarballs/zero-ar-validator-kit-0.4.2.tgz",
-      "bytes": 31083,
-      "sha256": "4854cb80736d8fc03ae18f3ae55d9163a8292159010587c311e61b4691d00e96"
+      "path": "release/tarballs/zero-ar-validator-kit-0.5.0.tgz",
+      "bytes": 31120,
+      "sha256": "a2708b0d8f2cb9911e67a0b35a864e8805a1d034f375b6fcb2c52c3b326e6a27"
     },
     {
       "path": "release/zero-ar-release-key.asc",
@@ -1495,11 +1515,6 @@
       "sha256": "54dfea4ba7296f857f17cea3eace609f3533422281e13562acf6a7b1c4d0dc91"
     },
     {
-      "path": "scripts/publish-npm-v0.4.2.mjs",
-      "bytes": 4925,
-      "sha256": "93a265965ee89a0a977636aaae245678b312d5efa587c95e2c13c63a4449ecdf"
-    },
-    {
       "path": "scripts/verify-public-export.mjs",
       "bytes": 6116,
       "sha256": "0f17755dba4865369eaac5a5061c9d2656bea012f573ac0d5720985a61b5aa5b"
@@ -1507,8 +1522,8 @@
     {
       "path": "SOURCE_COMMIT",
       "bytes": 41,
-      "sha256": "f3479f8899c396f08df40a04f000ebe19b3532e99ef9b431e3d8da72d762512d"
+      "sha256": "ef291bb5c7e0ced5d737c7653a7864e583da0e4b9049ebdf10cfcbfdf60054b1"
     }
   ],
-  "export_ref": "sha256:0f9a3a7835da66c44124bf784f0822b3dad14fd6f37a8f884ca86b4a2e76f5fa"
+  "export_ref": "sha256:9ed0a56865dcee6028393b4311cd1939c07e359a347fb9eb9884e21f1d9e0a8b"
 }

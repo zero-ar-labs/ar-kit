@@ -455,7 +455,7 @@ export declare const SourceOperationRequestSchema: z.ZodDiscriminatedUnion<[z.Zo
     max_matches: z.ZodOptional<z.ZodNumber>;
     max_scan_bytes: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strict>, z.ZodObject<{
-    source_alias: z.ZodString;
+    source_alias: z.ZodOptional<z.ZodString>;
     operation: z.ZodLiteral<"document.extract">;
     locator: z.ZodOptional<z.ZodString>;
     artifact_ref: z.ZodOptional<z.ZodString>;

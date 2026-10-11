@@ -64,7 +64,7 @@ function renderManpage(identity) {
         escapeRoff(row.summary),
     ]);
     return [
-        `.TH ${identity.command.toUpperCase()} 1 "2026-10-09" "${SUCCESSOR_PRODUCT_IDENTITY.display_name} 0.4.2" "${SUCCESSOR_PRODUCT_IDENTITY.display_name} user commands"`,
+        `.TH ${identity.command.toUpperCase()} 1 "2026-10-10" "${SUCCESSOR_PRODUCT_IDENTITY.display_name} 0.5.0" "${SUCCESSOR_PRODUCT_IDENTITY.display_name} user commands"`,
         '.SH NAME',
         `${identity.command} \\- ${identity.display_name} command`,
         '.SH SYNOPSIS',

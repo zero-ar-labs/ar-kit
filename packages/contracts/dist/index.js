@@ -10,6 +10,7 @@ export * from "./routes.js";
 export * from "./claims.js";
 export * from "./effects.js";
 export * from "./effect-approvals.js";
+export * from "./effect-wire.js";
 export * from "./model.js";
 export * from "./item-output.js";
 export * from "./artifact-aliases.js";

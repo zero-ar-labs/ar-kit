@@ -1,9 +1,9 @@
 {
   "schema": "zero-ar-package-release-identity-report/v1",
-  "release_manifest_ref": "sha256:336305541f9a319e5e0d9a4ece996eeac96d651bd3dd16cdf9d3eecf04281d50",
-  "source_commit": "e0064302805c8462e499ee144c24adf8e1248cf1",
+  "release_manifest_ref": "sha256:c658e5fbbc6e40d7fc517d2e352856a19832bb23236873f3ecfdc68a956e31ff",
+  "source_commit": "f7cd49e89603091c0e79f74d95a9e6fd879c0bb4",
   "package_count": 9,
-  "occurrence_count": 1495,
+  "occurrence_count": 1526,
   "occurrences": [
     {
       "package_name": "@zero-ar/cli",
@@ -164,6 +164,76 @@
       "token": "ZERO_AR_",
       "disposition": "successor",
       "reason": "the staged package accepts successor environment names."
+    },
+    {
+      "package_name": "@zero-ar/cli",
+      "path": "dist/commands/target.d.ts",
+      "line": 1,
+      "column": 59,
+      "token_id": "successor-package-scope",
+      "token": "@zero-ar",
+      "disposition": "successor",
+      "reason": "the staged npm package uses the controlled successor scope."
+    },
+    {
+      "package_name": "@zero-ar/cli",
+      "path": "dist/commands/target.d.ts",
+      "line": 28,
+      "column": 13,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/cli",
+      "path": "dist/commands/target.js",
+      "line": 3,
+      "column": 216,
+      "token_id": "successor-package-scope",
+      "token": "@zero-ar",
+      "disposition": "successor",
+      "reason": "the staged npm package uses the controlled successor scope."
+    },
+    {
+      "package_name": "@zero-ar/cli",
+      "path": "dist/commands/target.js",
+      "line": 63,
+      "column": 33,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/cli",
+      "path": "dist/commands/target.js",
+      "line": 233,
+      "column": 17,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/cli",
+      "path": "dist/commands/target.js",
+      "line": 271,
+      "column": 82,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/cli",
+      "path": "dist/commands/target.js",
+      "line": 272,
+      "column": 92,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
     },
     {
       "package_name": "@zero-ar/cli",
@@ -888,7 +958,7 @@
     {
       "package_name": "@zero-ar/cli",
       "path": "dist/identity.js",
-      "line": 128,
+      "line": 129,
       "column": 19,
       "token_id": "successor-environment-prefix",
       "token": "ZERO_AR_",
@@ -898,7 +968,7 @@
     {
       "package_name": "@zero-ar/cli",
       "path": "dist/identity.js",
-      "line": 128,
+      "line": 129,
       "column": 61,
       "token_id": "successor-environment-prefix",
       "token": "ZERO_AR_",
@@ -5838,7 +5908,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 21315,
+      "line": 21314,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5848,7 +5918,37 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 24136,
+      "line": 23233,
+      "column": 27,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/client",
+      "path": "openapi/zero-ar-v1.openapi.json",
+      "line": 23513,
+      "column": 27,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/client",
+      "path": "openapi/zero-ar-v1.openapi.json",
+      "line": 23912,
+      "column": 27,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/client",
+      "path": "openapi/zero-ar-v1.openapi.json",
+      "line": 24321,
       "column": 20,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5858,7 +5958,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 25815,
+      "line": 26003,
       "column": 37,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5868,7 +5968,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 25899,
+      "line": 26087,
       "column": 37,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5878,7 +5978,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 26524,
+      "line": 26713,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5888,7 +5988,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 27308,
+      "line": 27501,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5898,7 +5998,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 27599,
+      "line": 27792,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5908,7 +6008,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 28193,
+      "line": 28386,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5918,7 +6018,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 28461,
+      "line": 28654,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5928,7 +6028,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 29085,
+      "line": 29278,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5938,7 +6038,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 29284,
+      "line": 29477,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5948,7 +6048,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 33465,
+      "line": 33661,
       "column": 45,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5958,7 +6058,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 33549,
+      "line": 33745,
       "column": 45,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5968,7 +6068,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 34730,
+      "line": 34926,
       "column": 36,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5978,7 +6078,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 34917,
+      "line": 35113,
       "column": 32,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5988,7 +6088,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 35250,
+      "line": 35446,
       "column": 24,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -5998,7 +6098,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 38364,
+      "line": 38563,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6008,7 +6108,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 38664,
+      "line": 38863,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6018,7 +6118,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 39105,
+      "line": 39304,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6028,7 +6128,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 39462,
+      "line": 39661,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6038,7 +6138,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 46021,
+      "line": 46220,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6048,7 +6148,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 52904,
+      "line": 53103,
       "column": 16,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -6058,7 +6158,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 52905,
+      "line": 53104,
       "column": 16,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6068,7 +6168,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 52959,
+      "line": 53158,
       "column": 16,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -6078,7 +6178,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 52960,
+      "line": 53159,
       "column": 16,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6088,7 +6188,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 53040,
+      "line": 53239,
       "column": 20,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -6098,7 +6198,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 53041,
+      "line": 53240,
       "column": 20,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6108,7 +6208,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 53095,
+      "line": 53294,
       "column": 20,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -6118,7 +6218,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 53096,
+      "line": 53295,
       "column": 20,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6128,7 +6228,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 53146,
+      "line": 53345,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6138,7 +6238,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 53548,
+      "line": 53747,
       "column": 31,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6148,7 +6248,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 54669,
+      "line": 54868,
       "column": 16,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6158,7 +6258,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 54806,
+      "line": 55005,
       "column": 22,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6168,7 +6268,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 54933,
+      "line": 55132,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6178,7 +6278,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 54978,
+      "line": 55177,
       "column": 27,
       "token_id": "successor-package-scope",
       "token": "@zero-ar",
@@ -6188,7 +6288,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 55373,
+      "line": 55572,
       "column": 28,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6198,7 +6298,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 55646,
+      "line": 55845,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6208,7 +6308,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 55905,
+      "line": 56104,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6218,7 +6318,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 56094,
+      "line": 56293,
       "column": 27,
       "token_id": "successor-package-scope",
       "token": "@zero-ar",
@@ -6228,7 +6328,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 57222,
+      "line": 57424,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6238,7 +6338,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 57432,
+      "line": 57634,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6248,7 +6348,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 57884,
+      "line": 58086,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6258,7 +6358,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 58355,
+      "line": 58557,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6268,7 +6368,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 58915,
+      "line": 59117,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6278,7 +6378,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 59274,
+      "line": 59476,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6288,7 +6388,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 59707,
+      "line": 59909,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6298,7 +6398,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 59940,
+      "line": 60142,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6308,7 +6408,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 60071,
+      "line": 60273,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6318,7 +6418,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 60422,
+      "line": 60624,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6328,7 +6428,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 61675,
+      "line": 61877,
       "column": 22,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -6338,7 +6438,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 61676,
+      "line": 61878,
       "column": 22,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6348,7 +6448,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 62318,
+      "line": 62520,
       "column": 26,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -6358,7 +6458,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 62319,
+      "line": 62521,
       "column": 26,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6368,7 +6468,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 63098,
+      "line": 63300,
       "column": 24,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6378,7 +6478,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 63285,
+      "line": 63487,
       "column": 20,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6388,7 +6488,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 68096,
+      "line": 68298,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6398,7 +6498,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 68344,
+      "line": 68546,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6408,7 +6508,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 69101,
+      "line": 69303,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6418,7 +6518,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 69207,
+      "line": 69409,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6428,7 +6528,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 69259,
+      "line": 69461,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6438,7 +6538,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 69404,
+      "line": 69606,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6448,7 +6548,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 69456,
+      "line": 69658,
       "column": 31,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6458,7 +6558,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 70452,
+      "line": 70654,
       "column": 33,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6468,7 +6568,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 70915,
+      "line": 71117,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6478,7 +6578,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 71115,
+      "line": 71317,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6488,7 +6588,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 73663,
+      "line": 73865,
       "column": 23,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6498,7 +6598,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 74224,
+      "line": 74426,
       "column": 30,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -6508,7 +6608,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 74225,
+      "line": 74427,
       "column": 30,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6518,7 +6618,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 74884,
+      "line": 75086,
       "column": 6,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -6528,7 +6628,7 @@
     {
       "package_name": "@zero-ar/client",
       "path": "openapi/zero-ar-v1.openapi.json",
-      "line": 74885,
+      "line": 75087,
       "column": 6,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -7958,7 +8058,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/capability-profile.d.ts",
-      "line": 92,
+      "line": 93,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -8018,7 +8118,17 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/capability-profile.js",
-      "line": 382,
+      "line": 368,
+      "column": 297,
+      "token_id": "successor-command",
+      "token": "zeroar",
+      "disposition": "successor",
+      "reason": "the staged CLI package carries the successor command."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/capability-profile.js",
+      "line": 384,
       "column": 157,
       "token_id": "successor-environment-prefix",
       "token": "ZERO_AR_",
@@ -8028,7 +8138,17 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/capability-profile.js",
-      "line": 463,
+      "line": 434,
+      "column": 185,
+      "token_id": "successor-command",
+      "token": "zeroar",
+      "disposition": "successor",
+      "reason": "the staged CLI package carries the successor command."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/capability-profile.js",
+      "line": 466,
       "column": 142,
       "token_id": "successor-environment-prefix",
       "token": "ZERO_AR_",
@@ -8038,7 +8158,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/capability-profile.js",
-      "line": 471,
+      "line": 474,
       "column": 110,
       "token_id": "successor-environment-prefix",
       "token": "ZERO_AR_",
@@ -8048,7 +8168,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/capability-profile.js",
-      "line": 483,
+      "line": 486,
       "column": 129,
       "token_id": "successor-command",
       "token": "zeroar",
@@ -8058,7 +8178,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/capability-profile.js",
-      "line": 484,
+      "line": 487,
       "column": 136,
       "token_id": "successor-command",
       "token": "zeroar",
@@ -8068,7 +8188,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/capability-profile.js",
-      "line": 516,
+      "line": 519,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -8078,7 +8198,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/capability-profile.js",
-      "line": 532,
+      "line": 535,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -8088,7 +8208,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/capability-profile.js",
-      "line": 548,
+      "line": 551,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -8098,7 +8218,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/capability-profile.js",
-      "line": 564,
+      "line": 567,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -8230,6 +8350,116 @@
       "path": "dist/context-replay.d.ts",
       "line": 145,
       "column": 35,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-approvals.d.ts",
+      "line": 8,
+      "column": 25,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-approvals.d.ts",
+      "line": 42,
+      "column": 29,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-approvals.d.ts",
+      "line": 97,
+      "column": 29,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-approvals.d.ts",
+      "line": 132,
+      "column": 29,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-approvals.js",
+      "line": 12,
+      "column": 22,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-wire.d.ts",
+      "line": 2,
+      "column": 33,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-wire.js",
+      "line": 15,
+      "column": 16,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-wire.js",
+      "line": 16,
+      "column": 16,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-wire.js",
+      "line": 17,
+      "column": 42,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-wire.js",
+      "line": 41,
+      "column": 16,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/effect-wire.js",
+      "line": 42,
+      "column": 42,
       "token_id": "successor-slug",
       "token": "zero-ar",
       "disposition": "successor",
@@ -9568,7 +9798,17 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/profile-manifest-history.js",
-      "line": 155,
+      "line": 61,
+      "column": 229,
+      "token_id": "successor-environment-prefix",
+      "token": "ZERO_AR_",
+      "disposition": "successor",
+      "reason": "the staged package accepts successor environment names."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/profile-manifest-history.js",
+      "line": 158,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -9578,7 +9818,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/profile-manifest-history.js",
-      "line": 172,
+      "line": 175,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -9588,7 +9828,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/profile-manifest-history.js",
-      "line": 189,
+      "line": 192,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -9598,7 +9838,47 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/profile-manifest-history.js",
-      "line": 206,
+      "line": 209,
+      "column": 18,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/profile-manifest-history.js",
+      "line": 226,
+      "column": 18,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/profile-manifest-history.js",
+      "line": 243,
+      "column": 18,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/profile-manifest-history.js",
+      "line": 260,
+      "column": 18,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/profile-manifest-history.js",
+      "line": 277,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -9918,7 +10198,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 799,
+      "line": 802,
       "column": 33,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -9928,7 +10208,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 817,
+      "line": 820,
       "column": 33,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -9938,7 +10218,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 2128,
+      "line": 2134,
       "column": 37,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -9948,7 +10228,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 2146,
+      "line": 2152,
       "column": 37,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -9958,7 +10238,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3576,
+      "line": 3585,
       "column": 10,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -9968,7 +10248,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3576,
+      "line": 3585,
       "column": 32,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -9978,7 +10258,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3577,
+      "line": 3586,
       "column": 10,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -9988,7 +10268,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3577,
+      "line": 3586,
       "column": 32,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -9998,47 +10278,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3588,
-      "column": 10,
-      "token_id": "legacy-slug",
-      "token": "ramsden",
-      "disposition": "compatibility-history",
-      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 3588,
-      "column": 32,
-      "token_id": "legacy-slug",
-      "token": "ramsden",
-      "disposition": "compatibility-history",
-      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 3589,
-      "column": 10,
-      "token_id": "successor-slug",
-      "token": "zero-ar",
-      "disposition": "successor",
-      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 3589,
-      "column": 32,
-      "token_id": "successor-slug",
-      "token": "zero-ar",
-      "disposition": "successor",
-      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 3608,
+      "line": 3597,
       "column": 10,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -10048,7 +10288,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3608,
+      "line": 3597,
       "column": 32,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -10058,7 +10298,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3609,
+      "line": 3598,
       "column": 10,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10068,7 +10308,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3609,
+      "line": 3598,
       "column": 32,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10078,7 +10318,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3619,
+      "line": 3617,
       "column": 10,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -10088,7 +10328,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3619,
+      "line": 3617,
       "column": 32,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -10098,7 +10338,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3620,
+      "line": 3618,
       "column": 10,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10108,7 +10348,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3620,
+      "line": 3618,
       "column": 32,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10118,7 +10358,47 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3634,
+      "line": 3628,
+      "column": 10,
+      "token_id": "legacy-slug",
+      "token": "ramsden",
+      "disposition": "compatibility-history",
+      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 3628,
+      "column": 32,
+      "token_id": "legacy-slug",
+      "token": "ramsden",
+      "disposition": "compatibility-history",
+      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 3629,
+      "column": 10,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 3629,
+      "column": 32,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 3643,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10128,7 +10408,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3693,
+      "line": 3702,
       "column": 14,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10138,7 +10418,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3700,
+      "line": 3709,
       "column": 14,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10148,7 +10428,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 3780,
+      "line": 3789,
       "column": 31,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10158,7 +10438,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4135,
+      "line": 4144,
       "column": 10,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10168,7 +10448,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4135,
+      "line": 4144,
       "column": 21,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10178,7 +10458,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4162,
+      "line": 4171,
       "column": 14,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10188,7 +10468,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4162,
+      "line": 4171,
       "column": 25,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10198,17 +10478,17 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4185,
-      "column": 27,
-      "token_id": "successor-slug",
-      "token": "zero-ar",
-      "disposition": "successor",
-      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
       "line": 4194,
+      "column": 27,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 4203,
       "column": 32,
       "token_id": "successor-package-scope",
       "token": "@zero-ar",
@@ -10218,7 +10498,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4311,
+      "line": 4320,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10228,7 +10508,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4311,
+      "line": 4320,
       "column": 29,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10238,7 +10518,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4375,
+      "line": 4384,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10248,7 +10528,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4433,
+      "line": 4442,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10258,7 +10538,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4469,
+      "line": 4478,
       "column": 32,
       "token_id": "successor-package-scope",
       "token": "@zero-ar",
@@ -10268,7 +10548,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4961,
+      "line": 4973,
       "column": 31,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10278,7 +10558,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 4997,
+      "line": 5009,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10288,7 +10568,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 5112,
+      "line": 5124,
       "column": 27,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10298,7 +10578,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 5240,
+      "line": 5252,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10308,7 +10588,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 5369,
+      "line": 5381,
       "column": 31,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10318,7 +10598,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 7521,
+      "line": 7533,
       "column": 33,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10328,7 +10608,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 7726,
+      "line": 7738,
       "column": 37,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10338,7 +10618,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 7744,
+      "line": 7756,
       "column": 37,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10348,7 +10628,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 7809,
+      "line": 7821,
       "column": 37,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10358,7 +10638,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 7963,
+      "line": 7975,
       "column": 37,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10368,7 +10648,37 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 9334,
+      "line": 8471,
+      "column": 37,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 8532,
+      "column": 37,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 8619,
+      "column": 37,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 9373,
       "column": 41,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10378,7 +10688,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 9352,
+      "line": 9391,
       "column": 41,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10388,7 +10698,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 9545,
+      "line": 9585,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10398,7 +10708,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 9990,
+      "line": 10034,
       "column": 40,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10408,7 +10718,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 10056,
+      "line": 10100,
       "column": 40,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10418,7 +10728,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 10172,
+      "line": 10216,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10428,7 +10738,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 10211,
+      "line": 10255,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10438,7 +10748,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 10328,
+      "line": 10372,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10448,7 +10758,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 10381,
+      "line": 10425,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10458,7 +10768,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 11625,
+      "line": 11672,
       "column": 45,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10468,7 +10778,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 11643,
+      "line": 11690,
       "column": 45,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10478,7 +10788,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 12876,
+      "line": 12926,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10488,7 +10798,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 12953,
+      "line": 13003,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10498,7 +10808,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 13073,
+      "line": 13123,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10508,7 +10818,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 13172,
+      "line": 13222,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10518,7 +10828,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 14917,
+      "line": 14967,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10528,7 +10838,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 16951,
+      "line": 17001,
       "column": 18,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -10538,118 +10848,8 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 16951,
+      "line": 17001,
       "column": 40,
-      "token_id": "legacy-slug",
-      "token": "ramsden",
-      "disposition": "compatibility-history",
-      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 16952,
-      "column": 18,
-      "token_id": "successor-slug",
-      "token": "zero-ar",
-      "disposition": "successor",
-      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 16952,
-      "column": 40,
-      "token_id": "successor-slug",
-      "token": "zero-ar",
-      "disposition": "successor",
-      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 16967,
-      "column": 18,
-      "token_id": "legacy-slug",
-      "token": "ramsden",
-      "disposition": "compatibility-history",
-      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 16967,
-      "column": 40,
-      "token_id": "legacy-slug",
-      "token": "ramsden",
-      "disposition": "compatibility-history",
-      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 16968,
-      "column": 18,
-      "token_id": "successor-slug",
-      "token": "zero-ar",
-      "disposition": "successor",
-      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 16968,
-      "column": 40,
-      "token_id": "successor-slug",
-      "token": "zero-ar",
-      "disposition": "successor",
-      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 16991,
-      "column": 18,
-      "token_id": "legacy-slug",
-      "token": "ramsden",
-      "disposition": "compatibility-history",
-      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 16991,
-      "column": 40,
-      "token_id": "legacy-slug",
-      "token": "ramsden",
-      "disposition": "compatibility-history",
-      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 16992,
-      "column": 18,
-      "token_id": "successor-slug",
-      "token": "zero-ar",
-      "disposition": "successor",
-      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 16992,
-      "column": 40,
-      "token_id": "successor-slug",
-      "token": "zero-ar",
-      "disposition": "successor",
-      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 17002,
-      "column": 18,
       "token_id": "legacy-slug",
       "token": "ramsden",
       "disposition": "compatibility-history",
@@ -10659,16 +10859,6 @@
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
       "line": 17002,
-      "column": 40,
-      "token_id": "legacy-slug",
-      "token": "ramsden",
-      "disposition": "compatibility-history",
-      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/schemas.d.ts",
-      "line": 17003,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10678,7 +10868,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17003,
+      "line": 17002,
       "column": 40,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10688,7 +10878,127 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17020,
+      "line": 17017,
+      "column": 18,
+      "token_id": "legacy-slug",
+      "token": "ramsden",
+      "disposition": "compatibility-history",
+      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17017,
+      "column": 40,
+      "token_id": "legacy-slug",
+      "token": "ramsden",
+      "disposition": "compatibility-history",
+      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17018,
+      "column": 18,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17018,
+      "column": 40,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17041,
+      "column": 18,
+      "token_id": "legacy-slug",
+      "token": "ramsden",
+      "disposition": "compatibility-history",
+      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17041,
+      "column": 40,
+      "token_id": "legacy-slug",
+      "token": "ramsden",
+      "disposition": "compatibility-history",
+      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17042,
+      "column": 18,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17042,
+      "column": 40,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17052,
+      "column": 18,
+      "token_id": "legacy-slug",
+      "token": "ramsden",
+      "disposition": "compatibility-history",
+      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17052,
+      "column": 40,
+      "token_id": "legacy-slug",
+      "token": "ramsden",
+      "disposition": "compatibility-history",
+      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17053,
+      "column": 18,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17053,
+      "column": 40,
+      "token_id": "successor-slug",
+      "token": "zero-ar",
+      "disposition": "successor",
+      "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/schemas.d.ts",
+      "line": 17070,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10698,7 +11008,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17120,
+      "line": 17170,
       "column": 39,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10708,7 +11018,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17514,
+      "line": 17564,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10718,7 +11028,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17514,
+      "line": 17564,
       "column": 29,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10728,7 +11038,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17544,
+      "line": 17594,
       "column": 22,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10738,7 +11048,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17544,
+      "line": 17594,
       "column": 33,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10748,7 +11058,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17570,
+      "line": 17620,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10758,7 +11068,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17579,
+      "line": 17629,
       "column": 40,
       "token_id": "successor-package-scope",
       "token": "@zero-ar",
@@ -10768,7 +11078,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17696,
+      "line": 17746,
       "column": 26,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10778,7 +11088,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17696,
+      "line": 17746,
       "column": 37,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10788,7 +11098,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17749,
+      "line": 17799,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10798,7 +11108,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17810,
+      "line": 17860,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10808,7 +11118,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 17846,
+      "line": 17896,
       "column": 40,
       "token_id": "successor-package-scope",
       "token": "@zero-ar",
@@ -10818,7 +11128,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 18357,
+      "line": 18410,
       "column": 39,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10828,7 +11138,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 18399,
+      "line": 18452,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10838,7 +11148,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 18526,
+      "line": 18579,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10848,7 +11158,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 18657,
+      "line": 18710,
       "column": 43,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10858,7 +11168,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 18828,
+      "line": 18881,
       "column": 39,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10868,7 +11178,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 18936,
+      "line": 18989,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10878,7 +11188,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19072,
+      "line": 19125,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10888,7 +11198,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19154,
+      "line": 19207,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10898,7 +11208,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19206,
+      "line": 19259,
       "column": 39,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10908,7 +11218,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19309,
+      "line": 19362,
       "column": 39,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10918,7 +11228,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19717,
+      "line": 19770,
       "column": 22,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -10928,7 +11238,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19717,
+      "line": 19770,
       "column": 36,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -10938,7 +11248,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19718,
+      "line": 19771,
       "column": 22,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10948,7 +11258,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19718,
+      "line": 19771,
       "column": 36,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10958,7 +11268,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19909,
+      "line": 19962,
       "column": 26,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -10968,7 +11278,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19909,
+      "line": 19962,
       "column": 40,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -10978,7 +11288,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19910,
+      "line": 19963,
       "column": 26,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10988,7 +11298,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 19910,
+      "line": 19963,
       "column": 40,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -10998,7 +11308,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 21651,
+      "line": 21704,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11008,7 +11318,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 21709,
+      "line": 21762,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11018,7 +11328,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 21907,
+      "line": 21960,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11028,7 +11338,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 21930,
+      "line": 21983,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11038,7 +11348,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 21940,
+      "line": 21993,
       "column": 39,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11048,7 +11358,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 21974,
+      "line": 22027,
       "column": 39,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11058,7 +11368,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 21984,
+      "line": 22037,
       "column": 43,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11068,7 +11378,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 22249,
+      "line": 22302,
       "column": 43,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11078,7 +11388,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 22374,
+      "line": 22427,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11088,7 +11398,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 22426,
+      "line": 22479,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11098,7 +11408,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 22976,
+      "line": 23029,
       "column": 35,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11108,7 +11418,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 23162,
+      "line": 23215,
       "column": 26,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -11118,7 +11428,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 23162,
+      "line": 23215,
       "column": 40,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -11128,7 +11438,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 23163,
+      "line": 23216,
       "column": 26,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11138,7 +11448,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.d.ts",
-      "line": 23163,
+      "line": 23216,
       "column": 40,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11178,7 +11488,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.js",
-      "line": 1455,
+      "line": 1459,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11188,7 +11498,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.js",
-      "line": 1464,
+      "line": 1468,
       "column": 18,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11198,7 +11508,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.js",
-      "line": 1639,
+      "line": 1643,
       "column": 24,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11208,7 +11518,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.js",
-      "line": 1648,
+      "line": 1652,
       "column": 29,
       "token_id": "successor-package-scope",
       "token": "@zero-ar",
@@ -11218,7 +11528,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.js",
-      "line": 1685,
+      "line": 1689,
       "column": 24,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11228,7 +11538,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.js",
-      "line": 1713,
+      "line": 1717,
       "column": 24,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11238,7 +11548,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.js",
-      "line": 1733,
+      "line": 1737,
       "column": 29,
       "token_id": "successor-package-scope",
       "token": "@zero-ar",
@@ -11248,7 +11558,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.js",
-      "line": 1817,
+      "line": 1821,
       "column": 24,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11258,7 +11568,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/schemas.js",
-      "line": 1882,
+      "line": 1886,
       "column": 24,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11438,7 +11748,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/vocab.js",
-      "line": 664,
+      "line": 665,
       "column": 6,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -11448,28 +11758,28 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/vocab.js",
-      "line": 665,
+      "line": 666,
       "column": 6,
       "token_id": "successor-slug",
       "token": "zero-ar",
       "disposition": "successor",
       "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
-    },
-    {
-      "package_name": "@zero-ar/contracts",
-      "path": "dist/vocab.js",
-      "line": 668,
-      "column": 6,
-      "token_id": "legacy-slug",
-      "token": "ramsden",
-      "disposition": "compatibility-history",
-      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
     },
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/vocab.js",
       "line": 669,
       "column": 6,
+      "token_id": "legacy-slug",
+      "token": "ramsden",
+      "disposition": "compatibility-history",
+      "reason": "legacy names remain in public aliases, compatibility shims and historical readers until the retirement epoch."
+    },
+    {
+      "package_name": "@zero-ar/contracts",
+      "path": "dist/vocab.js",
+      "line": 670,
+      "column": 6,
       "token_id": "successor-slug",
       "token": "zero-ar",
       "disposition": "successor",
@@ -11478,7 +11788,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/vocab.js",
-      "line": 674,
+      "line": 675,
       "column": 6,
       "token_id": "legacy-slug",
       "token": "ramsden",
@@ -11488,7 +11798,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/vocab.js",
-      "line": 675,
+      "line": 676,
       "column": 6,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -11498,7 +11808,7 @@
     {
       "package_name": "@zero-ar/contracts",
       "path": "dist/vocab.js",
-      "line": 756,
+      "line": 757,
       "column": 56,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -14908,7 +15218,7 @@
     {
       "package_name": "@zero-ar/validator-kit",
       "path": "README.md",
-      "line": 175,
+      "line": 176,
       "column": 9,
       "token_id": "successor-package-scope",
       "token": "@zero-ar",
@@ -14918,7 +15228,7 @@
     {
       "package_name": "@zero-ar/validator-kit",
       "path": "README.md",
-      "line": 175,
+      "line": 176,
       "column": 43,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -14928,7 +15238,7 @@
     {
       "package_name": "@zero-ar/validator-kit",
       "path": "README.md",
-      "line": 177,
+      "line": 178,
       "column": 9,
       "token_id": "successor-package-scope",
       "token": "@zero-ar",
@@ -14938,7 +15248,7 @@
     {
       "package_name": "@zero-ar/validator-kit",
       "path": "README.md",
-      "line": 177,
+      "line": 178,
       "column": 49,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -14948,7 +15258,7 @@
     {
       "package_name": "@zero-ar/validator-kit",
       "path": "README.md",
-      "line": 179,
+      "line": 180,
       "column": 52,
       "token_id": "successor-slug",
       "token": "zero-ar",
@@ -14956,5 +15266,5 @@
       "reason": "the staged package derives the current release identity from PRODUCT_IDENTITY.yaml."
     }
   ],
-  "report_ref": "sha256:d9b3eab4142317119d2a51aab4ee64a5213d84db525885dd2a51e1f0a92f94c4"
+  "report_ref": "sha256:1a7659b6a442e6a8384f584f584b6c0cc6d5e456924cedd380bbbbe2b3e371e5"
 }

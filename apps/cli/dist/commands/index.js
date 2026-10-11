@@ -6,6 +6,7 @@ import { gatewayCommand } from "./gateway.js";
 import { memoryCommand } from "./memory.js";
 import { publicationCommand } from "./publication.js";
 import { registryCommand } from "./registry.js";
+import { targetCommand } from "./target.js";
 import { toolSourceCommand } from "./tool-source.js";
 export const CLI_COMMAND_MODULES = new Map([
     contextCommand,
@@ -17,4 +18,5 @@ export const CLI_COMMAND_MODULES = new Map([
     toolSourceCommand,
     gatewayCommand,
     memoryCommand,
+    targetCommand,
 ].map((module) => [module.command, module]));

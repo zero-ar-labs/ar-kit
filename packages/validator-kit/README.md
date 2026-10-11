@@ -164,11 +164,12 @@ declared coverage, complete labelled cases and deployment evidence for its
 host. A timeout, crash, cancellation, missing answer or input mismatch counts
 as indeterminate, never as a pass.
 
-The Effect Plane is separate. Read-only work may omit it. The current release
-records each proposal and refuses general production dispatch. The one
-exception is a configured reversible HTTP target whose exact operation,
-reversal and active grants all match. This package exports no effect
-dispatcher or production target adapter.
+The Effect Plane is separate. Read-only work may omit it. A Full Cell tenant
+with dynamic authority sends an action to an endpoint its application
+implements, under a grant or a person's approval, and reports the action as
+done only on the endpoint's answer. Every other attachment records proposals
+and sends nothing. This package exports no effect dispatcher or target
+adapter.
 
 ## Where to go next
 

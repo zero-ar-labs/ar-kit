@@ -204,6 +204,7 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
             "unattended-aggregator-mutations": "unattended-aggregator-mutations";
             "dynamic-authority": "dynamic-authority";
             "production-effect-dispatch": "production-effect-dispatch";
+            "host-target-effect-dispatch": "host-target-effect-dispatch";
             "research-reference-pack": "research-reference-pack";
             "video-reference-pack": "video-reference-pack";
             "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -267,6 +268,7 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                 "dynamic-authority": "dynamic-authority";
                 "production-effect-dispatch": "production-effect-dispatch";
+                "host-target-effect-dispatch": "host-target-effect-dispatch";
                 "research-reference-pack": "research-reference-pack";
                 "video-reference-pack": "video-reference-pack";
                 "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -341,6 +343,7 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                 "dynamic-authority": "dynamic-authority";
                 "production-effect-dispatch": "production-effect-dispatch";
+                "host-target-effect-dispatch": "host-target-effect-dispatch";
                 "research-reference-pack": "research-reference-pack";
                 "video-reference-pack": "video-reference-pack";
                 "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -1533,6 +1536,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                 "dynamic-authority": "dynamic-authority";
                 "production-effect-dispatch": "production-effect-dispatch";
+                "host-target-effect-dispatch": "host-target-effect-dispatch";
                 "research-reference-pack": "research-reference-pack";
                 "video-reference-pack": "video-reference-pack";
                 "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -1596,6 +1600,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                     "dynamic-authority": "dynamic-authority";
                     "production-effect-dispatch": "production-effect-dispatch";
+                    "host-target-effect-dispatch": "host-target-effect-dispatch";
                     "research-reference-pack": "research-reference-pack";
                     "video-reference-pack": "video-reference-pack";
                     "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -1670,6 +1675,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                     "dynamic-authority": "dynamic-authority";
                     "production-effect-dispatch": "production-effect-dispatch";
+                    "host-target-effect-dispatch": "host-target-effect-dispatch";
                     "research-reference-pack": "research-reference-pack";
                     "video-reference-pack": "video-reference-pack";
                     "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -2577,6 +2583,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             "unattended-aggregator-mutations": "unattended-aggregator-mutations";
             "dynamic-authority": "dynamic-authority";
             "production-effect-dispatch": "production-effect-dispatch";
+            "host-target-effect-dispatch": "host-target-effect-dispatch";
             "research-reference-pack": "research-reference-pack";
             "video-reference-pack": "video-reference-pack";
             "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -2640,6 +2647,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                 "dynamic-authority": "dynamic-authority";
                 "production-effect-dispatch": "production-effect-dispatch";
+                "host-target-effect-dispatch": "host-target-effect-dispatch";
                 "research-reference-pack": "research-reference-pack";
                 "video-reference-pack": "video-reference-pack";
                 "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -2714,6 +2722,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                 "dynamic-authority": "dynamic-authority";
                 "production-effect-dispatch": "production-effect-dispatch";
+                "host-target-effect-dispatch": "host-target-effect-dispatch";
                 "research-reference-pack": "research-reference-pack";
                 "video-reference-pack": "video-reference-pack";
                 "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -4730,6 +4739,7 @@ export declare const HealthResponseSchema: z.ZodObject<{
             "unattended-aggregator-mutations": "unattended-aggregator-mutations";
             "dynamic-authority": "dynamic-authority";
             "production-effect-dispatch": "production-effect-dispatch";
+            "host-target-effect-dispatch": "host-target-effect-dispatch";
             "research-reference-pack": "research-reference-pack";
             "video-reference-pack": "video-reference-pack";
             "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -4793,6 +4803,7 @@ export declare const HealthResponseSchema: z.ZodObject<{
                 "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                 "dynamic-authority": "dynamic-authority";
                 "production-effect-dispatch": "production-effect-dispatch";
+                "host-target-effect-dispatch": "host-target-effect-dispatch";
                 "research-reference-pack": "research-reference-pack";
                 "video-reference-pack": "video-reference-pack";
                 "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -4867,6 +4878,7 @@ export declare const HealthResponseSchema: z.ZodObject<{
                 "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                 "dynamic-authority": "dynamic-authority";
                 "production-effect-dispatch": "production-effect-dispatch";
+                "host-target-effect-dispatch": "host-target-effect-dispatch";
                 "research-reference-pack": "research-reference-pack";
                 "video-reference-pack": "video-reference-pack";
                 "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -7875,7 +7887,7 @@ export declare const SCHEMA_REGISTRY: {
             max_matches: z.ZodOptional<z.ZodNumber>;
             max_scan_bytes: z.ZodOptional<z.ZodNumber>;
         }, z.core.$strict>, z.ZodObject<{
-            source_alias: z.ZodString;
+            source_alias: z.ZodOptional<z.ZodString>;
             operation: z.ZodLiteral<"document.extract">;
             locator: z.ZodOptional<z.ZodString>;
             artifact_ref: z.ZodOptional<z.ZodString>;
@@ -8455,6 +8467,14 @@ export declare const SCHEMA_REGISTRY: {
                 refuse: "refuse";
             }>;
             reason: z.ZodString;
+            follow_up: z.ZodOptional<z.ZodObject<{
+                type: z.ZodLiteral<"zero-ar.follow-up">;
+                locations: z.ZodArray<z.ZodString>;
+                actions: z.ZodArray<z.ZodString>;
+                constraints: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodUnknown>>;
+                max_uses: z.ZodNumber;
+                expires_at: z.ZodString;
+            }, z.core.$strict>>;
         }, z.core.$strict>;
         readonly placement: "intake";
         readonly owner: "effect-plane";
@@ -8508,6 +8528,14 @@ export declare const SCHEMA_REGISTRY: {
                 refused: "refused";
             }>;
             reason: z.ZodString;
+            follow_up: z.ZodOptional<z.ZodObject<{
+                type: z.ZodLiteral<"zero-ar.follow-up">;
+                locations: z.ZodArray<z.ZodString>;
+                actions: z.ZodArray<z.ZodString>;
+                constraints: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodUnknown>>;
+                max_uses: z.ZodNumber;
+                expires_at: z.ZodString;
+            }, z.core.$strict>>;
             recorded_at: z.ZodString;
         }, z.core.$strict>;
         readonly placement: "observation";
@@ -8587,6 +8615,14 @@ export declare const SCHEMA_REGISTRY: {
                 approve: "approve";
                 refuse: "refuse";
             }>;
+            follow_up: z.ZodOptional<z.ZodObject<{
+                type: z.ZodLiteral<"zero-ar.follow-up">;
+                locations: z.ZodArray<z.ZodString>;
+                actions: z.ZodArray<z.ZodString>;
+                constraints: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodUnknown>>;
+                max_uses: z.ZodNumber;
+                expires_at: z.ZodString;
+            }, z.core.$strict>>;
             grant_ref: z.ZodString;
             scope: z.ZodLiteral<"effect:approve">;
             scope_epoch: z.ZodNumber;
@@ -8739,6 +8775,7 @@ export declare const SCHEMA_REGISTRY: {
                     "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                     "dynamic-authority": "dynamic-authority";
                     "production-effect-dispatch": "production-effect-dispatch";
+                    "host-target-effect-dispatch": "host-target-effect-dispatch";
                     "research-reference-pack": "research-reference-pack";
                     "video-reference-pack": "video-reference-pack";
                     "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -8802,6 +8839,7 @@ export declare const SCHEMA_REGISTRY: {
                         "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                         "dynamic-authority": "dynamic-authority";
                         "production-effect-dispatch": "production-effect-dispatch";
+                        "host-target-effect-dispatch": "host-target-effect-dispatch";
                         "research-reference-pack": "research-reference-pack";
                         "video-reference-pack": "video-reference-pack";
                         "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -8876,6 +8914,7 @@ export declare const SCHEMA_REGISTRY: {
                         "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                         "dynamic-authority": "dynamic-authority";
                         "production-effect-dispatch": "production-effect-dispatch";
+                        "host-target-effect-dispatch": "host-target-effect-dispatch";
                         "research-reference-pack": "research-reference-pack";
                         "video-reference-pack": "video-reference-pack";
                         "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -9489,6 +9528,7 @@ export declare const SCHEMA_REGISTRY: {
                 "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                 "dynamic-authority": "dynamic-authority";
                 "production-effect-dispatch": "production-effect-dispatch";
+                "host-target-effect-dispatch": "host-target-effect-dispatch";
                 "research-reference-pack": "research-reference-pack";
                 "video-reference-pack": "video-reference-pack";
                 "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -9657,6 +9697,7 @@ export declare const SCHEMA_REGISTRY: {
                     "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                     "dynamic-authority": "dynamic-authority";
                     "production-effect-dispatch": "production-effect-dispatch";
+                    "host-target-effect-dispatch": "host-target-effect-dispatch";
                     "research-reference-pack": "research-reference-pack";
                     "video-reference-pack": "video-reference-pack";
                     "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -9752,6 +9793,7 @@ export declare const SCHEMA_REGISTRY: {
                 "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                 "dynamic-authority": "dynamic-authority";
                 "production-effect-dispatch": "production-effect-dispatch";
+                "host-target-effect-dispatch": "host-target-effect-dispatch";
                 "research-reference-pack": "research-reference-pack";
                 "video-reference-pack": "video-reference-pack";
                 "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -9815,6 +9857,7 @@ export declare const SCHEMA_REGISTRY: {
                     "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                     "dynamic-authority": "dynamic-authority";
                     "production-effect-dispatch": "production-effect-dispatch";
+                    "host-target-effect-dispatch": "host-target-effect-dispatch";
                     "research-reference-pack": "research-reference-pack";
                     "video-reference-pack": "video-reference-pack";
                     "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -9889,6 +9932,7 @@ export declare const SCHEMA_REGISTRY: {
                     "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                     "dynamic-authority": "dynamic-authority";
                     "production-effect-dispatch": "production-effect-dispatch";
+                    "host-target-effect-dispatch": "host-target-effect-dispatch";
                     "research-reference-pack": "research-reference-pack";
                     "video-reference-pack": "video-reference-pack";
                     "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -11030,6 +11074,7 @@ export declare const SCHEMA_REGISTRY: {
                         "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                         "dynamic-authority": "dynamic-authority";
                         "production-effect-dispatch": "production-effect-dispatch";
+                        "host-target-effect-dispatch": "host-target-effect-dispatch";
                         "research-reference-pack": "research-reference-pack";
                         "video-reference-pack": "video-reference-pack";
                         "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -11093,6 +11138,7 @@ export declare const SCHEMA_REGISTRY: {
                             "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                             "dynamic-authority": "dynamic-authority";
                             "production-effect-dispatch": "production-effect-dispatch";
+                            "host-target-effect-dispatch": "host-target-effect-dispatch";
                             "research-reference-pack": "research-reference-pack";
                             "video-reference-pack": "video-reference-pack";
                             "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -11167,6 +11213,7 @@ export declare const SCHEMA_REGISTRY: {
                             "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                             "dynamic-authority": "dynamic-authority";
                             "production-effect-dispatch": "production-effect-dispatch";
+                            "host-target-effect-dispatch": "host-target-effect-dispatch";
                             "research-reference-pack": "research-reference-pack";
                             "video-reference-pack": "video-reference-pack";
                             "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -12074,6 +12121,7 @@ export declare const SCHEMA_REGISTRY: {
                     "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                     "dynamic-authority": "dynamic-authority";
                     "production-effect-dispatch": "production-effect-dispatch";
+                    "host-target-effect-dispatch": "host-target-effect-dispatch";
                     "research-reference-pack": "research-reference-pack";
                     "video-reference-pack": "video-reference-pack";
                     "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -12137,6 +12185,7 @@ export declare const SCHEMA_REGISTRY: {
                         "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                         "dynamic-authority": "dynamic-authority";
                         "production-effect-dispatch": "production-effect-dispatch";
+                        "host-target-effect-dispatch": "host-target-effect-dispatch";
                         "research-reference-pack": "research-reference-pack";
                         "video-reference-pack": "video-reference-pack";
                         "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -12211,6 +12260,7 @@ export declare const SCHEMA_REGISTRY: {
                         "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                         "dynamic-authority": "dynamic-authority";
                         "production-effect-dispatch": "production-effect-dispatch";
+                        "host-target-effect-dispatch": "host-target-effect-dispatch";
                         "research-reference-pack": "research-reference-pack";
                         "video-reference-pack": "video-reference-pack";
                         "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -18126,6 +18176,7 @@ export declare const SCHEMA_REGISTRY: {
                     "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                     "dynamic-authority": "dynamic-authority";
                     "production-effect-dispatch": "production-effect-dispatch";
+                    "host-target-effect-dispatch": "host-target-effect-dispatch";
                     "research-reference-pack": "research-reference-pack";
                     "video-reference-pack": "video-reference-pack";
                     "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -18189,6 +18240,7 @@ export declare const SCHEMA_REGISTRY: {
                         "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                         "dynamic-authority": "dynamic-authority";
                         "production-effect-dispatch": "production-effect-dispatch";
+                        "host-target-effect-dispatch": "host-target-effect-dispatch";
                         "research-reference-pack": "research-reference-pack";
                         "video-reference-pack": "video-reference-pack";
                         "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -18263,6 +18315,7 @@ export declare const SCHEMA_REGISTRY: {
                         "unattended-aggregator-mutations": "unattended-aggregator-mutations";
                         "dynamic-authority": "dynamic-authority";
                         "production-effect-dispatch": "production-effect-dispatch";
+                        "host-target-effect-dispatch": "host-target-effect-dispatch";
                         "research-reference-pack": "research-reference-pack";
                         "video-reference-pack": "video-reference-pack";
                         "native-packaged-self-hosting": "native-packaged-self-hosting";

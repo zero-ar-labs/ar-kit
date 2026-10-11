@@ -21050,7 +21050,6 @@
               }
             },
             "required": [
-              "source_alias",
               "operation"
             ],
             "additionalProperties": false
@@ -23225,6 +23224,68 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 1000
+          },
+          "follow_up": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "zero-ar.follow-up"
+              },
+              "locations": {
+                "minItems": 1,
+                "maxItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "actions": {
+                "minItems": 1,
+                "maxItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "constraints": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "additionalProperties": {
+                  "minItems": 1,
+                  "maxItems": 50,
+                  "type": "array",
+                  "items": {}
+                }
+              },
+              "max_uses": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "type",
+              "locations",
+              "actions",
+              "constraints",
+              "max_uses",
+              "expires_at"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -23443,6 +23504,68 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 1000
+          },
+          "follow_up": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "zero-ar.follow-up"
+              },
+              "locations": {
+                "minItems": 1,
+                "maxItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "actions": {
+                "minItems": 1,
+                "maxItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "constraints": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "additionalProperties": {
+                  "minItems": 1,
+                  "maxItems": 50,
+                  "type": "array",
+                  "items": {}
+                }
+              },
+              "max_uses": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "type",
+              "locations",
+              "actions",
+              "constraints",
+              "max_uses",
+              "expires_at"
+            ],
+            "additionalProperties": false
           },
           "recorded_at": {
             "type": "string",
@@ -23780,6 +23903,68 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 1000
+          },
+          "follow_up": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "zero-ar.follow-up"
+              },
+              "locations": {
+                "minItems": 1,
+                "maxItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "actions": {
+                "minItems": 1,
+                "maxItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "constraints": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "additionalProperties": {
+                  "minItems": 1,
+                  "maxItems": 50,
+                  "type": "array",
+                  "items": {}
+                }
+              },
+              "max_uses": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "type",
+              "locations",
+              "actions",
+              "constraints",
+              "max_uses",
+              "expires_at"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -24270,6 +24455,7 @@
                     "unattended-aggregator-mutations",
                     "dynamic-authority",
                     "production-effect-dispatch",
+                    "host-target-effect-dispatch",
                     "research-reference-pack",
                     "video-reference-pack",
                     "native-packaged-self-hosting",
@@ -24341,6 +24527,7 @@
                         "unattended-aggregator-mutations",
                         "dynamic-authority",
                         "production-effect-dispatch",
+                        "host-target-effect-dispatch",
                         "research-reference-pack",
                         "video-reference-pack",
                         "native-packaged-self-hosting",
@@ -24438,6 +24625,7 @@
                         "unattended-aggregator-mutations",
                         "dynamic-authority",
                         "production-effect-dispatch",
+                        "host-target-effect-dispatch",
                         "research-reference-pack",
                         "video-reference-pack",
                         "native-packaged-self-hosting",
@@ -26421,6 +26609,7 @@
               "unattended-aggregator-mutations",
               "dynamic-authority",
               "production-effect-dispatch",
+              "host-target-effect-dispatch",
               "research-reference-pack",
               "video-reference-pack",
               "native-packaged-self-hosting",
@@ -26732,6 +26921,7 @@
                     "unattended-aggregator-mutations",
                     "dynamic-authority",
                     "production-effect-dispatch",
+                    "host-target-effect-dispatch",
                     "research-reference-pack",
                     "video-reference-pack",
                     "native-packaged-self-hosting",
@@ -26907,6 +27097,7 @@
                 "unattended-aggregator-mutations",
                 "dynamic-authority",
                 "production-effect-dispatch",
+                "host-target-effect-dispatch",
                 "research-reference-pack",
                 "video-reference-pack",
                 "native-packaged-self-hosting",
@@ -26978,6 +27169,7 @@
                     "unattended-aggregator-mutations",
                     "dynamic-authority",
                     "production-effect-dispatch",
+                    "host-target-effect-dispatch",
                     "research-reference-pack",
                     "video-reference-pack",
                     "native-packaged-self-hosting",
@@ -27075,6 +27267,7 @@
                     "unattended-aggregator-mutations",
                     "dynamic-authority",
                     "production-effect-dispatch",
+                    "host-target-effect-dispatch",
                     "research-reference-pack",
                     "video-reference-pack",
                     "native-packaged-self-hosting",
@@ -31920,6 +32113,7 @@
                             "unattended-aggregator-mutations",
                             "dynamic-authority",
                             "production-effect-dispatch",
+                            "host-target-effect-dispatch",
                             "research-reference-pack",
                             "video-reference-pack",
                             "native-packaged-self-hosting",
@@ -31991,6 +32185,7 @@
                                 "unattended-aggregator-mutations",
                                 "dynamic-authority",
                                 "production-effect-dispatch",
+                                "host-target-effect-dispatch",
                                 "research-reference-pack",
                                 "video-reference-pack",
                                 "native-packaged-self-hosting",
@@ -32088,6 +32283,7 @@
                                 "unattended-aggregator-mutations",
                                 "dynamic-authority",
                                 "production-effect-dispatch",
+                                "host-target-effect-dispatch",
                                 "research-reference-pack",
                                 "video-reference-pack",
                                 "native-packaged-self-hosting",
@@ -35505,6 +35701,7 @@
                     "unattended-aggregator-mutations",
                     "dynamic-authority",
                     "production-effect-dispatch",
+                    "host-target-effect-dispatch",
                     "research-reference-pack",
                     "video-reference-pack",
                     "native-packaged-self-hosting",
@@ -35576,6 +35773,7 @@
                         "unattended-aggregator-mutations",
                         "dynamic-authority",
                         "production-effect-dispatch",
+                        "host-target-effect-dispatch",
                         "research-reference-pack",
                         "video-reference-pack",
                         "native-packaged-self-hosting",
@@ -35673,6 +35871,7 @@
                         "unattended-aggregator-mutations",
                         "dynamic-authority",
                         "production-effect-dispatch",
+                        "host-target-effect-dispatch",
                         "research-reference-pack",
                         "video-reference-pack",
                         "native-packaged-self-hosting",
@@ -56837,6 +57036,7 @@
                     "unattended-aggregator-mutations",
                     "dynamic-authority",
                     "production-effect-dispatch",
+                    "host-target-effect-dispatch",
                     "research-reference-pack",
                     "video-reference-pack",
                     "native-packaged-self-hosting",
@@ -56908,6 +57108,7 @@
                         "unattended-aggregator-mutations",
                         "dynamic-authority",
                         "production-effect-dispatch",
+                        "host-target-effect-dispatch",
                         "research-reference-pack",
                         "video-reference-pack",
                         "native-packaged-self-hosting",
@@ -57005,6 +57206,7 @@
                         "unattended-aggregator-mutations",
                         "dynamic-authority",
                         "production-effect-dispatch",
+                        "host-target-effect-dispatch",
                         "research-reference-pack",
                         "video-reference-pack",
                         "native-packaged-self-hosting",
