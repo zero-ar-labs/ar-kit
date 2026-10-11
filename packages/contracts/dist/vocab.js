@@ -298,6 +298,7 @@ export const PROFILE_CAPABILITIES = [
     'unattended-aggregator-mutations',
     'dynamic-authority',
     'production-effect-dispatch',
+    'host-target-effect-dispatch',
     'research-reference-pack',
     'video-reference-pack',
     'native-packaged-self-hosting',

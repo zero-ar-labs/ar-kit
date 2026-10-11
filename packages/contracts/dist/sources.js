@@ -246,7 +246,7 @@ export const SourceOperationRequestSchema = z.discriminatedUnion('operation', [
         max_scan_bytes: positiveCount.max(16 * 1_048_576).optional(),
     }),
     z.strictObject({
-        source_alias: sourceAlias,
+        source_alias: sourceAlias.optional(),
         operation: z.literal('document.extract'),
         locator: z.string().min(1).max(4_096).optional(),
         artifact_ref: artifactHandle.optional(),

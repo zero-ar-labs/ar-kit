@@ -12,7 +12,7 @@ import { pathToFileURL } from 'node:url';
 import { BindingProfileSchema, DomainPackSchema, MACHINE_PREDICATE, MemoryBindingSchema, OPERATION_CLASSES, PostureSchema, TRUST_TIERS, TaskContractSchema, VALIDATOR_CLASSES, VALIDATOR_OUTCOMES, canonicalJson, contentHash, productSourceApiVersionReadable, refuse, spanHash, } from '@zero-ar/contracts';
 import { ProcedureManifestSchema, PublicationBundleManifestSchema } from '@zero-ar/contracts';
 import { admitCatalogueEntry, catalogueDefaults, compileVerificationPlan, defineCatalogueEntry, verificationCheckpointInputForContract } from '@zero-ar/validator-kit';
-const COMPILER = { name: '@zero-ar/sdk', version: '0.4.2', canonicalization: 'canonical-json-1' };
+const COMPILER = { name: '@zero-ar/sdk', version: '0.5.0', canonicalization: 'canonical-json-1' };
 async function parseYaml(text) {
     let parser;
     try {

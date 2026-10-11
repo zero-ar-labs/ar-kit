@@ -31,14 +31,14 @@ Two public images run the runtime. Each is built for linux/amd64 and linux/arm64
 
 | Image | Use it when |
 | --- | --- |
-| `ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.4.2` | One person runs and inspects work on one machine. The entrypoint is the `zeroar` command, and runs stay in `.zero-ar` under the mounted project directory. |
-| `ghcr.io/zero-ar-labs/zero-ar/full-cell:v0.4.2` | Applications connect over the network. The cell serves the HTTP API on port 8420, keeps runs in PostgreSQL and gives each tenant its own key. |
+| `ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.5.0` | One person runs and inspects work on one machine. The entrypoint is the `zeroar` command, and runs stay in `.zero-ar` under the mounted project directory. |
+| `ghcr.io/zero-ar-labs/zero-ar/full-cell:v0.5.0` | Applications connect over the network. The cell serves the HTTP API on port 8420, keeps runs in PostgreSQL and gives each tenant its own key. |
 
 With no model settings, Local Lite uses a deterministic adapter, so a first run needs no credential and makes no network call:
 
 ```bash
 docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" \
-  ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.4.2 run "Summarise the objective"
+  ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.5.0 run "Summarise the objective"
 ```
 
 [Running Zero-AR](./docs/running-zero-ar.md) covers both images: model provider keys, the Full Cell configuration file, persistent storage, credentials, health and the HTTP API.
@@ -47,7 +47,7 @@ A tag can move, so pull by digest for anything you keep. [`release/release-image
 
 ## Build on Zero-AR
 
-**Developer release:** the nine public packages are published to npm at version 0.4.2. This repository also carries their exact tested tarballs, emitted JavaScript, TypeScript declarations and the [OpenAPI 3.1 contract](./packages/client/openapi/zero-ar-v1.openapi.json). The runtime server is not in any package; it ships in the two images.
+**Developer release:** the nine public packages are published to npm at version 0.5.0. This repository also carries their exact tested tarballs, emitted JavaScript, TypeScript declarations and the [OpenAPI 3.1 contract](./packages/client/openapi/zero-ar-v1.openapi.json). The runtime server is not in any package; it ships in the two images.
 
 Every SDK and command example below needs a running Zero-AR endpoint. With the public images, that endpoint is a Full Cell. The Local Lite image keeps its server inside the container, so use its own `zeroar` command for local work.
 
@@ -56,7 +56,7 @@ Node.js 24.11.0 or later in the Node 24 LTS line is required.
 ### SDK
 
 ```bash
-npm install @zero-ar/sdk@0.4.2
+npm install @zero-ar/sdk@0.5.0
 ```
 
 ```js
@@ -85,7 +85,7 @@ The handle is a client convenience. A process can discard it and recreate it lat
 ### Client and OpenAPI
 
 ```bash
-npm install @zero-ar/client@0.4.2
+npm install @zero-ar/client@0.5.0
 ```
 
 The typed client and the [OpenAPI 3.1 document](./packages/client/openapi/zero-ar-v1.openapi.json) come from the same route table, and `@zero-ar/client` exports that document as `@zero-ar/client/openapi`. Generate a client in another language from it; each operation lists the scopes it needs under `x-zero-ar-authorization`. The SDK and CLI use this same client.
@@ -93,7 +93,7 @@ The typed client and the [OpenAPI 3.1 document](./packages/client/openapi/zero-a
 ### Command line
 
 ```bash
-npm install --global @zero-ar/cli@0.4.2
+npm install --global @zero-ar/cli@0.5.0
 
 export ZERO_AR_URL=https://your-zero-ar.example
 export ZERO_AR_API_KEY=your-tenant-key
@@ -177,7 +177,7 @@ Not by runtime mechanics alone. A validator can be deterministic and consistentl
 
 ### 7. When is the Effect Plane required?
 
-Read-only work may omit it. A change to an outside system needs an attached Effect Plane and a matching grant, and Zero-AR reports the change as done only with the target's receipt. The current release records each proposal and refuses general production dispatch. The one exception is a configured reversible HTTP target whose exact operation, reversal and active grants all match. This kit exports no effect dispatcher or production target adapter.
+Read-only work may omit it. A change to an outside system needs an attached Effect Plane and a grant or a person's approval, and Zero-AR reports the change as done only with the target's answer. A Full Cell tenant with dynamic authority sends actions to endpoints its application implements; [Let your app take actions](./docs/let-your-app-take-actions.md) builds and checks one. Every other attachment records proposals and sends nothing. This kit exports no effect dispatcher.
 
 Before production use, a validator still needs a fixed identity, repeatable results, declared full, sampled or oracle coverage, a complete set of labelled cases, and a host with no network access and fixed resource limits. The current release does not provide that.
 
@@ -196,7 +196,7 @@ npm run verify
 npm run exercise
 ```
 
-`verify` checks the byte inventory and its binding to source commit `e0064302805c8462e499ee144c24adf8e1248cf1`. `exercise` installs all nine tarballs in an isolated consumer, imports their public entrypoints, reads the OpenAPI contract and runs the packaged command. Neither command publishes anything. See [PROVENANCE.md](./PROVENANCE.md) for the complete boundary.
+`verify` checks the byte inventory and its binding to source commit `f7cd49e89603091c0e79f74d95a9e6fd879c0bb4`. `exercise` installs all nine tarballs in an isolated consumer, imports their public entrypoints, reads the OpenAPI contract and runs the packaged command. Neither command publishes anything. See [PROVENANCE.md](./PROVENANCE.md) for the complete boundary.
 
 ## Repository map
 
@@ -204,7 +204,7 @@ npm run exercise
 | --- | --- |
 | `packages/`, `apps/` | The nine packages as emitted JavaScript and TypeScript declarations, each with its README, license and notice. |
 | `release/` | The package release manifest, its identity and exercise reports, the exact tested tarballs and the release public key. A release export adds the signed image record. |
-| `docs/` | [How Zero-AR works](./docs/how-zero-ar-works.md) and [Running Zero-AR](./docs/running-zero-ar.md). |
+| `docs/` | [How Zero-AR works](./docs/how-zero-ar-works.md), [Running Zero-AR](./docs/running-zero-ar.md) and [Let your app take actions](./docs/let-your-app-take-actions.md). |
 | `assets/` | The recorded run, verification plan and runtime shape shown in this README. |
 | `scripts/` | The checks behind `npm run verify` and `npm run exercise`. |
 | `public-export-manifest.json`, `SOURCE_COMMIT`, `PROVENANCE.md` | The digest of every exported file and the source commit they come from. |

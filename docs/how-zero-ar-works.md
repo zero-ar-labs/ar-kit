@@ -6,7 +6,7 @@ run, with its history and current position intact. The agent calls the
 selected models and tools within declared limits. A result receives the
 status *verified* only when its named checks pass.
 
-> This page describes Zero-AR version 0.4.2. It uses controlled English based
+> This page describes Zero-AR version 0.5.0. It uses controlled English based
 > on ASD-STE100, but it is not certified ASD-STE100. Commands and field names
 > are in a monospace font.
 
@@ -45,14 +45,14 @@ In each deployment, the W0 Kernel runs the work, the Quality Plane decides
 whether the work is verified, and the optional Effect Plane holds the
 authority to change outside systems.
 
-## What version 0.4.2 includes
+## What version 0.5.0 includes
 
 | Capability | What it does | Condition |
 |---|---|---|
 | Recovery without a person | After a restart, work in progress continues without an operator command. | A run that a person paused, or that waits for a person, continues to wait. |
 | Open goals | An agent can write a plan, name its checks, do the work, repair it and propose completion without an owner task contract. | Zero-AR, not the agent, decides whether the named checks passed. |
 | Workspace commands | `workspace.exec` runs commands in a container that belongs to the run. Its files stay for the full run. | The operator must configure a digest-pinned workspace image and Docker host capacity. |
-| Reversible effect dispatch | A configured HTTP target can receive a reversible change under an active grant. Zero-AR reports the change as done only when the target gives a definite answer. | The target, the change, its reversal and the grants must all match. This does not enable general production effect dispatch. |
+| Reversible effect dispatch | A configured HTTP target can receive a reversible change under an active grant. Zero-AR reports the change as done only when the target gives a definite answer. | The target, the change, its reversal and the grants must all match. |
 | Pause and budget addition | A person can pause a run and add budget to it. | Work in progress finishes before the pause. Resume is a separate command. |
 | Fork with working state | A fork starts a new run that keeps the plan and the last saved workspace files. | Plan items start again in the new run. Files changed after the last save are not in the fork. Grants and credentials do not transfer. |
 | Images to models | An admitted image or workspace screenshot goes to a model that accepts images. Other models receive a text note. | The number, size and cost of images stay within limits. |
@@ -64,7 +64,9 @@ authority to change outside systems.
 | Web search and page fetch | `web.search` sends up to three queries to one search provider at the same time. `web.fetch` reads one page and keeps it as a Markdown artifact that expires. | Local Lite needs a configured provider and its key, from the Keychain or an environment variable. A hosted tenant needs a configured `web_search` block. The run history keeps no query text and no page text. |
 | Handoff between cells | A suspended run can move to a second Full Cell that shares nothing with the first. The first cell signs the run over to one named cell and stops it, and only that cell continues it, once. | The cell that hands the run over needs an integrity signer. The continuing cell pins the first key it sees for each signer. |
 | Waiting for replies and decisions | A run that acts through an effect target can wait for a reply at no cost, and a reply that a product posts to the run wakes it. While an action waits for a person's decision, the run continues with work that does not depend on it. The agent reads what became of each action before its next step. | A decision window withdraws an action that no person decides. The window is 72 hours unless the operator sets another, and never extends past the grant. |
-| Attachments | `document.extract` reads a PDF, JPEG or PNG file of the run, such as an attachment on a reply, with the extractor that the run pins. | The run needs a source binding that pins the extractor. |
+| Attachments | `document.extract` reads a PDF, JPEG or PNG file of the run, such as an attachment on a reply, with the extractor that the run pins. The checks of the run read the pages it extracted. | The run needs a source binding that pins the extractor. |
+| Actions through your application | A Full Cell sends the actions of an agent to HTTPS endpoints that your application implements. Each action goes out one time, under a grant, an approval of that exact action, or a follow-up that an approver allowed. When an answer does not say what occurred, Zero-AR asks the endpoint before it sends the action again. | Each endpoint must pass `zeroar target check`, and the tenant must be configured to send actions. Local Lite records proposed actions and sends none. |
+| Follow-ups | An approver can approve one action and, in the same decision, allow later actions of the same type in the same run. The agent can then answer the next reply without a new approval. | The follow-up names the endpoint, the operation, the permitted values, a number of uses and an end time that is not after the approval. |
 
 ## Who uses Zero-AR
 
@@ -198,7 +200,7 @@ A person can send these commands at any time. Only `cancel` ends the run.
 | `cancel` | Ends the run. Zero-AR closes the work that is still open first. |
 | `budget` | Adds model tokens, tool calls, bytes, compute time, human attention or model turns to a run that has not ended. A run that ran out of budget continues after `resume`. |
 | `fork` | Starts a new run from a point in the history of an earlier run, with new budgets if you send them. The fork keeps the history up to that point, the plan with every item started again, and the last saved workspace. |
-| Effect decision | Approves or refuses one exact effect that waits for a person. |
+| Effect decision | Approves or refuses one exact effect that waits for a person. An approval can also allow a set number of later effects of the same kind in the same run, for the values it names, until a stated time. |
 | `inspect`, `records`, `result` | Show the current state, the records and the result. |
 
 A `resume-deferred` sent after a `pause` gives a pause that ends at a set
@@ -213,7 +215,7 @@ time. A pause never stops work in progress. To stop the current step now, use
 - An identity provider or a secret store.
 - The outside systems where effects occur.
 
-## Known limits in 0.4.2
+## Known limits in 0.5.0
 
 - Controls and budget additions record the application that sent them, not
   the end user it acted for.
@@ -223,9 +225,8 @@ time. A pause never stops work in progress. To stop the current step now, use
   Zero-AR checks that the workspace network is internal, but it does not
   check which hosts the proxy lets through.
 - The workspace runs on Docker only.
-- General production effect dispatch is not enabled. Version 0.4.2 includes a
-  reversible HTTP target whose exact change, reversal and active grants must
-  match.
+- Actions go only to endpoints that pass `zeroar target check` and to the
+  reversible HTTP target. Actions through tool gateways are not sent.
 - The browser workspace is a separate reference image. An operator must build
   it, pin its digest and configure it.
 - A tool that cannot state a limit for its own bytes or compute time can use
@@ -240,6 +241,6 @@ time. A pause never stops work in progress. To stop the current step now, use
 
 ---
 
-This page describes Zero-AR version 0.4.2. It describes what Zero-AR does and
+This page describes Zero-AR version 0.5.0. It describes what Zero-AR does and
 what it guarantees. The commands and names on this page are those of the
 public API and the `zeroar` command.

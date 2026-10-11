@@ -1,5 +1,5 @@
 export const MCP_PROTOCOL_VERSION = '2026-07-28';
 export const MCP_TASKS_EXTENSION = 'io.modelcontextprotocol/tasks';
 export const MCP_OFFICIAL_SDK_VERSION = '2.0.0';
-export const ZERO_AR_MCP_VERSION = '0.4.2';
+export const ZERO_AR_MCP_VERSION = '0.5.0';
 export const ZERO_AR_REQUEST_META_KEY = 'io.zero-ar/request';

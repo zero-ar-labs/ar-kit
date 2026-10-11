@@ -1,7 +1,7 @@
 import { SUPPORTED_NODE_RUNTIME } from '@zero-ar/contracts';
 export const EXTERNAL_PRODUCT_SCAFFOLD_VERSION = '1.0.0';
 export const EXTERNAL_PRODUCT_API_VERSION = 'v1';
-export const EXTERNAL_PRODUCT_PACKAGE_VERSION = '0.4.2';
+export const EXTERNAL_PRODUCT_PACKAGE_VERSION = '0.5.0';
 const FIXTURES = {
     'facilities-operations': {
         package_name: 'zero-ar-facilities-operations',
@@ -269,7 +269,7 @@ function compatibility() {
 import type { HealthResponse } from '@zero-ar/contracts';
 
 export const SUPPORTED_ZERO_AR_API = 'v1';
-export const SUPPORTED_ZERO_AR_PACKAGES = '0.4.2';
+export const SUPPORTED_ZERO_AR_PACKAGES = '0.5.0';
 
 export function assertCompatibleRuntime(health: HealthResponse): void {
   if (health.product !== 'zero-ar') {

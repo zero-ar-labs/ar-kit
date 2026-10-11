@@ -1,6 +1,6 @@
-# Running Zero-AR 0.4.2
+# Running Zero-AR 0.5.0
 
-This guide runs Zero-AR 0.4.2 from its two published container images. You
+This guide runs Zero-AR 0.5.0 from its two published container images. You
 need Docker. gpg and jq are optional: they check the signed record of image
 digests before you pull. The client packages need Node.js 24.11 or later in
 the Node 24 line.
@@ -9,8 +9,8 @@ the Node 24 line.
 
 | Image | What it holds | Use it when |
 |---|---|---|
-| `ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.4.2` | The `zeroar` command with Local Lite: one SQLite file under your project directory, no database engine, no account. | You run and inspect work on one machine, try an agent, or develop against the deterministic adapter. |
-| `ghcr.io/zero-ar-labs/zero-ar/full-cell:v0.4.2` | The hosted Full Cell: PostgreSQL, tenant API keys, isolated child hosts, a managed secret broker and the HTTP API on port 8420. | Applications connect over the network, tenants need their own keys, or work belongs in PostgreSQL. |
+| `ghcr.io/zero-ar-labs/zero-ar/local-lite:v0.5.0` | The `zeroar` command with Local Lite: one SQLite file under your project directory, no database engine, no account. | You run and inspect work on one machine, try an agent, or develop against the deterministic adapter. |
+| `ghcr.io/zero-ar-labs/zero-ar/full-cell:v0.5.0` | The hosted Full Cell: PostgreSQL, tenant API keys, isolated child hosts, a managed secret broker and the HTTP API on port 8420. | Applications connect over the network, tenants need their own keys, or work belongs in PostgreSQL. |
 
 Both images are built for linux/amd64 and linux/arm64, so Docker pulls the
 native platform. Both run as a non-root user and carry no source.
@@ -42,8 +42,8 @@ Each `digest` value already starts with `sha256:`. Read it with `jq`, or copy
 it by hand, and pull by it:
 
 ```sh
-FULL_CELL=$(jq -r '.images[] | select(.image | endswith("/full-cell:v0.4.2")) | .digest' release/release-images.json)
-LOCAL_LITE=$(jq -r '.images[] | select(.image | endswith("/local-lite:v0.4.2")) | .digest' release/release-images.json)
+FULL_CELL=$(jq -r '.images[] | select(.image | endswith("/full-cell:v0.5.0")) | .digest' release/release-images.json)
+LOCAL_LITE=$(jq -r '.images[] | select(.image | endswith("/local-lite:v0.5.0")) | .digest' release/release-images.json)
 docker pull "ghcr.io/zero-ar-labs/zero-ar/full-cell@$FULL_CELL"
 docker pull "ghcr.io/zero-ar-labs/zero-ar/local-lite@$LOCAL_LITE"
 ```
@@ -377,7 +377,7 @@ conformance evidence you accept. The `conformance_ref` must appear in
 content hash of the identity, so compute it before first start. The
 `adapter-admit` request adds an HMAC-SHA256 signature made with the admission
 key; a wrong key refuses with `provider.adapter.signature-invalid`. With
-`@zero-ar/contracts@0.4.2` installed and `ZERO_AR_ADAPTER_ADMISSION_KEY` set to
+`@zero-ar/contracts@0.5.0` installed and `ZERO_AR_ADAPTER_ADMISSION_KEY` set to
 the cell's value:
 
 ```js
@@ -568,13 +568,13 @@ in the developer kit. The `@zero-ar/client` package exports the same file as
 `/cell/openapi/zero-ar-v1.openapi.json`. Each operation lists the scopes it
 needs under `x-zero-ar-authorization`.
 
-The SDK, typed client and CLI are on npm at 0.4.2. In the SDK,
+The SDK, typed client and CLI are on npm at 0.5.0. In the SDK,
 `createZeroAR({ endpoint, apiKey })` connects to a cell and sends the key as
 the bearer.
 
 ```sh
-npm install @zero-ar/sdk@0.4.2 @zero-ar/client@0.4.2
-npm install --global @zero-ar/cli@0.4.2
+npm install @zero-ar/sdk@0.5.0 @zero-ar/client@0.5.0
+npm install --global @zero-ar/cli@0.5.0
 ```
 
 The npm `zeroar` command is an API client with no Local Lite server, so it

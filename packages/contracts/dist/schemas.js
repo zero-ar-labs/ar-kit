@@ -1066,6 +1066,10 @@ export const RECORD_PAYLOADS = {
         grant_ref: hash,
         evidence_resolved: count,
         decide_by: z.string().datetime().optional(),
+        follow_up: z.strictObject({
+            decision_id: z.string().regex(/^ead_[0-9a-f]{32}$/, 'expected an effect authority decision id'),
+            use: z.number().int().min(1),
+        }).optional(),
     }),
     'effect.authority.decision': EffectApprovalRecordedSchema,
     'effect.authority.invalidated': EffectApprovalInvalidatedSchema,

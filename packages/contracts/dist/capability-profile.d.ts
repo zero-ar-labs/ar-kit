@@ -39,6 +39,7 @@ export declare const ProfileCapabilityEntrySchema: z.ZodObject<{
         "unattended-aggregator-mutations": "unattended-aggregator-mutations";
         "dynamic-authority": "dynamic-authority";
         "production-effect-dispatch": "production-effect-dispatch";
+        "host-target-effect-dispatch": "host-target-effect-dispatch";
         "research-reference-pack": "research-reference-pack";
         "video-reference-pack": "video-reference-pack";
         "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -204,6 +205,7 @@ export declare const ProfileCapabilityManifestSchema: z.ZodObject<{
             "unattended-aggregator-mutations": "unattended-aggregator-mutations";
             "dynamic-authority": "dynamic-authority";
             "production-effect-dispatch": "production-effect-dispatch";
+            "host-target-effect-dispatch": "host-target-effect-dispatch";
             "research-reference-pack": "research-reference-pack";
             "video-reference-pack": "video-reference-pack";
             "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -296,6 +298,7 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
         "unattended-aggregator-mutations": "unattended-aggregator-mutations";
         "dynamic-authority": "dynamic-authority";
         "production-effect-dispatch": "production-effect-dispatch";
+        "host-target-effect-dispatch": "host-target-effect-dispatch";
         "research-reference-pack": "research-reference-pack";
         "video-reference-pack": "video-reference-pack";
         "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -359,6 +362,7 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
             "unattended-aggregator-mutations": "unattended-aggregator-mutations";
             "dynamic-authority": "dynamic-authority";
             "production-effect-dispatch": "production-effect-dispatch";
+            "host-target-effect-dispatch": "host-target-effect-dispatch";
             "research-reference-pack": "research-reference-pack";
             "video-reference-pack": "video-reference-pack";
             "native-packaged-self-hosting": "native-packaged-self-hosting";
@@ -433,6 +437,7 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
             "unattended-aggregator-mutations": "unattended-aggregator-mutations";
             "dynamic-authority": "dynamic-authority";
             "production-effect-dispatch": "production-effect-dispatch";
+            "host-target-effect-dispatch": "host-target-effect-dispatch";
             "research-reference-pack": "research-reference-pack";
             "video-reference-pack": "video-reference-pack";
             "native-packaged-self-hosting": "native-packaged-self-hosting";
