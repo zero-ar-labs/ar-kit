@@ -2,7 +2,7 @@ import { canonicalJson } from "./canonical.js";
 import { compileProfileCapabilityManifest, profileCapabilityManifestFor, profileCapabilityManifestRef, ProfileCapabilityManifestSchema } from "./capability-profile.js";
 import { refuse } from "./diagnostics.js";
 import { PROFILE_MANIFEST_PREDECESSORS } from "./profile-manifest-history.js";
-const KEPT_ENTRY_FIELDS = ['state', 'refusal_point', 'diagnostic_code', 'requirements', 'vectors'];
+const KEPT_ENTRY_FIELDS = ['state', 'refusal_point', 'diagnostic_code', 'requirements'];
 export function profileManifestExtension(current, earlier) {
     const manifest_ref = String(earlier.manifest_ref);
     if (!ProfileCapabilityManifestSchema.safeParse(earlier).success) {
@@ -23,6 +23,8 @@ export function profileManifestExtension(current, earlier) {
             continue;
         }
         const changed = KEPT_ENTRY_FIELDS.filter((field) => canonicalJson(entry[field]) !== canonicalJson(now[field]));
+        if (entry.vectors.some(vector => !now.vectors.includes(vector)))
+            changed.push('vectors');
         if (changed.length > 0)
             breaks.push(`the current manifest changes the ${changed.join(', ')} of ${entry.capability}`);
     }

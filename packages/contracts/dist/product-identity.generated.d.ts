@@ -1,18 +1,27 @@
 export declare const PRODUCT_IDENTITY_SOURCE = "PRODUCT_IDENTITY.yaml";
-export declare const PRODUCT_IDENTITY_SOURCE_REF = "sha256:08acc193d619e075f9221af22b92d62a604a185ea873eea15cd8e4827bc8dfb3";
+export declare const PRODUCT_IDENTITY_SOURCE_REF = "sha256:46fb9415570c213db5eb10224ae2c19b6b9daa86111b714ad1f6dfdf8faaf2de";
 export declare const PRODUCT_IDENTITY: {
-    readonly schema: "product-identity/v1";
-    readonly status: "current";
-    readonly version: "1.0.0";
-    readonly current: {
-        readonly display_name: "Ramsden";
-        readonly slug: "ramsden";
-        readonly package_scope: "@ramsden";
-        readonly command: "ramsden";
-        readonly environment_prefix: "RAMSDEN_";
-        readonly local_data_directory: ".ramsden";
-    };
     readonly successor: {
+        readonly display_name: "Zero-AR";
+        readonly wordmark: "ZERO-AR";
+        readonly expansion: "Zero-layer Autonomous Runtime";
+        readonly pronunciation: "zero A-R";
+        readonly canonical_introduction: "Zero-AR is a log-native runtime for long-horizon agent work.";
+        readonly slug: "zero-ar";
+        readonly package_scope: "@zero-ar";
+        readonly command: "zeroar";
+        readonly environment_prefix: "ZERO_AR_";
+        readonly local_data_directory: ".zero-ar";
+        readonly run_bundle_suffix: ".zeroar.jsonl";
+        readonly kernel: {
+            readonly display_name: "W0 Kernel";
+            readonly slug: "w0";
+        };
+    };
+    readonly schema: "product-identity/v2";
+    readonly status: "current";
+    readonly version: "2.0.0";
+    readonly current: {
         readonly display_name: "Zero-AR";
         readonly wordmark: "ZERO-AR";
         readonly expansion: "Zero-layer Autonomous Runtime";
@@ -32,8 +41,8 @@ export declare const PRODUCT_IDENTITY: {
     readonly ratification: {
         readonly authority: "product-owner";
         readonly selected_at: "2026-08-31";
-        readonly ratified_at: "2026-08-31";
-        readonly decision_ref: "docs/product-identity-and-namespace-migration-appendix.md@0.4.1";
+        readonly ratified_at: "2026-10-14";
+        readonly decision_ref: "docs/product-identity-and-namespace-migration-appendix.md@0.5.0";
         readonly external_legal_approval_required: false;
     };
     readonly distribution: {
@@ -50,13 +59,22 @@ export declare const PRODUCT_IDENTITY: {
 };
 export type ProductIdentity = typeof PRODUCT_IDENTITY;
 export type ProductIdentityStatus = 'proposed' | 'selected' | 'ratified' | 'migrating' | 'current' | 'retired';
-export declare const LEGACY_PRODUCT_IDENTITY: {
-    readonly display_name: "Ramsden";
-    readonly slug: "ramsden";
-    readonly package_scope: "@ramsden";
-    readonly command: "ramsden";
-    readonly environment_prefix: "RAMSDEN_";
-    readonly local_data_directory: ".ramsden";
+export declare const CURRENT_PRODUCT_IDENTITY: {
+    readonly display_name: "Zero-AR";
+    readonly wordmark: "ZERO-AR";
+    readonly expansion: "Zero-layer Autonomous Runtime";
+    readonly pronunciation: "zero A-R";
+    readonly canonical_introduction: "Zero-AR is a log-native runtime for long-horizon agent work.";
+    readonly slug: "zero-ar";
+    readonly package_scope: "@zero-ar";
+    readonly command: "zeroar";
+    readonly environment_prefix: "ZERO_AR_";
+    readonly local_data_directory: ".zero-ar";
+    readonly run_bundle_suffix: ".zeroar.jsonl";
+    readonly kernel: {
+        readonly display_name: "W0 Kernel";
+        readonly slug: "w0";
+    };
 };
 export declare const SUCCESSOR_PRODUCT_IDENTITY: {
     readonly display_name: "Zero-AR";

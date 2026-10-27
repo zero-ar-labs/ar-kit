@@ -2442,6 +2442,13 @@ export interface EnvironmentExecutionPort {
     };
     readonly profiles: Readonly<Record<string, string>>;
     execute(request: EnvironmentExecutionRequest, signal?: AbortSignal): Promise<EnvironmentExecutionResult>;
+    recover?(request: EnvironmentExecutionRequest, history: readonly {
+        type: string;
+        payload: Record<string, unknown>;
+    }[], signal?: AbortSignal): Promise<{
+        pending: boolean;
+        result?: EnvironmentExecutionResult;
+    }>;
     resolveForRun?(input: {
         tenant: string;
         run_id: string;

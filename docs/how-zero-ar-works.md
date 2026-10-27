@@ -6,7 +6,8 @@ run, with its history and current position intact. The agent calls the
 selected models and tools within declared limits. A result receives the
 status *verified* only when its named checks pass.
 
-> This page describes Zero-AR version 0.5.0. It uses controlled English based
+> This page describes the Zero-AR version 0.6.0 release candidate. Publication
+> is a separate release step. It uses controlled English based
 > on ASD-STE100, but it is not certified ASD-STE100. Commands and field names
 > are in a monospace font.
 
@@ -45,7 +46,7 @@ In each deployment, the W0 Kernel runs the work, the Quality Plane decides
 whether the work is verified, and the optional Effect Plane holds the
 authority to change outside systems.
 
-## What version 0.5.0 includes
+## What version 0.6.0 includes
 
 | Capability | What it does | Condition |
 |---|---|---|
@@ -62,11 +63,18 @@ authority to change outside systems.
 | Controlled continuation | A compatible destination can import a run and continue it one time. | The destination decides whether it is compatible. Import authority and resume authority are both necessary. |
 | Operator validators and questions | A Full Cell can run the validators of an operator outside the runtime. A validator can ask a person a question about one item during the work. | The publication names the validators. It does not upload validator code. |
 | Web search and page fetch | `web.search` sends up to three queries to one search provider at the same time. `web.fetch` reads one page and keeps it as a Markdown artifact that expires. | Local Lite needs a configured provider and its key, from the Keychain or an environment variable. A hosted tenant needs a configured `web_search` block. The run history keeps no query text and no page text. |
-| Handoff between cells | A suspended run can move to a second Full Cell that shares nothing with the first. The first cell signs the run over to one named cell and stops it, and only that cell continues it, once. | The cell that hands the run over needs an integrity signer. The continuing cell pins the first key it sees for each signer. |
+| Handoff between cells | A suspended run can move to a second Full Cell that shares nothing with the first. The first cell signs the run over to one named cell and stops it, and only that cell continues it, once. | The source signs for one destination, which checks its key and the receipts it receives. A plain export or Local Lite cannot take over committed outside actions. |
 | Waiting for replies and decisions | A run that acts through an effect target can wait for a reply at no cost, and a reply that a product posts to the run wakes it. While an action waits for a person's decision, the run continues with work that does not depend on it. The agent reads what became of each action before its next step. | A decision window withdraws an action that no person decides. The window is 72 hours unless the operator sets another, and never extends past the grant. |
 | Attachments | `document.extract` reads a PDF, JPEG or PNG file of the run, such as an attachment on a reply, with the extractor that the run pins. The checks of the run read the pages it extracted. | The run needs a source binding that pins the extractor. |
-| Actions through your application | A Full Cell sends the actions of an agent to HTTPS endpoints that your application implements. Each action goes out one time, under a grant, an approval of that exact action, or a follow-up that an approver allowed. When an answer does not say what occurred, Zero-AR asks the endpoint before it sends the action again. | Each endpoint must pass `zeroar target check`, and the tenant must be configured to send actions. Local Lite records proposed actions and sends none. |
+| Actions through your application | A Full Cell sends the actions of an agent to HTTPS endpoints that your application implements. Each action goes out one time, under a grant, an approval of that exact action, or a follow-up that an approver allowed. When an answer does not say what occurred, Zero-AR asks the endpoint before it sends the action again. | Each endpoint must pass `zeroar target check`, and the tenant must be configured to send actions. Signed calls are the default. An existing bearer endpoint must be selected explicitly. Local Lite records proposed actions and sends none. |
 | Follow-ups | An approver can approve one action and, in the same decision, allow later actions of the same type in the same run. The agent can then answer the next reply without a new approval. | The follow-up names the endpoint, the operation, the permitted values, a number of uses and an end time that is not after the approval. |
+| Budgets before tool work | Every tool call reserves its time, returned data and declared costs before it runs. A call that cannot be funded makes no outside request. | Work, checks and human review each need their declared headroom. |
+| Recovery after faults | Work retries temporary provider and preparation faults. After a restart, Zero-AR checks jobs that were already in progress. | Attempts are bounded. A change whose outcome is unknown is not automatically sent again. |
+| Sub-runs | An agent can delegate part of its objective. Its sub-runs use tools and budget the parent already holds, and receive its steer, redirect and cancel instructions. | A sub-run gains no new permission. The parent waits for its findings without keeping a worker busy. |
+| Skills | Agents find skills by name and summary, then read the text they need. They see when a skill expired or did not fit, and checks can read the same pinned text. | Policy skills have a fixed share of the window. Large entries get a warning when published. |
+| Concurrent reads | Up to eight consecutive read-only calls can run together. Results return to the correct call, including after cancellation or restart. | Every call needs its own budget. Changes and control instructions remain ordered. |
+| Knowledge without an index | Agents search up to 20,000 documents in each source by literal words, with ranked results continued across calls. They open bounded passages and reuse unchanged document text. | Sources remain read-only. Retention and access limits still apply. Passages cited for an open item remain available until it verifies. |
+| Several Full Cells | Several cells can serve one shared database, with one cell changing a run at a time. A follower receives durable events on its next stream heartbeat. | A decision sent while another cell holds the run returns HTTP 409 to retry. Participant credentials are not forwarded between cells. |
 
 ## Who uses Zero-AR
 
@@ -215,7 +223,7 @@ time. A pause never stops work in progress. To stop the current step now, use
 - An identity provider or a secret store.
 - The outside systems where effects occur.
 
-## Known limits in 0.5.0
+## Known limits in 0.6.0
 
 - Controls and budget additions record the application that sent them, not
   the end user it acted for.
@@ -241,6 +249,6 @@ time. A pause never stops work in progress. To stop the current step now, use
 
 ---
 
-This page describes Zero-AR version 0.5.0. It describes what Zero-AR does and
+This page describes Zero-AR version 0.6.0. It describes what Zero-AR does and
 what it guarantees. The commands and names on this page are those of the
 public API and the `zeroar` command.

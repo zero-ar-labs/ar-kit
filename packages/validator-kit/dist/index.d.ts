@@ -1,4 +1,4 @@
-import type { EffectAuthorityDecision, EffectState, FailureClass, ItemState, ValidatorCatalogueEntry, ValidatorClass } from '@zero-ar/contracts';
+import type { CheckInputTruncation, EffectAuthorityDecision, EffectState, FailureClass, ItemState, SourceReadKind, ValidatorCatalogueEntry, ValidatorClass, ValidatorInputExtension } from '@zero-ar/contracts';
 export { validatorFindingProblem } from './finding.js';
 export type { ValidatorFindingProblem } from './finding.js';
 export { admitAvailabilitySnapshot, admitCatalogueEntry, canonicalCatalogueEntry, catalogueDefaults, catalogueEvidenceRef, defineAvailabilitySnapshot, defineCatalogueEntry, defineCustomCatalogueEntry, defineFirstPartyCatalogueEntry, deriveValidatorEvidenceGrade, } from './catalogue.js';
@@ -60,6 +60,41 @@ export interface ExaminedDocumentPage {
     text: string;
     text_content_hash: string;
 }
+export interface ExaminedSourceRead {
+    kind: SourceReadKind;
+    tool: string;
+    source_alias: string | null;
+    locator: string;
+    page?: number;
+    offset: number | null;
+    length: number | null;
+    text: string;
+    content_hash: string;
+    artifact_ref?: string;
+    member_content_hash?: string;
+    classification?: string;
+}
+export interface ExaminedSkill {
+    skill_ref: string;
+    name: string;
+    version: string;
+    path: string | null;
+    content_ref: string;
+    content_hash: string;
+    text: string;
+    lines: {
+        start: number;
+        end: number;
+    } | null;
+    entry_id: string | null;
+}
+export interface CheckInputTruncationNote {
+    input: ValidatorInputExtension;
+    reason: CheckInputTruncation;
+    limit: number | null;
+    omitted: number;
+    locator?: string;
+}
 export interface ValidatorCaseInput {
     run_id: string;
     rule: string;
@@ -73,6 +108,11 @@ export interface ValidatorCaseInput {
     workspace_outputs_truncated?: boolean;
     web_pages?: readonly ExaminedWebPage[];
     web_pages_truncated?: boolean;
+    source_reads?: readonly ExaminedSourceRead[];
+    source_reads_truncated?: boolean;
+    skills?: readonly ExaminedSkill[];
+    skills_truncated?: boolean;
+    input_truncations?: readonly CheckInputTruncationNote[];
 }
 export interface ValidatorCaseFinding {
     verdict: ValidatorFindingKind;
@@ -137,6 +177,52 @@ export interface CaseOutcome {
     examined: ExaminedManifest;
 }
 export declare function runLabelledCases(validator: DefinedValidator, cases: readonly LabelledCase[]): Promise<CaseOutcome[]>;
+export declare const CASE_KINDS: readonly ["positive", "negative", "indeterminate", "adversarial"];
+export type CaseKind = (typeof CASE_KINDS)[number];
+export interface CorpusCase {
+    label: string;
+    kind: CaseKind;
+    input: ValidatorCaseInput;
+}
+export interface LabelledCorpus {
+    name: string;
+    version: string;
+    cases: readonly CorpusCase[];
+}
+export interface MeasuredCount {
+    count: number;
+    of: number;
+}
+export interface CheckQualityReport {
+    schema: 'validator-quality-report/1';
+    validator: {
+        name: string;
+        version: string;
+    };
+    corpus: {
+        name: string;
+        version: string;
+        ref: string;
+    };
+    by_kind: Record<CaseKind, {
+        cases: number;
+        pass: number;
+        reject: number;
+        indeterminate: number;
+    }>;
+    false_pass: MeasuredCount;
+    false_rejection: MeasuredCount;
+    missed_indeterminate: MeasuredCount;
+    disagreements: {
+        label: string;
+        kind: CaseKind;
+        expected: ValidatorFindingKind;
+        actual: ValidatorFindingKind;
+    }[];
+    boundary: 'measured on this corpus only; never a designation of sufficiency';
+}
+export declare function corpusRef(corpus: LabelledCorpus): string;
+export declare function evaluateCorpus(validator: DefinedValidator, corpus: LabelledCorpus): Promise<CheckQualityReport>;
 export declare function examinedItem(item_id: string, output: string | null, state?: ItemState, attempts?: number): ExaminedItem;
 type JsonPrimitiveKind = 'string' | 'number' | 'integer' | 'boolean';
 export interface BoundedJsonObjectSchema {

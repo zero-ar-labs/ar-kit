@@ -1,5 +1,6 @@
-import { createHash, createHmac, verify } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { canonicalJson } from "./canonical.js";
+import { decodeCompactJws, jwsSignatureValid } from "./compact-jws.js";
 export const EFFECT_TARGET_TIMEOUT_MS = 30_000;
 export const EFFECT_ANSWER_LIMIT = 4_096;
 export function effectDispatchRequest(endpoint, route, wire, credential, descriptor, now_seconds) {
@@ -50,8 +51,11 @@ function authentication(wire, credential, id, body, now_seconds = Math.floor(Dat
 function routeUrl(endpoint, path) {
     return new URL(path.replace(/^\/+/, ''), endpoint.href.endsWith('/') ? endpoint : `${endpoint.href}/`);
 }
+export function standardWebhookSecretBytes(secret) {
+    return secret.startsWith('whsec_') ? Buffer.from(secret.slice('whsec_'.length), 'base64') : Buffer.from(secret, 'utf8');
+}
 export function standardWebhookHeaders(secret, id, body, now_seconds) {
-    const key = secret.startsWith('whsec_') ? Buffer.from(secret.slice('whsec_'.length), 'base64') : Buffer.from(secret, 'utf8');
+    const key = standardWebhookSecretBytes(secret);
     const timestamp = String(now_seconds);
     const signature = createHmac('sha256', key).update(`${id}.${timestamp}.${body}`).digest('base64');
     return { 'webhook-id': id, 'webhook-timestamp': timestamp, 'webhook-signature': `v1,${signature}` };
@@ -118,17 +122,14 @@ export function ownerReceiptFields(descriptor, outcome) {
     };
 }
 export function ownerReceiptRefusal(jws, fields, key) {
-    const parts = jws.split('.');
-    if (parts.length !== 3)
+    const decoded = decodeCompactJws(jws);
+    if (!decoded)
         return 'it is not a compact JWS';
-    const [header, payload, signature] = parts;
-    const alg = parseRecord(Buffer.from(header, 'base64url').toString('utf8'))?.['alg'];
-    if (alg !== 'EdDSA')
-        return `its algorithm is ${String(alg)}, not EdDSA`;
-    const signed = parseRecord(Buffer.from(payload, 'base64url').toString('utf8'));
-    if (!signed || canonicalJson(signed) !== canonicalJson(fields))
+    if (decoded.header['alg'] !== 'EdDSA')
+        return `its algorithm is ${String(decoded.header['alg'])}, not EdDSA`;
+    if (canonicalJson(decoded.payload) !== canonicalJson(fields))
         return 'it signs fields other than this receipt\'s';
-    if (!verify(null, Buffer.from(`${header}.${payload}`), key, Buffer.from(signature, 'base64url')))
+    if (!jwsSignatureValid('EdDSA', decoded.signing_input, decoded.signature, key))
         return 'the registered receipt key does not verify it';
     return null;
 }

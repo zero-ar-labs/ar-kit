@@ -21,6 +21,7 @@ export const CitedSpanSchema = z.strictObject({
 export const EntryEvidenceSchema = z.strictObject({
     classification: z.enum(MEMORY_CLASSIFICATIONS),
     evidence_grade: z.enum(EVIDENCE_GRADES),
+    citations: z.array(CitationSchema).max(256).optional(),
     artifact: z
         .strictObject({
         artifact_ref: artifactHandle,

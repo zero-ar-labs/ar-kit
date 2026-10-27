@@ -150,9 +150,9 @@ the entry you will put under `effect_plane.http_targets`:
 }
 ```
 
-`wire: "standard"` selects the conventions above. Without it, Zero-AR
-sends the secret as a bearer token and expects the outcome in the body, the
-form earlier targets use. `credential_binding_ref` names the secret the cell
+`wire: "standard"` selects the conventions above and is the default in 0.6.0: the secret stays with Zero-AR and each call carries a signature that
+is good for that call alone. For an earlier bearer target, explicitly set `wire: "zero-ar-json"`: it sends the secret itself as a bearer token and
+expects the outcome in the body. `credential_binding_ref` names the secret the cell
 signs with; the check reads the same secret from your shell. Register the
 HTTPS address in place of `localhost`.
 

@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, statSync, writeFileSync, existsSync } from 'no
 import { createInterface } from 'node:readline';
 import { basename, dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { CONTRACT_VERSION, AUTHORING_SCAFFOLD_KINDS, CapabilityAdmissionRequestSchema, DiagnosticError, AdmitModelAdapterRequestSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, DeclareFallbackSetRequestSchema, EnableProviderModelRequestSchema, EnableToolSourceToolsRequestSchema, ProtectedCredentialIngestRequestSchema, RegisterEnvironmentRequestSchema, RegisterSourceRequestSchema, RegisterToolSourceRequestSchema, RunContinuationDeclarationSchema, RUN_PORTABILITY_LEVELS, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SyncProviderCatalogueRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceStateRequestSchema, canonicalJson, makeId, turnCeilingForBudget, productEnvironmentNames, productEnvironmentValue, profileCapabilitySummaryFor, resolveCommandTarget, renderDiagnostic, shortId, SUCCESSOR_PRODUCT_IDENTITY, SUPPORTED_NODE_RUNTIME, isSupportedNodeRuntime, productLocalDataDirectory, } from '@zero-ar/contracts';
+import { CONTRACT_VERSION, HealthResponseSchema, AUTHORING_SCAFFOLD_KINDS, CapabilityAdmissionRequestSchema, DiagnosticError, AdmitModelAdapterRequestSchema, CreateExternalCredentialBindingRequestSchema, CreateProviderInstanceRequestSchema, DeclareFallbackSetRequestSchema, EnableProviderModelRequestSchema, EnableToolSourceToolsRequestSchema, ProtectedCredentialIngestRequestSchema, RegisterEnvironmentRequestSchema, RegisterSourceRequestSchema, RegisterToolSourceRequestSchema, RunContinuationDeclarationSchema, RUN_PORTABILITY_LEVELS, RevokeCredentialRequestSchema, RotateExternalCredentialRequestSchema, RotateProtectedCredentialRequestSchema, SetDefaultModelAliasRequestSchema, SetModelAliasRequestSchema, SyncProviderCatalogueRequestSchema, SyncToolSourceCatalogueRequestSchema, ToolSourceStateRequestSchema, canonicalJson, makeId, turnCeilingForBudget, productEnvironmentNames, productEnvironmentValue, profileCapabilitySummaryFor, resolveCommandTarget, renderDiagnostic, shortId, SUCCESSOR_PRODUCT_IDENTITY, SUPPORTED_NODE_RUNTIME, isSupportedNodeRuntime, productLocalDataDirectory, } from '@zero-ar/contracts';
 import { connectRuntimeTarget, ZeroARClient } from '@zero-ar/client';
 import { authoringScaffold, compileAuthoringSource, loadProject, lockBytes, publishCapabilitySource, previewPublicationVerificationPlan, renderPlan, renderVerificationPlan, scaffoldProject, verifyBundle, } from '@zero-ar/sdk';
 import { CLI_COMMANDS, CLI_COMMAND_EXAMPLES, CLI_HELP_SECTIONS, CLI_USAGE_ROWS, cliIdentityReport, createCliContext, isRemoteCapableCommand, } from "./identity.js";
@@ -11,6 +11,7 @@ import { CLI_COMMAND_MODULES } from "./commands/index.js";
 import { exportedArtifactsNote } from "./commands/artifact.js";
 import { externalProductTemplate } from "./external-product-template.js";
 import { Terminal, detectAscii, detectTier, neutralize, neutralizeDeep, stateFor } from "./terminal.js";
+import { subRunEventLine, subRunRows, subRunSummaryRows } from "./sub-runs.js";
 let t = new Terminal();
 export async function runCli(options = {}) {
     const context = createCliContext();
@@ -41,7 +42,7 @@ export async function runCli(options = {}) {
     if (command === 'validate')
         return validate(rest);
     if (command === 'profile')
-        return profile(rest, context);
+        return await profile(rest, context);
     if (command === 'doctor' && !rest.includes('--database'))
         return doctor(rest, context);
     if (command === 'publish' && rest.includes('--dry-run'))
@@ -241,7 +242,9 @@ export async function runCli(options = {}) {
                 else {
                     console.log(outcome.head_equal
                         ? `imported ${outcome.run_id}: ${outcome.records} records, and the refolded head matches the manifest`
-                        : `imported ${outcome.run_id}, and the refolded head does not match the manifest. Do not promote this import.`);
+                        : outcome.projection_migration?.source_verified
+                            ? `imported ${outcome.run_id}: ${outcome.records} records, source head verified under ${outcome.projection_migration.source_profile}, projection migrated to ${outcome.projection_migration.current_profile}`
+                            : `imported ${outcome.run_id}, and the refolded head does not match the manifest. Do not promote this import.`);
                     if (outcome.artifacts) {
                         const reasons = [...new Set(outcome.artifacts.not_transferred.map((omission) => omission.reason))].sort();
                         console.log(`artifacts: ${outcome.artifacts.imported.length} restored, ${outcome.artifacts.not_transferred.length} named but not transferred` +
@@ -251,7 +254,7 @@ export async function runCli(options = {}) {
                 }
                 const compatibilityPassed = !declaration || compatibility?.compatible === true;
                 const continuationPassed = !continueRequested || continued?.accepted === true;
-                return outcome.head_equal && compatibilityPassed && continuationPassed ? 0 : 1;
+                return (outcome.head_equal || outcome.projection_migration?.source_verified === true) && compatibilityPassed && continuationPassed ? 0 : 1;
             }
             case 'publish':
                 return await publish(client, commandArguments, context);
@@ -863,6 +866,11 @@ function cursorValue(args, flag) {
 function renderEvent(raw) {
     const event = neutralizeDeep(raw);
     const at = t.dim(event.at.slice(11, 19));
+    const subRun = subRunEventLine(event);
+    if (subRun) {
+        console.log(`${at}  ${subRun}`);
+        return;
+    }
     switch (event.event) {
         case 'run.started':
             console.log(`${at}  ${t.label('run started')}`);
@@ -951,6 +959,11 @@ async function showResult(client, run_id, asJson = false) {
         for (const line of result.not_established)
             console.log(`  ${neutralize(line)}`);
     }
+    if (result.sub_runs) {
+        console.log('');
+        console.log(t.label('sub-runs'));
+        console.log(t.table(subRunSummaryRows(neutralizeDeep(result.sub_runs)).map(([k, v]) => ['  ' + k, v])));
+    }
     console.log('');
     console.log(t.label('handover'));
     for (const line of result.handover)
@@ -989,6 +1002,7 @@ async function inspect(client, run_id) {
     if (s.contract) {
         rows.push(['contract', `${s.contract.name}, repair ${s.contract.repair_attempts_used} of ${s.contract.repair_budget} attempts used`]);
     }
+    rows.push(...subRunRows(neutralizeDeep({ sub_runs: s.sub_runs, sub_run: s.sub_run })));
     if (s.tool_view) {
         rows.push(['tool closure', `${s.tool_view.closure_size} pinned, ${s.tool_view.hidden} hidden`]);
         rows.push(['tool view', `${s.tool_view.visible.length} visible, ${s.tool_view.used.schema_tokens}/${s.tool_view.budget.schema_tokens} schema tokens, ${s.tool_view.used.schema_bytes}/${s.tool_view.budget.schema_bytes} bytes`]);
@@ -1106,7 +1120,9 @@ function importedRunPortability(outcome, compatibility, continued) {
         verify: { status: 'passed', detail: 'the bundle schemas, checksum, content hashes, causal links and record chain passed before import' },
         materialize: outcome.head_equal
             ? { status: 'passed', detail: 'the imported records refold to the run-head hash declared by the manifest' }
-            : { status: 'refused', detail: 'the imported records do not refold to the declared run-head hash' },
+            : outcome.projection_migration?.source_verified
+                ? { status: 'passed', detail: `the source head verified under ${outcome.projection_migration.source_profile}; the current view uses ${outcome.projection_migration.current_profile}` }
+                : { status: 'refused', detail: 'the imported records do not refold to the declared run-head hash' },
         rehydrate: rehydration
             ? {
                 status: rehydration.rehydrated ? 'passed' : 'refused',
@@ -1209,11 +1225,20 @@ function renderDatabaseDoctor(report, target) {
 function ms(value) {
     return value === null ? 'unknown' : `${value.toFixed(1)} ms`;
 }
-function profile(rest, context) {
+async function profile(rest, context) {
     const home = resolveLocalDataHome(process.cwd());
     const keySource = envValue('KEY_SOURCE');
-    const capabilityManifest = profileCapabilitySummaryFor('local-lite');
+    const resolved = resolveCommandTarget({ arguments: rest, environment: {} });
+    const answered = resolved.target.base_url ? HealthResponseSchema.safeParse(await new ZeroARClient(resolved.target.base_url).health()) : null;
+    if (answered && (!answered.success || answered.data.product !== 'zero-ar')) {
+        console.error(`error: ${resolved.target.base_url} did not answer health as a Zero-AR ${CONTRACT_VERSION} runtime, so it serves no capability manifest this view can read. Point --url at a Zero-AR runtime.`);
+        return 1;
+    }
+    const observed = answered?.success ? answered.data : null;
+    const capabilityManifest = observed?.capability_manifest ?? profileCapabilitySummaryFor('local-lite');
+    const basis = observed ? 'observed' : 'declared';
     const capabilityManifestView = {
+        basis,
         manifest_id: capabilityManifest.manifest_id,
         manifest_ref: capabilityManifest.manifest_ref,
         profile: capabilityManifest.profile,
@@ -1227,8 +1252,9 @@ function profile(rest, context) {
     const report = {
         schema: 'zero-ar-profile/1',
         identity: cliIdentityReport(context),
-        profile: 'local-lite',
+        profile: observed?.profile ?? 'local-lite',
         capability_manifest: capabilityManifestView,
+        ...(observed ? { observed_at: resolved.target.base_url } : {}),
         data_home: home,
         database: resolve(envValue('DB') ?? `${home}/local.db`),
         versions: { contract: CONTRACT_VERSION, node: process.versions.node },
@@ -1239,7 +1265,7 @@ function profile(rest, context) {
                 : process.env['ANTHROPIC_API_KEY']
                     ? 'environment'
                     : null,
-        exclusions: capabilityManifest.excluded.map((entry) => `${entry.capability}: ${entry.summary}`),
+        exclusions: observed ? observed.guarantee_exclusions : capabilityManifest.excluded.map((entry) => `${entry.capability}: ${entry.summary}`),
         uninstall: `remove ${home} to erase local profile state; published closures live in the hosted registry`,
     };
     if (rest.includes('--json')) {
@@ -1247,7 +1273,9 @@ function profile(rest, context) {
         return 0;
     }
     console.log(t.label('profile') + '  ' + report.profile);
-    console.log(t.label('manifest') + '  ' + report.capability_manifest.manifest_ref);
+    console.log(t.label('manifest') + '  ' + report.capability_manifest.manifest_ref + (observed
+        ? `, observed on ${resolved.target.base_url}`
+        : ', declared, not observed: no runtime was asked. Pass --url to read what a running runtime compiled'));
     console.log(t.label('data home') + '  ' + report.data_home);
     console.log(t.label('versions') + '  ' + `contract ${report.versions.contract}, node ${report.versions.node}`);
     console.log(t.label('credential') + '  ' + (report.credential_source ?? 'none bound; the offline run needs none'));
@@ -1264,6 +1292,10 @@ async function publish(client, rest, context) {
     }
     const compiled = await compileAuthoringSource(source);
     verifyBundle(compiled.bundle, compiled.blobs);
+    if (!rest.includes('--dry-run') || rest.includes('--json') || argValue(rest, '--verification-input')) {
+        for (const warning of compiled.warnings ?? [])
+            console.error(renderDiagnostic(warning));
+    }
     if (rest.includes('--dry-run')) {
         const verificationInput = argValue(rest, '--verification-input');
         if (verificationInput) {

@@ -13,6 +13,8 @@ export const COMPLETION_MACHINE = [
     { from: 'checkpoint_verifying', to: 'working', on: 'checkpoint.indeterminate', actor: 'validator' },
     { from: 'checkpoint_verifying', to: 'repair', on: 'checkpoint.rejected', actor: 'validator' },
     { from: 'repair', to: 'working', on: 'repair.started', actor: 'runtime' },
+    { from: 'working', to: 'working', on: 'repair.started', actor: 'runtime' },
+    { from: 'gap_open', to: 'working', on: 'repair.started', actor: 'runtime' },
     { from: 'working', to: 'completion_proposed', on: 'completion.proposed', actor: 'model' },
     { from: 'completion_proposed', to: 'verifying', on: 'verification.started', actor: 'runtime' },
     { from: 'verifying', to: 'complete', on: 'verification.verified', actor: 'validator' },

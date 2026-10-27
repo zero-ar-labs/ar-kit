@@ -1,6 +1,6 @@
 {
   "name": "@zero-ar/cli",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "description": "Start, inspect, control and transfer Zero-AR work from the terminal.",
   "license": "Apache-2.0",
@@ -8,9 +8,9 @@
     "zeroar": "./dist/zeroar.js"
   },
   "dependencies": {
-    "@zero-ar/contracts": "0.5.0",
-    "@zero-ar/client": "0.5.0",
-    "@zero-ar/sdk": "0.5.0"
+    "@zero-ar/contracts": "0.6.0",
+    "@zero-ar/client": "0.6.0",
+    "@zero-ar/sdk": "0.6.0"
   },
   "engines": {
     "node": ">=24.11.0 <25"

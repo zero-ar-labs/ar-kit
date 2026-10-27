@@ -238,6 +238,8 @@ export class ZeroARClient extends GeneratedRoutes {
             return false;
         if (event.event !== 'run.suspended' || event.record_seq <= floor)
             return false;
+        if (event.payload['reason'] === 'awaiting_subruns')
+            return false;
         const later = await this.records(run_id, event.record_seq);
         return !later.records.some((record) => record.type === 'run.resumed' || record.type === 'run.started');
     }

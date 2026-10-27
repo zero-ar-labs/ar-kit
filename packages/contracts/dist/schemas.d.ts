@@ -31,6 +31,45 @@ export declare const BudgetsSchema: z.ZodObject<{
     verification_reserve_fraction: z.ZodNumber;
     max_turns: z.ZodNumber;
 }, z.core.$strict>;
+export declare const SUB_RUN_MAX_CHILDREN = 16;
+export declare const SubRunPolicySchema: z.ZodObject<{
+    max_children: z.ZodNumber;
+    act_on_partial_findings: z.ZodOptional<z.ZodBoolean>;
+}, z.core.$strict>;
+export type SubRunPolicy = z.infer<typeof SubRunPolicySchema>;
+export declare const SubRunSummarySchema: z.ZodObject<{
+    counts: z.ZodObject<{
+        running: z.ZodNumber;
+        finished: z.ZodNumber;
+        failed: z.ZodNumber;
+        cancelled: z.ZodNumber;
+    }, z.core.$strict>;
+    children: z.ZodArray<z.ZodObject<{
+        run_id: z.ZodString;
+        objective: z.ZodString;
+        state: z.ZodEnum<{
+            cancelled: "cancelled";
+            running: "running";
+            finished: "finished";
+            failed: "failed";
+        }>;
+        slice_model_tokens: z.ZodNumber;
+        spent_model_tokens: z.ZodNumber;
+        finding: z.ZodEnum<{
+            gap: "gap";
+            pending: "pending";
+            returned: "returned";
+        }>;
+        terminal: z.ZodNullable<z.ZodEnum<{
+            cancelled: "cancelled";
+            complete: "complete";
+            unverified_artifact: "unverified_artifact";
+        }>>;
+        gap: z.ZodNullable<z.ZodString>;
+    }, z.core.$strict>>;
+}, z.core.$strict>;
+export type SubRunSummary = z.infer<typeof SubRunSummarySchema>;
+export declare function subRunCountsLine(counts: SubRunSummary['counts']): string;
 export declare function turnCeilingForBudget(model_tokens: number, items?: number): number;
 export declare const InputArtifactBindingSchema: z.ZodObject<{
     alias: z.ZodOptional<z.ZodString>;
@@ -95,6 +134,7 @@ export declare const RemoteToolTaskHandleSchema: z.ZodObject<{
     }>;
     last_position: z.ZodNullable<z.ZodString>;
     observed_at: z.ZodString;
+    poll_interval_ms: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strict>;
 export type RemoteToolTaskHandle = z.infer<typeof RemoteToolTaskHandleSchema>;
 export declare const IntakeRequestSchema: z.ZodObject<{
@@ -234,6 +274,7 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
             "hierarchical-context": "hierarchical-context";
             "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
             "web-search": "web-search";
+            "several-cells-one-database": "several-cells-one-database";
         }>>;
         conditional: z.ZodArray<z.ZodObject<{
             capability: z.ZodEnum<{
@@ -298,6 +339,7 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "hierarchical-context": "hierarchical-context";
                 "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                 "web-search": "web-search";
+                "several-cells-one-database": "several-cells-one-database";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -373,6 +415,7 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
                 "hierarchical-context": "hierarchical-context";
                 "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                 "web-search": "web-search";
+                "several-cells-one-database": "several-cells-one-database";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -427,6 +470,10 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
         definition_ref: z.ZodString;
         instructions_ref: z.ZodString;
         publication_ref: z.ZodNullable<z.ZodString>;
+        sub_runs: z.ZodOptional<z.ZodObject<{
+            max_children: z.ZodNumber;
+            act_on_partial_findings: z.ZodOptional<z.ZodBoolean>;
+        }, z.core.$strict>>;
     }, z.core.$strict>;
     context: z.ZodObject<{
         assembler: z.ZodString;
@@ -921,6 +968,8 @@ export declare const ResolvedRunManifestSchema: z.ZodObject<{
     }, z.core.$strict>>>;
 }, z.core.$strict>;
 export type ResolvedRunManifest = z.infer<typeof ResolvedRunManifestSchema>;
+export declare const CHECK_INPUT_DEFAULT_BYTES: number;
+export declare const CHECK_INPUT_MAX_BYTES: number;
 export declare const TaskContractSchema: z.ZodObject<{
     name: z.ZodString;
     version: z.ZodString;
@@ -957,7 +1006,13 @@ export declare const TaskContractSchema: z.ZodObject<{
         "effect-outcomes": "effect-outcomes";
         "workspace-output": "workspace-output";
         "web-pages": "web-pages";
+        "source-reads": "source-reads";
+        "skill-text": "skill-text";
     }>>>;
+    reading_limits: z.ZodOptional<z.ZodObject<{
+        extract_max_pages: z.ZodOptional<z.ZodNumber>;
+        check_input_bytes: z.ZodOptional<z.ZodNumber>;
+    }, z.core.$strict>>;
     checkpoint_view: z.ZodOptional<z.ZodEnum<{
         "covered-items": "covered-items";
         "worked-items": "worked-items";
@@ -1457,7 +1512,13 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             "effect-outcomes": "effect-outcomes";
             "workspace-output": "workspace-output";
             "web-pages": "web-pages";
+            "source-reads": "source-reads";
+            "skill-text": "skill-text";
         }>>>;
+        reading_limits: z.ZodOptional<z.ZodObject<{
+            extract_max_pages: z.ZodOptional<z.ZodNumber>;
+            check_input_bytes: z.ZodOptional<z.ZodNumber>;
+        }, z.core.$strict>>;
         checkpoint_view: z.ZodOptional<z.ZodEnum<{
             "covered-items": "covered-items";
             "worked-items": "worked-items";
@@ -1566,6 +1627,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "hierarchical-context": "hierarchical-context";
                 "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                 "web-search": "web-search";
+                "several-cells-one-database": "several-cells-one-database";
             }>>;
             conditional: z.ZodArray<z.ZodObject<{
                 capability: z.ZodEnum<{
@@ -1630,6 +1692,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     "hierarchical-context": "hierarchical-context";
                     "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                     "web-search": "web-search";
+                    "several-cells-one-database": "several-cells-one-database";
                 }>;
                 refusal_point: z.ZodEnum<{
                     "profile-compilation": "profile-compilation";
@@ -1705,6 +1768,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                     "hierarchical-context": "hierarchical-context";
                     "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                     "web-search": "web-search";
+                    "several-cells-one-database": "several-cells-one-database";
                 }>;
                 refusal_point: z.ZodEnum<{
                     "profile-compilation": "profile-compilation";
@@ -1759,6 +1823,10 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             definition_ref: z.ZodString;
             instructions_ref: z.ZodString;
             publication_ref: z.ZodNullable<z.ZodString>;
+            sub_runs: z.ZodOptional<z.ZodObject<{
+                max_children: z.ZodNumber;
+                act_on_partial_findings: z.ZodOptional<z.ZodBoolean>;
+            }, z.core.$strict>>;
         }, z.core.$strict>;
         context: z.ZodObject<{
             assembler: z.ZodString;
@@ -2379,6 +2447,9 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             version: z.ZodString;
             owner: z.ZodString;
             verification_reserve_fraction: z.ZodNumber;
+            skill_context: z.ZodOptional<z.ZodObject<{
+                maximum_window_share_ppm: z.ZodNumber;
+            }, z.core.$strict>>;
             optimization: z.ZodOptional<z.ZodObject<{
                 checkpoint: z.ZodOptional<z.ZodObject<{
                     selector: z.ZodLiteral<"young-daly-items-v1">;
@@ -2613,6 +2684,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
             "hierarchical-context": "hierarchical-context";
             "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
             "web-search": "web-search";
+            "several-cells-one-database": "several-cells-one-database";
         }>>;
         conditional: z.ZodArray<z.ZodObject<{
             capability: z.ZodEnum<{
@@ -2677,6 +2749,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "hierarchical-context": "hierarchical-context";
                 "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                 "web-search": "web-search";
+                "several-cells-one-database": "several-cells-one-database";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -2752,6 +2825,7 @@ export declare const VerificationPlanInputSchema: z.ZodObject<{
                 "hierarchical-context": "hierarchical-context";
                 "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                 "web-search": "web-search";
+                "several-cells-one-database": "several-cells-one-database";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -3321,6 +3395,11 @@ export declare const EntrySchema: z.ZodObject<{
                 derived: "derived";
                 "model-generated": "model-generated";
             }>;
+            citations: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                source_id: z.ZodString;
+                span_hash: z.ZodString;
+                locator: z.ZodOptional<z.ZodString>;
+            }, z.core.$strict>>>;
             artifact: z.ZodOptional<z.ZodObject<{
                 artifact_ref: z.ZodString;
                 content_hash: z.ZodString;
@@ -3421,6 +3500,7 @@ export declare const RecordEnvelopeSchema: z.ZodObject<{
         "effect.resolved": "effect.resolved";
         "effect.unreconcilable": "effect.unreconcilable";
         "effect.answer.late": "effect.answer.late";
+        "effect.receipt.adopted": "effect.receipt.adopted";
         "grant.superseded": "grant.superseded";
         "item.attempted": "item.attempted";
         "item.parked": "item.parked";
@@ -3469,6 +3549,8 @@ export declare const RecordEnvelopeSchema: z.ZodObject<{
 }, z.core.$strict>;
 export type RecordEnvelope = z.infer<typeof RecordEnvelopeSchema>;
 export declare const PortableRecordEnvelopeSchema: z.ZodObject<{
+    payload: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+    at: z.ZodString;
     type: z.ZodEnum<{
         "run.created": "run.created";
         "run.started": "run.started";
@@ -3524,6 +3606,7 @@ export declare const PortableRecordEnvelopeSchema: z.ZodObject<{
         "effect.resolved": "effect.resolved";
         "effect.unreconcilable": "effect.unreconcilable";
         "effect.answer.late": "effect.answer.late";
+        "effect.receipt.adopted": "effect.receipt.adopted";
         "grant.superseded": "grant.superseded";
         "item.attempted": "item.attempted";
         "item.parked": "item.parked";
@@ -3565,11 +3648,9 @@ export declare const PortableRecordEnvelopeSchema: z.ZodObject<{
         "executor.continuation.accepted": "executor.continuation.accepted";
         "run.handoff.recorded": "run.handoff.recorded";
     }>;
-    at: z.ZodString;
     run_id: z.ZodString;
     logical_clock: z.ZodNumber;
     record_id: z.ZodString;
-    payload: z.ZodRecord<z.ZodString, z.ZodUnknown>;
     causal_parent: z.ZodNullable<z.ZodString>;
     type_version: z.ZodNumber;
     chain_hash: z.ZodString;
@@ -3582,7 +3663,6 @@ export declare const RunBundleManifestV1Schema: z.ZodObject<{
     chain_head: z.ZodNullable<z.ZodString>;
     head_projection_hash: z.ZodString;
     format: z.ZodEnum<{
-        "ramsden-run-bundle": "ramsden-run-bundle";
         "zero-ar-run-bundle": "zero-ar-run-bundle";
     }>;
     format_version: z.ZodLiteral<1>;
@@ -3594,7 +3674,6 @@ export declare const RunBundleManifestV2Schema: z.ZodObject<{
     chain_head: z.ZodNullable<z.ZodString>;
     head_projection_hash: z.ZodString;
     format: z.ZodEnum<{
-        "ramsden-run-bundle": "ramsden-run-bundle";
         "zero-ar-run-bundle": "zero-ar-run-bundle";
     }>;
     format_version: z.ZodLiteral<2>;
@@ -3604,6 +3683,8 @@ export declare const RunBundleManifestV2Schema: z.ZodObject<{
     record_catalogue_ref: z.ZodString;
     projection_kind: z.ZodLiteral<"run-head">;
     fold_profile: z.ZodEnum<{
+        "run-head-v11": "run-head-v11";
+        "run-head-v10": "run-head-v10";
         "run-head-v9": "run-head-v9";
     }>;
 }, z.core.$strict>;
@@ -3614,7 +3695,6 @@ export declare const RunBundleManifestSchema: z.ZodDiscriminatedUnion<[z.ZodObje
     chain_head: z.ZodNullable<z.ZodString>;
     head_projection_hash: z.ZodString;
     format: z.ZodEnum<{
-        "ramsden-run-bundle": "ramsden-run-bundle";
         "zero-ar-run-bundle": "zero-ar-run-bundle";
     }>;
     format_version: z.ZodLiteral<1>;
@@ -3625,7 +3705,6 @@ export declare const RunBundleManifestSchema: z.ZodDiscriminatedUnion<[z.ZodObje
     chain_head: z.ZodNullable<z.ZodString>;
     head_projection_hash: z.ZodString;
     format: z.ZodEnum<{
-        "ramsden-run-bundle": "ramsden-run-bundle";
         "zero-ar-run-bundle": "zero-ar-run-bundle";
     }>;
     format_version: z.ZodLiteral<2>;
@@ -3635,6 +3714,8 @@ export declare const RunBundleManifestSchema: z.ZodDiscriminatedUnion<[z.ZodObje
     record_catalogue_ref: z.ZodString;
     projection_kind: z.ZodLiteral<"run-head">;
     fold_profile: z.ZodEnum<{
+        "run-head-v11": "run-head-v11";
+        "run-head-v10": "run-head-v10";
         "run-head-v9": "run-head-v9";
     }>;
 }, z.core.$strict>], "format_version">;
@@ -3650,6 +3731,8 @@ export declare const RunMaterializationSchema: z.ZodObject<{
     record_catalogue_ref: z.ZodString;
     projection_kind: z.ZodLiteral<"run-head">;
     fold_profile: z.ZodEnum<{
+        "run-head-v11": "run-head-v11";
+        "run-head-v10": "run-head-v10";
         "run-head-v9": "run-head-v9";
     }>;
     frontier: z.ZodObject<{
@@ -3686,6 +3769,19 @@ export declare const SequentialSamplingRecordSchema: z.ZodObject<{
     guarantee: z.ZodRecord<z.ZodString, z.ZodUnknown>;
 }, z.core.$strict>;
 export type SequentialSamplingRecord = z.infer<typeof SequentialSamplingRecordSchema>;
+export declare const VALIDATOR_FINDINGS_LIMIT = 64;
+export declare const VALIDATOR_FINDING_REASON_LIMIT = 1000;
+export declare const ValidatorFindingRecordSchema: z.ZodObject<{
+    validator: z.ZodString;
+    verdict: z.ZodEnum<{
+        indeterminate: "indeterminate";
+        pass: "pass";
+        reject: "reject";
+    }>;
+    reason: z.ZodString;
+    elapsed_ms: z.ZodNumber;
+}, z.core.$strict>;
+export type ValidatorFindingRecord = z.infer<typeof ValidatorFindingRecordSchema>;
 export declare const AttentionEstimateRecordSchema: z.ZodObject<{
     class: z.ZodString;
     items: z.ZodNumber;
@@ -3695,6 +3791,50 @@ export declare const AttentionEstimateRecordSchema: z.ZodObject<{
     amortized_per_item_ms: z.ZodNumber;
 }, z.core.$strict>;
 export type AttentionEstimateRecord = z.infer<typeof AttentionEstimateRecordSchema>;
+export declare const PolicySkillWindowSchema: z.ZodObject<{
+    policy: z.ZodEnum<{
+        "bounded-run-v1": "bounded-run-v1";
+    }>;
+    maximum_window_share_ppm: z.ZodNumber;
+    budget_tokens: z.ZodNumber;
+    allowance_tokens: z.ZodNumber;
+    used_tokens: z.ZodNumber;
+    skills: z.ZodArray<z.ZodObject<{
+        skill_ref: z.ZodString;
+        entry_ref: z.ZodString;
+        tokens: z.ZodNumber;
+    }, z.core.$strict>>;
+}, z.core.$strict>;
+export type PolicySkillWindow = z.infer<typeof PolicySkillWindowSchema>;
+export declare const SkillWindowNoticesSchema: z.ZodObject<{
+    reserved_tokens: z.ZodNumber;
+    notices: z.ZodArray<z.ZodObject<{
+        entry_id: z.ZodString;
+        reason: z.ZodEnum<{
+            "retention-expired": "retention-expired";
+            "context-budget": "context-budget";
+            "context-omitted": "context-omitted";
+        }>;
+        reopen: z.ZodUnion<readonly [z.ZodObject<{
+            skill_ref: z.ZodString;
+            retention: z.ZodOptional<z.ZodEnum<{
+                checkpoint: "checkpoint";
+                turn: "turn";
+            }>>;
+        }, z.core.$strict>, z.ZodObject<{
+            skill_ref: z.ZodString;
+            path: z.ZodString;
+            start_line: z.ZodOptional<z.ZodNumber>;
+            end_line: z.ZodOptional<z.ZodNumber>;
+            retention: z.ZodOptional<z.ZodEnum<{
+                checkpoint: "checkpoint";
+                turn: "turn";
+            }>>;
+        }, z.core.$strict>]>;
+    }, z.core.$strict>>;
+    omitted: z.ZodNumber;
+}, z.core.$strict>;
+export type SkillWindowNotices = z.infer<typeof SkillWindowNoticesSchema>;
 export declare const RECORD_PAYLOADS: Record<(typeof RECORD_TYPES)[number], z.ZodType>;
 export declare function recordPayloadSchema(type: string, version: number): z.ZodType | null;
 export declare function latestRecordPayloadVersion(type: (typeof RECORD_TYPES)[number]): number;
@@ -3745,6 +3885,8 @@ export declare const RunSnapshotSchema: z.ZodObject<{
         remote_task: "remote_task";
         awaiting_approval: "awaiting_approval";
         awaiting_external: "awaiting_external";
+        awaiting_subruns: "awaiting_subruns";
+        runtime_defect: "runtime_defect";
     }>>;
     turn: z.ZodNumber;
     current_branch: z.ZodNullable<z.ZodString>;
@@ -3772,11 +3914,11 @@ export declare const RunSnapshotSchema: z.ZodObject<{
     verified_completion_reachable: z.ZodBoolean;
     items: z.ZodNullable<z.ZodRecord<z.ZodEnum<{
         verified: "verified";
+        failed: "failed";
         untouched: "untouched";
         completed_unverified: "completed_unverified";
         parked: "parked";
         dismissed: "dismissed";
-        failed: "failed";
         invalidated: "invalidated";
     }>, z.ZodNumber>>;
     contract: z.ZodNullable<z.ZodObject<{
@@ -3787,6 +3929,7 @@ export declare const RunSnapshotSchema: z.ZodObject<{
     }, z.core.$strict>>;
     tool_view: z.ZodOptional<z.ZodNullable<z.ZodObject<{
         schema: z.ZodLiteral<"zero-ar-tool-view/1">;
+        guidance_version: z.ZodOptional<z.ZodLiteral<2>>;
         ref: z.ZodString;
         closure_size: z.ZodNumber;
         budget: z.ZodObject<{
@@ -3818,6 +3961,7 @@ export declare const RunSnapshotSchema: z.ZodObject<{
                 "lifecycle-phase": "lifecycle-phase";
                 "objective-match": "objective-match";
                 "small-closure": "small-closure";
+                "budget-fill": "budget-fill";
             }>;
         }, z.core.$strict>>;
         hidden: z.ZodNumber;
@@ -3830,6 +3974,41 @@ export declare const RunSnapshotSchema: z.ZodObject<{
     active_closure_epoch: z.ZodOptional<z.ZodNumber>;
     active_closure_ref: z.ZodOptional<z.ZodString>;
     pending_capability_admission_count: z.ZodOptional<z.ZodNumber>;
+    sub_runs: z.ZodOptional<z.ZodObject<{
+        counts: z.ZodObject<{
+            running: z.ZodNumber;
+            finished: z.ZodNumber;
+            failed: z.ZodNumber;
+            cancelled: z.ZodNumber;
+        }, z.core.$strict>;
+        children: z.ZodArray<z.ZodObject<{
+            run_id: z.ZodString;
+            objective: z.ZodString;
+            state: z.ZodEnum<{
+                cancelled: "cancelled";
+                running: "running";
+                finished: "finished";
+                failed: "failed";
+            }>;
+            slice_model_tokens: z.ZodNumber;
+            spent_model_tokens: z.ZodNumber;
+            finding: z.ZodEnum<{
+                gap: "gap";
+                pending: "pending";
+                returned: "returned";
+            }>;
+            terminal: z.ZodNullable<z.ZodEnum<{
+                cancelled: "cancelled";
+                complete: "complete";
+                unverified_artifact: "unverified_artifact";
+            }>>;
+            gap: z.ZodNullable<z.ZodString>;
+        }, z.core.$strict>>;
+    }, z.core.$strict>>;
+    sub_run: z.ZodOptional<z.ZodObject<{
+        parent_run_id: z.ZodString;
+        depth: z.ZodNumber;
+    }, z.core.$strict>>;
     snapshot_version: z.ZodNumber;
 }, z.core.$strict>;
 export type RunSnapshot = z.infer<typeof RunSnapshotSchema>;
@@ -4578,6 +4757,37 @@ export declare const RunResultSchema: z.ZodObject<{
             anchor_ref: z.ZodOptional<z.ZodString>;
         }, z.core.$strict>>;
     }, z.core.$strict>>>;
+    sub_runs: z.ZodOptional<z.ZodObject<{
+        counts: z.ZodObject<{
+            running: z.ZodNumber;
+            finished: z.ZodNumber;
+            failed: z.ZodNumber;
+            cancelled: z.ZodNumber;
+        }, z.core.$strict>;
+        children: z.ZodArray<z.ZodObject<{
+            run_id: z.ZodString;
+            objective: z.ZodString;
+            state: z.ZodEnum<{
+                cancelled: "cancelled";
+                running: "running";
+                finished: "finished";
+                failed: "failed";
+            }>;
+            slice_model_tokens: z.ZodNumber;
+            spent_model_tokens: z.ZodNumber;
+            finding: z.ZodEnum<{
+                gap: "gap";
+                pending: "pending";
+                returned: "returned";
+            }>;
+            terminal: z.ZodNullable<z.ZodEnum<{
+                cancelled: "cancelled";
+                complete: "complete";
+                unverified_artifact: "unverified_artifact";
+            }>>;
+            gap: z.ZodNullable<z.ZodString>;
+        }, z.core.$strict>>;
+    }, z.core.$strict>>;
 }, z.core.$strict>;
 export type RunResult = z.infer<typeof RunResultSchema>;
 export declare const DiagnosticSchema: z.ZodObject<{
@@ -4769,6 +4979,7 @@ export declare const HealthResponseSchema: z.ZodObject<{
             "hierarchical-context": "hierarchical-context";
             "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
             "web-search": "web-search";
+            "several-cells-one-database": "several-cells-one-database";
         }>>;
         conditional: z.ZodArray<z.ZodObject<{
             capability: z.ZodEnum<{
@@ -4833,6 +5044,7 @@ export declare const HealthResponseSchema: z.ZodObject<{
                 "hierarchical-context": "hierarchical-context";
                 "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                 "web-search": "web-search";
+                "several-cells-one-database": "several-cells-one-database";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -4908,6 +5120,7 @@ export declare const HealthResponseSchema: z.ZodObject<{
                 "hierarchical-context": "hierarchical-context";
                 "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                 "web-search": "web-search";
+                "several-cells-one-database": "several-cells-one-database";
             }>;
             refusal_point: z.ZodEnum<{
                 "profile-compilation": "profile-compilation";
@@ -5060,6 +5273,20 @@ export declare const DatabaseDoctorResponseSchema: z.ZodObject<{
         p99: z.ZodNullable<z.ZodNumber>;
         max: z.ZodNullable<z.ZodNumber>;
     }, z.core.$strict>>;
+    ownership: z.ZodOptional<z.ZodObject<{
+        cell: z.ZodString;
+        claims: z.ZodArray<z.ZodObject<{
+            run_id: z.ZodString;
+            owner: z.ZodString;
+            claimed_at: z.ZodString;
+            expires_at: z.ZodString;
+            in_flight: z.ZodArray<z.ZodObject<{
+                effect_id: z.ZodString;
+                position: z.ZodNumber;
+                marked_at: z.ZodString;
+            }, z.core.$strict>>;
+        }, z.core.$strict>>;
+    }, z.core.$strict>>;
 }, z.core.$strict>;
 export type DatabaseDoctorResponse = z.infer<typeof DatabaseDoctorResponseSchema>;
 export declare const PostgresLatencyRawSampleSchema: z.ZodObject<{
@@ -5208,6 +5435,8 @@ export declare const CreatedRunSchema: z.ZodObject<{
             remote_task: "remote_task";
             awaiting_approval: "awaiting_approval";
             awaiting_external: "awaiting_external";
+            awaiting_subruns: "awaiting_subruns";
+            runtime_defect: "runtime_defect";
         }>>;
         turn: z.ZodNumber;
         current_branch: z.ZodNullable<z.ZodString>;
@@ -5235,11 +5464,11 @@ export declare const CreatedRunSchema: z.ZodObject<{
         verified_completion_reachable: z.ZodBoolean;
         items: z.ZodNullable<z.ZodRecord<z.ZodEnum<{
             verified: "verified";
+            failed: "failed";
             untouched: "untouched";
             completed_unverified: "completed_unverified";
             parked: "parked";
             dismissed: "dismissed";
-            failed: "failed";
             invalidated: "invalidated";
         }>, z.ZodNumber>>;
         contract: z.ZodNullable<z.ZodObject<{
@@ -5250,6 +5479,7 @@ export declare const CreatedRunSchema: z.ZodObject<{
         }, z.core.$strict>>;
         tool_view: z.ZodOptional<z.ZodNullable<z.ZodObject<{
             schema: z.ZodLiteral<"zero-ar-tool-view/1">;
+            guidance_version: z.ZodOptional<z.ZodLiteral<2>>;
             ref: z.ZodString;
             closure_size: z.ZodNumber;
             budget: z.ZodObject<{
@@ -5281,6 +5511,7 @@ export declare const CreatedRunSchema: z.ZodObject<{
                     "lifecycle-phase": "lifecycle-phase";
                     "objective-match": "objective-match";
                     "small-closure": "small-closure";
+                    "budget-fill": "budget-fill";
                 }>;
             }, z.core.$strict>>;
             hidden: z.ZodNumber;
@@ -5293,6 +5524,41 @@ export declare const CreatedRunSchema: z.ZodObject<{
         active_closure_epoch: z.ZodOptional<z.ZodNumber>;
         active_closure_ref: z.ZodOptional<z.ZodString>;
         pending_capability_admission_count: z.ZodOptional<z.ZodNumber>;
+        sub_runs: z.ZodOptional<z.ZodObject<{
+            counts: z.ZodObject<{
+                running: z.ZodNumber;
+                finished: z.ZodNumber;
+                failed: z.ZodNumber;
+                cancelled: z.ZodNumber;
+            }, z.core.$strict>;
+            children: z.ZodArray<z.ZodObject<{
+                run_id: z.ZodString;
+                objective: z.ZodString;
+                state: z.ZodEnum<{
+                    cancelled: "cancelled";
+                    running: "running";
+                    finished: "finished";
+                    failed: "failed";
+                }>;
+                slice_model_tokens: z.ZodNumber;
+                spent_model_tokens: z.ZodNumber;
+                finding: z.ZodEnum<{
+                    gap: "gap";
+                    pending: "pending";
+                    returned: "returned";
+                }>;
+                terminal: z.ZodNullable<z.ZodEnum<{
+                    cancelled: "cancelled";
+                    complete: "complete";
+                    unverified_artifact: "unverified_artifact";
+                }>>;
+                gap: z.ZodNullable<z.ZodString>;
+            }, z.core.$strict>>;
+        }, z.core.$strict>>;
+        sub_run: z.ZodOptional<z.ZodObject<{
+            parent_run_id: z.ZodString;
+            depth: z.ZodNumber;
+        }, z.core.$strict>>;
         snapshot_version: z.ZodNumber;
     }, z.core.$strict>;
 }, z.core.$strict>;
@@ -5339,16 +5605,31 @@ export declare const ImportOutcomeSchema: z.ZodObject<{
     run_id: z.ZodString;
     head_equal: z.ZodBoolean;
     records: z.ZodNumber;
+    projection_migration: z.ZodOptional<z.ZodObject<{
+        source_profile: z.ZodEnum<{
+            "run-head-v11": "run-head-v11";
+            "run-head-v10": "run-head-v10";
+            "run-head-v9": "run-head-v9";
+        }>;
+        current_profile: z.ZodEnum<{
+            "run-head-v11": "run-head-v11";
+            "run-head-v10": "run-head-v10";
+            "run-head-v9": "run-head-v9";
+        }>;
+        source_hash: z.ZodString;
+        current_hash: z.ZodString;
+        source_verified: z.ZodLiteral<true>;
+    }, z.core.$strict>>;
     artifacts: z.ZodOptional<z.ZodObject<{
         imported: z.ZodArray<z.ZodString>;
         not_transferred: z.ZodArray<z.ZodObject<{
             artifact_ref: z.ZodString;
             reason: z.ZodEnum<{
+                absent: "absent";
                 "tenant-mismatch": "tenant-mismatch";
                 "backend-mismatch": "backend-mismatch";
                 "no-artifact-store": "no-artifact-store";
                 erased: "erased";
-                absent: "absent";
                 "not-in-run": "not-in-run";
             }>;
         }, z.core.$strict>>;
@@ -5394,6 +5675,8 @@ export declare const ImportOutcomeSchema: z.ZodObject<{
             }>;
             record_catalogue_ref: z.ZodString;
             fold_profile: z.ZodEnum<{
+                "run-head-v11": "run-head-v11";
+                "run-head-v10": "run-head-v10";
                 "run-head-v9": "run-head-v9";
             }>;
         }, z.core.$strict>;
@@ -5544,6 +5827,7 @@ export declare const RecordsPageSchema: z.ZodObject<{
             "effect.resolved": "effect.resolved";
             "effect.unreconcilable": "effect.unreconcilable";
             "effect.answer.late": "effect.answer.late";
+            "effect.receipt.adopted": "effect.receipt.adopted";
             "grant.superseded": "grant.superseded";
             "item.attempted": "item.attempted";
             "item.parked": "item.parked";
@@ -5680,6 +5964,9 @@ export declare const PostureSchema: z.ZodObject<{
     version: z.ZodString;
     owner: z.ZodString;
     verification_reserve_fraction: z.ZodNumber;
+    skill_context: z.ZodOptional<z.ZodObject<{
+        maximum_window_share_ppm: z.ZodNumber;
+    }, z.core.$strict>>;
     optimization: z.ZodOptional<z.ZodObject<{
         checkpoint: z.ZodOptional<z.ZodObject<{
             selector: z.ZodLiteral<"young-daly-items-v1">;
@@ -5812,7 +6099,13 @@ export declare const DomainPackSchema: z.ZodObject<{
             "effect-outcomes": "effect-outcomes";
             "workspace-output": "workspace-output";
             "web-pages": "web-pages";
+            "source-reads": "source-reads";
+            "skill-text": "skill-text";
         }>>>;
+        reading_limits: z.ZodOptional<z.ZodObject<{
+            extract_max_pages: z.ZodOptional<z.ZodNumber>;
+            check_input_bytes: z.ZodOptional<z.ZodNumber>;
+        }, z.core.$strict>>;
         checkpoint_view: z.ZodOptional<z.ZodEnum<{
             "covered-items": "covered-items";
             "worked-items": "worked-items";
@@ -7881,11 +8174,21 @@ export declare const SCHEMA_REGISTRY: {
             offset: z.ZodNumber;
             length: z.ZodNumber;
         }, z.core.$strict>, z.ZodObject<{
-            source_alias: z.ZodString;
+            source_alias: z.ZodOptional<z.ZodString>;
+            source_aliases: z.ZodOptional<z.ZodArray<z.ZodString>>;
             operation: z.ZodLiteral<"search">;
             query: z.ZodString;
+            match: z.ZodOptional<z.ZodEnum<{
+                exact: "exact";
+                "all-terms": "all-terms";
+                "any-term": "any-term";
+                phrase: "phrase";
+            }>>;
+            window_chars: z.ZodOptional<z.ZodNumber>;
             max_matches: z.ZodOptional<z.ZodNumber>;
+            max_matches_per_document: z.ZodOptional<z.ZodNumber>;
             max_scan_bytes: z.ZodOptional<z.ZodNumber>;
+            cursor: z.ZodOptional<z.ZodString>;
         }, z.core.$strict>, z.ZodObject<{
             source_alias: z.ZodOptional<z.ZodString>;
             operation: z.ZodLiteral<"document.extract">;
@@ -7893,6 +8196,7 @@ export declare const SCHEMA_REGISTRY: {
             artifact_ref: z.ZodOptional<z.ZodString>;
             max_pages: z.ZodOptional<z.ZodNumber>;
             languages: z.ZodOptional<z.ZodArray<z.ZodString>>;
+            first_page: z.ZodOptional<z.ZodNumber>;
         }, z.core.$strict>], "operation">;
         readonly placement: "run-management";
         readonly owner: "source-access";
@@ -8033,9 +8337,30 @@ export declare const SCHEMA_REGISTRY: {
             page_count: z.ZodNumber;
             total_text_bytes: z.ZodNumber;
             truncated: z.ZodBoolean;
+            max_pages: z.ZodOptional<z.ZodNumber>;
             manifest_artifact_ref: z.ZodString;
             manifest_ref: z.ZodString;
             provenance_ref: z.ZodString;
+            text_window: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                first_page: z.ZodNumber;
+                text: z.ZodString;
+                pages: z.ZodArray<z.ZodObject<{
+                    page: z.ZodNumber;
+                    text_artifact_ref: z.ZodString;
+                    text_content_hash: z.ZodString;
+                    text_bytes: z.ZodNumber;
+                    shown_bytes: z.ZodNumber;
+                }, z.core.$strict>>;
+                next: z.ZodNullable<z.ZodObject<{
+                    page: z.ZodNumber;
+                    offset: z.ZodNumber;
+                }, z.core.$strict>>;
+            }, z.core.$strict>>>;
+            reused_from: z.ZodOptional<z.ZodObject<{
+                extraction_ref: z.ZodString;
+                run_id: z.ZodString;
+                record_id: z.ZodString;
+            }, z.core.$strict>>;
         }, z.core.$strict>;
         readonly placement: "observation";
         readonly owner: "source-access";
@@ -8471,7 +8796,9 @@ export declare const SCHEMA_REGISTRY: {
                 type: z.ZodLiteral<"zero-ar.follow-up">;
                 locations: z.ZodArray<z.ZodString>;
                 actions: z.ZodArray<z.ZodString>;
-                constraints: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodUnknown>>;
+                constraints: z.ZodRecord<z.ZodString, z.ZodUnion<readonly [z.ZodArray<z.ZodUnknown>, z.ZodObject<{
+                    max: z.ZodNumber;
+                }, z.core.$strict>]>>;
                 max_uses: z.ZodNumber;
                 expires_at: z.ZodString;
             }, z.core.$strict>>;
@@ -8532,7 +8859,9 @@ export declare const SCHEMA_REGISTRY: {
                 type: z.ZodLiteral<"zero-ar.follow-up">;
                 locations: z.ZodArray<z.ZodString>;
                 actions: z.ZodArray<z.ZodString>;
-                constraints: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodUnknown>>;
+                constraints: z.ZodRecord<z.ZodString, z.ZodUnion<readonly [z.ZodArray<z.ZodUnknown>, z.ZodObject<{
+                    max: z.ZodNumber;
+                }, z.core.$strict>]>>;
                 max_uses: z.ZodNumber;
                 expires_at: z.ZodString;
             }, z.core.$strict>>;
@@ -8592,15 +8921,17 @@ export declare const SCHEMA_REGISTRY: {
     };
     readonly EffectAuthorityDecisionCommandSchema: {
         readonly schema: z.ZodObject<{
-            reason: z.ZodString;
-            target: z.ZodString;
+            idempotency_key: z.ZodString;
+            request_fingerprint: z.ZodString;
+            application_principal: z.ZodString;
             run_id: z.ZodString;
             tenant: z.ZodString;
+            reason: z.ZodString;
+            target: z.ZodString;
             effect_id: z.ZodString;
             operation: z.ZodString;
             param_hash: z.ZodString;
             magnitude: z.ZodNullable<z.ZodNumber>;
-            idempotency_key: z.ZodString;
             approver: z.ZodObject<{
                 subject: z.ZodString;
                 issuer: z.ZodString;
@@ -8609,8 +8940,6 @@ export declare const SCHEMA_REGISTRY: {
                 credential_id: z.ZodNullable<z.ZodString>;
             }, z.core.$strict>;
             expires_at: z.ZodString;
-            request_fingerprint: z.ZodString;
-            application_principal: z.ZodString;
             decision: z.ZodEnum<{
                 approve: "approve";
                 refuse: "refuse";
@@ -8619,7 +8948,9 @@ export declare const SCHEMA_REGISTRY: {
                 type: z.ZodLiteral<"zero-ar.follow-up">;
                 locations: z.ZodArray<z.ZodString>;
                 actions: z.ZodArray<z.ZodString>;
-                constraints: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodUnknown>>;
+                constraints: z.ZodRecord<z.ZodString, z.ZodUnion<readonly [z.ZodArray<z.ZodUnknown>, z.ZodObject<{
+                    max: z.ZodNumber;
+                }, z.core.$strict>]>>;
                 max_uses: z.ZodNumber;
                 expires_at: z.ZodString;
             }, z.core.$strict>>;
@@ -8660,6 +8991,7 @@ export declare const SCHEMA_REGISTRY: {
             }>;
             last_position: z.ZodNullable<z.ZodString>;
             observed_at: z.ZodString;
+            poll_interval_ms: z.ZodOptional<z.ZodNumber>;
         }, z.core.$strict>;
         readonly placement: "run-management";
         readonly owner: "runtime-core";
@@ -8805,6 +9137,7 @@ export declare const SCHEMA_REGISTRY: {
                     "hierarchical-context": "hierarchical-context";
                     "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                     "web-search": "web-search";
+                    "several-cells-one-database": "several-cells-one-database";
                 }>>;
                 conditional: z.ZodArray<z.ZodObject<{
                     capability: z.ZodEnum<{
@@ -8869,6 +9202,7 @@ export declare const SCHEMA_REGISTRY: {
                         "hierarchical-context": "hierarchical-context";
                         "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                         "web-search": "web-search";
+                        "several-cells-one-database": "several-cells-one-database";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -8944,6 +9278,7 @@ export declare const SCHEMA_REGISTRY: {
                         "hierarchical-context": "hierarchical-context";
                         "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                         "web-search": "web-search";
+                        "several-cells-one-database": "several-cells-one-database";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -8998,6 +9333,10 @@ export declare const SCHEMA_REGISTRY: {
                 definition_ref: z.ZodString;
                 instructions_ref: z.ZodString;
                 publication_ref: z.ZodNullable<z.ZodString>;
+                sub_runs: z.ZodOptional<z.ZodObject<{
+                    max_children: z.ZodNumber;
+                    act_on_partial_findings: z.ZodOptional<z.ZodBoolean>;
+                }, z.core.$strict>>;
             }, z.core.$strict>;
             context: z.ZodObject<{
                 assembler: z.ZodString;
@@ -9558,6 +9897,7 @@ export declare const SCHEMA_REGISTRY: {
                 "hierarchical-context": "hierarchical-context";
                 "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                 "web-search": "web-search";
+                "several-cells-one-database": "several-cells-one-database";
             }>;
             state: z.ZodEnum<{
                 supported: "supported";
@@ -9630,8 +9970,8 @@ export declare const SCHEMA_REGISTRY: {
                 "effect-proposal": "effect-proposal";
             }>>;
             effect_plane: z.ZodEnum<{
-                "dynamic-authority": "dynamic-authority";
                 absent: "absent";
+                "dynamic-authority": "dynamic-authority";
                 "restricted-attachment": "restricted-attachment";
             }>;
             components: z.ZodObject<{
@@ -9727,6 +10067,7 @@ export declare const SCHEMA_REGISTRY: {
                     "hierarchical-context": "hierarchical-context";
                     "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                     "web-search": "web-search";
+                    "several-cells-one-database": "several-cells-one-database";
                 }>;
                 state: z.ZodEnum<{
                     supported: "supported";
@@ -9823,6 +10164,7 @@ export declare const SCHEMA_REGISTRY: {
                 "hierarchical-context": "hierarchical-context";
                 "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                 "web-search": "web-search";
+                "several-cells-one-database": "several-cells-one-database";
             }>>;
             conditional: z.ZodArray<z.ZodObject<{
                 capability: z.ZodEnum<{
@@ -9887,6 +10229,7 @@ export declare const SCHEMA_REGISTRY: {
                     "hierarchical-context": "hierarchical-context";
                     "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                     "web-search": "web-search";
+                    "several-cells-one-database": "several-cells-one-database";
                 }>;
                 refusal_point: z.ZodEnum<{
                     "profile-compilation": "profile-compilation";
@@ -9962,6 +10305,7 @@ export declare const SCHEMA_REGISTRY: {
                     "hierarchical-context": "hierarchical-context";
                     "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                     "web-search": "web-search";
+                    "several-cells-one-database": "several-cells-one-database";
                 }>;
                 refusal_point: z.ZodEnum<{
                     "profile-compilation": "profile-compilation";
@@ -10569,7 +10913,13 @@ export declare const SCHEMA_REGISTRY: {
                 "effect-outcomes": "effect-outcomes";
                 "workspace-output": "workspace-output";
                 "web-pages": "web-pages";
+                "source-reads": "source-reads";
+                "skill-text": "skill-text";
             }>>>;
+            reading_limits: z.ZodOptional<z.ZodObject<{
+                extract_max_pages: z.ZodOptional<z.ZodNumber>;
+                check_input_bytes: z.ZodOptional<z.ZodNumber>;
+            }, z.core.$strict>>;
             checkpoint_view: z.ZodOptional<z.ZodEnum<{
                 "covered-items": "covered-items";
                 "worked-items": "worked-items";
@@ -10995,7 +11345,13 @@ export declare const SCHEMA_REGISTRY: {
                     "effect-outcomes": "effect-outcomes";
                     "workspace-output": "workspace-output";
                     "web-pages": "web-pages";
+                    "source-reads": "source-reads";
+                    "skill-text": "skill-text";
                 }>>>;
+                reading_limits: z.ZodOptional<z.ZodObject<{
+                    extract_max_pages: z.ZodOptional<z.ZodNumber>;
+                    check_input_bytes: z.ZodOptional<z.ZodNumber>;
+                }, z.core.$strict>>;
                 checkpoint_view: z.ZodOptional<z.ZodEnum<{
                     "covered-items": "covered-items";
                     "worked-items": "worked-items";
@@ -11104,6 +11460,7 @@ export declare const SCHEMA_REGISTRY: {
                         "hierarchical-context": "hierarchical-context";
                         "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                         "web-search": "web-search";
+                        "several-cells-one-database": "several-cells-one-database";
                     }>>;
                     conditional: z.ZodArray<z.ZodObject<{
                         capability: z.ZodEnum<{
@@ -11168,6 +11525,7 @@ export declare const SCHEMA_REGISTRY: {
                             "hierarchical-context": "hierarchical-context";
                             "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                             "web-search": "web-search";
+                            "several-cells-one-database": "several-cells-one-database";
                         }>;
                         refusal_point: z.ZodEnum<{
                             "profile-compilation": "profile-compilation";
@@ -11243,6 +11601,7 @@ export declare const SCHEMA_REGISTRY: {
                             "hierarchical-context": "hierarchical-context";
                             "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                             "web-search": "web-search";
+                            "several-cells-one-database": "several-cells-one-database";
                         }>;
                         refusal_point: z.ZodEnum<{
                             "profile-compilation": "profile-compilation";
@@ -11297,6 +11656,10 @@ export declare const SCHEMA_REGISTRY: {
                     definition_ref: z.ZodString;
                     instructions_ref: z.ZodString;
                     publication_ref: z.ZodNullable<z.ZodString>;
+                    sub_runs: z.ZodOptional<z.ZodObject<{
+                        max_children: z.ZodNumber;
+                        act_on_partial_findings: z.ZodOptional<z.ZodBoolean>;
+                    }, z.core.$strict>>;
                 }, z.core.$strict>;
                 context: z.ZodObject<{
                     assembler: z.ZodString;
@@ -11917,6 +12280,9 @@ export declare const SCHEMA_REGISTRY: {
                     version: z.ZodString;
                     owner: z.ZodString;
                     verification_reserve_fraction: z.ZodNumber;
+                    skill_context: z.ZodOptional<z.ZodObject<{
+                        maximum_window_share_ppm: z.ZodNumber;
+                    }, z.core.$strict>>;
                     optimization: z.ZodOptional<z.ZodObject<{
                         checkpoint: z.ZodOptional<z.ZodObject<{
                             selector: z.ZodLiteral<"young-daly-items-v1">;
@@ -12151,6 +12517,7 @@ export declare const SCHEMA_REGISTRY: {
                     "hierarchical-context": "hierarchical-context";
                     "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                     "web-search": "web-search";
+                    "several-cells-one-database": "several-cells-one-database";
                 }>>;
                 conditional: z.ZodArray<z.ZodObject<{
                     capability: z.ZodEnum<{
@@ -12215,6 +12582,7 @@ export declare const SCHEMA_REGISTRY: {
                         "hierarchical-context": "hierarchical-context";
                         "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                         "web-search": "web-search";
+                        "several-cells-one-database": "several-cells-one-database";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -12290,6 +12658,7 @@ export declare const SCHEMA_REGISTRY: {
                         "hierarchical-context": "hierarchical-context";
                         "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                         "web-search": "web-search";
+                        "several-cells-one-database": "several-cells-one-database";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -12828,6 +13197,11 @@ export declare const SCHEMA_REGISTRY: {
                 "authenticated-response": "authenticated-response";
                 "authenticated-reconciliation": "authenticated-reconciliation";
             }>;
+            owner_signature: z.ZodOptional<z.ZodEnum<{
+                verified: "verified";
+                unverified: "unverified";
+                absent: "absent";
+            }>>;
             attestation: z.ZodNullable<z.ZodString>;
             target_adapter_version: z.ZodString;
             valid_time: z.ZodString;
@@ -12845,6 +13219,7 @@ export declare const SCHEMA_REGISTRY: {
             approver: z.ZodString;
             expires_at: z.ZodString;
             max_magnitude: z.ZodNullable<z.ZodNumber>;
+            pre_approved_within_cap: z.ZodOptional<z.ZodLiteral<true>>;
             attestation: z.ZodString;
         }, z.core.$strict>;
         readonly placement: "effect-dispatch";
@@ -16728,6 +17103,11 @@ export declare const SCHEMA_REGISTRY: {
                         derived: "derived";
                         "model-generated": "model-generated";
                     }>;
+                    citations: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                        source_id: z.ZodString;
+                        span_hash: z.ZodString;
+                        locator: z.ZodOptional<z.ZodString>;
+                    }, z.core.$strict>>>;
                     artifact: z.ZodOptional<z.ZodObject<{
                         artifact_ref: z.ZodString;
                         content_hash: z.ZodString;
@@ -16831,6 +17211,7 @@ export declare const SCHEMA_REGISTRY: {
                 "effect.resolved": "effect.resolved";
                 "effect.unreconcilable": "effect.unreconcilable";
                 "effect.answer.late": "effect.answer.late";
+                "effect.receipt.adopted": "effect.receipt.adopted";
                 "grant.superseded": "grant.superseded";
                 "item.attempted": "item.attempted";
                 "item.parked": "item.parked";
@@ -16882,6 +17263,8 @@ export declare const SCHEMA_REGISTRY: {
     };
     readonly PortableRecordEnvelopeSchema: {
         readonly schema: z.ZodObject<{
+            payload: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+            at: z.ZodString;
             type: z.ZodEnum<{
                 "run.created": "run.created";
                 "run.started": "run.started";
@@ -16937,6 +17320,7 @@ export declare const SCHEMA_REGISTRY: {
                 "effect.resolved": "effect.resolved";
                 "effect.unreconcilable": "effect.unreconcilable";
                 "effect.answer.late": "effect.answer.late";
+                "effect.receipt.adopted": "effect.receipt.adopted";
                 "grant.superseded": "grant.superseded";
                 "item.attempted": "item.attempted";
                 "item.parked": "item.parked";
@@ -16978,11 +17362,9 @@ export declare const SCHEMA_REGISTRY: {
                 "executor.continuation.accepted": "executor.continuation.accepted";
                 "run.handoff.recorded": "run.handoff.recorded";
             }>;
-            at: z.ZodString;
             run_id: z.ZodString;
             logical_clock: z.ZodNumber;
             record_id: z.ZodString;
-            payload: z.ZodRecord<z.ZodString, z.ZodUnknown>;
             causal_parent: z.ZodNullable<z.ZodString>;
             type_version: z.ZodNumber;
             chain_hash: z.ZodString;
@@ -16998,7 +17380,6 @@ export declare const SCHEMA_REGISTRY: {
             chain_head: z.ZodNullable<z.ZodString>;
             head_projection_hash: z.ZodString;
             format: z.ZodEnum<{
-                "ramsden-run-bundle": "ramsden-run-bundle";
                 "zero-ar-run-bundle": "zero-ar-run-bundle";
             }>;
             format_version: z.ZodLiteral<1>;
@@ -17014,7 +17395,6 @@ export declare const SCHEMA_REGISTRY: {
             chain_head: z.ZodNullable<z.ZodString>;
             head_projection_hash: z.ZodString;
             format: z.ZodEnum<{
-                "ramsden-run-bundle": "ramsden-run-bundle";
                 "zero-ar-run-bundle": "zero-ar-run-bundle";
             }>;
             format_version: z.ZodLiteral<2>;
@@ -17024,6 +17404,8 @@ export declare const SCHEMA_REGISTRY: {
             record_catalogue_ref: z.ZodString;
             projection_kind: z.ZodLiteral<"run-head">;
             fold_profile: z.ZodEnum<{
+                "run-head-v11": "run-head-v11";
+                "run-head-v10": "run-head-v10";
                 "run-head-v9": "run-head-v9";
             }>;
         }, z.core.$strict>;
@@ -17038,7 +17420,6 @@ export declare const SCHEMA_REGISTRY: {
             chain_head: z.ZodNullable<z.ZodString>;
             head_projection_hash: z.ZodString;
             format: z.ZodEnum<{
-                "ramsden-run-bundle": "ramsden-run-bundle";
                 "zero-ar-run-bundle": "zero-ar-run-bundle";
             }>;
             format_version: z.ZodLiteral<1>;
@@ -17049,7 +17430,6 @@ export declare const SCHEMA_REGISTRY: {
             chain_head: z.ZodNullable<z.ZodString>;
             head_projection_hash: z.ZodString;
             format: z.ZodEnum<{
-                "ramsden-run-bundle": "ramsden-run-bundle";
                 "zero-ar-run-bundle": "zero-ar-run-bundle";
             }>;
             format_version: z.ZodLiteral<2>;
@@ -17059,6 +17439,8 @@ export declare const SCHEMA_REGISTRY: {
             record_catalogue_ref: z.ZodString;
             projection_kind: z.ZodLiteral<"run-head">;
             fold_profile: z.ZodEnum<{
+                "run-head-v11": "run-head-v11";
+                "run-head-v10": "run-head-v10";
                 "run-head-v9": "run-head-v9";
             }>;
         }, z.core.$strict>], "format_version">;
@@ -17077,6 +17459,8 @@ export declare const SCHEMA_REGISTRY: {
             record_catalogue_ref: z.ZodString;
             projection_kind: z.ZodLiteral<"run-head">;
             fold_profile: z.ZodEnum<{
+                "run-head-v11": "run-head-v11";
+                "run-head-v10": "run-head-v10";
                 "run-head-v9": "run-head-v9";
             }>;
             frontier: z.ZodObject<{
@@ -17126,6 +17510,8 @@ export declare const SCHEMA_REGISTRY: {
                 remote_task: "remote_task";
                 awaiting_approval: "awaiting_approval";
                 awaiting_external: "awaiting_external";
+                awaiting_subruns: "awaiting_subruns";
+                runtime_defect: "runtime_defect";
             }>>;
             turn: z.ZodNumber;
             current_branch: z.ZodNullable<z.ZodString>;
@@ -17153,11 +17539,11 @@ export declare const SCHEMA_REGISTRY: {
             verified_completion_reachable: z.ZodBoolean;
             items: z.ZodNullable<z.ZodRecord<z.ZodEnum<{
                 verified: "verified";
+                failed: "failed";
                 untouched: "untouched";
                 completed_unverified: "completed_unverified";
                 parked: "parked";
                 dismissed: "dismissed";
-                failed: "failed";
                 invalidated: "invalidated";
             }>, z.ZodNumber>>;
             contract: z.ZodNullable<z.ZodObject<{
@@ -17168,6 +17554,7 @@ export declare const SCHEMA_REGISTRY: {
             }, z.core.$strict>>;
             tool_view: z.ZodOptional<z.ZodNullable<z.ZodObject<{
                 schema: z.ZodLiteral<"zero-ar-tool-view/1">;
+                guidance_version: z.ZodOptional<z.ZodLiteral<2>>;
                 ref: z.ZodString;
                 closure_size: z.ZodNumber;
                 budget: z.ZodObject<{
@@ -17199,6 +17586,7 @@ export declare const SCHEMA_REGISTRY: {
                         "lifecycle-phase": "lifecycle-phase";
                         "objective-match": "objective-match";
                         "small-closure": "small-closure";
+                        "budget-fill": "budget-fill";
                     }>;
                 }, z.core.$strict>>;
                 hidden: z.ZodNumber;
@@ -17211,6 +17599,41 @@ export declare const SCHEMA_REGISTRY: {
             active_closure_epoch: z.ZodOptional<z.ZodNumber>;
             active_closure_ref: z.ZodOptional<z.ZodString>;
             pending_capability_admission_count: z.ZodOptional<z.ZodNumber>;
+            sub_runs: z.ZodOptional<z.ZodObject<{
+                counts: z.ZodObject<{
+                    running: z.ZodNumber;
+                    finished: z.ZodNumber;
+                    failed: z.ZodNumber;
+                    cancelled: z.ZodNumber;
+                }, z.core.$strict>;
+                children: z.ZodArray<z.ZodObject<{
+                    run_id: z.ZodString;
+                    objective: z.ZodString;
+                    state: z.ZodEnum<{
+                        cancelled: "cancelled";
+                        running: "running";
+                        finished: "finished";
+                        failed: "failed";
+                    }>;
+                    slice_model_tokens: z.ZodNumber;
+                    spent_model_tokens: z.ZodNumber;
+                    finding: z.ZodEnum<{
+                        gap: "gap";
+                        pending: "pending";
+                        returned: "returned";
+                    }>;
+                    terminal: z.ZodNullable<z.ZodEnum<{
+                        cancelled: "cancelled";
+                        complete: "complete";
+                        unverified_artifact: "unverified_artifact";
+                    }>>;
+                    gap: z.ZodNullable<z.ZodString>;
+                }, z.core.$strict>>;
+            }, z.core.$strict>>;
+            sub_run: z.ZodOptional<z.ZodObject<{
+                parent_run_id: z.ZodString;
+                depth: z.ZodNumber;
+            }, z.core.$strict>>;
             snapshot_version: z.ZodNumber;
         }, z.core.$strict>;
         readonly placement: "observation";
@@ -18002,6 +18425,37 @@ export declare const SCHEMA_REGISTRY: {
                     anchor_ref: z.ZodOptional<z.ZodString>;
                 }, z.core.$strict>>;
             }, z.core.$strict>>>;
+            sub_runs: z.ZodOptional<z.ZodObject<{
+                counts: z.ZodObject<{
+                    running: z.ZodNumber;
+                    finished: z.ZodNumber;
+                    failed: z.ZodNumber;
+                    cancelled: z.ZodNumber;
+                }, z.core.$strict>;
+                children: z.ZodArray<z.ZodObject<{
+                    run_id: z.ZodString;
+                    objective: z.ZodString;
+                    state: z.ZodEnum<{
+                        cancelled: "cancelled";
+                        running: "running";
+                        finished: "finished";
+                        failed: "failed";
+                    }>;
+                    slice_model_tokens: z.ZodNumber;
+                    spent_model_tokens: z.ZodNumber;
+                    finding: z.ZodEnum<{
+                        gap: "gap";
+                        pending: "pending";
+                        returned: "returned";
+                    }>;
+                    terminal: z.ZodNullable<z.ZodEnum<{
+                        cancelled: "cancelled";
+                        complete: "complete";
+                        unverified_artifact: "unverified_artifact";
+                    }>>;
+                    gap: z.ZodNullable<z.ZodString>;
+                }, z.core.$strict>>;
+            }, z.core.$strict>>;
         }, z.core.$strict>;
         readonly placement: "observation";
         readonly owner: "quality-plane";
@@ -18206,6 +18660,7 @@ export declare const SCHEMA_REGISTRY: {
                     "hierarchical-context": "hierarchical-context";
                     "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                     "web-search": "web-search";
+                    "several-cells-one-database": "several-cells-one-database";
                 }>>;
                 conditional: z.ZodArray<z.ZodObject<{
                     capability: z.ZodEnum<{
@@ -18270,6 +18725,7 @@ export declare const SCHEMA_REGISTRY: {
                         "hierarchical-context": "hierarchical-context";
                         "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                         "web-search": "web-search";
+                        "several-cells-one-database": "several-cells-one-database";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -18345,6 +18801,7 @@ export declare const SCHEMA_REGISTRY: {
                         "hierarchical-context": "hierarchical-context";
                         "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
                         "web-search": "web-search";
+                        "several-cells-one-database": "several-cells-one-database";
                     }>;
                     refusal_point: z.ZodEnum<{
                         "profile-compilation": "profile-compilation";
@@ -18502,6 +18959,20 @@ export declare const SCHEMA_REGISTRY: {
                 p95: z.ZodNullable<z.ZodNumber>;
                 p99: z.ZodNullable<z.ZodNumber>;
                 max: z.ZodNullable<z.ZodNumber>;
+            }, z.core.$strict>>;
+            ownership: z.ZodOptional<z.ZodObject<{
+                cell: z.ZodString;
+                claims: z.ZodArray<z.ZodObject<{
+                    run_id: z.ZodString;
+                    owner: z.ZodString;
+                    claimed_at: z.ZodString;
+                    expires_at: z.ZodString;
+                    in_flight: z.ZodArray<z.ZodObject<{
+                        effect_id: z.ZodString;
+                        position: z.ZodNumber;
+                        marked_at: z.ZodString;
+                    }, z.core.$strict>>;
+                }, z.core.$strict>>;
             }, z.core.$strict>>;
         }, z.core.$strict>;
         readonly placement: "operator-management";
@@ -18666,6 +19137,8 @@ export declare const SCHEMA_REGISTRY: {
                     remote_task: "remote_task";
                     awaiting_approval: "awaiting_approval";
                     awaiting_external: "awaiting_external";
+                    awaiting_subruns: "awaiting_subruns";
+                    runtime_defect: "runtime_defect";
                 }>>;
                 turn: z.ZodNumber;
                 current_branch: z.ZodNullable<z.ZodString>;
@@ -18693,11 +19166,11 @@ export declare const SCHEMA_REGISTRY: {
                 verified_completion_reachable: z.ZodBoolean;
                 items: z.ZodNullable<z.ZodRecord<z.ZodEnum<{
                     verified: "verified";
+                    failed: "failed";
                     untouched: "untouched";
                     completed_unverified: "completed_unverified";
                     parked: "parked";
                     dismissed: "dismissed";
-                    failed: "failed";
                     invalidated: "invalidated";
                 }>, z.ZodNumber>>;
                 contract: z.ZodNullable<z.ZodObject<{
@@ -18708,6 +19181,7 @@ export declare const SCHEMA_REGISTRY: {
                 }, z.core.$strict>>;
                 tool_view: z.ZodOptional<z.ZodNullable<z.ZodObject<{
                     schema: z.ZodLiteral<"zero-ar-tool-view/1">;
+                    guidance_version: z.ZodOptional<z.ZodLiteral<2>>;
                     ref: z.ZodString;
                     closure_size: z.ZodNumber;
                     budget: z.ZodObject<{
@@ -18739,6 +19213,7 @@ export declare const SCHEMA_REGISTRY: {
                             "lifecycle-phase": "lifecycle-phase";
                             "objective-match": "objective-match";
                             "small-closure": "small-closure";
+                            "budget-fill": "budget-fill";
                         }>;
                     }, z.core.$strict>>;
                     hidden: z.ZodNumber;
@@ -18751,6 +19226,41 @@ export declare const SCHEMA_REGISTRY: {
                 active_closure_epoch: z.ZodOptional<z.ZodNumber>;
                 active_closure_ref: z.ZodOptional<z.ZodString>;
                 pending_capability_admission_count: z.ZodOptional<z.ZodNumber>;
+                sub_runs: z.ZodOptional<z.ZodObject<{
+                    counts: z.ZodObject<{
+                        running: z.ZodNumber;
+                        finished: z.ZodNumber;
+                        failed: z.ZodNumber;
+                        cancelled: z.ZodNumber;
+                    }, z.core.$strict>;
+                    children: z.ZodArray<z.ZodObject<{
+                        run_id: z.ZodString;
+                        objective: z.ZodString;
+                        state: z.ZodEnum<{
+                            cancelled: "cancelled";
+                            running: "running";
+                            finished: "finished";
+                            failed: "failed";
+                        }>;
+                        slice_model_tokens: z.ZodNumber;
+                        spent_model_tokens: z.ZodNumber;
+                        finding: z.ZodEnum<{
+                            gap: "gap";
+                            pending: "pending";
+                            returned: "returned";
+                        }>;
+                        terminal: z.ZodNullable<z.ZodEnum<{
+                            cancelled: "cancelled";
+                            complete: "complete";
+                            unverified_artifact: "unverified_artifact";
+                        }>>;
+                        gap: z.ZodNullable<z.ZodString>;
+                    }, z.core.$strict>>;
+                }, z.core.$strict>>;
+                sub_run: z.ZodOptional<z.ZodObject<{
+                    parent_run_id: z.ZodString;
+                    depth: z.ZodNumber;
+                }, z.core.$strict>>;
                 snapshot_version: z.ZodNumber;
             }, z.core.$strict>;
         }, z.core.$strict>;
@@ -18839,16 +19349,31 @@ export declare const SCHEMA_REGISTRY: {
             run_id: z.ZodString;
             head_equal: z.ZodBoolean;
             records: z.ZodNumber;
+            projection_migration: z.ZodOptional<z.ZodObject<{
+                source_profile: z.ZodEnum<{
+                    "run-head-v11": "run-head-v11";
+                    "run-head-v10": "run-head-v10";
+                    "run-head-v9": "run-head-v9";
+                }>;
+                current_profile: z.ZodEnum<{
+                    "run-head-v11": "run-head-v11";
+                    "run-head-v10": "run-head-v10";
+                    "run-head-v9": "run-head-v9";
+                }>;
+                source_hash: z.ZodString;
+                current_hash: z.ZodString;
+                source_verified: z.ZodLiteral<true>;
+            }, z.core.$strict>>;
             artifacts: z.ZodOptional<z.ZodObject<{
                 imported: z.ZodArray<z.ZodString>;
                 not_transferred: z.ZodArray<z.ZodObject<{
                     artifact_ref: z.ZodString;
                     reason: z.ZodEnum<{
+                        absent: "absent";
                         "tenant-mismatch": "tenant-mismatch";
                         "backend-mismatch": "backend-mismatch";
                         "no-artifact-store": "no-artifact-store";
                         erased: "erased";
-                        absent: "absent";
                         "not-in-run": "not-in-run";
                     }>;
                 }, z.core.$strict>>;
@@ -18894,6 +19419,8 @@ export declare const SCHEMA_REGISTRY: {
                     }>;
                     record_catalogue_ref: z.ZodString;
                     fold_profile: z.ZodEnum<{
+                        "run-head-v11": "run-head-v11";
+                        "run-head-v10": "run-head-v10";
                         "run-head-v9": "run-head-v9";
                     }>;
                 }, z.core.$strict>;
@@ -19002,6 +19529,8 @@ export declare const SCHEMA_REGISTRY: {
                 }>;
                 record_catalogue_ref: z.ZodString;
                 fold_profile: z.ZodEnum<{
+                    "run-head-v11": "run-head-v11";
+                    "run-head-v10": "run-head-v10";
                     "run-head-v9": "run-head-v9";
                 }>;
             }, z.core.$strict>;
@@ -19139,6 +19668,8 @@ export declare const SCHEMA_REGISTRY: {
                 version: z.ZodString;
             }, z.core.$strict>;
             supported_fold_profiles: z.ZodArray<z.ZodEnum<{
+                "run-head-v11": "run-head-v11";
+                "run-head-v10": "run-head-v10";
                 "run-head-v9": "run-head-v9";
             }>>;
             supported_record_catalogues: z.ZodArray<z.ZodString>;
@@ -19175,6 +19706,8 @@ export declare const SCHEMA_REGISTRY: {
                     version: z.ZodString;
                 }, z.core.$strict>;
                 supported_fold_profiles: z.ZodArray<z.ZodEnum<{
+                    "run-head-v11": "run-head-v11";
+                    "run-head-v10": "run-head-v10";
                     "run-head-v9": "run-head-v9";
                 }>>;
                 supported_record_catalogues: z.ZodArray<z.ZodString>;
@@ -19272,6 +19805,8 @@ export declare const SCHEMA_REGISTRY: {
                     }>;
                     record_catalogue_ref: z.ZodString;
                     fold_profile: z.ZodEnum<{
+                        "run-head-v11": "run-head-v11";
+                        "run-head-v10": "run-head-v10";
                         "run-head-v9": "run-head-v9";
                     }>;
                 }, z.core.$strict>;
@@ -19468,6 +20003,7 @@ export declare const SCHEMA_REGISTRY: {
                     "effect.resolved": "effect.resolved";
                     "effect.unreconcilable": "effect.unreconcilable";
                     "effect.answer.late": "effect.answer.late";
+                    "effect.receipt.adopted": "effect.receipt.adopted";
                     "grant.superseded": "grant.superseded";
                     "item.attempted": "item.attempted";
                     "item.parked": "item.parked";
@@ -19635,7 +20171,13 @@ export declare const SCHEMA_REGISTRY: {
                     "effect-outcomes": "effect-outcomes";
                     "workspace-output": "workspace-output";
                     "web-pages": "web-pages";
+                    "source-reads": "source-reads";
+                    "skill-text": "skill-text";
                 }>>>;
+                reading_limits: z.ZodOptional<z.ZodObject<{
+                    extract_max_pages: z.ZodOptional<z.ZodNumber>;
+                    check_input_bytes: z.ZodOptional<z.ZodNumber>;
+                }, z.core.$strict>>;
                 checkpoint_view: z.ZodOptional<z.ZodEnum<{
                     "covered-items": "covered-items";
                     "worked-items": "worked-items";
@@ -19766,10 +20308,7 @@ export declare const SCHEMA_REGISTRY: {
                 content_ref: z.ZodString;
                 path: z.ZodString;
                 source_content_ref: z.ZodOptional<z.ZodString>;
-                source_format: z.ZodOptional<z.ZodEnum<{
-                    "ramsden/v1": "ramsden/v1";
-                    "zero-ar/v1": "zero-ar/v1";
-                }>>;
+                source_format: z.ZodOptional<z.ZodString>;
             }, z.core.$strict>>;
             conformance: z.ZodArray<z.ZodObject<{
                 check: z.ZodString;
@@ -19854,6 +20393,9 @@ export declare const SCHEMA_REGISTRY: {
             activation: z.ZodOptional<z.ZodEnum<{
                 progressive: "progressive";
                 always: "always";
+            }>>;
+            context_policy: z.ZodOptional<z.ZodEnum<{
+                "bounded-run-v1": "bounded-run-v1";
             }>>;
         }, z.core.$strict>;
         readonly placement: "publication";
@@ -19958,10 +20500,7 @@ export declare const SCHEMA_REGISTRY: {
                     content_ref: z.ZodString;
                     path: z.ZodString;
                     source_content_ref: z.ZodOptional<z.ZodString>;
-                    source_format: z.ZodOptional<z.ZodEnum<{
-                        "ramsden/v1": "ramsden/v1";
-                        "zero-ar/v1": "zero-ar/v1";
-                    }>>;
+                    source_format: z.ZodOptional<z.ZodString>;
                 }, z.core.$strict>>;
                 conformance: z.ZodArray<z.ZodObject<{
                     check: z.ZodString;
@@ -20125,6 +20664,7 @@ export declare const SCHEMA_REGISTRY: {
     };
     readonly IdentityMigrationEventRequestSchema: {
         readonly schema: z.ZodObject<{
+            from_identity: z.ZodOptional<z.ZodString>;
             impact: z.ZodEnum<{
                 deployment: "deployment";
                 "publication-namespace": "publication-namespace";
@@ -20205,6 +20745,9 @@ export declare const SCHEMA_REGISTRY: {
             version: z.ZodString;
             owner: z.ZodString;
             verification_reserve_fraction: z.ZodNumber;
+            skill_context: z.ZodOptional<z.ZodObject<{
+                maximum_window_share_ppm: z.ZodNumber;
+            }, z.core.$strict>>;
             optimization: z.ZodOptional<z.ZodObject<{
                 checkpoint: z.ZodOptional<z.ZodObject<{
                     selector: z.ZodLiteral<"young-daly-items-v1">;
@@ -20323,6 +20866,56 @@ export declare const SCHEMA_REGISTRY: {
         }, z.core.$strict>;
         readonly placement: "publication";
         readonly owner: "contracts-dx";
+    };
+    readonly PolicySkillWindowSchema: {
+        readonly schema: z.ZodObject<{
+            policy: z.ZodEnum<{
+                "bounded-run-v1": "bounded-run-v1";
+            }>;
+            maximum_window_share_ppm: z.ZodNumber;
+            budget_tokens: z.ZodNumber;
+            allowance_tokens: z.ZodNumber;
+            used_tokens: z.ZodNumber;
+            skills: z.ZodArray<z.ZodObject<{
+                skill_ref: z.ZodString;
+                entry_ref: z.ZodString;
+                tokens: z.ZodNumber;
+            }, z.core.$strict>>;
+        }, z.core.$strict>;
+        readonly placement: "composition";
+        readonly owner: "runtime-core";
+    };
+    readonly SkillWindowNoticesSchema: {
+        readonly schema: z.ZodObject<{
+            reserved_tokens: z.ZodNumber;
+            notices: z.ZodArray<z.ZodObject<{
+                entry_id: z.ZodString;
+                reason: z.ZodEnum<{
+                    "retention-expired": "retention-expired";
+                    "context-budget": "context-budget";
+                    "context-omitted": "context-omitted";
+                }>;
+                reopen: z.ZodUnion<readonly [z.ZodObject<{
+                    skill_ref: z.ZodString;
+                    retention: z.ZodOptional<z.ZodEnum<{
+                        checkpoint: "checkpoint";
+                        turn: "turn";
+                    }>>;
+                }, z.core.$strict>, z.ZodObject<{
+                    skill_ref: z.ZodString;
+                    path: z.ZodString;
+                    start_line: z.ZodOptional<z.ZodNumber>;
+                    end_line: z.ZodOptional<z.ZodNumber>;
+                    retention: z.ZodOptional<z.ZodEnum<{
+                        checkpoint: "checkpoint";
+                        turn: "turn";
+                    }>>;
+                }, z.core.$strict>]>;
+            }, z.core.$strict>>;
+            omitted: z.ZodNumber;
+        }, z.core.$strict>;
+        readonly placement: "composition";
+        readonly owner: "runtime-core";
     };
     readonly SkillOpenRequestSchema: {
         readonly schema: z.ZodObject<{
@@ -22144,6 +22737,11 @@ export declare const SCHEMA_REGISTRY: {
                 derived: "derived";
                 "model-generated": "model-generated";
             }>;
+            citations: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                source_id: z.ZodString;
+                span_hash: z.ZodString;
+                locator: z.ZodOptional<z.ZodString>;
+            }, z.core.$strict>>>;
             artifact: z.ZodOptional<z.ZodObject<{
                 artifact_ref: z.ZodString;
                 content_hash: z.ZodString;
@@ -22967,11 +23565,11 @@ export declare const SCHEMA_REGISTRY: {
         readonly schema: z.ZodObject<{
             artifact_ref: z.ZodString;
             reason: z.ZodEnum<{
+                absent: "absent";
                 "tenant-mismatch": "tenant-mismatch";
                 "backend-mismatch": "backend-mismatch";
                 "no-artifact-store": "no-artifact-store";
                 erased: "erased";
-                absent: "absent";
                 "not-in-run": "not-in-run";
             }>;
         }, z.core.$strict>;
@@ -23211,10 +23809,7 @@ export declare const SCHEMA_REGISTRY: {
                     content_ref: z.ZodString;
                     path: z.ZodString;
                     source_content_ref: z.ZodOptional<z.ZodString>;
-                    source_format: z.ZodOptional<z.ZodEnum<{
-                        "ramsden/v1": "ramsden/v1";
-                        "zero-ar/v1": "zero-ar/v1";
-                    }>>;
+                    source_format: z.ZodOptional<z.ZodString>;
                 }, z.core.$strict>>;
                 conformance: z.ZodArray<z.ZodObject<{
                     check: z.ZodString;
@@ -23340,8 +23935,8 @@ export declare const SCHEMA_REGISTRY: {
     readonly EffectTargetListSchema: {
         readonly schema: z.ZodObject<{
             mode: z.ZodEnum<{
-                "dynamic-authority": "dynamic-authority";
                 absent: "absent";
+                "dynamic-authority": "dynamic-authority";
                 "restricted-attachment": "restricted-attachment";
             }>;
             targets: z.ZodArray<z.ZodObject<{
@@ -23349,6 +23944,37 @@ export declare const SCHEMA_REGISTRY: {
                 version: z.ZodString;
                 operations: z.ZodArray<z.ZodString>;
             }, z.core.$strict>>;
+        }, z.core.$strict>;
+        readonly placement: "effect-dispatch";
+        readonly owner: "effect-plane";
+    };
+    readonly EffectGrantReissueRequestSchema: {
+        readonly schema: z.ZodObject<{
+            superseded_grant_ref: z.ZodString;
+            prior_run_id: z.ZodString;
+            reason: z.ZodString;
+        }, z.core.$strict>;
+        readonly placement: "effect-dispatch";
+        readonly owner: "effect-plane";
+    };
+    readonly EffectGrantReissueOutcomeSchema: {
+        readonly schema: z.ZodObject<{
+            run_id: z.ZodString;
+            superseded_ref: z.ZodString;
+            replacement_ref: z.ZodString;
+            replacement_grant: z.ZodObject<{
+                target: z.ZodString;
+                operation: z.ZodString;
+                agent_ref: z.ZodString;
+                accountable: z.ZodString;
+                approver: z.ZodString;
+                expires_at: z.ZodString;
+                max_magnitude: z.ZodNullable<z.ZodNumber>;
+                pre_approved_within_cap: z.ZodOptional<z.ZodLiteral<true>>;
+                attestation: z.ZodString;
+            }, z.core.$strict>;
+            identity_diff: z.ZodArray<z.ZodString>;
+            approver: z.ZodString;
         }, z.core.$strict>;
         readonly placement: "effect-dispatch";
         readonly owner: "effect-plane";

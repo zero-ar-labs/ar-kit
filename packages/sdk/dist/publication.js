@@ -9,9 +9,10 @@ var __rewriteRelativeImportExtension = (this && this.__rewriteRelativeImportExte
 import { existsSync, lstatSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { BindingProfileSchema, DomainPackSchema, MACHINE_PREDICATE, MemoryBindingSchema, OPERATION_CLASSES, PostureSchema, TRUST_TIERS, TaskContractSchema, VALIDATOR_CLASSES, VALIDATOR_OUTCOMES, canonicalJson, contentHash, productSourceApiVersionReadable, refuse, spanHash, } from '@zero-ar/contracts';
+import { BindingProfileSchema, DomainPackSchema, MACHINE_PREDICATE, MemoryBindingSchema, MEMORY_CLASSIFICATIONS, SubRunPolicySchema, SKILL_ACTIVATION_POLICIES, POLICY_SKILL_WINDOW_DEFAULT_SHARE_PPM, OPERATION_CLASSES, PostureSchema, TRUST_TIERS, TaskContractSchema, VALIDATOR_CLASSES, VALIDATOR_OUTCOMES, canonicalJson, contentHash, productSourceApiVersionReadable, refuse, spanHash, } from '@zero-ar/contracts';
 import { ProcedureManifestSchema, PublicationBundleManifestSchema } from '@zero-ar/contracts';
 import { admitCatalogueEntry, catalogueDefaults, compileVerificationPlan, defineCatalogueEntry, verificationCheckpointInputForContract } from '@zero-ar/validator-kit';
+import { publicationSkillWarnings } from "./publication-skill-sizing.js";
 const COMPILER = { name: '@zero-ar/sdk', version: '0.5.0', canonicalization: 'canonical-json-1' };
 async function parseYaml(text) {
     let parser;
@@ -126,11 +127,16 @@ async function skillSource(path, directory, selectedVersion) {
     }
     const allowed_tools = typeof rawAllowed === 'string' ? rawAllowed.split(/\s+/).filter(Boolean) : (rawAllowed ?? []);
     const metadata = (parsed['metadata'] ?? {});
+    const activation = metadata['zero-ar.activation'] ?? 'progressive';
+    if (!SKILL_ACTIVATION_POLICIES.includes(activation)) {
+        refuse({ code: 'publish.skill.activation', clause: 'DXI-006', message: 'SKILL.md metadata zero-ar.activation must be progressive or always. Use always only for a run-long policy that fits the posture skill-context share.' });
+    }
     return {
         name,
         description,
         version: selectedVersion ?? metadata['version'] ?? '0.0.0',
         allowed_tools,
+        activation: activation,
         body: text.slice(boundary + 5),
     };
 }
@@ -162,13 +168,14 @@ async function agentSource(path) {
         if (!declared) {
             refuse({ code: 'publish.source.unknown', message: `${path} exports no AGENT declaration or default agent; export one typed definition.`, clause: 'PUB-001' });
         }
-        const { name, version, instructions, model, tools, procedures, skills, task_contract, validators, posture, semantic_declarations, domain_pack, memory, binding_profiles, workspace, overrides, model_fallback_set } = declared;
+        const { name, version, instructions, model, tools, procedures, skills, task_contract, validators, posture, semantic_declarations, domain_pack, memory, binding_profiles, workspace, overrides, model_fallback_set, sub_runs } = declared;
         return {
             name,
             version,
             instructions,
             ...(model ? { model } : {}),
             ...(model_fallback_set ? { model_fallback_set } : {}),
+            ...(sub_runs ? { sub_runs } : {}),
             ...(tools ? { tools } : {}),
             ...(procedures ? { procedures } : {}),
             ...(skills ? { skills } : {}),
@@ -196,7 +203,7 @@ async function declarationSource(path) {
 }
 function requireSourceDocument(doc, expectedKind, sourceName) {
     if (!productSourceApiVersionReadable(doc.apiVersion) || doc.kind !== expectedKind) {
-        const versions = ['ramsden/v1', 'zero-ar/v1'].join(' or ');
+        const versions = 'zero-ar/v1';
         refuse({
             code: 'publish.source.unknown',
             message: `${sourceName} is not a supported ${expectedKind} source. Use apiVersion ${versions} and kind ${expectedKind}.`,
@@ -204,6 +211,17 @@ function requireSourceDocument(doc, expectedKind, sourceName) {
         });
     }
     return doc.apiVersion;
+}
+function subRunDeclaration(declared, agent) {
+    const parsed = SubRunPolicySchema.safeParse(declared);
+    if (!parsed.success) {
+        refuse({
+            code: 'publish.sub-runs.invalid',
+            message: `agent ${agent} declares sub_runs that do not validate: ${parsed.error.issues[0]?.message ?? 'shape mismatch'}. Declare sub_runs as { max_children: N } with N a whole number from 1 to 16, or leave it out.`,
+            clause: 'SUB-001',
+        });
+    }
+    return parsed.data;
 }
 function semanticData(value, path = 'spec') {
     if (value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')
@@ -502,6 +520,30 @@ async function compiledTool(root, path, doc, addAsset) {
             refuse({ code: 'publish.tool.metering-mode', message: `tool ${name} has unknown metering mode ${String(value['mode'])}. Use bounded or unmetered.`, clause: 'ADX-023' });
         }
     }
+    const rawClassification = spec['output_classification'];
+    if (rawClassification !== undefined && !MEMORY_CLASSIFICATIONS.includes(rawClassification)) {
+        refuse({ code: 'publish.tool.output-classification', message: `tool ${name} declares output_classification ${canonicalJson(rawClassification)}, which is not a classification. Use one of ${MEMORY_CLASSIFICATIONS.join(', ')}.`, clause: 'SRC-035' });
+    }
+    const rawExternal = spec['external_content'];
+    if (rawExternal !== undefined && typeof rawExternal !== 'boolean') {
+        refuse({ code: 'publish.tool.external-content', message: `tool ${name} declares external_content as ${canonicalJson(rawExternal)}. Use true for a tool whose results come from outside the run, or leave it out.`, clause: 'SRC-035' });
+    }
+    if (rawExternal === true && rawClassification === undefined) {
+        refuse({
+            code: 'publish.tool.outside-content-unclassified',
+            message: `tool ${name} declares external_content without an output_classification. Outside content is always kept in an artifact that expires, and that artifact needs a classification, so every call would fail. Add output_classification, such as internal or public, beside external_content.`,
+            clause: 'SRC-035',
+        });
+    }
+    const rawRetention = spec['external_content_retention_days'];
+    if (rawRetention !== undefined && (rawExternal !== true || !Number.isSafeInteger(rawRetention) || rawRetention < 1 || rawRetention > 3_650)) {
+        refuse({ code: 'publish.tool.external-content-retention', message: `tool ${name} declares external_content_retention_days as ${canonicalJson(rawRetention)}. Declare a whole number of days from 1 to 3650, beside external_content: true.`, clause: 'SRC-035' });
+    }
+    const outside = {
+        ...(rawClassification !== undefined ? { output_classification: rawClassification } : {}),
+        ...(rawExternal === true ? { external_content: true } : {}),
+        ...(rawRetention !== undefined ? { external_content_retention_days: rawRetention } : {}),
+    };
     const binding = await executableBinding(root, path, spec, addAsset, {
         kind: 'tool',
         name,
@@ -531,6 +573,7 @@ async function compiledTool(root, path, doc, addAsset) {
             ...(typeof spec['target'] === 'string' ? { target: spec['target'] } : {}),
             ...(typeof spec['operation'] === 'string' ? { operation: spec['operation'] } : {}),
             ...(disclosure ? { disclosure } : {}),
+            ...outside,
             reviewer: reviewed && operationClass !== 'effect-proposal' ? spec['reviewer'] : null,
         },
         bindingRefs: executionAssetRefs(binding),
@@ -596,7 +639,8 @@ async function compileStandardSkill(directory, admittedTools, addAsset, selected
         executable: false,
         entry_bytes: entry.bytes,
         allowed_tools: [...parsed.allowed_tools].sort(),
-        activation: 'progressive',
+        activation: parsed.activation,
+        ...(parsed.activation === 'always' ? { context_policy: 'bounded-run-v1' } : {}),
     });
     return { manifest, entry, resources, compatibility, source };
 }
@@ -884,6 +928,7 @@ export async function compileProject(sourcePath) {
         instructions_ref: instructions.ref,
         model: agent.model ?? 'project-default',
         ...(agent.model_fallback_set ? { model_fallback_set: agent.model_fallback_set } : {}),
+        ...(agent.sub_runs !== undefined ? { sub_runs: subRunDeclaration(agent.sub_runs, agent.name) } : {}),
         tools: [...toolRefs].sort(),
         procedures: [...procedureRefs].sort(),
         task_contract_ref: taskContractRef,
@@ -932,7 +977,7 @@ export async function compileProject(sourcePath) {
         requested_aliases: [],
     };
     const bundle = PublicationBundleManifestSchema.parse({ ...unsealed, bundle_ref: contentHash(unsealed) });
-    return { bundle, blobs };
+    return withSkillWarnings({ bundle, blobs });
 }
 export async function compileAuthoringSource(sourcePath) {
     const source = resolve(sourcePath);
@@ -1048,7 +1093,7 @@ async function compileStandaloneDeclaration(source, doc) {
         requested_aliases: [],
     };
     const bundle = PublicationBundleManifestSchema.parse({ ...unsealed, bundle_ref: contentHash(unsealed) });
-    return { bundle, blobs };
+    return withSkillWarnings({ bundle, blobs });
 }
 async function standaloneValidator(root, path, doc, addAsset) {
     const spec = doc.spec ?? {};
@@ -1115,7 +1160,7 @@ export async function compileSkill(directoryPath, selectedVersion) {
             refuse({ code: 'publish.skill.lock-stale', message: 'zero-ar.skill-lock.json does not match the current skill bytes. Review the change and regenerate the lock before publication.', clause: 'ADX-012' });
         }
     }
-    return compiled;
+    return withSkillWarnings(compiled);
 }
 export function skillLock(compiled) {
     const raw = compiled.blobs.get(compiled.bundle.root_ref);
@@ -1156,14 +1201,22 @@ export function exportAgentSkill(archive, procedureRef = archive.bundle.root_ref
     return { name: manifest.name, version: manifest.version, package_ref: procedureRef, files };
 }
 export { verifyBundle } from '@zero-ar/contracts';
-export function renderPlan(compiled) {
+export function renderPlan(compiled, sizing = {}) {
     const { bundle } = compiled;
     const rootEntry = bundle.declarations.find((declaration) => declaration.content_ref === bundle.root_ref);
+    const policies = bundle.declarations.filter((entry) => entry.kind === 'procedure')
+        .map((entry) => ({ ref: entry.content_ref, manifest: ProcedureManifestSchema.parse(JSON.parse(compiled.blobs.get(entry.content_ref) ?? 'null')) }))
+        .filter((entry) => entry.manifest.context_policy === 'bounded-run-v1');
+    const root = JSON.parse(compiled.blobs.get(bundle.root_ref) ?? '{}');
+    const posture = root.posture_ref ? PostureSchema.parse(JSON.parse(compiled.blobs.get(root.posture_ref) ?? 'null')) : null;
+    const share = posture?.skill_context?.maximum_window_share_ppm ?? POLICY_SKILL_WINDOW_DEFAULT_SHARE_PPM;
     const lines = [
         `root         ${rootEntry?.kind} ${rootEntry?.name} ${rootEntry?.version}`,
         `root_ref     ${bundle.root_ref}`,
         `bundle_ref   ${bundle.bundle_ref}`,
         ...bundle.declarations.map((declaration) => `declares     ${declaration.kind} ${declaration.name} ${declaration.version} ${declaration.content_ref.slice(0, 20)}`),
+        ...policies.map(({ manifest }) => `policy       ${manifest.name} ${manifest.version}, always, ${manifest.context_policy}, window share at most ${share} ppm`),
+        ...publicationSkillWarnings(compiled, sizing).map(warning => `warning      ${warning.code}: ${warning.message}`),
         `assets       ${bundle.assets.length}, ${bundle.assets.reduce((sum, asset) => sum + asset.bytes, 0)} bytes`,
         `edges        ${bundle.edges.length}, closure complete`,
         'establishes  compiled and verifiable only; publication is a separate authorized commit',
@@ -1213,4 +1266,8 @@ export function previewPublicationVerificationPlan(compiled, input) {
         profile_manifest: input.profile_manifest,
         items_declared: input.items_declared,
     });
+}
+function withSkillWarnings(compiled) {
+    const warnings = publicationSkillWarnings(compiled);
+    return warnings.length ? { ...compiled, warnings } : compiled;
 }

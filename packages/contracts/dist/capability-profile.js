@@ -137,7 +137,7 @@ export function compileProfileCapabilityManifest(value, options = {}) {
     if (!parsed.success) {
         refuse({
             code: 'capability-profile.unknown',
-            message: 'the profile capability manifest uses a capability, component, provider, backend or field outside the contracts vocabulary. Use the closed vocabularies in @ramsden/contracts.',
+            message: 'the profile capability manifest uses a capability, component, provider, backend or field outside the contracts vocabulary. Use the closed vocabularies in @zero-ar/contracts.',
             clause: 'UAT-PRO-002',
         });
     }
@@ -180,8 +180,8 @@ export function compileProfileCapabilityManifest(value, options = {}) {
             clause: 'UAT-PRO-001',
         });
     }
-    const implemented = new Set(options.implemented_capabilities ?? PROFILE_CAPABILITIES);
-    const unimplemented = manifest.capabilities
+    const implemented = options.implemented_capabilities ? new Set(options.implemented_capabilities) : null;
+    const unimplemented = implemented === null ? [] : manifest.capabilities
         .filter((entry) => entry.state === 'supported' && !implemented.has(entry.capability))
         .map((entry) => entry.capability)
         .sort();
@@ -234,6 +234,8 @@ export function renderProfileCapabilityPage(manifest) {
         '# Zero-AR first-beta capability page',
         '',
         'Generated from `@zero-ar/contracts`. Do not edit by hand.',
+        '',
+        `A running ${summary.profile} cell compiles this manifest against the mechanisms it constructed and serves it on its health route. A supported capability the cell did not construct stops startup with capability-profile.unimplemented.`,
         '',
         `Manifest: ${summary.manifest_id}`,
         `Profile: ${summary.profile}`,
@@ -329,7 +331,7 @@ const localLiteSupported = [
     supported('research-reference-pack', 'The research pack\'s claim-set contract and citation validators run in Local Lite: claims cite artifact ranges whose citations come back from artifact.read, an unresolved citation is never admitted as support, and identical spans count once.', ['QCV-006', 'QCV-008'], ['CLM-001', 'CLM-002']),
     supported('run-fork', 'The public API forks from a named frontier into a new run, carries the plan with items restarted and inherits no active grant, lease, credential or completion state.', ['KCV-002']),
     supported('suspension', 'Suspended runs persist their handles and resume from durable state.', ['KCV-008']),
-    supported('source-local-read-only', 'Local directories register as read-only source instances and commit immutable artifact-backed snapshots.', ['SRC-CV-001', 'SRC-CV-002', 'SRC-CV-003', 'SRC-CV-005', 'SRC-CV-014'], ['SRC-001', 'SRC-002', 'SRC-003', 'SRC-004', 'SRC-005', 'SRC-006', 'SRC-007', 'SRC-009', 'SRC-021', 'SRC-022', 'SRC-023']),
+    supported('source-local-read-only', 'Local directories register as read-only source instances and commit immutable artifact-backed snapshots.', ['SRC-CV-001', 'SRC-CV-002', 'SRC-CV-003', 'SRC-CV-004', 'SRC-CV-005', 'SRC-CV-010', 'SRC-CV-014', 'SRC-CV-018', 'SRC-CV-019', 'SRC-CV-020', 'SRC-CV-021', 'SRC-CV-022', 'SRC-CV-023', 'VPC-CV-019'], ['SRC-001', 'SRC-002', 'SRC-003', 'SRC-004', 'SRC-005', 'SRC-006', 'SRC-007', 'SRC-009', 'SRC-021', 'SRC-022', 'SRC-023']),
     supported('transformation-volume-reference-pack', 'The transformation fixture is available at conformance scale.', ['UAT-CV-015']),
 ];
 const hostedSupported = [
@@ -349,7 +351,7 @@ const hostedSupported = [
     supported('effect-proposal-tools', 'Consequential tool calls create durable proposals through the restricted effect attachment. A tenant with dynamic authority dispatches them to host targets, as host-target-effect-dispatch states.', ['UAT-CV-009']),
     supported('restricted-effect-plane-attachment', 'Consequential aggregator work can stage proposals but cannot dispatch mutation effects.', ['UAT-CV-009']),
     supported('suspension', 'A named-human suspension releases hot state and resumes through the public client on a fresh process. The seven-day shipped-runtime wake proof remains a separate UAT-CV-018 release gate.', ['LIF-CV-014']),
-    supported('source-local-read-only', 'Admitted read-only directories resolve into immutable artifact-backed source bindings.', ['SRC-CV-001', 'SRC-CV-002', 'SRC-CV-003', 'SRC-CV-005', 'SRC-CV-014'], ['SRC-001', 'SRC-002', 'SRC-003', 'SRC-004', 'SRC-005', 'SRC-006', 'SRC-007', 'SRC-009', 'SRC-021', 'SRC-022', 'SRC-023']),
+    supported('source-local-read-only', 'Admitted read-only directories resolve into immutable artifact-backed source bindings.', ['SRC-CV-001', 'SRC-CV-002', 'SRC-CV-003', 'SRC-CV-004', 'SRC-CV-005', 'SRC-CV-010', 'SRC-CV-014', 'SRC-CV-018', 'SRC-CV-019', 'SRC-CV-020', 'SRC-CV-021', 'SRC-CV-022', 'SRC-CV-023', 'VPC-CV-019'], ['SRC-001', 'SRC-002', 'SRC-003', 'SRC-004', 'SRC-005', 'SRC-006', 'SRC-007', 'SRC-009', 'SRC-021', 'SRC-022', 'SRC-023']),
     supported('transformation-volume-reference-pack', 'The volume pack is the UAT domain reference.', ['UAT-CV-015']),
 ];
 const localVersionThreeConditions = [
@@ -381,6 +383,7 @@ const regulatedVersionThreeExclusions = [
     excluded('run-fork', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit public run forks.', ['KCV-002']),
     excluded('workspace-exec', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit workspace.exec.', ['KCV-009']),
 ];
+const hostedSeveralCells = supported('several-cells-one-database', 'Several active Full Cells may share one PostgreSQL database. Every path that changes a run takes the run\'s ownership claim in the transaction it guards, and a dispatch marks its action in flight in the same statement. A cell that cannot take a run answers run.owner.elsewhere with the owning cell\'s name and records nothing, and a stopped cell\'s claim expires so another cell reconciles through the target lookup before anything is sent again. The database doctor shows which cell owns which run.', ['HAX-CV-005', 'HAX-CV-006', 'HAX-CV-007'], ['HAX-007']);
 const localLiteWebSearch = conditionalAt('web-search', 'profile-compilation', 'web.provider.unknown', 'Local Lite offers web.search and web.fetch only when ZERO_AR_WEB_SEARCH_PROVIDER names an admitted provider and its key is supplied. Otherwise the tools are absent and the ready line says why.', ['WEB-CV-002', 'WEB-CV-005', 'WEB-CV-006', 'WEB-CV-007'], ['WEB-002', 'WEB-003', 'WEB-008']);
 const hostedWebSearch = conditionalAt('web-search', 'profile-compilation', 'web.provider.unknown', 'The hosted cell offers web.search and web.fetch only to a tenant whose web_search block names a shipped provider and an active web-search key binding, with a filesystem or S3-compatible artifact store. Otherwise the tenant has neither tool.', ['WEB-CV-009'], ['WEB-002', 'WEB-008', 'WEB-010']);
 const regulatedWebSearch = excluded('web-search', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile does not admit web.search or web.fetch.', ['WEB-CV-005']);
@@ -461,6 +464,7 @@ const localLiteExclusions = [
     excluded('authored-orchestration', 'publication', 'profile.capability.excluded', 'Authored orchestration is not part of Local Lite.', ['UAT-CV-001']),
     excluded('reversible-http-effect-dispatch', 'profile-compilation', 'profile.capability.excluded', 'Local Lite has no HTTP effect target or authority service.', ['UAT-CV-009']),
     excluded('host-target-effect-dispatch', 'profile-compilation', 'profile.capability.excluded', 'Local Lite has no effect plane, so it records no action and sends none. Host targets are a Full Cell capability.', ['UAT-CV-009']),
+    excluded('several-cells-one-database', 'profile-compilation', 'profile.capability.excluded', 'Local Lite keeps its runs in one SQLite file for one process. Several cells share a PostgreSQL database in the hosted profiles.', ['HAX-CV-005'], ['HAX-007']),
 ];
 function localLiteProvider(capability, label, profile, keyVariable, vectors) {
     return conditionalAt(capability, 'profile-compilation', 'model.adapter.credential-missing', `Local Lite builds the ${label} adapter when ZERO_AR_ADAPTER=${profile} and a key arrives through protected input, the OS credential store or ${keyVariable}; startup refuses without a key, and egress is admitted only to that adapter's host. Its release claim follows ${vectors.join(' and ')}.`, vectors, ['UAT-PRO-001']);
@@ -488,14 +492,14 @@ const gatewayConditional = [
 ];
 const localLiteUnwired = [
     excluded('fair-cell-scheduling', 'profile-compilation', 'profile.capability.excluded', 'Local Lite serves one tenant, so fair dispatch across tenants does not apply.', ['MTH-CV-040'], ['MTH-SC-001', 'TEN-004']),
-    unwired('attention-admission', 'publication', 'attention.admission.unwired', 'Attention admission is not wired in this build. Local Lite calibrates review capacity observe-only, publishes versioned capacity snapshots and serves the attention dashboard under /v1/attention; no run is admitted or refused on attention. The SDK publication compiler refuses a posture that declares an attention controller; a closure published through the raw publication API fails when a run binds it, as a server defect rather than a typed refusal. Runs record attention enforcement as not wired.', ['MTH-CV-080', 'MTH-CV-081', 'MTH-CV-082'], ['BUD-009', 'MTH-AT-004']),
+    unwired('attention-admission', 'publication', 'attention.admission.unwired', 'Posture-driven attention controllers remain reserved. Local Lite calibrates review capacity observe-only and publishes snapshots under /v1/attention. Runtime intake refuses known named-human review demand above its budget; a current published snapshot also enables capacity preflight and pins its decision. Questions and parked reviews hold attention before opening. The SDK refuses a posture that declares an attention controller; a raw-published closure declaring one fails when a run binds it.', ['MTH-CV-080', 'MTH-CV-081', 'MTH-CV-082'], ['BUD-009', 'MTH-AT-004']),
     ...unwiredInEveryComposition,
     ...gatewayConditional,
 ];
 const hostedUnwired = [
     unwired('fair-cell-scheduling', 'profile-compilation', 'scheduler.dispatch.unwired', 'Fair dispatch across tenants is not wired in this build; runs launch in arrival order and the cell applies no dominant-resource share.', ['MTH-CV-040', 'MTH-CV-041', 'MTH-CV-042'], ['MTH-SC-001', 'TEN-004']),
     unwired('sequential-sampled-validation', 'profile-compilation', 'validator.sampled.unwired', 'The hosted cell does not register the sampled check or its contract in this build, so a task contract that binds a sampled-oracle validator refuses at intake as unregistered. No hosted vector covers sampled validation or the controllers route.', ['MTH-CV-030', 'MTH-CV-031', 'MTH-CV-032'], ['MTH-SV-001', 'VPC-030']),
-    unwired('attention-admission', 'publication', 'attention.admission.unwired', 'Attention admission is not wired in this build. The SDK publication compiler refuses a posture that declares an attention controller; a closure published through the raw publication API fails when a run binds it, as a server defect rather than a typed refusal. Runs record attention enforcement as not wired, and a hosted tenant has no attention service in this build, so its attention routes refuse with attention.service.unwired.', ['MTH-CV-080', 'MTH-CV-081', 'MTH-CV-082'], ['BUD-009', 'MTH-AT-004']),
+    unwired('attention-admission', 'publication', 'attention.admission.unwired', 'Posture-driven attention controllers remain reserved. Runtime intake refuses known named-human review demand above its budget, and questions and parked reviews hold attention before opening. A hosted tenant has no capacity service, so its attention routes refuse with attention.service.unwired and queue feasibility remains unevaluated. The SDK refuses a posture that declares an attention controller; a raw-published closure declaring one fails when a run binds it.', ['MTH-CV-080', 'MTH-CV-081', 'MTH-CV-082'], ['BUD-009', 'MTH-AT-004']),
     ...unwiredInEveryComposition,
     ...gatewayConditional,
 ];
@@ -519,7 +523,7 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
         schema: 'zero-ar-profile-capability-manifest/1',
         manifest_id: 'local-lite',
         profile: 'local-lite',
-        version: '1.4.0',
+        version: '1.5.0',
         capability_vocabulary_ref: contentHash(PROFILE_CAPABILITIES),
         model_providers: ['scripted', 'openai', 'anthropic', 'openrouter', 'together', 'fireworks', 'openai-compatible'],
         aggregator_providers: [],
@@ -535,7 +539,7 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
         schema: 'zero-ar-profile-capability-manifest/1',
         manifest_id: 'first-beta-uat',
         profile: 'small-production',
-        version: '1.4.0',
+        version: '1.5.0',
         capability_vocabulary_ref: contentHash(PROFILE_CAPABILITIES),
         model_providers: ['openai', 'anthropic'],
         aggregator_providers: [],
@@ -545,13 +549,13 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
         tool_operation_classes: ['observation', 'run-internal', 'effect-proposal'],
         effect_plane: 'restricted-attachment',
         components: { required: ['artifact', 'migration', 'queue', 'store'], health_probes: ['artifact', 'migration', 'queue', 'secret_store', 'store', 'tool_host'] },
-        capabilities: [...hostedSupported, ...hostedVersionThreeConditions, hostedWebSearch, ...hostedReleaseConditions, ...hostedDeferredReleaseCapabilities, hostedMcpCapability, hostedMcpClientCapability, ...conditionalHostedEnvironments, excluded('full-cell-docker-linux', 'profile-compilation', 'profile.capability.excluded', 'The self-contained Docker/Linux Full Cell uses the full-cell manifest.', ['XCV-007']), ...firstBetaExclusions, ...hostedUnwired],
+        capabilities: [...hostedSupported, ...hostedVersionThreeConditions, hostedWebSearch, ...hostedReleaseConditions, ...hostedDeferredReleaseCapabilities, hostedMcpCapability, hostedMcpClientCapability, hostedSeveralCells, ...conditionalHostedEnvironments, excluded('full-cell-docker-linux', 'profile-compilation', 'profile.capability.excluded', 'The self-contained Docker/Linux Full Cell uses the full-cell manifest.', ['XCV-007']), ...firstBetaExclusions, ...hostedUnwired],
     }),
     'full-cell': seal({
         schema: 'zero-ar-profile-capability-manifest/1',
         manifest_id: 'first-beta-full-cell',
         profile: 'full-cell',
-        version: '1.4.0',
+        version: '1.5.0',
         capability_vocabulary_ref: contentHash(PROFILE_CAPABILITIES),
         model_providers: ['openai', 'anthropic'],
         aggregator_providers: [],
@@ -561,13 +565,13 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
         tool_operation_classes: ['observation', 'run-internal', 'effect-proposal'],
         effect_plane: 'restricted-attachment',
         components: { required: ['artifact', 'migration', 'queue', 'store', 'tool_host', 'validator_host'], health_probes: ['artifact', 'authority', 'migration', 'queue', 'secret_store', 'store', 'tool_host', 'validator_host'] },
-        capabilities: [...hostedSupported, ...hostedVersionThreeConditions, hostedWebSearch, ...hostedReleaseConditions, ...hostedDeferredReleaseCapabilities, hostedMcpCapability, hostedMcpClientCapability, ...conditionalHostedEnvironments, supported('full-cell-docker-linux', 'The Docker/Linux Full Cell packages the hosted runtime and child hosts together.', ['XCV-007']), ...firstBetaExclusions, ...hostedUnwired],
+        capabilities: [...hostedSupported, ...hostedVersionThreeConditions, hostedWebSearch, ...hostedReleaseConditions, ...hostedDeferredReleaseCapabilities, hostedMcpCapability, hostedMcpClientCapability, hostedSeveralCells, ...conditionalHostedEnvironments, supported('full-cell-docker-linux', 'The Docker/Linux Full Cell packages the hosted runtime and child hosts together.', ['XCV-007']), ...firstBetaExclusions, ...hostedUnwired],
     }),
     regulated: seal({
         schema: 'zero-ar-profile-capability-manifest/1',
         manifest_id: 'regulated-future',
         profile: 'regulated',
-        version: '1.4.0',
+        version: '1.5.0',
         capability_vocabulary_ref: contentHash(PROFILE_CAPABILITIES),
         model_providers: ['openai', 'anthropic'],
         aggregator_providers: [],
@@ -589,6 +593,7 @@ export const PROFILE_CAPABILITY_MANIFESTS = {
             excluded('full-cell-docker-linux', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile waits for its own packaged cell profile.', ['UAT-CV-001']),
             excluded('mcp-work-entrypoints', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile waits for a separately admitted interoperability listener.', ['IOP-CV-001'], ['IOP-114']),
             excluded('mcp-imported-tools', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile waits for separately admitted imported-tool egress.', ['IOP-CV-028'], ['IOP-031']),
+            excluded('several-cells-one-database', 'profile-compilation', 'profile.capability.excluded', 'The regulated profile runs one cell per database until its own composition proves several.', ['HAX-CV-005'], ['HAX-007']),
             ...allNonDefaultEnvironmentExclusions,
             excluded('authored-orchestration', 'publication', 'profile.capability.excluded', 'Authored orchestration remains later work for regulated deployments.', ['UAT-CV-001']),
             excluded('classification-airlocks', 'publication', 'profile.capability.excluded', 'Classification airlocks remain later work for regulated deployments.', ['UAT-CV-001']),

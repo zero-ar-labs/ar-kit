@@ -8,11 +8,15 @@ const effectId = z.string().regex(/^eff_[0-9a-f]{32}$/, 'expected an effect id')
 const decisionId = z.string().regex(/^ead_[0-9a-f]{32}$/, 'expected an effect authority decision id');
 const epoch = z.number().int().positive();
 export const FOLLOW_UP_LIMITS = Object.freeze({ constraints: 16, values: 50, max_uses: 100 });
+export const EffectFollowUpConstraintSchema = z.union([
+    z.array(z.unknown()).min(1).max(FOLLOW_UP_LIMITS.values),
+    z.strictObject({ max: z.number().nonnegative() }),
+]);
 export const EffectFollowUpGrantSchema = z.strictObject({
     type: z.literal('zero-ar.follow-up'),
     locations: z.array(z.string().min(1).max(128)).length(1),
     actions: z.array(z.string().min(1).max(128)).length(1),
-    constraints: z.record(z.string().min(1).max(128), z.array(z.unknown()).min(1).max(FOLLOW_UP_LIMITS.values))
+    constraints: z.record(z.string().min(1).max(128), EffectFollowUpConstraintSchema)
         .refine((constraints) => Object.keys(constraints).length <= FOLLOW_UP_LIMITS.constraints, `a follow-up pins at most ${FOLLOW_UP_LIMITS.constraints} parameters`),
     max_uses: z.number().int().min(1).max(FOLLOW_UP_LIMITS.max_uses),
     expires_at: z.string().datetime(),
@@ -25,6 +29,12 @@ export function followUpUncovered(grant, action) {
         const value = action.params[name];
         if (value === undefined)
             return `the follow-up pins ${name}, and the action names none`;
+        if (!Array.isArray(allowed)) {
+            if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > allowed.max) {
+                return `the follow-up allows ${name} up to ${allowed.max}, and the action names ${JSON.stringify(value)}`;
+            }
+            continue;
+        }
         const permitted = new Set(allowed.map((entry) => contentHash(entry)));
         const values = Array.isArray(value) ? value : [value];
         if (values.length === 0 || values.some((entry) => !permitted.has(contentHash(entry)))) {

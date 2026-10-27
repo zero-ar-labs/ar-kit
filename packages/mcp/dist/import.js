@@ -21,6 +21,13 @@ function assertImportBinding(snapshot, binding) {
 }
 export function compileMcpToolImport(input) {
     assertImportBinding(input.snapshot, input.binding);
+    if (input.external_content === true && input.output_classification === undefined) {
+        refuse({
+            code: 'interop.mcp.tool.outside-content-unclassified',
+            message: `the review marks ${input.tool_name} as outside content without an output classification. Outside content is always kept in an artifact that expires, and that artifact needs a classification, so every call would fail. Give the import an output_classification, such as internal or public.`,
+            clause: 'SRC-035',
+        });
+    }
     const tool = input.snapshot.tools.find((candidate) => candidate.name === input.tool_name);
     if (!tool) {
         refuse({
@@ -45,6 +52,8 @@ export function compileMcpToolImport(input) {
         isolation: 'remote',
         cost: null,
         timeout_ms: input.binding.timeouts.idle_ms,
+        ...(input.output_classification !== undefined ? { output_classification: input.output_classification } : {}),
+        ...(input.external_content === true ? { external_content: true } : {}),
     };
     const toolManifestRef = contentHash(manifest);
     const executionBindingRef = mcpToolExecutionBindingRef({

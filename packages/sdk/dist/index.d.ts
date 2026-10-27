@@ -8,6 +8,9 @@ export interface AgentSpec extends Named {
     instructions: string;
     model?: string;
     model_fallback_set?: string;
+    sub_runs?: {
+        max_children: number;
+    };
     tools?: string[];
     procedures?: string[];
     skills?: string[];
@@ -33,6 +36,9 @@ export declare function defineAgent(spec: AgentSpec): Readonly<{
     instructions: string;
     model: string;
     model_fallback_set?: string;
+    sub_runs?: {
+        max_children: number;
+    };
     tools: string[];
     procedures?: string[];
     skills?: string[];
@@ -296,6 +302,8 @@ export declare function compileDomainPack(pack: DomainPack, available: {
     version: string;
 }[]): CompiledPack;
 export { compileAuthoringSource, compileProject, compileSkill, exportAgentSkill, previewPublicationVerificationPlan, renderPlan, skillLock, } from './publication.js';
+export { publicationSkillWarnings } from './publication-skill-sizing.js';
+export type { PublicationSkillSizingOptions } from './publication-skill-sizing.js';
 export { verifyBundle } from '@zero-ar/contracts';
 export type { CompiledBundle, ExportedAgentSkill, PublicationVerificationPreviewInput, SkillLock } from './publication.js';
 export { renderVerificationPlan } from '@zero-ar/validator-kit';

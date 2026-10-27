@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PRODUCT_IDENTITY_MIGRATION_IMPACTS, PRODUCT_SOURCE_API_VERSIONS, PUBLICATION_BLOB_ENCODINGS, PUBLICATION_EDGE_KINDS, PUBLICATION_KINDS, SKILL_ACTIVATION_POLICIES, } from "./vocab.js";
+import { PRODUCT_IDENTITY_MIGRATION_IMPACTS, PUBLICATION_BLOB_ENCODINGS, PUBLICATION_EDGE_KINDS, PUBLICATION_KINDS, SKILL_ACTIVATION_POLICIES, SKILL_CONTEXT_POLICIES, } from "./vocab.js";
 import { contentHash } from "./ids.js";
 import { spanHash } from "./claims.js";
 import { refuse } from "./diagnostics.js";
@@ -38,7 +38,7 @@ export const PublicationBundleManifestSchema = z.strictObject({
         content_ref: ref,
         path: z.string().min(1).max(512),
         source_content_ref: ref.optional(),
-        source_format: z.enum(PRODUCT_SOURCE_API_VERSIONS).optional(),
+        source_format: z.string().min(1).max(128).optional(),
     })),
     conformance: z.array(z.strictObject({ check: z.string().min(1).max(128), outcome: z.enum(['pass', 'refused']) })),
     claims: z.array(z.strictObject({ kind: z.string().min(1).max(64), text: z.string().min(1).max(2_000) })),
@@ -57,6 +57,11 @@ export const ProcedureManifestSchema = z.strictObject({
     entry_bytes: z.number().int().min(0).optional(),
     allowed_tools: z.array(name).max(64).optional(),
     activation: z.enum(SKILL_ACTIVATION_POLICIES).optional(),
+    context_policy: z.enum(SKILL_CONTEXT_POLICIES).optional(),
+}).superRefine((value, context) => {
+    if (value.context_policy && value.activation !== 'always') {
+        context.addIssue({ code: 'custom', path: ['context_policy'], message: 'bounded run-long context requires explicit always activation' });
+    }
 });
 export const PublicationReceiptSchema = z.strictObject({
     publication_ref: ref,
@@ -129,6 +134,7 @@ export const DeprecationRequestSchema = z.strictObject({ content_ref: ref, reaso
 export const QuarantineRequestSchema = z.strictObject({ content_ref: ref, reason: z.string().min(1).max(500) });
 export const RegistryActOutcomeSchema = z.strictObject({ content_ref: ref, recorded: z.literal(true) });
 export const IdentityMigrationEventRequestSchema = z.strictObject({
+    from_identity: z.string().min(1).max(128).optional(),
     impact: z.enum(PRODUCT_IDENTITY_MIGRATION_IMPACTS),
     surface: identitySurface,
     decision_ref: decisionRef,

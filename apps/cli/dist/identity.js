@@ -35,7 +35,7 @@ export const CLI_USAGE_ROWS = [
     { command: 'memory', syntax: 'memory prepare-rotation --current <path> --next <path>', summary: 'create the next wrapping key and print the rotating start settings' },
     { command: 'memory', syntax: 'memory status|assert|supersede|history|erase|export|import|read [arguments] [--json]', summary: 'administer cross-run memory through the public API' },
     { command: 'doctor', syntax: 'doctor [--database] [--url u] [--json]', summary: 'check the installation, run portability surfaces, or hosted database' },
-    { command: 'profile', syntax: 'profile [--json]', summary: 'what this installation is, where its data lives, what it excludes' },
+    { command: 'profile', syntax: 'profile [--url <runtime>] [--json]', summary: 'what a running runtime or this installation claims, where its data lives, what it excludes' },
     { command: 'environment', syntax: 'environment <operation>', summary: 'administer profiles and environment jobs' },
     { command: 'provider', syntax: 'provider <operation> --url u', summary: 'administer provider adapters, credentials, instances, catalogues, and model policy' },
     { command: 'tool-source', syntax: 'tool-source <operation>', summary: 'administer Composio and Merge sources' },

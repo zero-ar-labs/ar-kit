@@ -313,7 +313,7 @@ export declare const API_ROUTES: {
             readonly argument: "participant_token";
             readonly required: false;
             readonly maxLength: 16384;
-            readonly description: "An optional JWT issued by the tenant's admitted participant identity provider. The application bearer key remains in Authorization.";
+            readonly description: "An optional participant credential: a JWT from the tenant's admitted identity provider, or an approver assertion the application signs with its registered key. The application bearer key remains in Authorization.";
         }];
         readonly area: "run";
         readonly authorization: {
@@ -335,7 +335,7 @@ export declare const API_ROUTES: {
             readonly argument: "participant_token";
             readonly required: true;
             readonly maxLength: 16384;
-            readonly description: "A JWT from the tenant's admitted participant identity provider. The verified subject becomes the exact-effect approver.";
+            readonly description: "A JWT from the tenant's admitted identity provider, or an approver assertion the application signs with its registered key. The verified subject becomes the exact-effect approver.";
         }];
         readonly area: "run";
         readonly authorization: {
@@ -344,6 +344,29 @@ export declare const API_ROUTES: {
         readonly product_mutation: {
             readonly idempotency_source: "request-idempotency-key";
             readonly changed_content_code: "effect.approval.idempotency.reused";
+        };
+    };
+    readonly reissueEffectGrant: {
+        readonly method: "POST";
+        readonly path: "/v1/runs/:run_id/effect-grants/reissuances";
+        readonly kind: "json";
+        readonly request: "EffectGrantReissueRequestSchema";
+        readonly response: "EffectGrantReissueOutcomeSchema";
+        readonly headers: readonly [{
+            readonly name: "X-Zero-AR-Participant-Token";
+            readonly argument: "participant_token";
+            readonly required: true;
+            readonly maxLength: 16384;
+            readonly description: "A JWT from the tenant's admitted participant identity provider. The verified subject becomes the named operator who re-issues the grant.";
+        }];
+        readonly diagnostics: readonly [{
+            readonly status: 400;
+            readonly code: "effect.grant.reissue.unavailable";
+            readonly when: "a runtime whose effect plane cannot re-issue grants, such as Local Lite";
+        }];
+        readonly area: "review-and-authority";
+        readonly authorization: {
+            readonly scopes: readonly ["effect:grant"];
         };
     };
     readonly fork: {

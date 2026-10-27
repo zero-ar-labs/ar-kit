@@ -1,7 +1,9 @@
 import type { IntakeRequest, PublicationBundleManifest, Posture, ValidatorAvailabilitySnapshot, VerificationCheckpointInput, VerificationPlan } from '@zero-ar/contracts';
+import type { PublicationSkillSizingOptions } from './publication-skill-sizing.js';
 export interface CompiledBundle {
     bundle: PublicationBundleManifest;
     blobs: Map<string, string>;
+    warnings?: readonly import('@zero-ar/contracts').Diagnostic[];
 }
 export interface PublicationVerificationPreviewInput {
     budgets: IntakeRequest['budgets'];
@@ -38,5 +40,5 @@ export declare function exportAgentSkill(archive: {
     blobs: Map<string, string> | Record<string, string>;
 }, procedureRef?: string): ExportedAgentSkill;
 export { verifyBundle } from '@zero-ar/contracts';
-export declare function renderPlan(compiled: CompiledBundle): string;
+export declare function renderPlan(compiled: CompiledBundle, sizing?: PublicationSkillSizingOptions): string;
 export declare function previewPublicationVerificationPlan(compiled: CompiledBundle, input: PublicationVerificationPreviewInput): VerificationPlan;

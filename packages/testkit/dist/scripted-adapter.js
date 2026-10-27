@@ -96,7 +96,7 @@ export class ScriptedAdapter {
         }
     }
     defaultTurn(request, objective) {
-        const system = messageText(request.messages.find((message) => message.role === 'system')?.content ?? '');
+        const system = request.messages.map((message) => messageText(message.content)).findLast((text) => text.includes('Work status: remaining items:')) ?? '';
         const match = system.match(/remaining items: ([^(\n]+?)(?:\s*\(and \d+ more\))?\.\s/);
         if (match && match[1] && match[1].trim() !== 'none') {
             const ids = match[1].split(',').map((id) => id.trim()).filter(Boolean).slice(0, this.batch);

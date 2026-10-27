@@ -87,10 +87,7 @@ export declare const PublicationBundleManifestSchema: z.ZodObject<{
         content_ref: z.ZodString;
         path: z.ZodString;
         source_content_ref: z.ZodOptional<z.ZodString>;
-        source_format: z.ZodOptional<z.ZodEnum<{
-            "ramsden/v1": "ramsden/v1";
-            "zero-ar/v1": "zero-ar/v1";
-        }>>;
+        source_format: z.ZodOptional<z.ZodString>;
     }, z.core.$strict>>;
     conformance: z.ZodArray<z.ZodObject<{
         check: z.ZodString;
@@ -129,6 +126,9 @@ export declare const ProcedureManifestSchema: z.ZodObject<{
     activation: z.ZodOptional<z.ZodEnum<{
         progressive: "progressive";
         always: "always";
+    }>>;
+    context_policy: z.ZodOptional<z.ZodEnum<{
+        "bounded-run-v1": "bounded-run-v1";
     }>>;
 }, z.core.$strict>;
 export type ProcedureManifest = z.infer<typeof ProcedureManifestSchema>;
@@ -228,10 +228,7 @@ export declare const PublicationSessionRequestSchema: z.ZodObject<{
             content_ref: z.ZodString;
             path: z.ZodString;
             source_content_ref: z.ZodOptional<z.ZodString>;
-            source_format: z.ZodOptional<z.ZodEnum<{
-                "ramsden/v1": "ramsden/v1";
-                "zero-ar/v1": "zero-ar/v1";
-            }>>;
+            source_format: z.ZodOptional<z.ZodString>;
         }, z.core.$strict>>;
         conformance: z.ZodArray<z.ZodObject<{
             check: z.ZodString;
@@ -353,6 +350,7 @@ export declare const RegistryActOutcomeSchema: z.ZodObject<{
 }, z.core.$strict>;
 export type RegistryActOutcome = z.infer<typeof RegistryActOutcomeSchema>;
 export declare const IdentityMigrationEventRequestSchema: z.ZodObject<{
+    from_identity: z.ZodOptional<z.ZodString>;
     impact: z.ZodEnum<{
         deployment: "deployment";
         "publication-namespace": "publication-namespace";
@@ -481,10 +479,7 @@ export declare const PublicationExportFrameSchema: z.ZodDiscriminatedUnion<[z.Zo
             content_ref: z.ZodString;
             path: z.ZodString;
             source_content_ref: z.ZodOptional<z.ZodString>;
-            source_format: z.ZodOptional<z.ZodEnum<{
-                "ramsden/v1": "ramsden/v1";
-                "zero-ar/v1": "zero-ar/v1";
-            }>>;
+            source_format: z.ZodOptional<z.ZodString>;
         }, z.core.$strict>>;
         conformance: z.ZodArray<z.ZodObject<{
             check: z.ZodString;

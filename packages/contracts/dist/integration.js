@@ -5,6 +5,10 @@ const ref = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>'
 const name = z.string().regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'expected lowercase dot-separated naming');
 const version = z.string().regex(/^\d+\.\d+\.\d+$/, 'expected semantic versioning');
 const count = z.number().int().nonnegative();
+export const POLICY_SKILL_WINDOW_DEFAULT_SHARE_PPM = 100_000;
+export function publishedSkillInstructions(procedure) {
+    return `\n\nPublished skill ${procedure.name} ${procedure.version} (${procedure.ref}):\n\n${procedure.instructions}`;
+}
 export const SkillDescriptorSchema = z.strictObject({
     skill_ref: ref,
     name,

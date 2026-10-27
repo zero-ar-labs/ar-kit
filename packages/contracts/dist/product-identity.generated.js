@@ -1,18 +1,10 @@
 export const PRODUCT_IDENTITY_SOURCE = 'PRODUCT_IDENTITY.yaml';
-export const PRODUCT_IDENTITY_SOURCE_REF = 'sha256:08acc193d619e075f9221af22b92d62a604a185ea873eea15cd8e4827bc8dfb3';
-export const PRODUCT_IDENTITY = {
-    "schema": "product-identity/v1",
+export const PRODUCT_IDENTITY_SOURCE_REF = 'sha256:46fb9415570c213db5eb10224ae2c19b6b9daa86111b714ad1f6dfdf8faaf2de';
+const IDENTITY_ARTIFACT = {
+    "schema": "product-identity/v2",
     "status": "current",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "current": {
-        "display_name": "Ramsden",
-        "slug": "ramsden",
-        "package_scope": "@ramsden",
-        "command": "ramsden",
-        "environment_prefix": "RAMSDEN_",
-        "local_data_directory": ".ramsden"
-    },
-    "successor": {
         "display_name": "Zero-AR",
         "wordmark": "ZERO-AR",
         "expansion": "Zero-layer Autonomous Runtime",
@@ -32,8 +24,8 @@ export const PRODUCT_IDENTITY = {
     "ratification": {
         "authority": "product-owner",
         "selected_at": "2026-08-31",
-        "ratified_at": "2026-08-31",
-        "decision_ref": "docs/product-identity-and-namespace-migration-appendix.md@0.4.1",
+        "ratified_at": "2026-10-14",
+        "decision_ref": "docs/product-identity-and-namespace-migration-appendix.md@0.5.0",
         "external_legal_approval_required": false
     },
     "distribution": {
@@ -51,8 +43,9 @@ export const PRODUCT_IDENTITY = {
         "legacy_support_ends": "2026-09-02T00:00:00Z"
     }
 };
-export const LEGACY_PRODUCT_IDENTITY = PRODUCT_IDENTITY.current;
-export const SUCCESSOR_PRODUCT_IDENTITY = PRODUCT_IDENTITY.successor;
+export const PRODUCT_IDENTITY = { ...IDENTITY_ARTIFACT, successor: IDENTITY_ARTIFACT.current };
+export const CURRENT_PRODUCT_IDENTITY = PRODUCT_IDENTITY.current;
+export const SUCCESSOR_PRODUCT_IDENTITY = CURRENT_PRODUCT_IDENTITY;
 export const PRODUCT_IDENTITY_MIGRATION = PRODUCT_IDENTITY.migration;
 export function activeProductIdentity() {
     return SUCCESSOR_PRODUCT_IDENTITY;

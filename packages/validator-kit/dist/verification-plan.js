@@ -397,7 +397,8 @@ export function compileVerificationPlan(raw) {
     }
     const interval = input.checkpoint?.interval_items ?? contract?.checkpoint_every_items ?? 1;
     const fixed = contract ? fixedCost(contract, input.items_declared, interval) : { perCheckpoint: 0, acceptance: 0, checkpoints: 0, projected: 0 };
-    const reserve = input.budgets.consumption.compute_ms ?? 60_000;
+    const fraction = input.posture?.configuration.verification_reserve_fraction ?? input.budgets.verification_reserve_fraction;
+    const reserve = Math.floor((input.budgets.consumption.compute_ms ?? 0) * fraction);
     const projected = input.checkpoint?.projected_cost_ms ?? fixed.projected;
     if (contract && !input.checkpoint) {
         refusals.push(refusal('schedule-infeasible', 'a task contract has no pinned checkpoint input.'));
@@ -436,7 +437,9 @@ export function compileVerificationPlan(raw) {
         const snapshot = input.attention_capacity_snapshot;
         const requirements = namedHuman.map((name) => {
             const capacity = snapshot?.classes.find((entry) => entry.name === name) ?? null;
-            const admitted = Boolean(capacity && capacity.available > 0 && input.budgets.attention > 0);
+            const admitted = capacity && 'admission_result' in capacity
+                ? capacity.admission_result === 'admitted'
+                : Boolean(capacity && capacity.available > 0 && input.budgets.attention > 0);
             if (!admitted) {
                 refusals.push(refusal('attention-capacity-unavailable', `named-human class ${name} lacks pinned available capacity or attention budget.`, { validator: name, dependency: 'attention-capacity' }));
             }
@@ -464,7 +467,7 @@ export function compileVerificationPlan(raw) {
             'coverage-MMR is context selection, not truth.',
             'Young-Daly cadence and dependency closure are planner inputs, not validators.',
             ...sampledGuarantees,
-            ...(namedHuman.length > 0 ? [ATTENTION_NOT_EVALUATED] : []),
+            ...(namedHuman.length > 0 && input.attention_enforcement.mode === 'not-wired' ? [ATTENTION_NOT_EVALUATED] : []),
         ])].sort();
     const uniqueRefusals = [...new Map(refusals.sort(refusalOrder).map((item) => [canonicalJson(item), item])).values()];
     const body = VerificationPlanBodySchema.parse({

@@ -37,6 +37,11 @@ export declare const ReceiptSchema: z.ZodObject<{
         "authenticated-response": "authenticated-response";
         "authenticated-reconciliation": "authenticated-reconciliation";
     }>;
+    owner_signature: z.ZodOptional<z.ZodEnum<{
+        verified: "verified";
+        unverified: "unverified";
+        absent: "absent";
+    }>>;
     attestation: z.ZodNullable<z.ZodString>;
     target_adapter_version: z.ZodString;
     valid_time: z.ZodString;
@@ -51,9 +56,12 @@ export declare const StaticGrantSchema: z.ZodObject<{
     approver: z.ZodString;
     expires_at: z.ZodString;
     max_magnitude: z.ZodNullable<z.ZodNumber>;
+    pre_approved_within_cap: z.ZodOptional<z.ZodLiteral<true>>;
     attestation: z.ZodString;
 }, z.core.$strict>;
 export type StaticGrant = z.infer<typeof StaticGrantSchema>;
 export declare function receiptBinding(receipt: Pick<Receipt, 'effect_id' | 'target' | 'operation' | 'param_hash' | 'idempotency_key' | 'outcome' | 'owner_response'>): string;
+export declare function receiptAttestationBinding(receipt: Pick<Receipt, 'effect_id' | 'target' | 'operation' | 'param_hash' | 'idempotency_key' | 'outcome' | 'owner_response' | 'assurance' | 'owner_signature'>): string;
+export declare function adoptedReceiptBinding(receipt: Parameters<typeof receiptAttestationBinding>[0], handoff_ref: string): string;
 export declare function receiptBindingMismatch(receipt: Pick<Receipt, 'effect_id' | 'target' | 'operation' | 'param_hash' | 'idempotency_key'>, descriptor: Pick<EffectDescriptor, 'effect_id' | 'target' | 'operation' | 'param_hash' | 'idempotency_key'>): 'effect_id' | 'target' | 'operation' | 'param_hash' | 'idempotency_key' | null;
 export declare function grantBinding(grant: Omit<StaticGrant, 'attestation'>): string;

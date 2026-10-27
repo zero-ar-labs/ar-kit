@@ -4,11 +4,17 @@ export declare const FOLLOW_UP_LIMITS: Readonly<{
     values: 50;
     max_uses: 100;
 }>;
+export declare const EffectFollowUpConstraintSchema: z.ZodUnion<readonly [z.ZodArray<z.ZodUnknown>, z.ZodObject<{
+    max: z.ZodNumber;
+}, z.core.$strict>]>;
+export type EffectFollowUpConstraint = z.infer<typeof EffectFollowUpConstraintSchema>;
 export declare const EffectFollowUpGrantSchema: z.ZodObject<{
     type: z.ZodLiteral<"zero-ar.follow-up">;
     locations: z.ZodArray<z.ZodString>;
     actions: z.ZodArray<z.ZodString>;
-    constraints: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodUnknown>>;
+    constraints: z.ZodRecord<z.ZodString, z.ZodUnion<readonly [z.ZodArray<z.ZodUnknown>, z.ZodObject<{
+        max: z.ZodNumber;
+    }, z.core.$strict>]>>;
     max_uses: z.ZodNumber;
     expires_at: z.ZodString;
 }, z.core.$strict>;
@@ -42,7 +48,9 @@ export declare const EffectApprovalRequestSchema: z.ZodObject<{
         type: z.ZodLiteral<"zero-ar.follow-up">;
         locations: z.ZodArray<z.ZodString>;
         actions: z.ZodArray<z.ZodString>;
-        constraints: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodUnknown>>;
+        constraints: z.ZodRecord<z.ZodString, z.ZodUnion<readonly [z.ZodArray<z.ZodUnknown>, z.ZodObject<{
+            max: z.ZodNumber;
+        }, z.core.$strict>]>>;
         max_uses: z.ZodNumber;
         expires_at: z.ZodString;
     }, z.core.$strict>>;
@@ -97,7 +105,9 @@ export declare const EffectApprovalRecordedSchema: z.ZodObject<{
         type: z.ZodLiteral<"zero-ar.follow-up">;
         locations: z.ZodArray<z.ZodString>;
         actions: z.ZodArray<z.ZodString>;
-        constraints: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodUnknown>>;
+        constraints: z.ZodRecord<z.ZodString, z.ZodUnion<readonly [z.ZodArray<z.ZodUnknown>, z.ZodObject<{
+            max: z.ZodNumber;
+        }, z.core.$strict>]>>;
         max_uses: z.ZodNumber;
         expires_at: z.ZodString;
     }, z.core.$strict>>;
@@ -105,15 +115,17 @@ export declare const EffectApprovalRecordedSchema: z.ZodObject<{
 }, z.core.$strict>;
 export type EffectApprovalRecorded = z.infer<typeof EffectApprovalRecordedSchema>;
 export declare const EffectAuthorityDecisionCommandSchema: z.ZodObject<{
-    reason: z.ZodString;
-    target: z.ZodString;
+    idempotency_key: z.ZodString;
+    request_fingerprint: z.ZodString;
+    application_principal: z.ZodString;
     run_id: z.ZodString;
     tenant: z.ZodString;
+    reason: z.ZodString;
+    target: z.ZodString;
     effect_id: z.ZodString;
     operation: z.ZodString;
     param_hash: z.ZodString;
     magnitude: z.ZodNullable<z.ZodNumber>;
-    idempotency_key: z.ZodString;
     approver: z.ZodObject<{
         subject: z.ZodString;
         issuer: z.ZodString;
@@ -122,8 +134,6 @@ export declare const EffectAuthorityDecisionCommandSchema: z.ZodObject<{
         credential_id: z.ZodNullable<z.ZodString>;
     }, z.core.$strict>;
     expires_at: z.ZodString;
-    request_fingerprint: z.ZodString;
-    application_principal: z.ZodString;
     decision: z.ZodEnum<{
         approve: "approve";
         refuse: "refuse";
@@ -132,7 +142,9 @@ export declare const EffectAuthorityDecisionCommandSchema: z.ZodObject<{
         type: z.ZodLiteral<"zero-ar.follow-up">;
         locations: z.ZodArray<z.ZodString>;
         actions: z.ZodArray<z.ZodString>;
-        constraints: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodUnknown>>;
+        constraints: z.ZodRecord<z.ZodString, z.ZodUnion<readonly [z.ZodArray<z.ZodUnknown>, z.ZodObject<{
+            max: z.ZodNumber;
+        }, z.core.$strict>]>>;
         max_uses: z.ZodNumber;
         expires_at: z.ZodString;
     }, z.core.$strict>>;

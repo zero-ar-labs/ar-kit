@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { MemoryClassification } from './vocab.js';
+import type { MemoryClassification, SourceSearchMatch, SourceSearchSkip } from './vocab.js';
 export declare const SOURCE_ACCESS_PROFILES: readonly ["local-read-only"];
 export declare const SOURCE_INSTANCE_STATES: readonly ["ready", "disabled", "removed"];
 export declare const SOURCE_LOCATOR_KINDS: readonly ["local-directory"];
@@ -58,6 +58,25 @@ export declare const SourceExtractorIdentityV1Schema: z.ZodObject<{
 }, z.core.$strict>;
 export type SourceExtractorIdentityV1 = z.infer<typeof SourceExtractorIdentityV1Schema>;
 export declare function extractorDefaultLanguages(identity: SourceExtractorIdentity | SourceExtractorIdentityV1): readonly string[];
+export declare const SOURCE_SEARCH_LIMITS: Readonly<{
+    max_sources: 16;
+    max_terms: 16;
+    default_max_matches: 10;
+    max_matches: 1000;
+    default_max_matches_per_document: 3;
+    max_matches_per_document: 100;
+    default_window_chars: 200;
+    max_window_chars: 4096;
+    default_scan_bytes: 1048576;
+    max_scan_bytes: number;
+    read_window_bytes: 1048576;
+    window_overlap_bytes: 16384;
+    max_member_bytes: number;
+    max_members_visited: 10000;
+    max_skipped_named: 20;
+    max_cursor_chars: 1024;
+}>;
+export declare function sourceTextMediaType(mediaType: string): boolean;
 export declare const SourceLocatorSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     kind: z.ZodLiteral<"local-directory">;
     path: z.ZodString;
@@ -449,11 +468,21 @@ export declare const SourceOperationRequestSchema: z.ZodDiscriminatedUnion<[z.Zo
     offset: z.ZodNumber;
     length: z.ZodNumber;
 }, z.core.$strict>, z.ZodObject<{
-    source_alias: z.ZodString;
+    source_alias: z.ZodOptional<z.ZodString>;
+    source_aliases: z.ZodOptional<z.ZodArray<z.ZodString>>;
     operation: z.ZodLiteral<"search">;
     query: z.ZodString;
+    match: z.ZodOptional<z.ZodEnum<{
+        exact: "exact";
+        "all-terms": "all-terms";
+        "any-term": "any-term";
+        phrase: "phrase";
+    }>>;
+    window_chars: z.ZodOptional<z.ZodNumber>;
     max_matches: z.ZodOptional<z.ZodNumber>;
+    max_matches_per_document: z.ZodOptional<z.ZodNumber>;
     max_scan_bytes: z.ZodOptional<z.ZodNumber>;
+    cursor: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>, z.ZodObject<{
     source_alias: z.ZodOptional<z.ZodString>;
     operation: z.ZodLiteral<"document.extract">;
@@ -461,8 +490,47 @@ export declare const SourceOperationRequestSchema: z.ZodDiscriminatedUnion<[z.Zo
     artifact_ref: z.ZodOptional<z.ZodString>;
     max_pages: z.ZodOptional<z.ZodNumber>;
     languages: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    first_page: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strict>], "operation">;
 export type SourceOperationRequest = z.infer<typeof SourceOperationRequestSchema>;
+export interface SourceSearchRequest {
+    query: string;
+    match: SourceSearchMatch;
+    window_chars: number;
+    max_matches: number;
+    max_matches_per_document: number;
+    max_scan_bytes: number;
+    cursor?: string;
+}
+export interface SourceSearchMatchHit {
+    source_alias: string;
+    locator: string;
+    page?: number;
+    offset: number;
+    length: number;
+    context: string;
+    score: number;
+}
+export interface SourceSearchSkipped {
+    source_alias: string;
+    locator: string;
+    bytes: number;
+    reason: SourceSearchSkip;
+}
+export interface SourceSearchResult {
+    query: string;
+    match: SourceSearchMatch;
+    source_aliases: string[];
+    matches: SourceSearchMatchHit[];
+    documents_matched: number;
+    matches_not_returned: number;
+    scanned_bytes: number;
+    scanned_members: number;
+    skipped: SourceSearchSkipped[];
+    skipped_count: number;
+    truncated: boolean;
+    next_cursor: string | null;
+}
 export declare const SourceOperationResultSchema: z.ZodObject<{
     source_alias: z.ZodString;
     operation: z.ZodEnum<{
@@ -548,6 +616,120 @@ export declare function inlinePageNumbers(pages: readonly {
     page: number;
     text_bytes: number;
 }[], budget?: number): Set<number>;
+export declare const DOCUMENT_EXTRACTION_DEFAULT_MAX_PAGES = 100;
+export declare const DOCUMENT_EXTRACTION_TEXT_WINDOW_BYTES = 3072;
+export declare const DocumentTextWindowPageSchema: z.ZodObject<{
+    page: z.ZodNumber;
+    text_artifact_ref: z.ZodString;
+    text_content_hash: z.ZodString;
+    text_bytes: z.ZodNumber;
+    shown_bytes: z.ZodNumber;
+}, z.core.$strict>;
+export declare const DocumentTextWindowSchema: z.ZodObject<{
+    first_page: z.ZodNumber;
+    text: z.ZodString;
+    pages: z.ZodArray<z.ZodObject<{
+        page: z.ZodNumber;
+        text_artifact_ref: z.ZodString;
+        text_content_hash: z.ZodString;
+        text_bytes: z.ZodNumber;
+        shown_bytes: z.ZodNumber;
+    }, z.core.$strict>>;
+    next: z.ZodNullable<z.ZodObject<{
+        page: z.ZodNumber;
+        offset: z.ZodNumber;
+    }, z.core.$strict>>;
+}, z.core.$strict>;
+export type DocumentTextWindow = z.infer<typeof DocumentTextWindowSchema>;
+export declare function documentTextWindow(pages: readonly {
+    page: number;
+    text_artifact_ref: string;
+    text_content_hash: string;
+    text_bytes: number;
+}[], texts: ReadonlyMap<number, string>, firstPage?: number, budget?: number): DocumentTextWindow | null;
+export declare const DocumentExtractionReuseSchema: z.ZodObject<{
+    extraction_ref: z.ZodString;
+    run_id: z.ZodString;
+    record_id: z.ZodString;
+}, z.core.$strict>;
+export type DocumentExtractionReuse = z.infer<typeof DocumentExtractionReuseSchema>;
+export declare const KeptDocumentExtractionSchema: z.ZodObject<{
+    extraction_ref: z.ZodString;
+    content_hash: z.ZodString;
+    extractor_ref: z.ZodString;
+    extractor: z.ZodObject<{
+        name: z.ZodLiteral<"zero-ar.pdf-extractor">;
+        version: z.ZodString;
+        poppler_version: z.ZodString;
+        tesseract_version: z.ZodNullable<z.ZodString>;
+        languages: z.ZodArray<z.ZodString>;
+        dpi: z.ZodNumber;
+        sandbox_mode: z.ZodEnum<{
+            "linux-bwrap-no-network": "linux-bwrap-no-network";
+            "resource-limited-process": "resource-limited-process";
+            "oci-no-network-read-only": "oci-no-network-read-only";
+        }>;
+        binding: z.ZodEnum<{
+            "host-process": "host-process";
+            "oci-document": "oci-document";
+        }>;
+        image_digest: z.ZodNullable<z.ZodString>;
+        code_hash: z.ZodOptional<z.ZodString>;
+    }, z.core.$strict>;
+    media_type: z.ZodEnum<{
+        "image/png": "image/png";
+        "image/jpeg": "image/jpeg";
+        "application/pdf": "application/pdf";
+    }>;
+    page_count: z.ZodNumber;
+    truncated: z.ZodBoolean;
+    max_pages: z.ZodNumber;
+    pages: z.ZodArray<z.ZodObject<{
+        page: z.ZodNumber;
+        width: z.ZodNullable<z.ZodNumber>;
+        height: z.ZodNullable<z.ZodNumber>;
+        coordinate_space: z.ZodEnum<{
+            "pdf-points": "pdf-points";
+            "image-pixels": "image-pixels";
+        }>;
+        text_artifact_ref: z.ZodString;
+        text_content_hash: z.ZodString;
+        text_bytes: z.ZodNumber;
+        method: z.ZodEnum<{
+            "poppler-text": "poppler-text";
+            "tesseract-ocr": "tesseract-ocr";
+        }>;
+        confidence: z.ZodNullable<z.ZodNumber>;
+        image: z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
+            kept: z.ZodLiteral<true>;
+            artifact_ref: z.ZodString;
+            content_hash: z.ZodString;
+            media_type: z.ZodEnum<{
+                "image/png": "image/png";
+                "image/jpeg": "image/jpeg";
+            }>;
+            bytes: z.ZodNumber;
+        }, z.core.$strict>, z.ZodObject<{
+            kept: z.ZodLiteral<false>;
+            media_type: z.ZodEnum<{
+                "image/png": "image/png";
+                "image/jpeg": "image/jpeg";
+            }>;
+            bytes: z.ZodNumber;
+            reason: z.ZodEnum<{
+                "page-image-bytes": "page-image-bytes";
+                "extraction-image-bytes": "extraction-image-bytes";
+            }>;
+            max_bytes: z.ZodNumber;
+        }, z.core.$strict>], "kept">>;
+    }, z.core.$strict>>;
+    run_id: z.ZodString;
+    record_id: z.ZodString;
+    manifest_artifact_ref: z.ZodString;
+    kept_at: z.ZodString;
+}, z.core.$strict>;
+export type KeptDocumentExtraction = z.infer<typeof KeptDocumentExtractionSchema>;
+export declare function documentExtractorRef(identity: SourceExtractorIdentity): string;
 export declare const DocumentExtractionResultSchema: z.ZodObject<{
     source_alias: z.ZodString;
     member_ref: z.ZodString;
@@ -620,8 +802,29 @@ export declare const DocumentExtractionResultSchema: z.ZodObject<{
     page_count: z.ZodNumber;
     total_text_bytes: z.ZodNumber;
     truncated: z.ZodBoolean;
+    max_pages: z.ZodOptional<z.ZodNumber>;
     manifest_artifact_ref: z.ZodString;
     manifest_ref: z.ZodString;
     provenance_ref: z.ZodString;
+    text_window: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        first_page: z.ZodNumber;
+        text: z.ZodString;
+        pages: z.ZodArray<z.ZodObject<{
+            page: z.ZodNumber;
+            text_artifact_ref: z.ZodString;
+            text_content_hash: z.ZodString;
+            text_bytes: z.ZodNumber;
+            shown_bytes: z.ZodNumber;
+        }, z.core.$strict>>;
+        next: z.ZodNullable<z.ZodObject<{
+            page: z.ZodNumber;
+            offset: z.ZodNumber;
+        }, z.core.$strict>>;
+    }, z.core.$strict>>>;
+    reused_from: z.ZodOptional<z.ZodObject<{
+        extraction_ref: z.ZodString;
+        run_id: z.ZodString;
+        record_id: z.ZodString;
+    }, z.core.$strict>>;
 }, z.core.$strict>;
 export type DocumentExtractionResult = z.infer<typeof DocumentExtractionResultSchema>;

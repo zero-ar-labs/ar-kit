@@ -8,7 +8,7 @@ import { ContextExpandRequestSchema, ContextExpansionResultSchema, ContextSegmen
 import { ControllersViewSchema, PinnedCheckpointDecisionSchema } from "./controllers-view.js";
 import { WakeClockDiagnosticSchema, WakeSchedulerDeclarationSchema, WakeSchedulerReportSchema } from "./wake-scheduler.js";
 import { AttentionCalibrationReportSchema, AttentionCalibrationRequestSchema, AttentionCapacitySnapshotPublishRequestSchema, AttentionCapacitySnapshotSchema, AttentionClassModelSchema, AttentionDashboardSchema, AttentionDistributionSchema, } from "./attention.js";
-import { EffectTargetListSchema } from "./effect-authority.js";
+import { EffectGrantReissueOutcomeSchema, EffectGrantReissueRequestSchema, EffectTargetListSchema } from "./effect-authority.js";
 import { ResolvedWorkspaceInstanceSchema, WorkspaceIntakeBindingSchema } from "./workspace-instances.js";
 import { ProfileCapabilityEntrySchema, ProfileCapabilityManifestSchema, ProfileCapabilitySummarySchema, } from "./capability-profile.js";
 import { AliasHistorySchema, AliasMutationRequestSchema, DrainOutcomeSchema, DrainRequestSchema, IdentityMigrationEventOutcomeSchema, IdentityMigrationEventRequestSchema, OperatorAuditPageSchema, ReconciliationOutcomeSchema, AliasMutationResultSchema, DeclarationViewSchema, DeprecationRequestSchema, ProcedureManifestSchema, PublicationAssetEntrySchema, PublicationBlobAckSchema, PublicationBlobFrameSchema, PublicationBlobUploadFinishSchema, PublicationBlobUploadStatusSchema, PublicationBundleManifestSchema, PublicationCommitRequestSchema, PublicationDeclarationEntrySchema, PublicationDependencyEdgeSchema, PublicationExportFrameSchema, PublicationImportOutcomeSchema, PublicationReceiptSchema, PublicationSessionRequestSchema, PublicationSessionSchema, PublicationViewSchema, QuarantineRequestSchema, RegistryActOutcomeSchema, RegistryRebuildOutcomeSchema, } from "./publication.js";
@@ -28,7 +28,7 @@ import { EnableToolSourceToolsRequestSchema, RegisterToolSourceRequestSchema, Sy
 import { DocumentExtractionPageSchema, DocumentExtractionResultSchema, RegisterSourceRequestSchema, ResolvedSourceBindingSchema, SourceBindingInputSchema, SourceInstanceSchema, SourceExtractorIdentitySchema, SourceListSchema, SourceLocatorSchema, SourceBoundsSchema, SourceOperationRequestSchema, SourceOperationResultSchema, SourcePreflightSchema, SourceSnapshotMemberSchema, SourceSnapshotPageRequestSchema, SourceSnapshotPageSchema, SourceSnapshotSchema, } from "./sources.js";
 import { MemoryAssertionInputSchema, MemoryAssertionSchema, MemorySubjectErasureRequestSchema, MemorySubjectErasureOutcomeSchema, MemorySubjectImportOutcomeSchema, MemorySubjectImportRequestSchema, MemorySubjectKeyMaterialSchema, MemorySubjectTransferBundleSchema, MemorySubjectTransferRequestSchema, MemoryWrappedKeySchema, MemoryHistoryRequestSchema, MemoryHistoryResponseSchema, MemoryBindingSchema, MemoryReadEnvelopeSchema, MemoryReadRequestSchema, MemoryReadResponseSchema, ModelMemoryProposalSchema, ModelMemoryReadRequestSchema, ProtectedMemoryReadEnvelopeSchema, ResolvedMemoryBindingSchema, MemorySupersedeRequestSchema, MemorySupersedeOutcomeSchema, MemoryWriteOutcomeSchema, RunMemoryReadOutcomeSchema, } from "./memory.js";
 import { AssuranceEnvelopeSchema, InteropBindingManifestBodySchema, InteropBindingManifestSchema, InteropCapabilitySchema, InteropConnectionSchema, InteropJsonSchema, InteropProtocolRegistryEntrySchema, InteropProtocolRegistrySchema, McpImportedToolPlanSchema, McpImportedResourcePlanSchema, McpPeerResourceSchema, McpPeerSnapshotBodySchema, McpPeerSnapshotSchema, McpPeerToolSchema, McpPendingInputSchema, McpPublishedWorkEntrypointSchema, McpTaskAliasSchema, McpTaskProjectionSchema, } from "./interop.js";
-import { ATTENTION_ADMISSION_RESULTS, BLOCKING_OUTCOME_KINDS, BRANCH_REASONS, CLAIM_REPRESENTATIONS, ASK_TIMINGS, VALIDATOR_INPUT_EXTENSIONS, CHECKPOINT_VIEWS, CONTROLLER_MODES, SAMPLED_ORACLE_OUTCOMES, SEQUENTIAL_STOP_REASONS, WAKE_CLAIM_VIAS, OPERATION_CLASSES, PACK_CLAIM_KINDS, TOOL_EXECUTION_OUTCOMES, TOOL_METERING, TOOL_VIEW_SELECTION_REASONS, WORKSPACE_SLOTS, CONTROL_VERBS, DURABLE_EVENTS, ENTRY_ROLES, EVIDENCE_GRADES, EXTERNAL_EVIDENCE_CLASSIFICATIONS, EXTERNAL_EVIDENCE_CAMPAIGN_MODES, EXTERNAL_EVIDENCE_DECISION_KINDS, EXTERNAL_EVIDENCE_DEGRADATIONS, EXTERNAL_EVIDENCE_DEMONSTRATION_SIDES, EXTERNAL_EVIDENCE_ENVIRONMENT_KINDS, EXTERNAL_EVIDENCE_INVARIANTS, EXTERNAL_EVIDENCE_INVARIANT_STATUSES, EXTERNAL_EVIDENCE_PROPERTY_FAMILIES, EXTERNAL_EVIDENCE_REFERENCE_VECTORS, EXTERNAL_EVIDENCE_STANDINGS, EXTERNAL_EVIDENCE_STRENGTHS, FAILURE_CLASSES, ITEM_STATES, LEASE_DENOMINATIONS, LEASE_POOLS, LEASE_STATES, MEMORY_CLASSIFICATIONS, MEMORY_EVENT_KINDS, MCP_REMOTE_TASK_CAUSES, MCP_REMOTE_TASK_STATES, MODEL_CATALOGUE_SOURCES, MODEL_CONTROL_OPERATION_KINDS, MODEL_CREDENTIAL_MODES, MODEL_PROTOCOL_ADAPTERS, MODEL_PROVIDERS, MODEL_PROVIDER_PROFILES, MODEL_USAGE_MEASUREMENTS, INPUT_BOUND_BASES, PROFILES, PRODUCT_EVENT_FAMILIES, PRODUCT_RUN_BUNDLE_FORMATS, RECORD_TYPES, RECORD_TYPE_VERSIONS, SKILL_RETENTIONS, REVIEW_ITEM_KINDS, REVIEW_ITEM_STATES, RUN_REVIEW_STATES, RUN_STATUSES, RUN_TERMINALS, RUN_RESUME_BLOCK_CATEGORIES, RUN_LIFECYCLE_COMMANDS, RUN_BUNDLE_CANONICALIZATIONS, RUN_HEAD_FOLD_PROFILES, SUSPEND_REASONS, COMPLETION_STATES, STOP_REASONS, POSTGRES_DEPLOYMENT_MODES, POSTGRES_LATENCY_OPERATIONS, POSTGRES_LATENCY_REPORT_STATUSES, POSTGRES_LATENCY_TOPOLOGIES, STORE_KINDS, VALIDATOR_CLASSES, VALIDATOR_EVIDENCE_GRADES, VERIFICATION_PLAN_REFUSAL_CODES, VALIDATOR_OUTCOMES, VERDICTS, DIAGNOSTIC_SEVERITIES, TRUST_TIERS, ASSURANCE_COMPLETION_CLASSES, PLAN_CHECK_KINDS, } from "./vocab.js";
+import { ATTENTION_ADMISSION_RESULTS, BLOCKING_OUTCOME_KINDS, BRANCH_REASONS, CLAIM_REPRESENTATIONS, ASK_TIMINGS, VALIDATOR_INPUT_EXTENSIONS, CHECKPOINT_VIEWS, CONTROLLER_MODES, SAMPLED_ORACLE_OUTCOMES, SEQUENTIAL_STOP_REASONS, WAKE_CLAIM_VIAS, OPERATION_CLASSES, PACK_CLAIM_KINDS, TOOL_EXECUTION_OUTCOMES, TOOL_METERING, TOOL_VIEW_SELECTION_REASONS, WORKSPACE_SLOTS, CONTROL_VERBS, DURABLE_EVENTS, ENTRY_ROLES, EVIDENCE_GRADES, EXTERNAL_EVIDENCE_CLASSIFICATIONS, EXTERNAL_EVIDENCE_CAMPAIGN_MODES, EXTERNAL_EVIDENCE_DECISION_KINDS, EXTERNAL_EVIDENCE_DEGRADATIONS, EXTERNAL_EVIDENCE_DEMONSTRATION_SIDES, EXTERNAL_EVIDENCE_ENVIRONMENT_KINDS, EXTERNAL_EVIDENCE_INVARIANTS, EXTERNAL_EVIDENCE_INVARIANT_STATUSES, EXTERNAL_EVIDENCE_PROPERTY_FAMILIES, EXTERNAL_EVIDENCE_REFERENCE_VECTORS, EXTERNAL_EVIDENCE_STANDINGS, EXTERNAL_EVIDENCE_STRENGTHS, FAILURE_CLASSES, ITEM_STATES, LEASE_DENOMINATIONS, LEASE_POOLS, LEASE_STATES, MEMORY_CLASSIFICATIONS, MEMORY_EVENT_KINDS, MCP_REMOTE_TASK_CAUSES, MCP_REMOTE_TASK_STATES, MODEL_CATALOGUE_SOURCES, MODEL_CONTROL_OPERATION_KINDS, MODEL_CREDENTIAL_MODES, MODEL_PROTOCOL_ADAPTERS, MODEL_PROVIDERS, MODEL_PROVIDER_PROFILES, MODEL_USAGE_MEASUREMENTS, INPUT_BOUND_BASES, PROFILES, PRODUCT_EVENT_FAMILIES, PRODUCT_RUN_BUNDLE_FORMATS, RECORD_TYPES, RECORD_TYPE_VERSIONS, SKILL_RETENTIONS, SKILL_CONTEXT_POLICIES, SKILL_WINDOW_NOTICE_REASONS, REVIEW_ITEM_KINDS, REVIEW_ITEM_STATES, RUN_REVIEW_STATES, RUN_STATUSES, RUN_TERMINALS, RUN_RESUME_BLOCK_CATEGORIES, RUN_LIFECYCLE_COMMANDS, RUN_BUNDLE_CANONICALIZATIONS, RUN_HEAD_FOLD_PROFILES, SUSPEND_REASONS, SUB_RUN_FINDING_STATES, SUB_RUN_STATES, COMPLETION_STATES, STOP_REASONS, POSTGRES_DEPLOYMENT_MODES, POSTGRES_LATENCY_OPERATIONS, POSTGRES_LATENCY_REPORT_STATUSES, POSTGRES_LATENCY_TOPOLOGIES, STORE_KINDS, VALIDATOR_CLASSES, VALIDATOR_EVIDENCE_GRADES, VERIFICATION_PLAN_REFUSAL_CODES, VALIDATOR_OUTCOMES, VERDICTS, DIAGNOSTIC_SEVERITIES, TRUST_TIERS, ASSURANCE_COMPLETION_CLASSES, PLAN_CHECK_KINDS, } from "./vocab.js";
 const id = (prefix) => z.string().regex(new RegExp(`^${prefix}_[0-9a-f]{32}$`), `expected a ${prefix} id`);
 const hash = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 const count = z.number().int().nonnegative();
@@ -56,6 +56,7 @@ const closureAttributed = (shape) => z.strictObject({ ...shape, ...closureAttrib
 const closureAttributedSchema = (schema) => schema.extend(closureAttributionFields).superRefine((value, context) => closureAttributionInvariant(value, context));
 const ToolViewRecordSchema = z.strictObject({
     schema: z.literal('zero-ar-tool-view/1'),
+    guidance_version: z.literal(2).optional(),
     ref: hash,
     closure_size: count,
     budget: z.strictObject({ schema_tokens: count, schema_bytes: count }),
@@ -96,6 +97,30 @@ export const BudgetsSchema = z.strictObject({
     verification_reserve_fraction: z.number().min(0).max(0.9),
     max_turns: z.number().int().positive().max(10_000),
 });
+export const SUB_RUN_MAX_CHILDREN = 16;
+export const SubRunPolicySchema = z.strictObject({
+    max_children: z.number().int().min(1).max(SUB_RUN_MAX_CHILDREN),
+    act_on_partial_findings: z.boolean().optional(),
+});
+export const SubRunSummarySchema = z.strictObject({
+    counts: z.strictObject({ running: count, finished: count, failed: count, cancelled: count }),
+    children: z.array(z.strictObject({
+        run_id: id('run'),
+        objective: z.string(),
+        state: z.enum(SUB_RUN_STATES),
+        slice_model_tokens: count,
+        spent_model_tokens: count,
+        finding: z.enum(SUB_RUN_FINDING_STATES),
+        terminal: z.enum(RUN_TERMINALS).nullable(),
+        gap: z.string().nullable(),
+    })),
+});
+export function subRunCountsLine(counts) {
+    const parts = ['finished', 'running', 'failed', 'cancelled']
+        .filter((state) => counts[state] > 0)
+        .map((state) => `${counts[state]} ${state}`);
+    return parts.join(', ') || 'none';
+}
 export function turnCeilingForBudget(model_tokens, items = 0) {
     const bySpend = Math.ceil(model_tokens / 2_000);
     const byItems = Math.ceil(items / 2) + 12;
@@ -139,6 +164,7 @@ export const RemoteToolTaskHandleSchema = z.strictObject({
     cause: z.enum(MCP_REMOTE_TASK_CAUSES),
     last_position: z.string().min(1).max(512).nullable(),
     observed_at: z.string().datetime(),
+    poll_interval_ms: z.number().int().positive().max(86_400_000).optional(),
 });
 export const IntakeRequestSchema = z.strictObject({
     objective: z.string().min(1).max(100_000),
@@ -172,6 +198,7 @@ export const ResolvedRunManifestSchema = z.strictObject({
         definition_ref: hash,
         instructions_ref: hash,
         publication_ref: hash.nullable(),
+        sub_runs: SubRunPolicySchema.optional(),
     }),
     context: z.strictObject({ assembler: z.string(), version: z.string(), ref: hash, posture_ref: hash.nullable() }),
     model: z.strictObject({
@@ -228,6 +255,8 @@ export const ResolvedRunManifestSchema = z.strictObject({
     environment_profiles: z.record(z.string().min(1).max(200), hash).optional(),
     workspace_instances: z.array(ResolvedWorkspaceInstanceSchema).max(32).optional(),
 });
+export const CHECK_INPUT_DEFAULT_BYTES = 512 * 1_024;
+export const CHECK_INPUT_MAX_BYTES = 16 * 1_048_576;
 export const TaskContractSchema = z.strictObject({
     name: z.string().min(1),
     version: z.string().regex(/^\d+\.\d+\.\d+$/),
@@ -247,7 +276,11 @@ export const TaskContractSchema = z.strictObject({
     claim_representation: z.enum(CLAIM_REPRESENTATIONS).optional(),
     ask_when: z.enum(ASK_TIMINGS).optional(),
     max_agent_questions: z.number().int().min(0).max(64).optional(),
-    validator_inputs: z.array(z.enum(VALIDATOR_INPUT_EXTENSIONS)).min(1).max(4).optional(),
+    validator_inputs: z.array(z.enum(VALIDATOR_INPUT_EXTENSIONS)).min(1).max(VALIDATOR_INPUT_EXTENSIONS.length).optional(),
+    reading_limits: z.strictObject({
+        extract_max_pages: z.number().int().positive().max(500).optional(),
+        check_input_bytes: z.number().int().positive().max(CHECK_INPUT_MAX_BYTES).optional(),
+    }).optional(),
     checkpoint_view: z.enum(CHECKPOINT_VIEWS).optional(),
     answer_windows: z.array(z.strictObject({
         named_human_class: z.string().min(1).max(200),
@@ -731,6 +764,14 @@ export const SequentialSamplingRecordSchema = z.strictObject({
     trace: z.record(z.string(), z.unknown()),
     guarantee: z.record(z.string(), z.unknown()),
 });
+export const VALIDATOR_FINDINGS_LIMIT = 64;
+export const VALIDATOR_FINDING_REASON_LIMIT = 1_000;
+export const ValidatorFindingRecordSchema = z.strictObject({
+    validator: z.string().min(1).max(300),
+    verdict: z.enum(VALIDATOR_OUTCOMES),
+    reason: z.string().max(VALIDATOR_FINDING_REASON_LIMIT),
+    elapsed_ms: count,
+});
 export const AttentionEstimateRecordSchema = z.strictObject({
     class: z.string().min(1).max(200),
     items: count,
@@ -739,6 +780,25 @@ export const AttentionEstimateRecordSchema = z.strictObject({
     total_ms: count,
     amortized_per_item_ms: count,
 });
+const CheckpointPassedV1Fields = {
+    checkpoint_id: z.string(),
+    covered_items: z.array(z.string()),
+    validator_versions: z.array(z.string()),
+    sampling: SequentialSamplingRecordSchema.optional(),
+};
+const CheckpointIndeterminateV1Fields = {
+    checkpoint_id: z.string(),
+    covered_items: z.array(z.string()),
+    reason: z.string(),
+    infrastructure: z.boolean(),
+};
+const VerificationConcludedV1Fields = {
+    verdict: z.enum(VERDICTS),
+    reason: z.string(),
+    validator_versions: z.array(z.string()),
+    examined: z.array(z.strictObject({ validator: z.string(), input_hash: z.string(), items: z.number() })),
+    evidence_blockers: z.array(ArtifactEvidenceBlockerSchema).optional(),
+};
 const ModelCallStartedV1Shape = {
     turn: count,
     call_id: hash,
@@ -782,6 +842,102 @@ const ExecutorContinuationAcceptedV2Schema = ExecutorContinuationAcceptedV1Schem
         source_capsule_ref: hash,
     }),
 });
+const RunSuspendedSchema = z.strictObject({
+    reason: z.enum(SUSPEND_REASONS),
+    detail: z.string(),
+    pending: z.strictObject({
+        model: z.string().nullable(),
+        tools: z.array(z.string()),
+        validators: z.array(z.string()),
+        effects: z.array(z.string()),
+        attention: z.array(z.string()),
+        environments: z.array(SuspendedEnvironmentHandleSchema),
+        remote_tools: z.array(RemoteToolTaskHandleSchema).default([]),
+    }),
+    wake: z.strictObject({ condition: z.string().min(1).max(200), detail: z.string().nullable() }),
+    leases: z.array(z.strictObject({
+        pool: z.string(),
+        denomination: z.string(),
+        reserved: z.number(),
+        consumed: z.number(),
+        disposition: z.enum(['retained', 'released']),
+        amount: z.number(),
+        reason: z.string().min(1).max(300),
+    })),
+    attention_estimate: AttentionEstimateRecordSchema.optional(),
+});
+export const PolicySkillWindowSchema = z.strictObject({
+    policy: z.enum(SKILL_CONTEXT_POLICIES),
+    maximum_window_share_ppm: z.number().int().min(1).max(1_000_000),
+    budget_tokens: count,
+    allowance_tokens: count,
+    used_tokens: count,
+    skills: z.array(z.strictObject({ skill_ref: hash, entry_ref: hash, tokens: count })),
+});
+export const SkillWindowNoticesSchema = z.strictObject({
+    reserved_tokens: count,
+    notices: z.array(z.strictObject({
+        entry_id: id('ent'),
+        reason: z.enum(SKILL_WINDOW_NOTICE_REASONS),
+        reopen: z.union([SkillOpenRequestSchema, SkillReadRequestSchema]),
+    })).max(16),
+    omitted: count,
+});
+const WorkStatusV4Fields = { items_declared: count, remaining: z.array(z.string()).max(13), untouched: count };
+const ContextAssembledFields = {
+    turn: count,
+    included_entries: z.array(id('ent')),
+    omitted: z.array(z.strictObject({ entry_id: id('ent'), reason: z.string() })),
+    token_estimate: count,
+    head_entry_id: id('ent').nullable(),
+    budget_tokens: count,
+    window: z.strictObject({
+        context_window: count,
+        output_tokens: count,
+        schema_tokens: count,
+        framing_tokens: count,
+    }).optional(),
+    instructions_hash: hash,
+    covers: z.literal('discovered-candidates-only'),
+    skills: z
+        .strictObject({
+        catalogue_budget_tokens: count,
+        page: z.number().int().min(1),
+        pages: z.number().int().min(1),
+        advertised: z.array(z.strictObject({ skill_ref: hash, tokens: count })),
+        omitted: z.array(z.strictObject({ skill_ref: hash, reason: z.literal('skill-catalogue-budget') })),
+        retained: z.array(z.strictObject({ skill_ref: hash, entry_id: id('ent'), retention: z.enum(SKILL_RETENTIONS) })),
+        expired: z.array(z.strictObject({ skill_ref: hash, entry_id: id('ent'), reason: z.literal('skill-retention-expired') })),
+    })
+        .optional(),
+    policy_skills: PolicySkillWindowSchema.optional(),
+    skill_notices: SkillWindowNoticesSchema.optional(),
+    tools: ToolViewRecordSchema.optional(),
+    control_operations: z.array(ModelControlOperationSchema).max(MODEL_CONTROL_OPERATIONS_MAX).optional(),
+    evidence_retention: z.strictObject({
+        budget_tokens: count, item_limit: count, citation_limit: count,
+        items: z.array(z.string()).max(256),
+        citations: z.array(z.strictObject({ source_id: z.string(), span_hash: hash })).max(256),
+        entry_ids: z.array(id('ent')).max(256),
+        items_truncated: z.boolean(), citations_truncated: z.boolean(),
+    }).optional(),
+    spans: z.array(CitedSpanSchema).optional(),
+    artifact_entries: z.array(z.strictObject({
+        entry_id: id('ent'),
+        artifact_ref: artifactHandle,
+        expected_content_hash: hash,
+        start: count,
+        end: count,
+        required_for_completion: z.boolean(),
+    })).optional(),
+    artifact_spans: z.array(ArtifactContextSpanSchema).optional(),
+    fence_nonce: ContextFenceNonceSchema.optional(),
+    evidence_blockers: z.array(ArtifactEvidenceBlockerSchema).optional(),
+    images: z.array(ContextImageRecordSchema).optional(),
+    hierarchy: ContextHierarchyWindowSchema.optional(),
+    instructions_tokens: count.optional(),
+    work_status: z.strictObject({ ...WorkStatusV4Fields, placement: z.literal('trailing').optional() }).optional(),
+};
 export const RECORD_PAYLOADS = {
     'run.created': z.strictObject({
         created_at: z.string().datetime().optional(),
@@ -798,6 +954,7 @@ export const RECORD_PAYLOADS = {
         correlation_id: z.string().nullable(),
         profile: z.enum(PROFILES),
         context_fence_nonce: ContextFenceNonceSchema.optional(),
+        sub_run: z.strictObject({ parent_run_id: id('run'), depth: z.number().int().min(1).max(8) }).optional(),
         resolved: z.strictObject({
             manifest: ResolvedRunManifestSchema.optional(),
             narration: z.array(z.string()),
@@ -851,51 +1008,7 @@ export const RECORD_PAYLOADS = {
         to_entry_id: id('ent'),
         reason: z.enum(BRANCH_REASONS),
     }),
-    'context.assembled': closureAttributed({
-        turn: count,
-        included_entries: z.array(id('ent')),
-        omitted: z.array(z.strictObject({ entry_id: id('ent'), reason: z.string() })),
-        token_estimate: count,
-        head_entry_id: id('ent').nullable(),
-        budget_tokens: count,
-        window: z.strictObject({
-            context_window: count,
-            output_tokens: count,
-            schema_tokens: count,
-            framing_tokens: count,
-        }).optional(),
-        instructions_hash: hash,
-        covers: z.literal('discovered-candidates-only'),
-        skills: z
-            .strictObject({
-            catalogue_budget_tokens: count,
-            page: z.number().int().min(1),
-            pages: z.number().int().min(1),
-            advertised: z.array(z.strictObject({ skill_ref: hash, tokens: count })),
-            omitted: z.array(z.strictObject({ skill_ref: hash, reason: z.literal('skill-catalogue-budget') })),
-            retained: z.array(z.strictObject({ skill_ref: hash, entry_id: id('ent'), retention: z.enum(SKILL_RETENTIONS) })),
-            expired: z.array(z.strictObject({ skill_ref: hash, entry_id: id('ent'), reason: z.literal('skill-retention-expired') })),
-        })
-            .optional(),
-        tools: ToolViewRecordSchema.optional(),
-        control_operations: z.array(ModelControlOperationSchema).max(MODEL_CONTROL_OPERATIONS_MAX).optional(),
-        spans: z.array(CitedSpanSchema).optional(),
-        artifact_entries: z.array(z.strictObject({
-            entry_id: id('ent'),
-            artifact_ref: artifactHandle,
-            expected_content_hash: hash,
-            start: count,
-            end: count,
-            required_for_completion: z.boolean(),
-        })).optional(),
-        artifact_spans: z.array(ArtifactContextSpanSchema).optional(),
-        fence_nonce: ContextFenceNonceSchema.optional(),
-        evidence_blockers: z.array(ArtifactEvidenceBlockerSchema).optional(),
-        images: z.array(ContextImageRecordSchema).optional(),
-        hierarchy: ContextHierarchyWindowSchema.optional(),
-        instructions_tokens: count.optional(),
-        work_status: z.strictObject({ items_declared: count, remaining: z.array(z.string()).max(13), untouched: count }).optional(),
-    }),
+    'context.assembled': closureAttributed(ContextAssembledFields),
     'context.segment.started': closureAttributed({
         request_ref: hash,
         plan_ref: hash,
@@ -1001,6 +1114,11 @@ export const RECORD_PAYLOADS = {
         reserved: count,
         lease_id: id('lea'),
         depth: count,
+        leases: z.array(z.strictObject(leaseFields)).min(1).max(8).optional(),
+        scope: z.strictObject({ tools: z.array(z.string()).max(1_000), max_turns: count }).optional(),
+        slicing: z.string().max(2_000).optional(),
+        model_tool_call_id: modelToolCallId.optional(),
+        input: z.record(z.string(), z.unknown()).optional(),
     }),
     'subrun.finished': z.strictObject({
         child_run_id: id('run'),
@@ -1010,8 +1128,11 @@ export const RECORD_PAYLOADS = {
             artifact: z.string().max(4_096).nullable(),
             verdict: z.enum(VERDICTS).nullable(),
             turns: count,
+            gap: z.string().max(2_000).optional(),
         }),
         consumed: count,
+        model_tool_call_id: modelToolCallId.optional(),
+        entry_hash: hash.optional(),
     }),
     'tool.invoked': closureAttributed({
         invoke_id: z.string(),
@@ -1117,12 +1238,19 @@ export const RECORD_PAYLOADS = {
         receipt: ReceiptSchema,
         reason: z.string(),
     }),
+    'effect.receipt.adopted': z.strictObject({
+        effect_id: id('eff'),
+        handoff_ref: hash,
+        signing_key_ref: hash,
+        attestation: z.string().min(1).max(128),
+    }),
     'grant.superseded': z.strictObject({
         superseded_ref: z.string().min(1),
         replacement_ref: z.string().min(1),
         identity_diff: z.array(z.string().min(1).max(300)),
         approver: z.string().min(1).max(128),
         replacement_grant: StaticGrantSchema.optional(),
+        reason: z.string().min(1).max(1_000).optional(),
     }),
     'item.attempted': closureAttributed({
         item_id: z.string(),
@@ -1166,10 +1294,8 @@ export const RECORD_PAYLOADS = {
         covered_items: z.array(z.string()),
     }),
     'checkpoint.passed': closureAttributed({
-        checkpoint_id: z.string(),
-        covered_items: z.array(z.string()),
-        validator_versions: z.array(z.string()),
-        sampling: SequentialSamplingRecordSchema.optional(),
+        ...CheckpointPassedV1Fields,
+        findings: z.array(ValidatorFindingRecordSchema).max(VALIDATOR_FINDINGS_LIMIT).optional(),
     }),
     'checkpoint.rejected': closureAttributed({
         checkpoint_id: z.string(),
@@ -1195,10 +1321,9 @@ export const RECORD_PAYLOADS = {
         sampling: SequentialSamplingRecordSchema.optional(),
     }),
     'checkpoint.indeterminate': closureAttributed({
-        checkpoint_id: z.string(),
-        covered_items: z.array(z.string()),
-        reason: z.string(),
-        infrastructure: z.boolean(),
+        ...CheckpointIndeterminateV1Fields,
+        findings: z.array(ValidatorFindingRecordSchema).max(VALIDATOR_FINDINGS_LIMIT).optional(),
+        sampling: SequentialSamplingRecordSchema.optional(),
     }),
     'repair.started': z.strictObject({
         attempt: count,
@@ -1211,36 +1336,11 @@ export const RECORD_PAYLOADS = {
         artifact_entry_id: id('ent'),
     }),
     'verification.concluded': closureAttributed({
-        verdict: z.enum(VERDICTS),
-        reason: z.string(),
-        validator_versions: z.array(z.string()),
-        examined: z.array(z.strictObject({ validator: z.string(), input_hash: z.string(), items: z.number() })),
-        evidence_blockers: z.array(ArtifactEvidenceBlockerSchema).optional(),
+        ...VerificationConcludedV1Fields,
+        findings: z.array(ValidatorFindingRecordSchema).max(VALIDATOR_FINDINGS_LIMIT).optional(),
+        sampling: SequentialSamplingRecordSchema.optional(),
     }),
-    'run.suspended': z.strictObject({
-        reason: z.enum(SUSPEND_REASONS),
-        detail: z.string(),
-        pending: z.strictObject({
-            model: z.string().nullable(),
-            tools: z.array(z.string()),
-            validators: z.array(z.string()),
-            effects: z.array(z.string()),
-            attention: z.array(z.string()),
-            environments: z.array(SuspendedEnvironmentHandleSchema),
-            remote_tools: z.array(RemoteToolTaskHandleSchema).default([]),
-        }),
-        wake: z.strictObject({ condition: z.string().min(1).max(200), detail: z.string().nullable() }),
-        leases: z.array(z.strictObject({
-            pool: z.string(),
-            denomination: z.string(),
-            reserved: z.number(),
-            consumed: z.number(),
-            disposition: z.enum(['retained', 'released']),
-            amount: z.number(),
-            reason: z.string().min(1).max(300),
-        })),
-        attention_estimate: AttentionEstimateRecordSchema.optional(),
-    }),
+    'run.suspended': RunSuspendedSchema,
     'run.resume.blocked': z.strictObject({
         category: z.enum(RUN_RESUME_BLOCK_CATEGORIES),
         message: z.string().min(1),
@@ -1437,7 +1537,19 @@ export const RECORD_PAYLOADS = {
         reason: z.string().max(1_000).nullable(),
     }),
 };
+const ContextAssembledV4Fields = { ...ContextAssembledFields, work_status: z.strictObject(WorkStatusV4Fields).optional() };
 const HISTORICAL_RECORD_PAYLOADS = {
+    'context.assembled': {
+        1: closureAttributedSchema(z.strictObject(ContextAssembledV4Fields).omit({ evidence_retention: true, skill_notices: true, policy_skills: true })),
+        2: closureAttributedSchema(z.strictObject(ContextAssembledV4Fields).omit({ skill_notices: true, policy_skills: true })),
+        3: closureAttributedSchema(z.strictObject(ContextAssembledV4Fields).omit({ policy_skills: true })),
+        4: closureAttributedSchema(z.strictObject(ContextAssembledV4Fields)),
+    },
+    'tool.remote.pending': { 1: closureAttributedSchema(RemoteToolTaskHandleSchema.omit({ poll_interval_ms: true })) },
+    'checkpoint.passed': { 1: closureAttributedSchema(z.strictObject(CheckpointPassedV1Fields)) },
+    'checkpoint.indeterminate': { 1: closureAttributedSchema(z.strictObject(CheckpointIndeterminateV1Fields)) },
+    'verification.concluded': { 1: closureAttributedSchema(z.strictObject(VerificationConcludedV1Fields)) },
+    'run.suspended': { 1: RunSuspendedSchema.extend({ reason: z.enum(SUSPEND_REASONS.filter((reason) => reason !== 'runtime_defect')), pending: RunSuspendedSchema.shape.pending.extend({ remote_tools: z.array(RemoteToolTaskHandleSchema.omit({ poll_interval_ms: true })).default([]) }) }) },
     'model.call.started': { 1: ModelCallStartedV1ReaderSchema },
     'state.closure.rehydrated': { 1: StateClosureRehydratedV1Schema },
     'executor.continuation.accepted': { 1: ExecutorContinuationAcceptedV1Schema },
@@ -1499,6 +1611,8 @@ export const RunSnapshotSchema = z.strictObject({
     active_closure_epoch: z.number().int().min(1).optional(),
     active_closure_ref: hash.optional(),
     pending_capability_admission_count: count.optional(),
+    sub_runs: SubRunSummarySchema.optional(),
+    sub_run: z.strictObject({ parent_run_id: id('run'), depth: count }).optional(),
     snapshot_version: count,
 });
 export const WorkQueryRequestSchema = z.strictObject({
@@ -1770,6 +1884,7 @@ export const RunResultSchema = z.strictObject({
     not_established: z.array(z.string()),
     handover: z.array(z.string()),
     integrity: RunIntegritySummarySchema.nullable().optional(),
+    sub_runs: SubRunSummarySchema.optional(),
 });
 export const DiagnosticSchema = z.strictObject({
     code: z.string(),
@@ -1854,6 +1969,16 @@ export const DatabaseDoctorResponseSchema = z.strictObject({
         warning: z.string().nullable(),
     }),
     metrics: z.array(DatabaseMetricSummarySchema),
+    ownership: z.strictObject({
+        cell: z.string(),
+        claims: z.array(z.strictObject({
+            run_id: z.string(),
+            owner: z.string(),
+            claimed_at: z.string(),
+            expires_at: z.string(),
+            in_flight: z.array(z.strictObject({ effect_id: z.string(), position: count, marked_at: z.string() })),
+        })),
+    }).optional(),
 });
 export const PostgresLatencyRawSampleSchema = z.strictObject({
     topology: z.enum(POSTGRES_LATENCY_TOPOLOGIES),
@@ -1921,6 +2046,13 @@ export const ImportOutcomeSchema = z.strictObject({
     run_id: id('run'),
     head_equal: z.boolean(),
     records: count,
+    projection_migration: z.strictObject({
+        source_profile: z.enum(RUN_HEAD_FOLD_PROFILES),
+        current_profile: z.enum(RUN_HEAD_FOLD_PROFILES),
+        source_hash: hash,
+        current_hash: hash,
+        source_verified: z.literal(true),
+    }).optional(),
     artifacts: z.strictObject({
         imported: z.array(artifactHandle),
         not_transferred: z.array(ArtifactTransferOmissionSchema),
@@ -1964,6 +2096,7 @@ export const PostureSchema = z.strictObject({
     version: z.string().regex(/^\d+\.\d+\.\d+$/),
     owner: z.string().min(1),
     verification_reserve_fraction: z.number().min(0).max(0.9),
+    skill_context: z.strictObject({ maximum_window_share_ppm: z.number().int().min(1).max(1_000_000) }).optional(),
     optimization: z
         .strictObject({
         checkpoint: z
@@ -2294,6 +2427,8 @@ export const SCHEMA_REGISTRY = {
     PostureSchema: { schema: PostureSchema, placement: 'authoring', owner: 'contracts-dx' },
     BindingProfileSchema: { schema: BindingProfileSchema, placement: 'environment', owner: 'runtime-core' },
     SkillDescriptorSchema: { schema: SkillDescriptorSchema, placement: 'publication', owner: 'contracts-dx' },
+    PolicySkillWindowSchema: { schema: PolicySkillWindowSchema, placement: 'composition', owner: 'runtime-core' },
+    SkillWindowNoticesSchema: { schema: SkillWindowNoticesSchema, placement: 'composition', owner: 'runtime-core' },
     SkillOpenRequestSchema: { schema: SkillOpenRequestSchema, placement: 'composition', owner: 'runtime-core' },
     SkillReadRequestSchema: { schema: SkillReadRequestSchema, placement: 'composition', owner: 'runtime-core' },
     SkillSearchRequestSchema: { schema: SkillSearchRequestSchema, placement: 'composition', owner: 'runtime-core' },
@@ -2400,6 +2535,8 @@ export const SCHEMA_REGISTRY = {
     ToolSourceDriftRecordSchema: { schema: ToolSourceDriftRecordSchema, placement: 'operator-management', owner: 'runtime-core' },
     ToolSourceDriftReportSchema: { schema: ToolSourceDriftReportSchema, placement: 'operator-management', owner: 'runtime-core' },
     EffectTargetListSchema: { schema: EffectTargetListSchema, placement: 'effect-dispatch', owner: 'effect-plane' },
+    EffectGrantReissueRequestSchema: { schema: EffectGrantReissueRequestSchema, placement: 'effect-dispatch', owner: 'effect-plane' },
+    EffectGrantReissueOutcomeSchema: { schema: EffectGrantReissueOutcomeSchema, placement: 'effect-dispatch', owner: 'effect-plane' },
     WorkspaceIntakeBindingSchema: { schema: WorkspaceIntakeBindingSchema, placement: 'intake', owner: 'runtime-core' },
     ResolvedWorkspaceInstanceSchema: { schema: ResolvedWorkspaceInstanceSchema, placement: 'runtime-identity', owner: 'runtime-core' },
     RunResumeDeferredRequestSchema: { schema: RunResumeDeferredRequestSchema, placement: 'run-management', owner: 'runtime-core' },

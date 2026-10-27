@@ -31,6 +31,11 @@ export declare const EntryEvidenceSchema: z.ZodObject<{
         derived: "derived";
         "model-generated": "model-generated";
     }>;
+    citations: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        source_id: z.ZodString;
+        span_hash: z.ZodString;
+        locator: z.ZodOptional<z.ZodString>;
+    }, z.core.$strict>>>;
     artifact: z.ZodOptional<z.ZodObject<{
         artifact_ref: z.ZodString;
         content_hash: z.ZodString;

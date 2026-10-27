@@ -69,6 +69,7 @@ export declare const ProfileCapabilityEntrySchema: z.ZodObject<{
         "hierarchical-context": "hierarchical-context";
         "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
         "web-search": "web-search";
+        "several-cells-one-database": "several-cells-one-database";
     }>;
     state: z.ZodEnum<{
         supported: "supported";
@@ -138,8 +139,8 @@ export declare const ProfileCapabilityManifestSchema: z.ZodObject<{
         "effect-proposal": "effect-proposal";
     }>>;
     effect_plane: z.ZodEnum<{
-        "dynamic-authority": "dynamic-authority";
         absent: "absent";
+        "dynamic-authority": "dynamic-authority";
         "restricted-attachment": "restricted-attachment";
     }>;
     components: z.ZodObject<{
@@ -235,6 +236,7 @@ export declare const ProfileCapabilityManifestSchema: z.ZodObject<{
             "hierarchical-context": "hierarchical-context";
             "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
             "web-search": "web-search";
+            "several-cells-one-database": "several-cells-one-database";
         }>;
         state: z.ZodEnum<{
             supported: "supported";
@@ -328,6 +330,7 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
         "hierarchical-context": "hierarchical-context";
         "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
         "web-search": "web-search";
+        "several-cells-one-database": "several-cells-one-database";
     }>>;
     conditional: z.ZodArray<z.ZodObject<{
         capability: z.ZodEnum<{
@@ -392,6 +395,7 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
             "hierarchical-context": "hierarchical-context";
             "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
             "web-search": "web-search";
+            "several-cells-one-database": "several-cells-one-database";
         }>;
         refusal_point: z.ZodEnum<{
             "profile-compilation": "profile-compilation";
@@ -467,6 +471,7 @@ export declare const ProfileCapabilitySummarySchema: z.ZodObject<{
             "hierarchical-context": "hierarchical-context";
             "reversible-http-effect-dispatch": "reversible-http-effect-dispatch";
             "web-search": "web-search";
+            "several-cells-one-database": "several-cells-one-database";
         }>;
         refusal_point: z.ZodEnum<{
             "profile-compilation": "profile-compilation";

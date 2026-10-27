@@ -46,6 +46,7 @@ export declare function effectDispatchRequest(endpoint: URL, route: EffectTarget
 export declare function effectLookupRequest(endpoint: URL, route: EffectTargetRoute, wire: EffectTargetWire, credential: string, descriptor: Omit<EffectCallDescriptor, 'params'> & {
     param_hash: string;
 }, now_seconds?: number): EffectTargetRequest | null;
+export declare function standardWebhookSecretBytes(secret: string): Buffer;
 export declare function standardWebhookHeaders(secret: string, id: string, body: string, now_seconds: number): Record<string, string>;
 export declare function contentDigest(body: string): string;
 export declare function definiteRefusal(status: number): boolean;
