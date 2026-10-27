@@ -117,6 +117,54 @@ export async function runLabelledCases(validator, cases) {
     }
     return outcomes;
 }
+export const CASE_KINDS = ['positive', 'negative', 'indeterminate', 'adversarial'];
+const EXPECTED_FINDING = {
+    positive: 'pass',
+    negative: 'reject',
+    indeterminate: 'indeterminate',
+    adversarial: 'reject',
+};
+export function corpusRef(corpus) {
+    if (!NAME.test(corpus.name) || !VERSION.test(corpus.version)) {
+        refuse({ code: 'validator.corpus.invalid', message: `corpus ${corpus.name}@${corpus.version} needs a dotted lowercase name and an exact semantic version.`, clause: 'QLT-010' });
+    }
+    if (corpus.cases.length === 0) {
+        refuse({ code: 'validator.corpus.invalid', message: `corpus ${corpus.name} has no cases, so it measures nothing. Add labelled cases before evaluating.`, clause: 'QLT-010' });
+    }
+    const labels = new Set();
+    for (const item of corpus.cases) {
+        if (!item.label || labels.has(item.label) || !CASE_KINDS.includes(item.kind)) {
+            refuse({ code: 'validator.corpus.invalid', message: `corpus ${corpus.name} case "${item.label}" needs a unique label and one of the kinds ${CASE_KINDS.join(', ')}.`, clause: 'QLT-010' });
+        }
+        labels.add(item.label);
+    }
+    return contentHash({ schema: 'labelled-corpus/1', name: corpus.name, version: corpus.version, cases: corpus.cases });
+}
+export async function evaluateCorpus(validator, corpus) {
+    const ref = corpusRef(corpus);
+    const outcomes = await runLabelledCases(validator, corpus.cases.map((item) => ({ label: item.label, input: item.input, expect: EXPECTED_FINDING[item.kind] })));
+    const by_kind = Object.fromEntries(CASE_KINDS.map((kind) => [kind, { cases: 0, pass: 0, reject: 0, indeterminate: 0 }]));
+    const disagreements = [];
+    outcomes.forEach((outcome, index) => {
+        const kind = corpus.cases[index].kind;
+        by_kind[kind].cases += 1;
+        by_kind[kind][outcome.actual] += 1;
+        if (!outcome.agreed)
+            disagreements.push({ label: outcome.label, kind, expected: outcome.expected, actual: outcome.actual });
+    });
+    const negatives = by_kind.negative.cases + by_kind.adversarial.cases;
+    return {
+        schema: 'validator-quality-report/1',
+        validator: { name: validator.name, version: validator.version },
+        corpus: { name: corpus.name, version: corpus.version, ref },
+        by_kind,
+        false_pass: { count: by_kind.negative.pass + by_kind.adversarial.pass, of: negatives },
+        false_rejection: { count: by_kind.positive.reject, of: by_kind.positive.cases },
+        missed_indeterminate: { count: by_kind.indeterminate.pass + by_kind.indeterminate.reject, of: by_kind.indeterminate.cases },
+        disagreements,
+        boundary: 'measured on this corpus only; never a designation of sufficiency',
+    };
+}
 export function examinedItem(item_id, output, state = 'completed_unverified', attempts = 1) {
     return { item_id, state, attempts, output };
 }

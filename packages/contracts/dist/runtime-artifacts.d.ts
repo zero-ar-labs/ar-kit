@@ -234,11 +234,11 @@ export type ArtifactSweepResult = z.infer<typeof ArtifactSweepResultSchema>;
 export declare const ArtifactTransferOmissionSchema: z.ZodObject<{
     artifact_ref: z.ZodString;
     reason: z.ZodEnum<{
+        absent: "absent";
         "tenant-mismatch": "tenant-mismatch";
         "backend-mismatch": "backend-mismatch";
         "no-artifact-store": "no-artifact-store";
         erased: "erased";
-        absent: "absent";
         "not-in-run": "not-in-run";
     }>;
 }, z.core.$strict>;
@@ -396,11 +396,11 @@ export declare const RunBundleArtifactFrameSchema: z.ZodDiscriminatedUnion<[z.Zo
     omissions: z.ZodArray<z.ZodObject<{
         artifact_ref: z.ZodString;
         reason: z.ZodEnum<{
+            absent: "absent";
             "tenant-mismatch": "tenant-mismatch";
             "backend-mismatch": "backend-mismatch";
             "no-artifact-store": "no-artifact-store";
             erased: "erased";
-            absent: "absent";
             "not-in-run": "not-in-run";
         }>;
     }, z.core.$strict>>;
@@ -493,6 +493,8 @@ export declare const RunBundleArtifactFrameSchema: z.ZodDiscriminatedUnion<[z.Zo
             }>;
             record_catalogue_ref: z.ZodString;
             fold_profile: z.ZodEnum<{
+                "run-head-v11": "run-head-v11";
+                "run-head-v10": "run-head-v10";
                 "run-head-v9": "run-head-v9";
             }>;
         }, z.core.$strict>;

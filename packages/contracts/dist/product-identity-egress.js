@@ -1,8 +1,13 @@
 import { refuse } from "./diagnostics.js";
 import { contentHash } from "./ids.js";
-import { PRODUCT_IDENTITY, PRODUCT_IDENTITY_SOURCE_REF } from "./product-identity.generated.js";
+import { PRODUCT_IDENTITY_SOURCE_REF } from "./product-identity.generated.js";
 import { MODEL_PROVIDERS, PRODUCT_EGRESS_REVIEW_PURPOSES } from "./vocab.js";
 export const PRODUCT_IDENTITY_EGRESS_REVIEW_PROTOCOL = 'product-identity-egress-review/v1';
+export const PRODUCT_DEFAULT_EGRESS_REVIEW = {
+    reviewed_by: 'operator:first-beta-runtime',
+    reviewed_at: '2026-08-31',
+    change_ref: 'docs/product-identity-and-namespace-migration-appendix.md@0.4.1',
+};
 export const DEFAULT_PRODUCT_MODEL_PROVIDER_ORIGINS = {
     anthropic: 'https://api.anthropic.com',
     openai: 'https://api.openai.com',
@@ -13,6 +18,7 @@ export const DEFAULT_PRODUCT_MODEL_PROVIDER_ORIGINS = {
 export const DEFAULT_PRODUCT_WEB_SEARCH_ORIGINS = {
     parallel: 'https://api.parallel.ai',
     exa: 'https://api.exa.ai',
+    deepseek: 'https://api.deepseek.com',
 };
 export function productIdentityEgressOrigin(raw) {
     return parsedEgressUrl(raw).origin;
@@ -48,18 +54,18 @@ export function defaultProductModelProviderEgressReviews(providers = ['openai', 
     return providers.map((provider) => ({
         url: DEFAULT_PRODUCT_MODEL_PROVIDER_ORIGINS[provider],
         purpose: 'model-provider',
-        reviewed_by: 'operator:first-beta-runtime',
-        reviewed_at: PRODUCT_IDENTITY.ratification.ratified_at,
-        change_ref: PRODUCT_IDENTITY.ratification.decision_ref,
+        ...PRODUCT_DEFAULT_EGRESS_REVIEW,
     }));
 }
 export function defaultProductWebSearchEgressReviews() {
-    return Object.values(DEFAULT_PRODUCT_WEB_SEARCH_ORIGINS).map((url) => ({
+    return Object.entries(DEFAULT_PRODUCT_WEB_SEARCH_ORIGINS).map(([provider, url]) => ({
         url,
         purpose: 'web-search',
-        reviewed_by: 'operator:first-beta-runtime',
-        reviewed_at: PRODUCT_IDENTITY.ratification.ratified_at,
-        change_ref: PRODUCT_IDENTITY.ratification.decision_ref,
+        ...(provider === 'deepseek' ? {
+            reviewed_by: 'operator:web-provider-review',
+            reviewed_at: '2026-10-17',
+            change_ref: 'docs/agent-runtime-web-search-appendix.md#deepseek-search-and-fetch',
+        } : PRODUCT_DEFAULT_EGRESS_REVIEW),
     }));
 }
 export function assertProductIdentityEgressReview(input) {

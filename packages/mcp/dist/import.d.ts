@@ -1,4 +1,4 @@
-import type { InteropBindingManifest, McpImportedResourcePlan, McpImportedToolPlan, McpPeerSnapshot, OperationClass } from '@zero-ar/contracts';
+import type { InteropBindingManifest, McpImportedResourcePlan, McpImportedToolPlan, McpPeerSnapshot, MemoryClassification, OperationClass } from '@zero-ar/contracts';
 import type { ToolManifest } from '@zero-ar/tool-kit';
 export declare function mcpToolExecutionBindingRef(input: {
     snapshot_ref: string;
@@ -15,6 +15,8 @@ export declare function compileMcpToolImport(input: {
     tool_name: string;
     version: string;
     operation_class: OperationClass;
+    output_classification?: MemoryClassification;
+    external_content?: boolean;
 }): {
     manifest: ToolManifest;
     plan: McpImportedToolPlan;

@@ -6,7 +6,7 @@
     "package_scope": "@zero-ar"
   },
   "source": {
-    "commit": "f7cd49e89603091c0e79f74d95a9e6fd879c0bb4",
+    "commit": "d7adde6df9d56b94575c3a2d0bdf09d867777785",
     "repository": {
       "provider": "github",
       "organization": "zero-ar-labs",
@@ -22,27 +22,20 @@
     "publish_command": "npm publish --provenance --access public"
   },
   "release_signing": {
-    "schema": "zero-ar-release-signing-plan/v1",
-    "product_identity_source_ref": "sha256:08acc193d619e075f9221af22b92d62a604a185ea873eea15cd8e4827bc8dfb3",
+    "schema": "zero-ar-release-signing-plan/v2",
+    "product_identity_source_ref": "sha256:46fb9415570c213db5eb10224ae2c19b6b9daa86111b714ad1f6dfdf8faaf2de",
     "artifact_kind": "npm-package-set",
     "product_slug": "zero-ar",
     "signing_identity": "openpgp:zero-ar-release",
     "purpose": "successor-release",
     "subject": "zero-ar:npm-package-set",
-    "legacy_verification": {
-      "product_slug": "ramsden",
-      "signing_identity": "openpgp:ramsden-release",
-      "purpose": "legacy-history",
-      "may_sign_new_releases": false,
-      "retained_until": "2026-09-02T00:00:00Z"
-    },
-    "plan_ref": "sha256:bf3b0e663d63236b48b2e7defe51017086d2f2faa30749fc6639ce5b99b7344c"
+    "plan_ref": "sha256:88d68178dfa58fa76bbc011a8a5f942a0685b48dc817f513ddade8926615dd74"
   },
   "external_evidence": {
-    "report_ref": "sha256:e4b165f2e4485d42bb7801a517a16f99d14c064612c6a9a94a084e49213ff0a3",
+    "report_ref": "sha256:7ce2bce66d83bcb30adc53cd1348a1986538823a4de36fa42e498e774664e6e0",
     "campaign_comparison_ref": null,
-    "publication_ref": "sha256:474df770b55ca077a304db3081d07e7c2beaddcd9cf6cbea64427649c4ac0fa8",
-    "local_campaign_manifest_ref": "sha256:163c3790bbdeb850ed9a63922d54546defc515a8d6b957c746e6dd4a1ade7c80",
+    "publication_ref": "sha256:7084e2bb419e57c3afa19262f4cf2951f51c67d19e615cfa6d221e9d55b08839",
+    "local_campaign_manifest_ref": "sha256:c8aec2b52f7607f8ca550ddff9d78825b50bc853161e619d79d4e0162db0d0ae",
     "ci_campaign_manifest_ref": null,
     "report_path": "docs/zero-ar-external-evidence-report.md",
     "comparison_path": "governance/evidence/campaign-comparison.json",
@@ -50,27 +43,27 @@
     "storage": {
       "provider": "github-release-asset",
       "repository": "https://github.com/zero-ar-labs/zero-ar",
-      "source_commit": "f7cd49e89603091c0e79f74d95a9e6fd879c0bb4",
-      "release_tag": "zero-ar-external-evidence-f7cd49e89603091c0e79f74d95a9e6fd879c0bb4",
-      "asset_name": "zero-ar-external-evidence-publication-f7cd49e89603091c0e79f74d95a9e6fd879c0bb4-af40e6601b79e4082507749065bda597104dc7280a97c0c27fcbfd79a6863198.json",
-      "content_digest": "sha256:af40e6601b79e4082507749065bda597104dc7280a97c0c27fcbfd79a6863198"
+      "source_commit": "d7adde6df9d56b94575c3a2d0bdf09d867777785",
+      "release_tag": "zero-ar-external-evidence-d7adde6df9d56b94575c3a2d0bdf09d867777785",
+      "asset_name": "zero-ar-external-evidence-publication-d7adde6df9d56b94575c3a2d0bdf09d867777785-71465932b6e50f5dd242f630038c0947392e453d1202c034405ad94b3bbd9742.json",
+      "content_digest": "sha256:71465932b6e50f5dd242f630038c0947392e453d1202c034405ad94b3bbd9742"
     }
   },
   "live_provider_evidence": {
-    "publication_ref": "sha256:fa5466a3e3aa3d7c26fdb3fb7711458fb5b3e7ce3d58425c0cc4a496fd1c04e0",
-    "workflow_run_ref": "local://live-providers/f7cd49e89603091c0e79f74d95a9e6fd879c0bb4/2026-10-11T05:44:11Z",
+    "publication_ref": "sha256:d24328703ba5e6bb6fe09184c07f6c0600ae9b6be0d027faf6224e30d90a03a7",
+    "workflow_run_ref": "local://live-providers/d7adde6df9d56b94575c3a2d0bdf09d867777785/2026-10-27T05:02:38Z",
     "provider_report_refs": {
       "openai": {
-        "model": "sha256:23aaf03f81e99f30175f63266b8cefcada191cd7c4591949a15c92bc030f4437",
-        "source": "sha256:5df315d48e711b15f5a26ce372326c5b10a4a5669294dc9307b8c188685b918a"
+        "model": "sha256:7ab23aa27581067e3b293e3deafae8d39047b1d0662d4d63a86e164a73046a9b",
+        "source": "sha256:9e89d9799ce5922f56313a8f1660d55736bf1033525ded898dc1d9da8ada3e0b"
       },
       "anthropic": {
-        "model": "sha256:f91003851895ccb59c3e990ea6b72d48fb9800dbbd05f6e98039a679471a2063",
-        "source": "sha256:776f9564dfe7d1abe09b3a9958cf66bc1a6c58da6d76e858460ff03292ddd934"
+        "model": "sha256:1e185b85452e8414d7bf434b3a3efe034ba83d24d3d4fe15959f1e068865a2ca",
+        "source": "sha256:bdd2218ac05ef942c12d7c5822f2d08fe861e8ea334ad2959eebcedee5598cbc"
       }
     },
     "web_report_refs": {
-      "parallel": "sha256:5b895f8308ff289dee95787016cb7aa90ee7eb5faeb1d651806b96e336bf4c10"
+      "parallel": "sha256:8eeb5644dd31b86851f53ed19d1c0b5c76a6d01245861a8b7eed32f5193b9450"
     },
     "deferred_providers": [
       "openrouter",
@@ -81,10 +74,10 @@
     "storage": {
       "provider": "github-release-asset",
       "repository": "https://github.com/zero-ar-labs/zero-ar",
-      "source_commit": "f7cd49e89603091c0e79f74d95a9e6fd879c0bb4",
-      "release_tag": "zero-ar-external-evidence-f7cd49e89603091c0e79f74d95a9e6fd879c0bb4",
-      "asset_name": "zero-ar-live-provider-publication-f7cd49e89603091c0e79f74d95a9e6fd879c0bb4-72cc0efa8e1c0158cebdeaf000644f2519ebe0fe2eaced3c3b8f85cbf4c2a16b.json",
-      "content_digest": "sha256:72cc0efa8e1c0158cebdeaf000644f2519ebe0fe2eaced3c3b8f85cbf4c2a16b"
+      "source_commit": "d7adde6df9d56b94575c3a2d0bdf09d867777785",
+      "release_tag": "zero-ar-external-evidence-d7adde6df9d56b94575c3a2d0bdf09d867777785",
+      "asset_name": "zero-ar-live-provider-publication-d7adde6df9d56b94575c3a2d0bdf09d867777785-9b0cf15f8bb7d6e42b9dc4d9d92191ac8f3f898cfb956209c7f1c66e2f69831f.json",
+      "content_digest": "sha256:9b0cf15f8bb7d6e42b9dc4d9d92191ac8f3f898cfb956209c7f1c66e2f69831f"
     }
   },
   "openapi": {
@@ -92,15 +85,15 @@
     "export_subpath": "./openapi",
     "path": "openapi/zero-ar-v1.openapi.json",
     "contract_version": "v1",
-    "sha256": "507293d3c3638985ec4b7573b7060b168044412fb32c18ccf9063e115a59f9b9",
-    "source_revision": "f7cd49e89603091c0e79f74d95a9e6fd879c0bb4"
+    "sha256": "3188d71674898fa6e2c52d9a6ee587a18e7ce352f6e076507fbda2d3e034c574",
+    "source_revision": "d7adde6df9d56b94575c3a2d0bdf09d867777785"
   },
   "packages": [
     {
       "name": "@zero-ar/contracts",
       "workspace_path": "packages/contracts",
-      "version": "0.5.0",
-      "manifest_ref": "sha256:bba9f3bdd023e955356822a5c3e6f19ced6b634ee56c6f28a4f636bf789019b8",
+      "version": "0.6.0",
+      "manifest_ref": "sha256:69cf139186fb4c375e7322ca48ef25f7e1435bd7a452a06396a7508158749dbf",
       "repository": {
         "type": "git",
         "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
@@ -130,8 +123,8 @@
     {
       "name": "@zero-ar/client",
       "workspace_path": "packages/client",
-      "version": "0.5.0",
-      "manifest_ref": "sha256:7710002acb51bcd060883a672967647e3fd3a575b30722c7c5def7c95a3d4aff",
+      "version": "0.6.0",
+      "manifest_ref": "sha256:a50a9848f3971af26c3aaffd12a443c9ce59e25640cd1ea31df3dbeb872533e7",
       "repository": {
         "type": "git",
         "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
@@ -163,8 +156,8 @@
     {
       "name": "@zero-ar/validator-kit",
       "workspace_path": "packages/validator-kit",
-      "version": "0.5.0",
-      "manifest_ref": "sha256:b04549d06fca17c1a4553cc887c006b23be8f5dedb8cb5f544693e1186fcde39",
+      "version": "0.6.0",
+      "manifest_ref": "sha256:549c3feb0c1743feac791a27e35a42c3530035343d2160c2ca590f7bef7603d7",
       "repository": {
         "type": "git",
         "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
@@ -194,8 +187,8 @@
     {
       "name": "@zero-ar/sdk",
       "workspace_path": "packages/sdk",
-      "version": "0.5.0",
-      "manifest_ref": "sha256:254448106f3bf41710868be65557b1ee9079fa6800dd1bf3176e6e41bc4e0433",
+      "version": "0.6.0",
+      "manifest_ref": "sha256:5e30fb832f8b24d7d7248cf3b799a66e151809e235fdb73cb8137f67963a50e7",
       "repository": {
         "type": "git",
         "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
@@ -225,8 +218,8 @@
     {
       "name": "@zero-ar/cli",
       "workspace_path": "apps/cli",
-      "version": "0.5.0",
-      "manifest_ref": "sha256:37274f4e09eda263838538dddb047f1c30044f89feadb601e8e9817f345f6adc",
+      "version": "0.6.0",
+      "manifest_ref": "sha256:603d1e9c2a20ab5565b65a08254887de40c57d316ad7b9dbf10819fcb9e2057e",
       "repository": {
         "type": "git",
         "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
@@ -264,8 +257,8 @@
     {
       "name": "@zero-ar/conformance",
       "workspace_path": "packages/conformance",
-      "version": "0.5.0",
-      "manifest_ref": "sha256:12e4df81f844ac71f26e20df225eb1ed131298c00898ff15d759fc8f58af10c5",
+      "version": "0.6.0",
+      "manifest_ref": "sha256:a5dab69ee7a2e93c55cfd53d676d94109f5eb3ada63992682a2f236c358942f5",
       "repository": {
         "type": "git",
         "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
@@ -302,8 +295,8 @@
     {
       "name": "@zero-ar/tool-kit",
       "workspace_path": "packages/tool-kit",
-      "version": "0.5.0",
-      "manifest_ref": "sha256:9ec2654c2b4d60d30b83b8ff9eba91fed1baeb04912b4e791b41c32691b03302",
+      "version": "0.6.0",
+      "manifest_ref": "sha256:df5c1121da46bcdb8c479554abfe4438155547c65e196991dc4e065d2bf4ccaa",
       "repository": {
         "type": "git",
         "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
@@ -333,8 +326,8 @@
     {
       "name": "@zero-ar/mcp",
       "workspace_path": "packages/mcp",
-      "version": "0.5.0",
-      "manifest_ref": "sha256:9e8e1c9b0d7328170b01e5b8033d1bc4e1772fe8367ebdb95017889c43d95980",
+      "version": "0.6.0",
+      "manifest_ref": "sha256:35d0d5987b6dcb0a1ebdf117e884abd9eb7ce96389ba16a549fe020e8cbe9233",
       "repository": {
         "type": "git",
         "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
@@ -364,8 +357,8 @@
     {
       "name": "@zero-ar/testkit",
       "workspace_path": "packages/testkit",
-      "version": "0.5.0",
-      "manifest_ref": "sha256:5aede1e7379fed6742391b42a862ffb16851ad57cc62fb7302c62ed584ebe356",
+      "version": "0.6.0",
+      "manifest_ref": "sha256:b83a3fd4455bab2aac2a51c9e927c3905b95ebe0bf94deee02692e3e653c427e",
       "repository": {
         "type": "git",
         "url": "git+https://github.com/zero-ar-labs/ar-kit.git",
@@ -393,5 +386,5 @@
       }
     }
   ],
-  "package_set_ref": "sha256:c658e5fbbc6e40d7fc517d2e352856a19832bb23236873f3ecfdc68a956e31ff"
+  "package_set_ref": "sha256:28ea4e52cb42e8e4e2433031520407704dbaec1d39f0a55acc8ae7334386c1cb"
 }

@@ -1,5 +1,12 @@
 import { z } from 'zod';
 import type { ProcedureManifest } from './publication.js';
+export declare const POLICY_SKILL_WINDOW_DEFAULT_SHARE_PPM = 100000;
+export declare function publishedSkillInstructions(procedure: {
+    ref: string;
+    name: string;
+    version: string;
+    instructions: string;
+}): string;
 export declare const SkillDescriptorSchema: z.ZodObject<{
     skill_ref: z.ZodString;
     name: z.ZodString;

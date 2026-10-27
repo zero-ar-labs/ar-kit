@@ -58,6 +58,7 @@ export const RECORD_TYPES = [
     'effect.resolved',
     'effect.unreconcilable',
     'effect.answer.late',
+    'effect.receipt.adopted',
     'grant.superseded',
     'item.attempted',
     'item.parked',
@@ -105,7 +106,14 @@ const recordTypeVersions = RECORD_TYPES.reduce((versions, type) => {
 }, {});
 recordTypeVersions['state.closure.rehydrated'] = Object.freeze([1, 2]);
 recordTypeVersions['executor.continuation.accepted'] = Object.freeze([1, 2]);
+recordTypeVersions['repair.started'] = Object.freeze([1, 2]);
+recordTypeVersions['tool.remote.pending'] = Object.freeze([1, 2]);
+recordTypeVersions['run.suspended'] = Object.freeze([1, 2]);
+recordTypeVersions['context.assembled'] = Object.freeze([1, 2, 3, 4, 5]);
 recordTypeVersions['model.call.started'] = Object.freeze([1, 2]);
+recordTypeVersions['checkpoint.passed'] = Object.freeze([1, 2]);
+recordTypeVersions['checkpoint.indeterminate'] = Object.freeze([1, 2]);
+recordTypeVersions['verification.concluded'] = Object.freeze([1, 2]);
 export const RECORD_TYPE_VERSIONS = Object.freeze(recordTypeVersions);
 export const RUN_PORTABILITY_LEVELS = ['verify', 'materialize', 'rehydrate', 'continue'];
 export const CAPABILITY_ADMISSION_KINDS = ['add', 'replace', 'remove'];
@@ -160,7 +168,7 @@ export const MEMORY_WRITE_MODES = ['none', 'propose-after-verification', 'human-
 export const MEMORY_AVAILABILITY_MODES = ['optional', 'required'];
 export const MEMORY_MODEL_OPERATIONS = ['memory.read', 'memory.propose'];
 export const PLAN_OPERATIONS = ['plan.record'];
-export const RUN_OPERATIONS = ['run.wait'];
+export const RUN_OPERATIONS = ['run.wait', 'run.delegate'];
 export const PLAN_CHECK_KINDS = ['json-shape', 'workspace-command'];
 export const TOOL_VIEW_SELECTION_REASONS = [
     'reserved-local-catalogue',
@@ -180,6 +188,7 @@ export const TOOL_VIEW_SELECTION_REASONS = [
     'lifecycle-phase',
     'objective-match',
     'small-closure',
+    'budget-fill',
 ];
 export const CONTEXT_MODEL_OPERATIONS = ['context.expand'];
 export const RUN_STATUSES = ['created', 'running', 'suspended', 'cancelled', 'finished'];
@@ -195,7 +204,9 @@ export const COMPLETION_STATES = [
 ];
 export const VERDICTS = ['verified', 'rejected', 'indeterminate', 'exhausted'];
 export const RUN_TERMINALS = ['complete', 'unverified_artifact', 'cancelled'];
-export const SUSPEND_REASONS = ['budget_exhausted', 'provider_failure', 'awaiting_answer', 'operator_pause', 'stagnation', 'remote_task', 'awaiting_approval', 'awaiting_external'];
+export const SUSPEND_REASONS = ['budget_exhausted', 'provider_failure', 'awaiting_answer', 'operator_pause', 'stagnation', 'remote_task', 'awaiting_approval', 'awaiting_external', 'awaiting_subruns', 'runtime_defect'];
+export const SUB_RUN_STATES = ['running', 'finished', 'failed', 'cancelled'];
+export const SUB_RUN_FINDING_STATES = ['pending', 'returned', 'gap'];
 export const RUN_RESUME_BLOCK_CATEGORIES = ['budget-unavailable', 'answers-outstanding', 'storage-unready', 'authority-unready', 'remote-task-pending'];
 export const WAKE_CLAIM_VIAS = ['cancellation', 'deadline', 'deadline-stale', 'stale'];
 export const BLOCKING_OUTCOME_KINDS = ['parked-item', 'open-effect', 'artifact-evidence'];
@@ -223,6 +234,8 @@ export function isNonTerminalEffectState(state) {
     return !isTerminalEffectState(state);
 }
 export const RECEIPT_ASSURANCES = ['owner-signed', 'authenticated-response', 'authenticated-reconciliation'];
+export const OWNER_SIGNATURE_STATUSES = ['verified', 'unverified', 'absent'];
+export const GRANT_RULE_IDENTITY_POLICIES = ['exact', 'published-agent'];
 export const RECEIPT_OUTCOMES = ['applied', 'already_applied', 'refused'];
 export const REVIEW_ITEM_KINDS = ['gap', 'human-validator', 'approval'];
 export const REVIEW_ITEM_STATES = ['pending'];
@@ -259,12 +272,13 @@ export const VERIFICATION_PLAN_REFUSAL_CODES = [
 export const VALIDATOR_OUTCOMES = ['pass', 'reject', 'indeterminate'];
 export const CLAIM_LABELS = ['guarantee', 'assumption', 'heuristic', 'open'];
 export const ASK_TIMINGS = ['at-completion', 'when-parked'];
-export const VALIDATOR_INPUT_EXTENSIONS = ['document-text', 'effect-outcomes', 'workspace-output', 'web-pages'];
+export const VALIDATOR_INPUT_EXTENSIONS = ['document-text', 'effect-outcomes', 'workspace-output', 'web-pages', 'source-reads', 'skill-text'];
 export const CHECKPOINT_VIEWS = ['covered-items', 'worked-items'];
 export const CLAIM_REPRESENTATIONS = ['structured-claims-with-citations'];
 export const FAILURE_CLASSES = ['shape', 'domain', 'grounding', 'infrastructure'];
 export const OPERATION_CLASSES = ['observation', 'run-internal', 'effect-proposal'];
 export const TOOL_METERING = ['enforced', 'unmetered', 'effect-governed'];
+export const TOOL_SPEND_DENOMINATIONS = ['bytes', 'compute_ms'];
 export const PROFILES = ['local-lite', 'full-cell', 'small-production', 'regulated'];
 export const PROFILE_CAPABILITIES = [
     'hosted-postgresql-service',
@@ -328,7 +342,62 @@ export const PROFILE_CAPABILITIES = [
     'hierarchical-context',
     'reversible-http-effect-dispatch',
     'web-search',
+    'several-cells-one-database',
 ];
+export const CAPABILITY_MECHANISMS = [
+    'run-engine',
+    'canonical-log-store',
+    'postgres-tenancy',
+    'run-transfer',
+    'artifact-port',
+    'runtime-artifact-store',
+    'publication-registry',
+    'source-service',
+    'process-tool-host',
+    'published-tool-host',
+    'process-environment',
+    'oci-environment',
+    'workspace-exec',
+    'browser-workspace',
+    'durable-wake-scheduler',
+    'cell-run-ownership',
+    'transformation-validators',
+    'research-validators',
+    'sampled-validator',
+    'web-tools',
+    'cross-run-memory',
+    'model-adapter-anthropic',
+    'model-adapter-openai',
+    'model-adapter-openrouter',
+    'model-adapter-together',
+    'model-adapter-fireworks',
+    'effect-plane',
+    'effect-authority-service',
+    'http-effect-target',
+    'mcp-listener',
+    'mcp-client',
+    'aggregator-composio',
+    'aggregator-merge',
+    'environment-ssh',
+    'environment-firecracker',
+    'environment-apptainer',
+    'environment-openai-agents',
+    'full-cell-supervisor',
+    'workspace-instance-attachment',
+    'attention-admission',
+    'fair-dispatch-scheduler',
+    'context-feature-cache',
+    'content-defined-chunker',
+    'gateway-host',
+    'classification-airlock',
+    'video-pack',
+    'native-package',
+    'regulated-composition',
+    'unattended-aggregator-dispatch',
+    'production-effect-dispatcher',
+];
+export const UNBUILT_CAPABILITY_MECHANISMS = CAPABILITY_MECHANISMS.slice(CAPABILITY_MECHANISMS.indexOf('workspace-instance-attachment'));
+export const CAPABILITY_MANIFEST_BASES = ['observed', 'declared'];
 export const PROFILE_CAPABILITY_STATES = ['supported', 'conditional', 'excluded'];
 export const ENVIRONMENT_PRODUCT_STATES = ['default-supported', 'conditional-supported', 'future-optional'];
 export const ENVIRONMENT_ACCEPTANCE_STATES = ['not-required', 'pending', 'current', 'expired', 'mismatched'];
@@ -461,7 +530,10 @@ export const ROUTE_SCOPES = [
 ];
 export const PLATFORM_ROUTE_SCOPES = ['platform:authority-epoch'];
 export const EXTERNAL_OBSERVATION_CHANNELS = ['web', 'mobile', 'voice', 'sms', 'email', 'chat', 'system', 'other'];
-export const OIDC_JWT_ALGORITHMS = ['RS256'];
+export const JWS_ALGORITHMS = ['RS256', 'ES256', 'EdDSA', 'HS256'];
+export const OIDC_JWT_ALGORITHMS = ['RS256', 'ES256', 'EdDSA'];
+export const APPROVER_ASSERTION_ALGORITHMS = ['EdDSA', 'ES256', 'HS256'];
+export const ACTOR_IDENTITY_KINDS = ['oidc-jwt', 'application-attested'];
 export const MODEL_PROVIDERS = ['scripted', 'openai', 'anthropic', 'openrouter', 'together', 'fireworks', 'openai-compatible'];
 export const MODEL_PROTOCOL_ADAPTERS = ['scripted', 'openai-chat-completions', 'anthropic-messages'];
 export const MODEL_PROVIDER_PROFILES = ['scripted', 'openai', 'anthropic', 'openrouter', 'together', 'fireworks', 'generic-openai-compatible', 'litellm', 'ollama'];
@@ -476,6 +548,10 @@ export const DOCUMENT_COORDINATE_SPACES = ['pdf-points', 'image-pixels'];
 export const DOCUMENT_EXTRACTOR_BINDINGS = ['host-process', 'oci-document'];
 export const DOCUMENT_EXTRACTOR_SANDBOX_MODES = ['linux-bwrap-no-network', 'resource-limited-process', 'oci-no-network-read-only'];
 export const DOCUMENT_PAGE_IMAGE_OMISSIONS = ['page-image-bytes', 'extraction-image-bytes'];
+export const SOURCE_SEARCH_MATCHES = ['all-terms', 'any-term', 'phrase', 'exact'];
+export const SOURCE_SEARCH_SKIPS = ['too-large', 'not-text', 'not-extracted'];
+export const SOURCE_READ_KINDS = ['source-read', 'search-hit', 'tool-result'];
+export const CHECK_INPUT_TRUNCATIONS = ['byte-bound', 'unreadable', 'page-cap'];
 export const CONTEXT_IMAGE_DELIVERIES = ['image', 'note'];
 export const CONTEXT_IMAGE_NOTE_REASONS = [
     'model-without-image-input',
@@ -484,7 +560,7 @@ export const CONTEXT_IMAGE_NOTE_REASONS = [
     'image-unavailable',
 ];
 export const MODEL_USAGE_MEASUREMENTS = ['reported', 'untrusted', 'absent', 'estimated'];
-export const INPUT_BOUND_BASES = ['provider-count', 'byte-bound'];
+export const INPUT_BOUND_BASES = ['provider-count', 'byte-bound', 'measured-delta'];
 export const AGGREGATOR_PROVIDERS = ['composio', 'merge-agent-handler', 'merge-unified'];
 export const PROVIDER_CREDENTIAL_PURPOSES = ['openai', 'anthropic', 'openrouter', 'together', 'fireworks', 'openai-compatible', 'composio', 'merge-agent-handler', 'merge-unified', 'mcp', 's3-compatible-artifact-store', 'memory-wrapping-key', 'web-search'];
 export const SECRET_BROKER_PRINCIPAL_KINDS = ['runtime', 'aggregator-host', 'artifact-store', 'supervisor'];
@@ -662,17 +738,14 @@ export const PRODUCT_LOCAL_MIGRATION_STATUSES = [
     'rolled-back',
 ];
 export const PRODUCT_SOURCE_API_VERSIONS = [
-    'ramsden/v1',
     'zero-ar/v1',
 ];
 export const PRODUCT_RUN_BUNDLE_FORMATS = [
-    'ramsden-run-bundle',
     'zero-ar-run-bundle',
 ];
 export const RUN_BUNDLE_CANONICALIZATIONS = ['canonical-json-1'];
-export const RUN_HEAD_FOLD_PROFILES = ['run-head-v9'];
+export const RUN_HEAD_FOLD_PROFILES = ['run-head-v11', 'run-head-v10', 'run-head-v9'];
 export const PRODUCT_SBOM_FORMATS = [
-    'ramsden-sbom-2',
     'zero-ar-sbom-1',
 ];
 export const PRODUCT_CLI_RELEASE_ARTIFACT_KINDS = ['shell-completion', 'manpage', 'install-script', 'service-unit', 'example'];
@@ -688,6 +761,7 @@ export const PRODUCT_EGRESS_REVIEW_PURPOSES = [
     'webhook-callback',
     'workspace',
     'web-search',
+    'identity-keys',
 ];
 export const PRODUCT_PACKAGE_IMPLEMENTATION_IDENTITIES = ['legacy', 'successor', 'legacy-wrapper'];
 export const PRODUCT_PACKAGE_GRAPH_STATES = ['legacy-compatible', 'successor-compatible', 'mixed-incompatible'];
@@ -757,7 +831,9 @@ export const EXTERNAL_EVIDENCE_INVARIANT_STATUSES = ['met', 'not-met'];
 export const EXTERNAL_EVIDENCE_DEMONSTRATION_SIDES = ['zero-ar', 'conventional-agent'];
 export const PUBLICATION_KINDS = ['agent', 'tool', 'procedure', 'validator', 'posture', 'task-contract', 'semantic', 'domain-pack', 'binding-profile'];
 export const SKILL_ACTIVATION_POLICIES = ['progressive', 'always'];
+export const SKILL_CONTEXT_POLICIES = ['bounded-run-v1'];
 export const SKILL_RETENTIONS = ['turn', 'checkpoint'];
+export const SKILL_WINDOW_NOTICE_REASONS = ['retention-expired', 'context-budget', 'context-omitted'];
 export const SKILL_OPERATIONS = ['skill.open', 'skill.read', 'skill.search'];
 export const ARTIFACT_OPERATIONS = ['artifact.read'];
 export const GATEWAY_FAMILIES = ['signed-webhook', 'interactive-messaging'];

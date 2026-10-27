@@ -137,6 +137,7 @@ export function compileDomainPack(pack, available) {
     };
 }
 export { compileAuthoringSource, compileProject, compileSkill, exportAgentSkill, previewPublicationVerificationPlan, renderPlan, skillLock, } from "./publication.js";
+export { publicationSkillWarnings } from "./publication-skill-sizing.js";
 export { verifyBundle } from '@zero-ar/contracts';
 export { renderVerificationPlan } from '@zero-ar/validator-kit';
 export { defineOrchestration, runOrchestration } from "./orchestration.js";

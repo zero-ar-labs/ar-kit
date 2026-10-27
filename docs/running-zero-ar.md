@@ -231,7 +231,8 @@ adapter `anthropic-messages` and every other provider uses
 `openai-chat-completions`. `openai-compatible` takes the profiles
 `generic-openai-compatible`, `litellm` and `ollama` and needs `endpoints`.
 Other tenant blocks turn on cross-run memory, MCP, tool sources, participant
-identity and effects; leave them out for a first cell.
+identity and effects; leave them out for a first cell. Approvers below
+describes the participant identity block, `actor_identity`.
 
 A minimal single-tenant config. Replace each `sha256:` placeholder as the
 credentials section describes. The scopes are a starting set; each route
@@ -403,6 +404,99 @@ database role itself.
 openssl genpkey -algorithm ed25519 -out signer.key
 openssl pkey -in signer.key -pubout -out signer.pub
 ```
+
+### Approvers
+
+When an action waits for a person, your app sends the decision to
+`POST /v1/runs/:run_id/effects/:effect_id/decisions`. The tenant API key says
+which app is calling. A second credential, in the
+`X-Zero-AR-Participant-Token` header, proves which person approves. Zero-AR
+never takes a person's name from the request body or any other text a caller
+types. A tenant that lets people approve actions needs an `actor_identity`
+block, or the cell does not start.
+
+Choose one of two forms.
+
+**Your sign-in provider.** If your people sign in through a provider that
+issues JWTs, such as Okta, Auth0, Microsoft Entra ID, Google or Keycloak,
+name it:
+
+```json
+"actor_identity": {
+  "type": "oidc-jwt",
+  "issuer": "https://login.example.com/",
+  "audience": "zero-ar",
+  "tenant_claim": "tenant_id",
+  "jwks_url": "https://login.example.com/.well-known/jwks.json"
+}
+```
+
+- `issuer` must match the token's `iss` claim exactly.
+- `audience` must be one of the token's `aud` values.
+- `jwks_url` is the address of the provider's public keys. It must use HTTPS.
+  Add it to `egress_destinations` with purpose `identity-keys`. The cell
+  reads the keys again when a token names a new key, at most once a minute.
+  Instead of a URL, `jwks_env` can name a variable that holds the keys as JSON.
+- Tokens signed with RS256, ES256 or EdDSA are accepted.
+- `tenant_claim` names the token claim that holds the tenant id. You can leave
+  it out when everyone this provider signs in belongs to this tenant. The cell
+  then refuses to start if another tenant names the same issuer.
+
+Send the person's token, unchanged, in `X-Zero-AR-Participant-Token`.
+
+**Your app signs for the person.** If your people sign in some other way, your
+app can vouch for them itself. Register your app's public key, an Ed25519 or
+P-256 key in PEM form, or a shared secret of at least 32 bytes stored in the
+tenant's secret store:
+
+```json
+"actor_identity": {
+  "type": "application-attested",
+  "audience": "zero-ar",
+  "keys": [{ "kid": "app-key-1", "public_key_pem": "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----\n" }]
+}
+```
+
+Make an Ed25519 key pair and put the contents of `approver.pub` in
+`public_key_pem`, with each line break written as `\n`. Keep `approver.key`
+with your app. For a shared secret, give the key `credential_binding_ref` with
+a `secret://` reference instead of `public_key_pem`.
+
+```sh
+openssl genpkey -algorithm ed25519 -out approver.key
+openssl pkey -in approver.key -pubout -out approver.pub
+```
+
+For each decision, your app signs a short approver assertion with its key and
+sends it in `X-Zero-AR-Participant-Token`. The `@zero-ar/contracts` package
+signs one:
+
+```ts
+import { createPrivateKey } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { signApproverAssertion } from '@zero-ar/contracts';
+
+const assertion = signApproverAssertion({
+  subject: 'person:ada@example.com',
+  audience: 'zero-ar',
+  tenant: 'acme',
+  key_id: 'app-key-1',
+}, createPrivateKey(readFileSync('approver.key')));
+```
+
+An assertion lasts five minutes by default and ten minutes at most. Each one
+serves one decision: to retry the same decision after a lost answer, send the
+same assertion again; for any other decision, sign a new one. Zero-AR keeps a
+note of each assertion it has accepted, so a copy cannot approve another
+action, even through another cell or after a restart. Zero-AR records
+the approver's issuer as `urn:zero-ar:application:` followed by your app's
+name on the cell (`api-key:` and the tenant id, unless the tenant sets
+`principal`). The record then shows that your app, not a sign-in provider,
+vouched for the person.
+
+Either way, your app decides who may approve which action, for example which
+role can approve a refund, or that a person cannot approve their own request.
+Zero-AR checks the credential and records who approved.
 
 ### Web search
 

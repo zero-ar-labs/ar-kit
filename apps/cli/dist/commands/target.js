@@ -60,7 +60,7 @@ export async function checkTarget(entry, options) {
     if (!route)
         throw new Error(`target ${entry.target} does not list operation ${options.operation}. Name one of: ${Object.keys(entry.operations).join(', ')}.`);
     const endpoint = new URL(entry.endpoint);
-    const wire = entry.wire ?? 'zero-ar-json';
+    const wire = entry.wire ?? 'standard';
     const receiptKey = entry.receipt_key_pem ? ed25519Key(entry.target, entry.receipt_key_pem) : null;
     const fetchImpl = options.fetch_impl ?? fetch;
     const timeout = options.timeout_ms ?? EFFECT_TARGET_TIMEOUT_MS;
@@ -167,7 +167,7 @@ export async function checkTarget(entry, options) {
     else
         line('other-secret', 'fail', `it applied a call made with another secret. Check ${authName} before acting on a call.`);
     if (wire !== 'standard')
-        line('stale-call', 'skip', 'the bearer wire carries no timestamp.');
+        line('stale-call', 'skip', 'the legacy bearer wire carries no timestamp, and the target receives its standing secret on every call. Move it to the standard wire.');
     else {
         const stale = await dispatch(effect(options.params), options.secret, Math.floor(Date.now() / 1_000) - 600);
         if (!stale.ok)

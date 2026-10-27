@@ -1,4 +1,4 @@
-import type { OperationClass, ToolDisclosureClass, TrustTier } from '@zero-ar/contracts';
+import type { MemoryClassification, OperationClass, ToolDisclosureClass, TrustTier } from '@zero-ar/contracts';
 export interface Schema<T> {
     readonly json: Record<string, unknown>;
     parse(value: unknown, path?: string): T;
@@ -94,6 +94,8 @@ export interface ToolManifest {
     } | null;
     timeout_ms: number | null;
     disclosure?: ToolDefinition['disclosure'];
+    output_classification?: MemoryClassification;
+    external_content?: boolean;
 }
 export interface HostedTool {
     name: string;

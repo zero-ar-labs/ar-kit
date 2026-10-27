@@ -44,6 +44,7 @@ export function assertRunOwnedModelRequest(request) {
 export function adapterAcceptsImages(adapter) {
     return adapter.image_input === 'supported';
 }
+export const DEFAULT_CONTEXT_BUDGET_TOKENS = 12_000;
 export function approxTokens(text) {
     return Math.ceil(text.length / 4);
 }

@@ -2,7 +2,7 @@ import type { PackageDistribution, ProductPackageGraphState, ProductPackageImple
 export declare const PRODUCT_PACKAGE_GRAPH_PROTOCOL: "product-package-graph/v1";
 export interface ProductPackageIdentity {
     workspace_path: string;
-    legacy_name: string;
+    legacy_name?: string;
     successor_name: string;
     distribution: PackageDistribution;
 }

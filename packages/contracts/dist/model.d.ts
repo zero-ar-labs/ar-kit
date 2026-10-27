@@ -54,6 +54,7 @@ export interface ToolCatalogueDescriptor {
 }
 export interface ModelToolViewRecord {
     schema: 'zero-ar-tool-view/1';
+    guidance_version?: 2;
     ref: string;
     closure_size: number;
     budget: {
@@ -148,6 +149,7 @@ export interface ModelAdapter {
     stream(request: ModelRequest, signal: AbortSignal): AsyncGenerator<ModelStreamEvent, void, void>;
 }
 export declare function adapterAcceptsImages(adapter: Pick<ModelAdapter, 'image_input'>): boolean;
+export declare const DEFAULT_CONTEXT_BUDGET_TOKENS = 12000;
 export declare function approxTokens(text: string): number;
 export declare const MESSAGE_FRAME_TOKENS = 16;
 export declare const TOOL_FRAME_TOKENS = 64;

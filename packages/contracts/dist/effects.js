@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { canonicalJson } from "./canonical.js";
 import { CitationSchema } from "./claims.js";
-import { RECEIPT_ASSURANCES, RECEIPT_OUTCOMES } from "./vocab.js";
+import { OWNER_SIGNATURE_STATUSES, RECEIPT_ASSURANCES, RECEIPT_OUTCOMES } from "./vocab.js";
 const effectId = z.string().regex(/^eff_[0-9a-f]{32}$/, 'expected an eff id');
 const sha = z.string().regex(/^sha256:[0-9a-f]{64}$/, 'expected sha256:<64 hex>');
 export const EffectDescriptorSchema = z.strictObject({
@@ -29,6 +29,7 @@ export const ReceiptSchema = z.strictObject({
     outcome: z.enum(RECEIPT_OUTCOMES),
     owner_response: z.string().max(4_096),
     assurance: z.enum(RECEIPT_ASSURANCES),
+    owner_signature: z.enum(OWNER_SIGNATURE_STATUSES).optional(),
     attestation: z.string().nullable(),
     target_adapter_version: z.string(),
     valid_time: z.string(),
@@ -42,6 +43,7 @@ export const StaticGrantSchema = z.strictObject({
     approver: z.string().min(1),
     expires_at: z.string().datetime(),
     max_magnitude: z.number().nonnegative().nullable(),
+    pre_approved_within_cap: z.literal(true).optional(),
     attestation: z.string().min(1),
 });
 export function receiptBinding(receipt) {
@@ -54,6 +56,24 @@ export function receiptBinding(receipt) {
         outcome: receipt.outcome,
         owner_response: receipt.owner_response,
     });
+}
+export function receiptAttestationBinding(receipt) {
+    if (receipt.owner_signature === undefined)
+        return receiptBinding(receipt);
+    return canonicalJson({
+        effect_id: receipt.effect_id,
+        target: receipt.target,
+        operation: receipt.operation,
+        param_hash: receipt.param_hash,
+        idempotency_key: receipt.idempotency_key,
+        outcome: receipt.outcome,
+        owner_response: receipt.owner_response,
+        assurance: receipt.assurance,
+        owner_signature: receipt.owner_signature,
+    });
+}
+export function adoptedReceiptBinding(receipt, handoff_ref) {
+    return canonicalJson({ schema: 'zero-ar-adopted-receipt/1', receipt: receiptAttestationBinding(receipt), handoff_ref });
 }
 export function receiptBindingMismatch(receipt, descriptor) {
     for (const field of ['effect_id', 'target', 'operation', 'param_hash', 'idempotency_key']) {
@@ -71,5 +91,6 @@ export function grantBinding(grant) {
         approver: grant.approver,
         expires_at: grant.expires_at,
         max_magnitude: grant.max_magnitude,
+        ...(grant.pre_approved_within_cap ? { pre_approved_within_cap: true } : {}),
     });
 }

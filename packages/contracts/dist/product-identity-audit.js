@@ -1,11 +1,9 @@
-import { LEGACY_PRODUCT_IDENTITY, PRODUCT_IDENTITY, PRODUCT_IDENTITY_MIGRATION, SUCCESSOR_PRODUCT_IDENTITY, activeProductIdentity, } from "./product-identity.generated.js";
+import { PRODUCT_IDENTITY, PRODUCT_IDENTITY_MIGRATION, SUCCESSOR_PRODUCT_IDENTITY, activeProductIdentity, } from "./product-identity.generated.js";
 import { contentHash } from "./ids.js";
-const KNOWN_SLUGS = [LEGACY_PRODUCT_IDENTITY.slug, SUCCESSOR_PRODUCT_IDENTITY.slug];
+const KNOWN_SLUGS = [SUCCESSOR_PRODUCT_IDENTITY.slug];
 function displayFor(slug) {
     if (slug === SUCCESSOR_PRODUCT_IDENTITY.slug)
         return SUCCESSOR_PRODUCT_IDENTITY.display_name;
-    if (slug === LEGACY_PRODUCT_IDENTITY.slug)
-        return LEGACY_PRODUCT_IDENTITY.display_name;
     return slug;
 }
 export function renderHistoricalIdentity(historical_slug) {

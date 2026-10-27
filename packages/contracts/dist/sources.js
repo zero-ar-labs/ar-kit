@@ -1,6 +1,7 @@
 import { z } from 'zod';
+import { contentHash } from "./ids.js";
 import { IMAGE_INPUT_DEFAULTS } from "./model.js";
-import { DOCUMENT_COORDINATE_SPACES, DOCUMENT_EXTRACTION_MEDIA_TYPES, DOCUMENT_EXTRACTOR_BINDINGS, DOCUMENT_EXTRACTOR_SANDBOX_MODES, DOCUMENT_PAGE_IMAGE_MEDIA_TYPES, DOCUMENT_PAGE_IMAGE_OMISSIONS, EVIDENCE_GRADES, MEMORY_CLASSIFICATIONS, } from "./vocab.js";
+import { DOCUMENT_COORDINATE_SPACES, DOCUMENT_EXTRACTION_MEDIA_TYPES, DOCUMENT_EXTRACTOR_BINDINGS, DOCUMENT_EXTRACTOR_SANDBOX_MODES, DOCUMENT_PAGE_IMAGE_MEDIA_TYPES, DOCUMENT_PAGE_IMAGE_OMISSIONS, EVIDENCE_GRADES, MEMORY_CLASSIFICATIONS, SOURCE_SEARCH_MATCHES, SOURCE_SEARCH_SKIPS, } from "./vocab.js";
 export const SOURCE_ACCESS_PROFILES = ['local-read-only'];
 export const SOURCE_INSTANCE_STATES = ['ready', 'disabled', 'removed'];
 export const SOURCE_LOCATOR_KINDS = ['local-directory'];
@@ -71,6 +72,32 @@ export const SourceExtractorIdentityV1Schema = z.strictObject({
 });
 export function extractorDefaultLanguages(identity) {
     return 'languages' in identity ? identity.languages : [identity.language];
+}
+export const SOURCE_SEARCH_LIMITS = Object.freeze({
+    max_sources: 16,
+    max_terms: 16,
+    default_max_matches: 10,
+    max_matches: 1_000,
+    default_max_matches_per_document: 3,
+    max_matches_per_document: 100,
+    default_window_chars: 200,
+    max_window_chars: 4_096,
+    default_scan_bytes: 1_048_576,
+    max_scan_bytes: 16 * 1_048_576,
+    read_window_bytes: 1_048_576,
+    window_overlap_bytes: 16_384,
+    max_member_bytes: 16 * 1_048_576,
+    max_members_visited: 10_000,
+    max_skipped_named: 20,
+    max_cursor_chars: 1_024,
+});
+export function sourceTextMediaType(mediaType) {
+    return mediaType.startsWith('text/')
+        || mediaType === 'application/json'
+        || mediaType === 'application/yaml'
+        || mediaType === 'application/xml'
+        || mediaType.endsWith('+json')
+        || mediaType.endsWith('+xml');
 }
 export const SourceLocatorSchema = z.discriminatedUnion('kind', [
     z.strictObject({
@@ -239,11 +266,16 @@ export const SourceOperationRequestSchema = z.discriminatedUnion('operation', [
         length: positiveCount.max(1_048_576),
     }),
     z.strictObject({
-        source_alias: sourceAlias,
+        source_alias: sourceAlias.optional(),
+        source_aliases: z.array(sourceAlias).min(1).max(SOURCE_SEARCH_LIMITS.max_sources).optional(),
         operation: z.literal('search'),
         query: z.string().min(1).max(4_096),
-        max_matches: positiveCount.max(1_000).optional(),
-        max_scan_bytes: positiveCount.max(16 * 1_048_576).optional(),
+        match: z.enum(SOURCE_SEARCH_MATCHES).optional(),
+        window_chars: positiveCount.max(SOURCE_SEARCH_LIMITS.max_window_chars).optional(),
+        max_matches: positiveCount.max(SOURCE_SEARCH_LIMITS.max_matches).optional(),
+        max_matches_per_document: positiveCount.max(SOURCE_SEARCH_LIMITS.max_matches_per_document).optional(),
+        max_scan_bytes: positiveCount.max(SOURCE_SEARCH_LIMITS.max_scan_bytes).optional(),
+        cursor: z.string().min(1).max(SOURCE_SEARCH_LIMITS.max_cursor_chars).optional(),
     }),
     z.strictObject({
         source_alias: sourceAlias.optional(),
@@ -252,6 +284,7 @@ export const SourceOperationRequestSchema = z.discriminatedUnion('operation', [
         artifact_ref: artifactHandle.optional(),
         max_pages: positiveCount.max(500).optional(),
         languages: ocrLanguages.optional(),
+        first_page: positiveCount.max(10_000).optional(),
     }),
 ]);
 export const SourceOperationResultSchema = z.strictObject({
@@ -304,6 +337,83 @@ export function inlinePageNumbers(pages, budget = DOCUMENT_EXTRACTION_INLINE_TEX
     }
     return inline;
 }
+export const DOCUMENT_EXTRACTION_DEFAULT_MAX_PAGES = 100;
+export const DOCUMENT_EXTRACTION_TEXT_WINDOW_BYTES = 3_072;
+export const DocumentTextWindowPageSchema = z.strictObject({
+    page: positiveCount,
+    text_artifact_ref: artifactHandle,
+    text_content_hash: hash,
+    text_bytes: count,
+    shown_bytes: count,
+});
+export const DocumentTextWindowSchema = z.strictObject({
+    first_page: positiveCount,
+    text: z.string().max(DOCUMENT_EXTRACTION_TEXT_WINDOW_BYTES),
+    pages: z.array(DocumentTextWindowPageSchema).max(1_000),
+    next: z.strictObject({ page: positiveCount, offset: count }).nullable(),
+});
+export function documentTextWindow(pages, texts, firstPage = 1, budget = DOCUMENT_EXTRACTION_TEXT_WINDOW_BYTES) {
+    const ordered = [...pages].sort((left, right) => left.page - right.page).filter((page) => page.page >= firstPage);
+    if (ordered.length === 0)
+        return null;
+    let text = '';
+    const shown = [];
+    for (const listed of ordered) {
+        const page = { page: listed.page, text_artifact_ref: listed.text_artifact_ref, text_content_hash: listed.text_content_hash, text_bytes: listed.text_bytes };
+        const header = `${text.length === 0 ? '' : '\n'}[page ${page.page}]\n`;
+        const room = budget - Buffer.byteLength(text) - Buffer.byteLength(header);
+        if (room <= 0)
+            return { first_page: firstPage, text, pages: shown, next: { page: page.page, offset: 0 } };
+        const body = texts.get(page.page) ?? '';
+        if (Buffer.byteLength(body) <= room) {
+            text += header + body;
+            shown.push({ ...page, shown_bytes: Buffer.byteLength(body) });
+            continue;
+        }
+        let cut = Buffer.from(body, 'utf8').subarray(0, room).toString('utf8');
+        if (cut.endsWith('\uFFFD'))
+            cut = cut.slice(0, -1);
+        const cutBytes = Buffer.byteLength(cut);
+        text += header + cut;
+        shown.push({ ...page, shown_bytes: cutBytes });
+        return { first_page: firstPage, text, pages: shown, next: { page: page.page, offset: cutBytes } };
+    }
+    return { first_page: firstPage, text, pages: shown, next: null };
+}
+export const DocumentExtractionReuseSchema = z.strictObject({
+    extraction_ref: hash,
+    run_id: z.string().min(1).max(128),
+    record_id: z.string().min(1).max(128),
+});
+export const KeptDocumentExtractionSchema = z.strictObject({
+    extraction_ref: hash,
+    content_hash: hash,
+    extractor_ref: hash,
+    extractor: SourceExtractorIdentitySchema,
+    media_type: z.enum(DOCUMENT_EXTRACTION_MEDIA_TYPES),
+    page_count: positiveCount,
+    truncated: z.boolean(),
+    max_pages: positiveCount,
+    pages: z.array(z.strictObject({
+        page: positiveCount,
+        width: z.number().positive().nullable(),
+        height: z.number().positive().nullable(),
+        coordinate_space: z.enum(DOCUMENT_COORDINATE_SPACES),
+        text_artifact_ref: artifactHandle,
+        text_content_hash: hash,
+        text_bytes: count,
+        method: z.enum(SOURCE_EXTRACTION_METHODS),
+        confidence: z.number().min(0).max(1).nullable(),
+        image: DocumentPageImageSchema.optional(),
+    })).min(1).max(10_000),
+    run_id: z.string().min(1).max(128),
+    record_id: z.string().min(1).max(128),
+    manifest_artifact_ref: artifactHandle,
+    kept_at: z.string().datetime(),
+});
+export function documentExtractorRef(identity) {
+    return contentHash({ schema: 'zero-ar-document-extractor/1', identity });
+}
 export const DocumentExtractionResultSchema = z.strictObject({
     source_alias: sourceAlias,
     member_ref: memberRef,
@@ -315,7 +425,10 @@ export const DocumentExtractionResultSchema = z.strictObject({
     page_count: positiveCount,
     total_text_bytes: count,
     truncated: z.boolean(),
+    max_pages: positiveCount.optional(),
     manifest_artifact_ref: artifactHandle,
     manifest_ref: hash,
     provenance_ref: hash,
+    text_window: DocumentTextWindowSchema.nullable().optional(),
+    reused_from: DocumentExtractionReuseSchema.optional(),
 });

@@ -63,6 +63,9 @@ export class GeneratedRoutes {
     decideEffect(run_id, effect_id, body, participant_token) {
         return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/effects/${encodeURIComponent(effect_id)}/decisions`, body, { "X-Zero-AR-Participant-Token": participant_token });
     }
+    reissueEffectGrant(run_id, body, participant_token) {
+        return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/effect-grants/reissuances`, body, { "X-Zero-AR-Participant-Token": participant_token });
+    }
     fork(run_id, body) {
         return this.transport.json('POST', `/v1/runs/${encodeURIComponent(run_id)}/forks`, body);
     }

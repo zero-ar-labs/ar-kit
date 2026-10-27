@@ -1,6 +1,6 @@
 import { refuse } from "./diagnostics.js";
-import { activeSourceApiVersion, LEGACY_SOURCE_API_VERSION, SUCCESSOR_SOURCE_API_VERSION, } from "./product-identity-formats.js";
-import { LEGACY_PRODUCT_IDENTITY, PRODUCT_IDENTITY_MIGRATION, SUCCESSOR_PRODUCT_IDENTITY, } from "./product-identity.generated.js";
+import { activeSourceApiVersion, SUCCESSOR_SOURCE_API_VERSION, } from "./product-identity-formats.js";
+import { PRODUCT_IDENTITY_MIGRATION, SUCCESSOR_PRODUCT_IDENTITY, } from "./product-identity.generated.js";
 const AGENT_NAME = /^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/;
 const SEMVER = /^\d+\.\d+\.\d+$/;
 export function productProjectTemplate(options = {}) {
@@ -82,7 +82,7 @@ export function productProjectTemplate(options = {}) {
 }
 export function legacyProductSurfaceDiagnostic(options) {
     const supportEnds = options.support_ends ?? PRODUCT_IDENTITY_MIGRATION.legacy_support_ends;
-    const stillWorks = options.still_works ?? true;
+    const stillWorks = options.still_works ?? false;
     const migrationAction = options.migration_action ?? migrationActionFor(options.surface, options.found);
     return {
         code: 'identity.legacy-surface',
@@ -102,19 +102,19 @@ export function legacyProductSurfaceDiagnostic(options) {
 function migrationActionFor(surface, found) {
     switch (surface) {
         case 'command':
-            return `use ${SUCCESSOR_PRODUCT_IDENTITY.command} for new command invocations; keep ${found} only where a compatibility script still calls it`;
+            return `use ${SUCCESSOR_PRODUCT_IDENTITY.command} for new command invocations; the retired command is unsupported`;
         case 'package':
-            return `replace the legacy package name with ${found.replace(LEGACY_PRODUCT_IDENTITY.package_scope, SUCCESSOR_PRODUCT_IDENTITY.package_scope)}`;
+            return `replace the legacy package name with a package from ${SUCCESSOR_PRODUCT_IDENTITY.package_scope}`;
         case 'environment':
-            return `set ${found.replace(LEGACY_PRODUCT_IDENTITY.environment_prefix, SUCCESSOR_PRODUCT_IDENTITY.environment_prefix)} after checking there is no conflicting legacy value`;
+            return `set the matching ${SUCCESSOR_PRODUCT_IDENTITY.environment_prefix} setting`;
         case 'local-data':
             return `export any run worth keeping with ${SUCCESSOR_PRODUCT_IDENTITY.command} export, then start fresh under ${SUCCESSOR_PRODUCT_IDENTITY.local_data_directory}; nothing shipped under the retired identity, so no migration command exists`;
         case 'source-api':
-            return `keep reading ${LEGACY_SOURCE_API_VERSION}; new writers use ${SUCCESSOR_SOURCE_API_VERSION}`;
+            return `use ${SUCCESSOR_SOURCE_API_VERSION}; retired source formats are unsupported`;
         case 'run-bundle':
-            return 'import the bundle with the compatibility reader and re-export it in the successor format';
+            return 'use a zero-ar-run-bundle export; retired bundle formats are unsupported';
         case 'sbom':
-            return 'verify the legacy SBOM with historical verification material and sign a successor SBOM for new releases';
+            return 'use a zero-ar-sbom-1 artifact; retired SBOM formats are unsupported';
         case 'project-manifest':
             return `generate a fresh project with ${SUCCESSOR_PRODUCT_IDENTITY.command} init, or rename the manifest to ${SUCCESSOR_PRODUCT_IDENTITY.slug}.project.yaml when its apiVersion is ${SUCCESSOR_SOURCE_API_VERSION}`;
         case 'deployment-identifier':
@@ -122,6 +122,6 @@ function migrationActionFor(surface, found) {
         case 'egress-destination':
             return 'add the exact destination to reviewed egress configuration; a similar spelling does not admit it';
         case 'telemetry':
-            return 'emit one successor telemetry event for new measurements and query legacy history through the dashboard union';
+            return 'emit one current Zero-AR telemetry event; historical labels remain stored data, and retired aliases are unsupported';
     }
 }

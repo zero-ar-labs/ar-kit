@@ -62,6 +62,14 @@ function taskStatus(result) {
     const nested = record(result['task']);
     return nested ?? result;
 }
+function pollInterval(task) {
+    const interval = task?.['pollIntervalMs'];
+    if (interval === undefined)
+        return undefined;
+    if (typeof interval !== 'number' || !Number.isSafeInteger(interval) || interval < 1 || interval > 86_400_000)
+        throw new McpMalformedResponseError('the MCP task pollIntervalMs must be a positive integer no greater than one day');
+    return interval;
+}
 function pendingHandle(source, context, input, state, cause, peerTaskId, lastPosition, now) {
     const invokeId = context.tool_call_id;
     return RemoteToolTaskHandleSchema.parse({
@@ -210,8 +218,7 @@ export class McpRemoteToolExecutor {
             return {
                 ok: false,
                 outcome: 'outcome-unknown',
-                error: 'the lost MCP answer supplied no remote task handle or operation-specific read, so the runtime will not repeat the original call',
-                pending: { ...parsed, observed_at: this.now().toISOString() },
+                error: 'the lost MCP answer supplied no remote task handle or operation-specific read; the agent receives an unknown outcome and decides what to do next without a repeated dispatch',
             };
         }
         try {
@@ -228,7 +235,7 @@ export class McpRemoteToolExecutor {
                     ok: false,
                     outcome: 'outcome-unknown',
                     error: `the remote MCP task remains ${status}`,
-                    pending: { ...parsed, state: status, last_position: lastPosition, observed_at: this.now().toISOString() },
+                    pending: { ...parsed, state: status, last_position: lastPosition, observed_at: this.now().toISOString(), ...(pollInterval(task) === undefined ? {} : { poll_interval_ms: pollInterval(task) }) },
                 };
             }
             if (status === 'failed' || status === 'cancelled') {
@@ -312,7 +319,7 @@ export class McpRemoteToolExecutor {
                 ok: false,
                 outcome: 'outcome-unknown',
                 error: `the MCP peer accepted remote task ${taskId} and it remains ${status}`,
-                pending: pendingHandle(source, context, input, status, 'peer-task', taskId, lastPosition, this.now),
+                pending: { ...pendingHandle(source, context, input, status, 'peer-task', taskId, lastPosition, this.now), ...(pollInterval(task) === undefined ? {} : { poll_interval_ms: pollInterval(task) }) },
             };
         }
         const lifted = result['resultType'] === 'complete'

@@ -55,6 +55,7 @@ export const RECORD_EVENT_MAP = {
     'grant.superseded': 'grant.superseded',
     'effect.unreconcilable': 'effect.unreconcilable',
     'effect.answer.late': 'effect.answer.late',
+    'effect.receipt.adopted': null,
     'item.attempted': null,
     'item.parked': 'item.parked',
     'item.invalidated': 'item.invalidated',

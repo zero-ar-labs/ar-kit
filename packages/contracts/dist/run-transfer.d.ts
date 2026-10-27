@@ -50,6 +50,8 @@ export declare const RunContinuationCapsuleSchema: z.ZodObject<{
         }>;
         record_catalogue_ref: z.ZodString;
         fold_profile: z.ZodEnum<{
+            "run-head-v11": "run-head-v11";
+            "run-head-v10": "run-head-v10";
             "run-head-v9": "run-head-v9";
         }>;
     }, z.core.$strict>;
@@ -144,6 +146,8 @@ export declare const RunContinuationDeclarationSchema: z.ZodObject<{
         version: z.ZodString;
     }, z.core.$strict>;
     supported_fold_profiles: z.ZodArray<z.ZodEnum<{
+        "run-head-v11": "run-head-v11";
+        "run-head-v10": "run-head-v10";
         "run-head-v9": "run-head-v9";
     }>>;
     supported_record_catalogues: z.ZodArray<z.ZodString>;
@@ -202,6 +206,8 @@ export declare const RunContinuationAdmissionRequestSchema: z.ZodObject<{
             version: z.ZodString;
         }, z.core.$strict>;
         supported_fold_profiles: z.ZodArray<z.ZodEnum<{
+            "run-head-v11": "run-head-v11";
+            "run-head-v10": "run-head-v10";
             "run-head-v9": "run-head-v9";
         }>>;
         supported_record_catalogues: z.ZodArray<z.ZodString>;
@@ -311,6 +317,8 @@ export declare const RunContinuationAcceptedSchema: z.ZodObject<{
             }>;
             record_catalogue_ref: z.ZodString;
             fold_profile: z.ZodEnum<{
+                "run-head-v11": "run-head-v11";
+                "run-head-v10": "run-head-v10";
                 "run-head-v9": "run-head-v9";
             }>;
         }, z.core.$strict>;

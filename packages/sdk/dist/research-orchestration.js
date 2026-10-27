@@ -15,7 +15,7 @@ const DEFAULT_NODE_BUDGETS = {
     max_turns: 6,
 };
 const DEFAULT_DISPOSITION_BUDGETS = {
-    consumption: { model_tokens: 60_000, tool_calls: 2 },
+    consumption: { model_tokens: 60_000, tool_calls: 2, compute_ms: 60_000, bytes: 2 * 1_048_576 },
     attention: 0,
     verification_reserve_fraction: 0.2,
     max_turns: 4,

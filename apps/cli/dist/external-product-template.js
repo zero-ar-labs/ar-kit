@@ -172,13 +172,35 @@ function identityAdapter() {
  * Customer identity enters through this replaceable product adapter.
  *
  * Junior guide: the application identity authenticates the backend to
- * Zero-AR. A represented person is a separate signed credential. Display
+ * Zero-AR. A represented person is a separate signed credential: a JWT from
+ * the identity provider the deployment admits, or an approver assertion this
+ * backend signs with the key the deployment registered for it. Display
  * names and caller-supplied principal strings never become authority.
  */
+
+import type { KeyObject } from 'node:crypto';
+import { signApproverAssertion } from '@zero-ar/contracts';
 
 export interface RepresentedActorSession {
   principal: string;
   participant_token: string;
+}
+
+/**
+ * When people sign in through a provider the runtime does not admit, the
+ * backend vouches for them: authenticate() signs one approver assertion per
+ * request with the key registered under actor_identity type
+ * application-attested. The runtime then records this application as the
+ * issuer, so an approval shows whose word it rests on.
+ */
+export function applicationAttestedActor(
+  person: { principal: string },
+  signer: { audience: string; tenant: string; key_id: string; key: KeyObject },
+): RepresentedActorSession {
+  return {
+    principal: person.principal,
+    participant_token: signApproverAssertion({ subject: person.principal, audience: signer.audience, tenant: signer.tenant, key_id: signer.key_id }, signer.key),
+  };
 }
 
 export interface AuthenticatedProductSession {
@@ -345,7 +367,7 @@ export class ExternalProductBackend {
         accountable: session.accountable_principal,
       },
       budgets: {
-        consumption: { model_tokens: options.model_tokens ?? 100_000 },
+        consumption: { model_tokens: options.model_tokens ?? 100_000, compute_ms: 600_000 },
         attention: 2,
         verification_reserve_fraction: 0.2,
         max_turns: options.max_turns ?? 20,
@@ -748,10 +770,12 @@ function nativeBoundaryTest(copy) {
  */
 
 import assert from 'node:assert/strict';
+import { generateKeyPairSync } from 'node:crypto';
 import test from 'node:test';
 import type { NativeProductPort } from '../../src/zero-ar/client.ts';
 import { ExternalProductBackend } from '../../src/zero-ar/client.ts';
 import { ProductChannel } from '../../src/channels/product-channel.ts';
+import { applicationAttestedActor } from '../../src/identity/customer-identity.ts';
 import { uploadRunEvidence } from '../../src/zero-ar/artifacts.ts';
 import { publishDomainProject } from '../../src/zero-ar/publications.ts';
 
@@ -809,6 +833,10 @@ test('the backend creates durable work through the compatible native boundary', 
   });
   assert.equal((calls.find((call) => call.name === 'observe')?.body as { token: string }).token, 'signed-participant-token');
   assert.equal((calls.find((call) => call.name === 'effect')?.body as { token: string }).token, 'signed-participant-token');
+  const signer = generateKeyPairSync('ed25519');
+  const attested = applicationAttestedActor({ principal: 'person:reviewer' }, { audience: 'zero-ar', tenant: 'tenant-a', key_id: 'product-approver-1', key: signer.privateKey });
+  const header = JSON.parse(Buffer.from(attested.participant_token.split('.')[0] ?? '', 'base64url').toString('utf8')) as { typ?: string; kid?: string };
+  assert.deepEqual([header.typ, header.kid], ['zero-ar-approver+jwt', 'product-approver-1'], 'the backend can vouch for its own approver');
   assert.equal((await backend.result(run_id)).verdict, 'verified');
   assert.deepEqual(await backend.query(), { items: [], next_cursor: null });
 
